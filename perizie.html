@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perizia Veicolo</title>
     <style>
-        /* ... (stili esistenti rimangono invariati) ... */
+        /* ... (stili CSS di base invariati) ... */
         .header-circles { display: flex; justify-content: space-around; align-items: center; width: 100%; padding: 8px 0; box-sizing: border-box; position: fixed; top: 10px; left: 0; background-color: #1e1e1e; z-index: 1000; }
         .circle { width: 1.5cm; height: 1.5cm; background-color: #ffffff; border-radius: 50%; flex-shrink: 0; }
-        body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; padding-top: 0; }
-        .content-wrapper { padding: 20px; margin-top: 0; }
+        body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; padding-top: 20px; transition: padding-top 0.3s ease; }
+        .content-wrapper { padding: 20px; }
         h1, h2 { text-align: center; color: #ffffff; }
+        h1#mainTitleGlobal { line-height: 1.2; margin-bottom: 10px; }
         h2.section-title { color: #cccccc; border-bottom: 1px solid #444444; padding-bottom: 5px; margin-top: 30px; text-align: left; }
         h3 { color: #bbbbbb; margin-top: 20px; margin-bottom: 10px; }
         ul { list-style-type: none; padding-left: 0; }
@@ -28,31 +29,76 @@
         .save-and-next-btn:hover { background-color: #0056b3 !important; border-color: #004085 !important; }
         #navButtons button:hover, .action-button:hover, #procediConPeriziaBtn:hover { background-color: #0056b3; border-color: #004085; }
         #procediConPeriziaBtn:disabled { background-color: #555; border-color: #444; cursor: not-allowed; }
-        #navButtons button.active { background-color: #0056b3; border-color: #004085; }
+        
+        /* Stili per i pulsanti di navigazione sezione */
+        #navButtons button.active { /* Pagina corrente - Blu */
+            background-color: #0056b3 !important; /* Blu scuro, !important per priorità */
+            border-color: #004085 !important;
+            color: white !important;
+        }
+        #navButtons button.nav-btn-completed { /* Verde */
+            background-color: #28a745 !important;
+            border-color: #1e7e34 !important;
+            color: white !important;
+        }
+        #navButtons button.nav-btn-partial { /* Arancione */
+            background-color: #ffc107 !important;
+            border-color: #e0a800 !important;
+            color: #212529 !important; /* Testo scuro per leggibilità su arancione */
+        }
+        #navButtons button.nav-btn-untouched { /* Rosso */
+            background-color: #dc3545 !important;
+            border-color: #c82333 !important;
+            color: white !important;
+        }
 
-        #landingPageSection { padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a; max-width: 800px; margin-left: auto; margin-right: auto; }
-        .category-section { display: none; padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a; }
+
+        #landingPageSection, .category-section, #historyPageSection { padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a; max-width: 850px; margin-left: auto; margin-right: auto; }
+        .category-section, #historyPageSection, #navButtons { display: none; } 
+        #landingPageSection { display: block; } 
         .category-section.active { display: block; }
+        
         .summary-item { margin-bottom: 8px; padding: 5px; background-color: #333; border-radius: 3px; }
         .summary-item strong { color: #00aeff; }
         
-        .targa-list-header { display: flex; font-weight: bold; padding: 8px 8px 4px 8px; border-bottom: 1px solid #555; margin-bottom: 5px; color: #ccc; }
-        .targa-list-header .targa-col-radio-spacer { flex-basis: 30px; flex-shrink: 0; }
-        #targaListContainer { margin-top: 5px; max-height: 300px; overflow-y: auto; padding: 0; border: 1px solid #444; border-radius: 4px; }
-        .targa-list-item { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #383838; }
+        .table-scroll-wrapper { overflow-x: auto; width: 100%; margin-bottom: 10px; border: 1px solid #444; border-radius: 4px; }
+        .targa-list-table-content { min-width: 600px; }
+        .targa-list-header { display: flex; font-weight: bold; padding: 0; border-bottom: 2px solid #777; color: #ddd; background-color: #3a3a3a; }
+        .targa-list-header .targa-col-radio-spacer { flex-basis: 45px; flex-shrink: 0; padding: 6px 8px; border-right: 1px solid #555; }
+        .targa-list-header .targa-col { padding: 6px 8px; border-right: 1px solid #555; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .targa-list-header .targa-col:last-child { border-right: none; }
+        .targa-list-header .targa-col-actions { flex-basis: 60px; text-align: center; }
+
+        #targaListContainer { margin-top: 0; max-height: 350px; overflow-y: auto; overflow-x: visible; padding: 0; }
+        .targa-list-item { display: flex; align-items: center; border-bottom: 1px solid #444; }
+        .targa-list-item:nth-child(odd) { background-color: #2f2f2f; }
+        .targa-list-item:nth-child(even) { background-color: #353535; }
         .targa-list-item:last-child { border-bottom: none; }
-        .targa-list-item input[type="radio"] { margin-right: 10px; flex-shrink: 0; }
-        label.radio-label-container { display: flex; flex-grow: 1; cursor: pointer; color: #f0f0f0; }
-        .targa-col { padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; }
-        .targa-col-targa   { flex-basis: 20%; min-width: 80px;}
-        .targa-col-marca   { flex-basis: 25%; min-width: 100px;}
-        .targa-col-modello { flex-basis: 30%; min-width: 120px;}
-        .targa-col-piazzale{ flex-basis: 25%; min-width: 80px; text-align: left; }
+        .targa-list-item:hover { background-color: #404040; }
+        .targa-list-item input[type="radio"] { margin: 0 0 0 10px; padding: 10px 0px 10px 0px; border-right: 1px solid #444; margin-right:0; padding-right:10px; flex-shrink: 0; min-width: 35px; box-sizing: content-box; }
+        label.radio-label-container { display: flex; flex-grow: 1; cursor: pointer; color: #f0f0f0; padding: 0; min-width: calc(600px - 45px - 60px); }
+        .targa-list-item .targa-col { padding: 8px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-right: 1px solid #444; text-align: left; }
+        .targa-list-item .targa-col:last-child { border-right: none; }
+        
+        .targa-col-targa   { flex-basis: 20%; min-width: 90px;}
+        .targa-col-marca   { flex-basis: 25%; min-width: 110px;}
+        .targa-col-modello { flex-basis: 30%; min-width: 130px;}
+        .targa-col-piazzale{ flex-basis: 25%; min-width: 90px; }
+
+        .delete-progress-btn { background-color: #dc3545; border-color: #c82333; color: white; padding: 3px 7px; font-size: 0.8em; line-height: 1; margin-left: 8px; margin-right: 8px; flex-shrink: 0; border-radius: 3px; }
+        .delete-progress-btn:hover { background-color: #c82333; border-color: #bd2130; }
+
         .targa-list-item.completed label.radio-label-container,
-        .targa-list-item.completed label.radio-label-container .targa-col { text-decoration: line-through; color: #888 !important; }
+        .targa-list-item.completed label.radio-label-container .targa-col { text-decoration: none !important; color: #888 !important; }
+        .targa-list-item.completed { background-color: #2a2a2a !important; }
 
         #targheLoadingStatus { text-align: center; padding: 10px; color: #00aeff; }
-        .header-circles, #mainTitleGlobal, #navButtons, #checklistContainer { display: none; }
+        .header-circles, /* #mainTitleGlobal, */ #checklistContainer, #historyPageSection { display: none; } 
+
+        #savedTargasListContainer { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #333; border-radius: 4px; margin-bottom: 20px; }
+        .saved-targa-button { display: block; width: 100%; padding: 10px; background-color: #383838; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; text-align: left; cursor: pointer; font-size: 0.95em; }
+        .saved-targa-button:hover { background-color: #454545; }
+        #historyPageSection .action-button { margin-right: 10px; }
 
         @media (max-width: 768px) {
             .content-wrapper { margin-top: 0; }
@@ -60,14 +106,18 @@
             .circle { width: 1.2cm; height: 1.2cm; }
             #navButtons button { padding: 8px 12px; font-size: 0.9em; }
             input[type="text"], input[type="url"], select { width: 100%; box-sizing: border-box; }
-            .targa-list-header { display: none; } 
-            label.radio-label-container { flex-direction: column; align-items: flex-start; } 
-            .targa-col { width: 100%; white-space: normal; margin-bottom: 2px; padding-left: 0;}
-            .targa-col-targa::before { content: "Targa: "; font-weight: bold; }
-            .targa-col-marca::before { content: "Marca: "; font-weight: bold; }
-            .targa-col-modello::before { content: "Modello: "; font-weight: bold; }
-            .targa-col-piazzale::before { content: "Piazzale: "; font-weight: bold; }
-            .targa-list-item input[type="radio"] { margin-top: 5px; }
+            .table-scroll-wrapper { overflow-x: auto; }
+            .targa-list-table-content { min-width: 550px; }
+            .targa-list-header { display: flex !important; }
+            .targa-list-header .targa-col, .targa-list-item .targa-col { padding: 6px 5px; }
+            .targa-list-header .targa-col-radio-spacer { flex-basis: 35px; padding: 6px 5px; }
+            .targa-list-item input[type="radio"] { min-width: 25px; padding-right: 5px; }
+            .delete-progress-btn { padding: 5px 8px; }
+            .targa-list-item { padding-right: 0; }
+            label.radio-label-container { min-width: calc(550px - 35px - 50px); } 
+            .targa-list-item.completed label.radio-label-container,
+            .targa-list-item.completed label.radio-label-container .targa-col { text-decoration: none !important; color: #999 !important; }
+            .targa-list-item.completed { background-color: #252525 !important; }
         }
     </style>
 </head>
@@ -79,90 +129,103 @@
     <div class="content-wrapper" id="mainContentWrapper">
         <h1 id="mainTitleGlobal">Checklist Perizia Veicolo</h1>
 
-        <div id="landingPageSection">
+        <div id="navButtons" style="display: none;"> 
+            <button data-target="remarketing">1. Remarketing</button>
+            <button data-target="pneumatici">2. Pneumatici</button>
+            <button data-target="danniVerifiche">3. Danni/Verifiche</button>
+            <button data-target="riepilogo">Riepilogo</button>
+            <button id="backToListBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe</button>
+            <button id="historyBtn" class="action-button" style="background-color: #17a2b8; border-color: #117a8b;">Salvataggi</button>
+        </div>
+
+        <div id="landingPageSection" style="display: block;"> 
             <h2>Seleziona Veicolo da Periziare</h2>
             <div id="targheLoadingStatus">Caricamento targhe in corso...</div>
-            <div class="targa-list-header">
-                <div class="targa-col-radio-spacer"></div>
-                <span class="targa-col targa-col-targa">Targa</span>
-                <span class="targa-col targa-col-marca">Marca</span>
-                <span class="targa-col targa-col-modello">Modello</span>
-                <span class="targa-col targa-col-piazzale">Piazzale</span>
+            <div class="table-scroll-wrapper">
+                <div class="targa-list-table-content"> 
+                    <div class="targa-list-header">
+                        <div class="targa-col-radio-spacer"></div> 
+                        <span class="targa-col targa-col-targa">Targa</span>
+                        <span class="targa-col targa-col-marca">Marca</span>
+                        <span class="targa-col targa-col-modello">Modello</span>
+                        <span class="targa-col targa-col-piazzale">Piazzale</span>
+                        <span class="targa-col targa-col-actions">Azioni</span>
+                    </div>
+                    <div id="targaListContainer"></div>
+                </div>
             </div>
-            <div id="targaListContainer"></div>
             <button id="procediConPeriziaBtn" disabled>Procedi alla Perizia</button>
         </div>
 
-        <div id="navButtons">
-            <button data-target="remarketing">1. Foto Remarketing</button>
-            <button data-target="pneumatici">2. Foto Pneumatici</button>
-            <button data-target="danniVerifiche">3. Foto Danni e Verifiche</button>
-            <button data-target="riepilogo">Riepilogo Perizia</button>
-            <button id="backToListBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe</button>
-        </div>
-
-        <div id="checklistContainer">
+        <div id="checklistContainer" style="display: none;">
             <div id="remarketingSection" class="category-section">
-                <h2 class="section-title">1. Foto Remarketing (Checklist)</h2>
+                <h2 class="section-title">1. Foto Remarketing</h2>
                 <ul>
-                    <li><label for="targa_select">Targa Selezionata:</label><select id="targa_select" name="targa_select" disabled><option value="">Nessuna targa</option></select></li>
                     <li><input type="checkbox" id="foto_angolari"><label for="foto_angolari">a) Foto angolari (3/4)</label></li>
-                    <li><label for="tipo_equipaggiamento">b) Vano carico - Tipo equipaggiamento:</label><select id="tipo_equipaggiamento" name="tipo_equipaggiamento"><option value="">Seleziona...</option><option value="kit_gonfia_ripara">Kit gonfia e ripara</option><option value="ruota">Ruota</option><option value="ruotino">Ruotino</option><option value="runflat">Runflat</option></select></li>
-                    <li><label for="equipaggiamento_presenza">Equipaggiamento presente/mancante?</label><select id="equipaggiamento_presenza" name="equipaggiamento_presenza"><option value="">Seleziona...</option><option value="presente">Presente</option><option value="mancante">Mancante</option></select></li>
-                    <li><input type="checkbox" id="foto_interni_pannelli"><label for="foto_interni_pannelli">c) Foto interni e pannelli porte</label></li>
-                    <li><input type="checkbox" id="foto_cruscotto"><label for="foto_cruscotto">d) Foto cruscotto</label></li>
-                    <li><label for="stato_chilometri">e) Foto chilometri - Stato:</label><select id="stato_chilometri" name="stato_chilometri"><option value="">Seleziona...</option><option value="rilevabili">Rilevabili</option><option value="non_rilevabili">Non rilevabili</option></select></li>
-                    <li><label for="stato_cdc">f) Foto CDC - Stato:</label><select id="stato_cdc" name="stato_cdc"><option value="">Seleziona...</option><option value="originale">Originale</option><option value="copia_conforme">Copia conforme</option><option value="mancante">Mancante</option></select></li>
-                    <li><input type="checkbox" id="foto_vano_motore"><label for="foto_vano_motore">g) Foto vano motore</label></li>
-                    <li><input type="checkbox" id="foto_cofano_tetto"><label for="foto_cofano_tetto">h) Foto cofano motore e tetto</label></li>
+                    <li><label for="tipo_equipaggiamento">b) Vano carico - Equipaggiamento:</label><select id="tipo_equipaggiamento"><option value="">Seleziona...</option><option value="kit_gonfia_ripara">Kit</option><option value="ruota">Ruota</option><option value="ruotino">Ruotino</option><option value="runflat">Runflat</option></select></li>
+                    <li><label for="equipaggiamento_presenza">Presenza equip.:</label><select id="equipaggiamento_presenza"><option value="">Seleziona...</option><option value="presente">Presente</option><option value="mancante">Mancante</option></select></li>
+                    <li><input type="checkbox" id="foto_interni_pannelli"><label for="foto_interni_pannelli">c) Interni/pannelli</label></li>
+                    <li><input type="checkbox" id="foto_cruscotto"><label for="foto_cruscotto">d) Cruscotto</label></li>
+                    <li><label for="stato_chilometri">e) Chilometri - Stato:</label><select id="stato_chilometri"><option value="">Seleziona...</option><option value="rilevabili">Rilevabili</option><option value="non_rilevabili">Non rilevabili</option></select></li>
+                    <li><label for="stato_cdc">f) CDC - Stato:</label><select id="stato_cdc"><option value="">Seleziona...</option><option value="originale">Originale</option><option value="copia_conforme">Copia conforme</option><option value="mancante">Mancante</option></select></li>
+                    <li><input type="checkbox" id="foto_vano_motore"><label for="foto_vano_motore">g) Vano motore</label></li>
+                    <li><input type="checkbox" id="foto_cofano_tetto"><label for="foto_cofano_tetto">h) Cofano e tetto</label></li>
                 </ul>
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
             </div>
-
             <div id="pneumaticiSection" class="category-section">
-                <h2 class="section-title">2. Foto Pneumatici (Checklist)</h2>
+                <h2 class="section-title">2. Foto Pneumatici</h2>
                 <ul>
-                    <li><label for="pneumatico_as">a) Anteriore sinistro:</label><select id="pneumatico_as" name="pneumatico_as"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
-                    <li><label for="pneumatico_ad">b) Anteriore destro:</label><select id="pneumatico_ad" name="pneumatico_ad"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
-                    <li><label for="pneumatico_pd">c) Posteriore destro:</label><select id="pneumatico_pd" name="pneumatico_pd"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
-                    <li><label for="pneumatico_ps">d) Posteriore sinistro:</label><select id="pneumatico_ps" name="pneumatico_ps"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
+                    <li><label for="pneumatico_as">a) Ant. sinistro:</label><select id="pneumatico_as"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
+                    <li><label for="pneumatico_ad">b) Ant. destro:</label><select id="pneumatico_ad"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
+                    <li><label for="pneumatico_pd">c) Post. destro:</label><select id="pneumatico_pd"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
+                    <li><label for="pneumatico_ps">d) Post. sinistro:</label><select id="pneumatico_ps"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
                 </ul>
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
             </div>
-
             <div id="danniVerificheSection" class="category-section">
-                <h2 class="section-title">3. Foto Danni e Verifiche Funzionali</h2>
+                <h2 class="section-title">3. Foto Danni e Verifiche</h2>
                 <ul>
-                    <li><label for="motore_accende">a) Il motore si accende:</label><select id="motore_accende" name="motore_accende"><option value="">Seleziona...</option><option value="ok">OK</option><option value="non_ok">Non OK</option></select></li>
-                    <li><label for="batteria_stato">b) Batteria:</label><select id="batteria_stato" name="batteria_stato"><option value="">Seleziona...</option><option value="ok">OK</option><option value="non_ok">Non OK</option></select></li>
-                    <li><input type="checkbox" id="foto_danni_generiche"><label for="foto_danni_generiche">Altre foto danni (generiche)</label></li>
+                    <li><label for="motore_accende">a) Motore si accende:</label><select id="motore_accende"><option value="">Seleziona...</option><option value="ok">OK</option><option value="non_ok">Non OK</option></select></li>
+                    <li><label for="batteria_stato">b) Batteria:</label><select id="batteria_stato"><option value="">Seleziona...</option><option value="ok">OK</option><option value="non_ok">Non OK</option></select></li>
+                    <li><input type="checkbox" id="foto_danni_generiche"><label for="foto_danni_generiche">Altre foto danni</label></li>
                 </ul>
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Vai al Riepilogo</button></div>
             </div>
-            
             <div id="riepilogoSection" class="category-section">
                 <h2 class="section-title">Riepilogo Perizia</h2>
-                <div id="summaryContent"><p><em>Compila le sezioni precedenti per visualizzare il riepilogo.</em></p></div>
+                <div id="summaryContent"><p><em>Compila le sezioni precedenti...</em></p></div>
                 <button id="saveAndReturnBtn" class="action-button" style="background-color: #28a745; border-color: #1e7e34; margin-top: 15px;">Salva Perizia</button>
+            </div>
+        </div>
+
+        <div id="historyPageSection" style="display: none;">
+            <h2 class="section-title" style="text-align: center;">Cronistoria Salvataggi</h2>
+            <div id="savedTargasListContainer"><p>Nessun salvataggio trovato.</p></div>
+            <div style="margin-top: 20px; text-align: center;">
+                <button id="clearAllProgressBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Cancella Tutti i Salvataggi</button>
+                <button id="backToLandingFromHistoryBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe Principale</button>
             </div>
         </div>
     </div>
 <script>
     const landingPageSection = document.getElementById('landingPageSection');
+    const checklistContainer = document.getElementById('checklistContainer');
+    const historyPageSection = document.getElementById('historyPageSection'); 
     const targaListContainer = document.getElementById('targaListContainer');
+    const savedTargasListContainer = document.getElementById('savedTargasListContainer'); 
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
     const procediConPeriziaBtn = document.getElementById('procediConPeriziaBtn');
     const headerCircles = document.querySelector('.header-circles');
     const mainTitleGlobal = document.getElementById('mainTitleGlobal');
-    const mainContentWrapper = document.getElementById('mainContentWrapper');
-    const navButtonsContainer = document.getElementById('navButtons');
-    const checklistContainer = document.getElementById('checklistContainer');
-    const targaSelectChecklist = document.getElementById('targa_select');
-    const navButtons = document.querySelectorAll('#navButtons button[data-target]');
-    const sections = document.querySelectorAll('.category-section');
+    const navButtonsContainer = document.getElementById('navButtons'); 
+    const navButtons = document.querySelectorAll('#navButtons button[data-target]'); 
+    const sections = document.querySelectorAll('#checklistContainer .category-section');
     const summaryContent = document.getElementById('summaryContent');
-    // MODIFICATO: ID e variabile per il nuovo pulsante "Elenco Targhe"
     const backToListBtn = document.getElementById('backToListBtn'); 
+    const historyBtn = document.getElementById('historyBtn'); 
+    const clearAllProgressBtn = document.getElementById('clearAllProgressBtn'); 
+    const backToLandingFromHistoryBtn = document.getElementById('backToLandingFromHistoryBtn'); 
     const saveAndReturnBtn = document.getElementById('saveAndReturnBtn'); 
     const saveAndNextButtons = document.querySelectorAll('.save-and-next-btn');
 
@@ -171,111 +234,201 @@
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_'; 
 
-    function resetChecklistForm() { /* ...invariata... */ const els=document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select'); els.forEach(el=>{if(el.type==='checkbox')el.checked=false;else if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';}); console.log("Modulo resettato."); }
-    function saveProgress(targa) { /* ...invariata... */ if(!targa){console.warn("No targa for save.");return false;} const data={}; document.querySelectorAll('#checklistContainer input[type="checkbox"],#checklistContainer select').forEach(el=>{if(el.id){if(el.type==='checkbox')data[el.id]=el.checked;else data[el.id]=el.value;}}); try{localStorage.setItem(`${APP_PREFIX}data_${targa}`,JSON.stringify(data));console.log(`Saved for ${targa}.`);return true;}catch(e){console.error("LS Save Err:",e);alert("Save failed.");return false;}}
-    function loadProgress(targa) { /* ...invariata... */ if(!targa)return; resetChecklistForm(); try{const json=localStorage.getItem(`${APP_PREFIX}data_${targa}`); if(json){const data=JSON.parse(json); document.querySelectorAll('#checklistContainer input[type="checkbox"],#checklistContainer select').forEach(el=>{if(el.id&&data.hasOwnProperty(el.id)){if(el.type==='checkbox')el.checked=data[el.id];else el.value=data[el.id];}}); console.log(`Loaded for ${targa}.`);}else console.log(`No saved data for ${targa}.`);}catch(e){console.error("LS Load Err:",e);}}
-    function getCompletedTarghe() { /* ...invariata... */ try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){return{};}}
-    function markTargaAsCompleted(targa) { /* ...invariata... */ if(!targa)return; try{const completed=getCompletedTarghe();completed[targa]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa} marked complete.`);}catch(e){console.error("LS Mark Err:",e);}}
-    function isTargaCompleted(targa) { /* ...invariata... */ const completed=getCompletedTarghe(); return !!(completed[targa]); }
-    function generateAndDownloadScreenshot() { /* ...invariata... */ return new Promise((resolve,reject)=>{ const riepilogoSection=document.getElementById('riepilogoSection'); if(!riepilogoSection){alert("Err: Riepilogo non trovato.");return reject("");} if(typeof html2canvas==='undefined'){alert("Err: html2canvas non caricata.");return reject("");} setTimeout(()=>{ alert("Screenshot...\nDownload a breve."); riepilogoSection.scrollTop=0; html2canvas(riepilogoSection,{scale:2,useCORS:true,logging:false}).then(canvas=>{const link=document.createElement('a');const targaNomeFile=targaSelezionataGlobalmente?targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9]/g,'_'):'sconosciuta';link.download=`riepilogo_perizia_${targaNomeFile}.png`;link.href=canvas.toDataURL('image/png');document.body.appendChild(link);link.click();document.body.removeChild(link);console.log("Screenshot OK.");resolve();}).catch(error=>{console.error("Screenshot Err:",error);alert("Errore screenshot.");reject(error);});},100);});}
-    async function handleSavePeriziaAndReturn() { /* ...invariata... */ if(!targaSelezionataGlobalmente){alert("No targa attiva.");return;} if(!saveProgress(targaSelezionataGlobalmente)){alert("Salvataggio dati fallito.");return;} if(document.getElementById('riepilogoSection').classList.contains('active')){generateSummary();} try{await generateAndDownloadScreenshot();}catch(e){console.warn("Screenshot fallito, ma dati salvati.");} markTargaAsCompleted(targaSelezionataGlobalmente); alert(`Perizia per ${targaSelezionataGlobalmente} salvata, screenshot tentato, completata. Torno all'elenco.`); targaSelezionataGlobalmente=null;showMainUI(false);caricaEPopolaTarghe();}
-    function handleSaveAndNext() { /* ...invariata... */ if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
-    function showMainUI(show) { /* ...invariata... */ const dV=show?'block':'none',fV=show?'flex':'none';headerCircles.style.display=fV;mainTitleGlobal.style.display=dV;navButtonsContainer.style.display=fV;checklistContainer.style.display=dV;mainContentWrapper.style.paddingTop=show?'70px':'20px';mainContentWrapper.style.margin=show?'0':'0 auto';mainContentWrapper.style.maxWidth=show?'none':'800px';if(show){landingPageSection.style.display='none';if(targaSelezionataGlobalmente)mainTitleGlobal.textContent=`Perizia - Targa: ${targaSelezionataGlobalmente}`;else mainTitleGlobal.textContent=`Perizia Veicolo`;}else{landingPageSection.style.display='block';mainTitleGlobal.textContent=`Perizia Veicolo`;const actR=document.querySelector('input[name="targa_selection_radio"]:checked');if(actR)actR.checked=false;procediConPeriziaBtn.disabled=true;}}
-    async function caricaEPopolaTarghe() { /* ...invariata (usa la versione con più colonne)... */
-        targheLoadingStatus.textContent = "Caricamento targhe...";
-        targheLoadingStatus.style.color = "#00aeff";
-        procediConPeriziaBtn.disabled = true; 
-        try {
-            const response = await fetch(GOOGLE_SHEET_CSV_URL);
-            if (!response.ok) {
-                let errMessage = `Errore HTTP ${response.status}.`;
-                if(response.status === 0) errMessage = "Errore di rete o CORS.";
-                else if(response.status === 404) errMessage = "File CSV non trovato (404).";
-                else if(response.status === 403) errMessage = "Accesso al file CSV negato (403).";
-                throw new Error(errMessage);
-            }
-            const csvText = await response.text();
-            const lines = csvText.split(/\r\n|\n|\r/).filter(line => line.trim() !== "");
-
-            if (lines.length === 0) {
-                targheLoadingStatus.textContent = "Nessun dato trovato nel foglio CSV.";
-                targheLoadingStatus.style.color = "orange"; return;
-            }
-            
-            listaTargheCompleta = lines.map(line => {
-                const parts = line.split(',');
-                return {
-                    targa: (parts[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(),
-                    marca: (parts[1] || '').trim().replace(/^"|"$/g, ''),
-                    modello: (parts[2] || '').trim().replace(/^"|"$/g, ''),
-                    piazzale: (parts[3] || '').trim().replace(/^"|"$/g, '')
-                };
-            }).filter(item => item.targa && item.targa.length > 3);
-
-            targaListContainer.innerHTML = ''; 
-            while (targaSelectChecklist.options.length > 1) targaSelectChecklist.remove(1);
-            
-            if (listaTargheCompleta.length === 0) {
-                targheLoadingStatus.textContent = "Nessuna targa valida trovata dopo l'elaborazione del CSV.";
-                targheLoadingStatus.style.color = "orange"; return;
-            }
-
-            listaTargheCompleta.forEach((item, index) => {
-                const listItemDiv = document.createElement('div');
-                listItemDiv.classList.add('targa-list-item');
-                if (isTargaCompleted(item.targa)) listItemDiv.classList.add('completed');
-                const radioId = `targa_radio_${index}`;
-                const radioButton = document.createElement('input');
-                radioButton.type = 'radio'; radioButton.name = 'targa_selection_radio';
-                radioButton.value = item.targa; radioButton.id = radioId;
-                const label = document.createElement('label');
-                label.htmlFor = radioId; label.classList.add('radio-label-container');
-                label.innerHTML = `<span class="targa-col targa-col-targa">${item.targa||'N/D'}</span><span class="targa-col targa-col-marca">${item.marca||'N/D'}</span><span class="targa-col targa-col-modello">${item.modello||'N/D'}</span><span class="targa-col targa-col-piazzale">${item.piazzale||'N/D'}</span>`;
-                listItemDiv.appendChild(radioButton); listItemDiv.appendChild(label);
-                targaListContainer.appendChild(listItemDiv);
-                const optionChecklist = document.createElement('option');
-                optionChecklist.value = item.targa; optionChecklist.textContent = item.targa;
-                targaSelectChecklist.appendChild(optionChecklist);
-            });
-            targheLoadingStatus.textContent = "Seleziona una targa dall'elenco:";
-            targheLoadingStatus.style.color = "#f0f0f0"; 
-            document.querySelectorAll('input[name="targa_selection_radio"]').forEach(radio => {
-                radio.addEventListener('change', function(){ if(this.checked){targaSelezionataGlobalmente=this.value;procediConPeriziaBtn.disabled=false;}});
-            });
-        } catch (error) {
-            console.error("Errore caricamento targhe:", error);
-            targheLoadingStatus.textContent = `Errore: ${error.message}.`;
-            targheLoadingStatus.style.color = "red";
-        }
+    function resetChecklistForm() { const els=document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select'); els.forEach(el=>{if(el.type==='checkbox')el.checked=false;else if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';}); console.log("Modulo resettato."); }
+    function saveProgress(targa) { if(!targa){console.warn("No targa for save.");return false;} const data={}; document.querySelectorAll('#checklistContainer input[type="checkbox"],#checklistContainer select').forEach(el=>{if(el.id){if(el.type==='checkbox')data[el.id]=el.checked;else data[el.id]=el.value;}}); try{localStorage.setItem(`${APP_PREFIX}data_${targa}`,JSON.stringify(data));console.log(`Saved for ${targa}.`); updateNavButtonColors(); return true;}catch(e){console.error("LS Save Err:",e);alert("Save failed.");return false;}}
+    function loadProgress(targa) { if(!targa)return; resetChecklistForm(); try{const json=localStorage.getItem(`${APP_PREFIX}data_${targa}`); if(json){const data=JSON.parse(json); document.querySelectorAll('#checklistContainer input[type="checkbox"],#checklistContainer select').forEach(el=>{if(el.id&&data.hasOwnProperty(el.id)){if(el.type==='checkbox')el.checked=data[el.id];else el.value=data[el.id];}}); console.log(`Loaded for ${targa}.`);}else console.log(`No saved data for ${targa}.`); updateNavButtonColors(); }catch(e){console.error("LS Load Err:",e); updateNavButtonColors();}}
+    function getCompletedTarghe() { try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){return{};}}
+    function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa} marked complete.`);}catch(e){console.error("LS Mark Err:",e);}}
+    function isTargaCompleted(targa) { const completed=getCompletedTarghe(); return !!(completed[targa]); }
+    function deleteProgressForTarga(targa) { if(!targa){return;} try{localStorage.removeItem(`${APP_PREFIX}data_${targa}`);console.log(`Dati modulo rimossi per ${targa}.`);const completed=getCompletedTarghe();if(completed.hasOwnProperty(targa)){delete completed[targa];localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`Stato completamento rimosso per ${targa}.`);}}catch(e){console.error(`Errore cancellazione dati per ${targa}:`,e);alert(`Errore cancellazione dati per ${targa}.`);}}
+    function generateAndDownloadScreenshot() { return new Promise((resolve,reject)=>{ const riepilogoSection=document.getElementById('riepilogoSection'); if(!riepilogoSection){alert("Err: Riepilogo non trovato.");return reject("Sezione riepilogo non trovata");} if(typeof html2canvas==='undefined'){alert("Err: html2canvas non caricata.");return reject("html2canvas non caricata");} setTimeout(()=>{ console.log("Inizio generazione screenshot..."); riepilogoSection.scrollTop=0; html2canvas(riepilogoSection,{scale:2,useCORS:true,logging:false}).then(canvas=>{const link=document.createElement('a');const targaNomeFile=targaSelezionataGlobalmente?targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9]/g,'_'):'sconosciuta';link.download=`riepilogo_perizia_${targaNomeFile}.png`;link.href=canvas.toDataURL('image/png');document.body.appendChild(link);link.click();document.body.removeChild(link);console.log("Screenshot generato e download avviato.");resolve();}).catch(error=>{console.error("Errore durante la generazione dello screenshot:",error);alert("Si è verificato un errore durante la generazione dello screenshot.");reject(error);});},100);});}
+    async function handleSavePeriziaAndReturn() { if(!targaSelezionataGlobalmente){alert("No targa attiva.");return;} if(!saveProgress(targaSelezionataGlobalmente)){alert("Salvataggio dati fallito.");return;} if(document.getElementById('riepilogoSection').classList.contains('active')){generateSummary();} try{await generateAndDownloadScreenshot();}catch(e){console.warn("Screenshot fallito, ma dati salvati.");} markTargaAsCompleted(targaSelezionataGlobalmente); updateNavButtonColors(); alert(`Perizia per ${targaSelezionataGlobalmente} salvata, screenshot tentato, completata. Torno all'elenco.`); targaSelezionataGlobalmente=null;showView('landing');caricaEPopolaTarghe();}
+    function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
+    
+    // --- NUOVA LOGICA PER COLORARE I BOTTONI DI NAVIGAZIONE ---
+    function isInputDefault(inputElement) {
+        if (inputElement.type === 'checkbox') return !inputElement.checked;
+        if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0;
+        return true; 
     }
-    procediConPeriziaBtn.addEventListener('click', () => { /* ...invariata... */ if(targaSelezionataGlobalmente){targaSelectChecklist.value=targaSelezionataGlobalmente;showMainUI(true);loadProgress(targaSelezionataGlobalmente);if(navButtons.length>0)showSection(navButtons[0].dataset.target);}else alert("Seleziona targa.");});
-    function showSection(targetId) { /* ...invariata... */ sections.forEach(s=>s.classList.toggle('active',s.id===targetId+'Section'));navButtons.forEach(b=>b.classList.toggle('active',b.dataset.target===targetId));if(targetId==='riepilogo')generateSummary();}
+
+    function getSectionInputs(sectionElementId) {
+        const sectionDiv = document.getElementById(sectionElementId);
+        if (!sectionDiv) return [];
+        return sectionDiv.querySelectorAll('input[type="checkbox"], select');
+    }
+
+    function getSectionStatus(sectionElementId, targaData) {
+        const inputs = getSectionInputs(sectionElementId);
+        if (inputs.length === 0) return 'completed'; // Sezione senza input è considerata completa
+
+        let allDefault = true;
+        let allNonDefault = true;
+        let hasAtLeastOneNonDefault = false;
+
+        inputs.forEach(input => {
+            let isDefault;
+            const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined;
+
+            if (input.type === 'checkbox') {
+                isDefault = (savedValue !== undefined ? !savedValue : !input.checked);
+            } else { // Select
+                isDefault = (savedValue !== undefined ? (savedValue === "" || savedValue === input.options[0].value) : (input.value === "" || input.selectedIndex === 0));
+            }
+
+            if (!isDefault) {
+                allDefault = false;
+                hasAtLeastOneNonDefault = true;
+            } else {
+                allNonDefault = false;
+            }
+        });
+
+        if (allDefault) return 'untouched';
+        if (allNonDefault) return 'completed';
+        if (hasAtLeastOneNonDefault) return 'partial';
+        return 'untouched'; 
+    }
+
+    function updateNavButtonColors() {
+        if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') {
+             navButtons.forEach(btn => { // Resetta tutti se non siamo in una perizia attiva
+                btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active');
+                // Ripristina stile di default se necessario, ma .active gestisce il blu
+                btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = '';
+             });
+            return;
+        }
+
+        const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`);
+        const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null;
+
+        navButtons.forEach(btn => {
+            // Pulisci prima le classi di stato precedenti, tranne .active
+            btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched');
+            // Ripristina stile di default prima di applicare quello nuovo, se non è active
+            if (!btn.classList.contains('active')) {
+                 btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = '';
+            }
+
+
+            if (btn.classList.contains('active')) {
+                // Il blu per l'attivo è gestito dalla classe .active, non fare altro
+                return; 
+            }
+
+            const targetSection = btn.dataset.target;
+            let status = 'untouched';
+
+            if (targetSection === 'riepilogo') {
+                if (isTargaCompleted(targaSelezionataGlobalmente)) {
+                    status = 'completed';
+                } else {
+                    // Il riepilogo è "parziale" se c'è almeno un dato salvato per la targa
+                    // o se una delle sezioni precedenti è parziale/completa
+                    let hasAnyDataForSummary = false;
+                    if (targaData && Object.keys(targaData).length > 0) {
+                         hasAnyDataForSummary = true;
+                    } else {
+                        ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => {
+                            if (getSectionStatus(secId, targaData) !== 'untouched') {
+                                hasAnyDataForSummary = true;
+                            }
+                        });
+                    }
+                    status = hasAnyDataForSummary ? 'partial' : 'untouched';
+                }
+            } else if (targetSection) { // Per le altre sezioni con data-target
+                 status = getSectionStatus(targetSection + 'Section', targaData);
+            }
+
+
+            if (status === 'completed') btn.classList.add('nav-btn-completed');
+            else if (status === 'partial') btn.classList.add('nav-btn-partial');
+            else btn.classList.add('nav-btn-untouched');
+        });
+    }
+    // --- FINE NUOVA LOGICA COLORI ---
+
+
+    function showView(viewName) {
+        landingPageSection.style.display = 'none';
+        checklistContainer.style.display = 'none';
+        historyPageSection.style.display = 'none';
+        let showTopBarAndNav = false; 
+        let bodyPaddingTop = '20px'; 
+
+        if (viewName === 'landing') {
+            landingPageSection.style.display = 'block';
+            mainTitleGlobal.innerHTML = "Checklist Perizia Veicolo";
+            showTopBarAndNav = false;
+            const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked');
+            if (activeRadio) activeRadio.checked = false;
+            procediConPeriziaBtn.disabled = true;
+            if (!event || !event.target || (!checklistContainer.contains(event.target) && !historyPageSection.contains(event.target) && event.target !== procediConPeriziaBtn && !Array.from(saveAndNextButtons).includes(event.target) && event.target !== saveAndReturnBtn ) ) {
+                 targaSelezionataGlobalmente = null; // Resetta solo se si arriva da fuori checklist/history
+            }
+             if (targaSelezionataGlobalmente === null) updateNavButtonColors(); // Resetta colori bottoni nav se si torna a landing
+        } else if (viewName === 'checklist') {
+            if (!targaSelezionataGlobalmente) {
+                alert("Nessuna targa selezionata."); showView('landing'); return;
+            }
+            checklistContainer.style.display = 'block';
+            showTopBarAndNav = true; bodyPaddingTop = '95px'; 
+            const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
+            let subIdentifier = ""; 
+            if (veicoloAttuale && (veicoloAttuale.marca || veicoloAttuale.modello)) {
+                subIdentifier = `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim();
+            }
+            mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
+            updateNavButtonColors(); // Aggiorna colori quando si entra nella checklist
+        } else if (viewName === 'history') {
+            historyPageSection.style.display = 'block';
+            mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
+            showTopBarAndNav = true; bodyPaddingTop = '95px'; 
+            populateSavedTargasList();
+            updateNavButtonColors(); // Aggiorna colori (anche se qui non ha molto senso, ma per coerenza)
+        }
+        document.body.style.paddingTop = bodyPaddingTop;
+        headerCircles.style.display = showTopBarAndNav ? 'flex' : 'none';
+        navButtonsContainer.style.display = showTopBarAndNav ? 'flex' : 'none'; 
+        mainTitleGlobal.style.display = 'block'; 
+    }
+    
+    function populateSavedTargasList() { savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targa = key.substring(`${APP_PREFIX}data_`.length); if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa);}}} if (tempSavedTargas.length > 0) hasSaves = true; tempSavedTargas.sort(); tempSavedTargas.forEach(targa => { const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' }; let displayText = targa; let details = []; if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`); if (details.length > 0) { displayText += ` - ${details.join(' ')}`; } const button = document.createElement('button'); button.classList.add('saved-targa-button'); button.textContent = displayText; button.dataset.targa = targa; button.addEventListener('click', function() { targaSelezionataGlobalmente = this.dataset.targa; showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstChecklistNavButton = Array.from(navButtons).find(btn => btn.dataset.target && btn.id !== 'backToListBtn' && btn.id !== 'historyBtn'); if (firstChecklistNavButton) { showSection(firstChecklistNavButton.dataset.target); } else if (navButtons.length > 0 && navButtons[0].dataset.target) { showSection(navButtons[0].dataset.target); }}); savedTargasListContainer.appendChild(button); }); if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>'; } }
+    function clearAllSavedData() { if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati?\n\nAzione irreversibile.")) { let c = 0; for (let i=localStorage.length-1;i>=0;i--) { const k=localStorage.key(i); if (k.startsWith(APP_PREFIX)) {localStorage.removeItem(k);c++;}} alert(`${c} elementi cancellati.`); populateSavedTargasList(); caricaEPopolaTarghe(); showView('landing'); } }
+    async function caricaEPopolaTarghe() { targheLoadingStatus.textContent = "Caricamento..."; procediConPeriziaBtn.disabled = true; try { const r=await fetch(GOOGLE_SHEET_CSV_URL); if(!r.ok){let e=`HTTP ${r.status}.`;if(r.status===0)e="Rete/CORS.";else if(r.status===404)e="CSV(404).";else if(r.status===403)e="Accesso(403).";throw new Error(e);} const csv=await r.text(); const lines=csv.split(/\r\n|\n|\r/).filter(l=>l.trim()!==''); if(lines.length===0){targheLoadingStatus.textContent="No dati CSV.";return;} listaTargheCompleta=lines.map(l=>{const p=l.split(',');return{targa:(p[0]||'').trim().replace(/^"|"$/g,'').toUpperCase(),marca:(p[1]||'').trim().replace(/^"|"$/g,''),modello:(p[2]||'').trim().replace(/^"|"$/g,''),piazzale:(p[3]||'').trim().replace(/^"|"$/g,'')};}).filter(i=>i.targa&&i.targa.length>3); const tEl=document.getElementById('targaListContainer');tEl.innerHTML='';if(listaTargheCompleta.length===0){targheLoadingStatus.textContent="No targhe valide.";return;} listaTargheCompleta.forEach((item,idx)=>{const li=document.createElement('div');li.classList.add('targa-list-item');if(isTargaCompleted(item.targa))li.classList.add('completed');const rId=`targa_radio_${idx}`;const rb=document.createElement('input');rb.type='radio';rb.name='targa_selection_radio';rb.value=item.targa;rb.id=rId;const lab=document.createElement('label');lab.htmlFor=rId;lab.classList.add('radio-label-container');lab.innerHTML=`<span class="targa-col targa-col-targa">${item.targa||'N/D'}</span><span class="targa-col targa-col-marca">${item.marca||'N/D'}</span><span class="targa-col targa-col-modello">${item.modello||'N/D'}</span><span class="targa-col targa-col-piazzale">${item.piazzale||'N/D'}</span>`;li.appendChild(rb);li.appendChild(lab);const delB=document.createElement('button');delB.classList.add('action-button','delete-progress-btn');delB.dataset.targa=item.targa;delB.title=`Cancella progressi per ${item.targa}`;delB.textContent='X';delB.addEventListener('click',function(){const tDel=this.dataset.targa;if(confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel}?\n\nAzione irreversibile.`)){deleteProgressForTarga(tDel);if(targaSelezionataGlobalmente===tDel){targaSelezionataGlobalmente=null;showView('landing');}else{caricaEPopolaTarghe();}}});li.appendChild(delB);tEl.appendChild(li);});targheLoadingStatus.textContent="Seleziona targa:";document.querySelectorAll('input[name="targa_selection_radio"]').forEach(r=>{r.addEventListener('change',function(){if(this.checked){targaSelezionataGlobalmente=this.value;procediConPeriziaBtn.disabled=false;}});});}catch(e){console.error("Errore targhe:",e);targheLoadingStatus.textContent=`Errore: ${e.message}.`;}}
+    
+    procediConPeriziaBtn.addEventListener('click', () => { if(targaSelezionataGlobalmente){ showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstNav = Array.from(navButtons).find(b=>b.dataset.target && b.id!=='backToListBtn' && b.id!=='historyBtn'); if(firstNav)showSection(firstNav.dataset.target); else if(navButtons.length>0&&navButtons[0].dataset.target)showSection(navButtons[0].dataset.target);} else alert("Seleziona targa.");});
+    
+    // MODIFICATA: showSection ora chiama updateNavButtonColors
+    function showSection(targetId) {
+        sections.forEach(s=>s.classList.toggle('active',s.id === targetId + 'Section'));
+        // La classe .active sui bottoni di navigazione principali viene gestita da updateNavButtonColors
+        navButtons.forEach(b => { // Solo per la classe 'active' dei bottoni di navigazione sezioni
+            if (b.dataset.target === targetId) {
+                b.classList.add('active');
+            } else {
+                b.classList.remove('active');
+            }
+        });
+        updateNavButtonColors(); // Aggiorna i colori di tutti i bottoni nav
+        if (targetId === 'riepilogo') generateSummary();
+    }
+
     navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
-    function getSelectText(id) { /* ...invariata... */ const el=document.getElementById(id);if(el&&el.value!==""){if(el.selectedIndex>=0&&el.options[el.selectedIndex])return el.options[el.selectedIndex].text;return el.value;}return"N/S";}
-    function generateSummary() { /* ...invariata... */ summaryContent.innerHTML='';let targa=targaSelezionataGlobalmente||(targaSelectChecklist.value||"N/A");summaryContent.innerHTML+=`<div class="summary-item"><strong>Targa:</strong> ${targa}</div>`;summaryContent.innerHTML+=`<h3>Remarketing:</h3><div class="summary-item"><strong>Equip.:</strong> ${getSelectText('tipo_equipaggiamento')}</div><div class="summary-item"><strong>Presenza:</strong> ${getSelectText('equipaggiamento_presenza')}</div><div class="summary-item"><strong>KM:</strong> ${getSelectText('stato_chilometri')}</div><div class="summary-item"><strong>CDC:</strong> ${getSelectText('stato_cdc')}</div>`;summaryContent.innerHTML+=`<h3>Pneumatici:</h3><div class="summary-item"><strong>AS:</strong> ${getSelectText('pneumatico_as')}</div><div class="summary-item"><strong>AD:</strong> ${getSelectText('pneumatico_ad')}</div><div class="summary-item"><strong>PD:</strong> ${getSelectText('pneumatico_pd')}</div><div class="summary-item"><strong>PS:</strong> ${getSelectText('pneumatico_ps')}</div>`;summaryContent.innerHTML+=`<h3>Danni/Verifiche:</h3><div class="summary-item"><strong>Motore:</strong> ${getSelectText('motore_accende')}</div><div class="summary-item"><strong>Batteria:</strong> ${getSelectText('batteria_stato')}</div>`;}
+    function getSelectText(id) {const el=document.getElementById(id);if(el&&el.value!==""){if(el.selectedIndex>=0&&el.options[el.selectedIndex])return el.options[el.selectedIndex].text;return el.value;}return"N/S";}
+    function generateSummary() { summaryContent.innerHTML='';let targa = targaSelezionataGlobalmente || "N/D"; summaryContent.innerHTML+=`<div class="summary-item"><strong>Targa:</strong> ${targa}</div>`;summaryContent.innerHTML+=`<h3>Remarketing:</h3><div class="summary-item"><strong>Equip.:</strong> ${getSelectText('tipo_equipaggiamento')}</div><div class="summary-item"><strong>Presenza:</strong> ${getSelectText('equipaggiamento_presenza')}</div><div class="summary-item"><strong>KM:</strong> ${getSelectText('stato_chilometri')}</div><div class="summary-item"><strong>CDC:</strong> ${getSelectText('stato_cdc')}</div>`;summaryContent.innerHTML+=`<h3>Pneumatici:</h3><div class="summary-item"><strong>AS:</strong> ${getSelectText('pneumatico_as')}</div><div class="summary-item"><strong>AD:</strong> ${getSelectText('pneumatico_ad')}</div><div class="summary-item"><strong>PD:</strong> ${getSelectText('pneumatico_pd')}</div><div class="summary-item"><strong>PS:</strong> ${getSelectText('pneumatico_ps')}</div>`;summaryContent.innerHTML+=`<h3>Danni/Verifiche:</h3><div class="summary-item"><strong>Motore:</strong> ${getSelectText('motore_accende')}</div><div class="summary-item"><strong>Batteria:</strong> ${getSelectText('batteria_stato')}</div>`;}
     
     document.addEventListener('DOMContentLoaded', () => {
-        showMainUI(false); 
+        showView('landing'); 
         caricaEPopolaTarghe();
-        
-        // MODIFICATO: Event listener per il nuovo pulsante "Elenco Targhe"
-        if (backToListBtn) { 
-            backToListBtn.addEventListener('click', () => {
-                targaSelezionataGlobalmente = null; // Resetta la targa attiva
-                showMainUI(false); // Mostra la landing page
-                // Non è strettamente necessario ricaricare le targhe qui, 
-                // a meno che lo stato di completamento non possa cambiare mentre si è sulla checklist
-                // caricaEPopolaTarghe(); // Opzionale: rinfresca la lista se necessario
-            });
-        }
-
-        if (saveAndReturnBtn) {
-            saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn);
-        }
-        
-        saveAndNextButtons.forEach(button => {
-            button.addEventListener('click', handleSaveAndNext);
-        });
+        if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
+        if(historyBtn) historyBtn.addEventListener('click', () => showView('history')); 
+        if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData); 
+        if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing')); 
+        if(saveAndReturnBtn)saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn);
+        saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
     });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
