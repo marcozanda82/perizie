@@ -12,7 +12,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.75); /* Sfondo semitrasparente per preloader */
+            background-color: rgba(0, 0, 0, 0.75); /* Sfondo semitrasparente */
             z-index: 99999;
             display: flex;
             justify-content: center;
@@ -72,12 +72,10 @@
         .loader-bar:nth-child(2) { animation-delay: 0.2s; }
         .loader-bar:nth-child(3) { animation-delay: 0.4s; }
 
-        /* Animazione barre per uscita normale (non glitch, non tv-off) */
-        #exit-curtain:not(.glitching):not(.tv-off-effect) .loader-bar {
+        #exit-curtain:not(.glitching):not(.flash-out-effect) .loader-bar {
             animation-direction: reverse;
         }
-         /* Assicura che barPulse continui normalmente durante il glitch */
-        #exit-curtain.glitching:not(.tv-off-effect) .loader-bar {
+        #exit-curtain.glitching:not(.flash-out-effect) .loader-bar {
             animation-direction: normal; 
         }
         
@@ -97,9 +95,8 @@
             animation: textGlow 1.8s infinite alternate ease-in-out;
         }
         
-        /* Stile base per il testo di uscita, colore e animazione verranno gestiti da JS/classi specifiche */
         #exit-curtain .loading-text {
-             color: #ff8787; /* Colore di fallback o per la primissima fase "CHIUSURA IN CORSO" */
+             color: #ff8787; 
         }
 
         @keyframes textGlow {
@@ -107,10 +104,9 @@
           to   { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; opacity: 1;}
         }
 
-        /* Stili per l'effetto Glitch */
         #exit-curtain.glitching .loading-text {
             animation: glitchText 0.8s infinite steps(1, end), textGlow 1.8s infinite alternate ease-in-out;
-            color: #ff3030;
+            color: #ff3030 !important; /* Importante per sovrascrivere lo stile base */
             position: relative;
             z-index: 10;
         }
@@ -166,43 +162,42 @@
         @keyframes glitchText {
             0%, 100% { text-shadow: 0 0 3px red, 0 0 5px blue, 0 0 1px white; transform: translateX(0) translateY(0) skewX(0deg); opacity: 1;}
             10% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-2px) translateY(1px) skewX(5deg); opacity: 0.8;}
-            20% { text-shadow: -2px 0 3px red, 2px 1px 5px blue, 0 0 1px white; transform: translateX(3px) translateY(-2px) skewX(-3deg); opacity: 1;}
-            30% { text-shadow: 0 -1px 3px red, -1px 2px 5px blue, 0 0 1px white; transform: translateX(-1px) translateY(2px) skewX(2deg); opacity: 0.7;}
-            40% { text-shadow: 2px 2px 3px red, -2px -2px 5px blue, 0 0 1px white; transform: translateX(1px) translateY(-1px) skewX(-4deg); opacity: 1;}
-            50% { text-shadow: -1px -1px 3px red, 1px 1px 5px blue, 0 0 1px white; transform: translateX(-3px) translateY(1px) skewX(6deg); opacity: 0.85;}
-            60% { text-shadow: 1px 0 3px red, -1px 0 5px blue, 0 0 1px white; transform: translateX(2px) translateY(-1px) skewX(-1deg); opacity: 1;}
-            70% { text-shadow: -2px 1px 3px red, 2px -1px 5px blue, 0 0 1px white; transform: translateX(-2px) translateY(2px) skewX(3deg); opacity: 0.75;}
-            80% { text-shadow: 0px -2px 3px red, 0px 2px 5px blue, 0 0 1px white; transform: translateX(1px) translateY(-2px) skewX(-5deg); opacity: 1;}
+            /* ... (altri keyframes del glitchText) ... */
             90% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-1px) translateY(1px) skewX(1deg); opacity: 0.9;}
         }
 
-        /* Stili per l'effetto TV Off sul testo */
-        #exit-curtain.tv-off-effect .loading-text {
-            animation: tvOffTextCollapse 0.6s forwards cubic-bezier(0.4, 0, 0.2, 1);
-            color: #FFFFFF; 
-            text-shadow: none; 
+        /* Stili per l'effetto Flash Out sul testo finale */
+        #exit-curtain.flash-out-effect .loading-text {
+            color: #FFFFFF !important; 
+            text-shadow: none !important;
+            animation: textFlashOut 0.5s forwards ease-out;
             transform-origin: center center;
         }
 
-        @keyframes tvOffTextCollapse {
+        @keyframes textFlashOut {
             0% {
+                opacity: 1;
                 transform: scale(1);
-                opacity: 1;
+                text-shadow: 0 0 5px rgba(255,255,255,0.5);
             }
-            40% { /* Testo si illumina e si espande leggermente */
+            50% { 
+                opacity: 1;
+                transform: scale(1.1); 
+                color: #FFFFE0 !important; 
+                text-shadow: 0 0 15px #FFFFFF, 
+                             0 0 25px #FFFFFF, 
+                             0 0 35px #FFFFE0, 
+                             0 0 50px #FFFF99; 
+            }
+            99% { 
+                opacity: 0.8; 
                 transform: scale(1.05);
-                opacity: 1;
-                /* filter: brightness(1.5); Potrebbe essere troppo, ma è un'opzione */
             }
-            80% {
-                /* Collassa orizzontalmente in una linea/punto molto sottile */
-                transform: scale(0.02, 0.8); 
-                opacity: 0.7;
-            }
-            100% {
-                /* La linea/punto svanisce completamente */
-                transform: scale(0, 0);
+            100% { 
                 opacity: 0;
+                transform: scale(0.8); 
+                text-shadow: none;
+                color: transparent !important;
             }
         }
 
@@ -213,6 +208,7 @@
             opacity: 0.8;
         }
         body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; transition: padding-top 0.3s ease; }
+        /* ... (resto degli stili CSS come da versione precedente) ... */
         .content-wrapper { padding: 20px; }
         h1, h2 { text-align: center; color: #ffffff; }
         h1#mainTitleGlobal { line-height: 1.2; margin-bottom: 10px; margin-top: 5px; font-size: 1.6em;}
@@ -1151,7 +1147,6 @@
                 listaTargheCompleta = []; 
                 if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
                 if (targaListContainer) targaListContainer.innerHTML = '';
-                // Non nascondere il preloader qui, lo farà il blocco finally
                 return; 
             }
 
@@ -1170,7 +1165,6 @@
                 if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";
                  if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
                 if (targaListContainer) targaListContainer.innerHTML = '';
-                // Non nascondere il preloader qui
                 return; 
             }
             
@@ -1426,13 +1420,12 @@
                     const glitchText = "ERRORE DI SISTEMA...";
 
                     // --- Fase 1: Animazione normale (0.8 secondi) ---
-                    exitCurtain.classList.remove('glitching', 'tv-off-effect'); 
+                    exitCurtain.classList.remove('glitching', 'flash-out-effect'); // Rimuove anche la vecchia classe tv-off-effect se presente
                     if (exitLoadingText) {
                         exitLoadingText.textContent = defaultCloseText;
-                        // Applica animazione glow e colore per la fase normale
                         exitLoadingText.style.animation = 'textGlow 1.8s infinite alternate ease-in-out';
                         exitLoadingText.style.color = '#ff8787'; 
-                        exitLoadingText.style.textShadow = ''; // textGlow gestirà l'ombra
+                        exitLoadingText.style.textShadow = ''; 
                     }
                     exitCurtain.setAttribute('data-text', defaultCloseText);
                     if (barContainer) barContainer.style.display = 'flex'; 
@@ -1445,9 +1438,7 @@
                         exitCurtain.classList.add('glitching');
                         if (exitLoadingText) {
                            exitLoadingText.textContent = glitchText;
-                           // Le animazioni per il glitch sono definite nel CSS per .glitching .loading-text
-                           // Resettare .style.animation qui permetterà al CSS di prendere il sopravvento
-                           exitLoadingText.style.animation = ''; 
+                           exitLoadingText.style.animation = ''; // Lascia che CSS per .glitching .loading-text prenda il controllo
                         }
                         exitCurtain.setAttribute('data-text', glitchText);
 
@@ -1463,17 +1454,18 @@
                             if (barContainer) barContainer.style.display = 'none'; 
 
                             setTimeout(() => {
-                                // --- Fase 4: Effetto TV off sul testo (0.6 secondi) ---
-                                exitCurtain.classList.add('tv-off-effect');
-                                // L'animazione tvOffTextCollapse è applicata da CSS
+                                // --- Fase 4: Effetto Flash Out sul testo (0.5 secondi) ---
+                                exitCurtain.classList.add('flash-out-effect');
+                                // L'animazione textFlashOut è applicata da CSS
 
                                 setTimeout(() => {
-                                    // --- Fase 5: Dopo l'animazione TV off ---
+                                    // --- Fase 5: Dopo l'animazione Flash Out ---
+                                    // Il testo è ora invisibile
                                     const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
                                     fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
                                         .then(response => console.log('Macrodroid trigger request sent.'))
                                         .catch(error => console.error('Error sending Macrodroid trigger:', error));
-                                }, 600); // Corrisponde alla durata di tvOffTextCollapse (0.6s)
+                                }, 500); // Corrisponde alla durata di textFlashOut (0.5s)
 
                             }, 700); // Tempo di visualizzazione del testo "Applicazione terminata."
 
