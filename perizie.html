@@ -50,7 +50,7 @@
 
         /* Animazione barre specifica per l'uscita */
         #exit-curtain .loader-bar {
-            animation-direction: reverse;
+            animation-direction: reverse; /* Le barre si "svuotano" o animano al contrario */
         }
         /* Animazione base per le barre */
         @keyframes barPulse {
@@ -235,11 +235,22 @@
         .delete-progress-btn { background-color: #dc3545; border-color: #c82333; color: white; padding: 3px 7px; font-size: 0.8em; line-height: 1; margin-left: 8px; margin-right: 8px; flex-shrink: 0; border-radius: 3px; }
         .delete-progress-btn:hover { background-color: #c82333; border-color: #bd2130; }
 
-        /* Colore NEUTRO/STANDARD per NESSUN SALVATAGGIO */
-        .targa-list-item.status-da-vedere { background-color: #54542E !important; }
-        .targa-list-item.status-da-vedere:hover { background-color: #666639 !important; }
-        .targa-list-item.status-da-vedere label.radio-label-container .targa-col { color: #f0f0f0 !important; }
-        .targa-list-item.status-da-vedere .targa-col-posizione input.posizione-input { background-color: #606038; color: #f0f0f0;}
+        /* MODIFICATO: Colore GRIGIO per NESSUN SALVATAGGIO / NESSUNA PRIORITA' / NON COMPLETATO (Neutro) */
+        .targa-list-item.status-da-vedere {
+            background-color: #383838 !important; /* Grigio scuro neutro */
+        }
+        .targa-list-item.status-da-vedere:hover {
+            background-color: #454545 !important; /* Grigio leggermente più chiaro per hover */
+        }
+        .targa-list-item.status-da-vedere label.radio-label-container .targa-col {
+            color: #f0f0f0 !important; /* Testo chiaro standard, leggibile su sfondo scuro */
+        }
+        .targa-list-item.status-da-vedere .targa-col-posizione input.posizione-input {
+            background-color: #4f4f4f; /* Sfondo input coordinato */
+            color: #f0f0f0;
+            border-color: #5a5a5a;
+        }
+
 
         /* Colore VERDE per TARGA COMPLETATA */
         .targa-list-item.status-visto { background-color: #2E4B35 !important; }
@@ -273,7 +284,7 @@
         .targa-list-item.urgent-item.completed label.radio-label-container .targa-col-piazzale { color: #a07c7c !important; }
         .targa-list-item.urgent-item.completed .targa-col-posizione input.posizione-input { background-color: #4a2e2e; color: #a07c7c; }
 
-        /* NUOVO: Stili per SALVATAGGIO PARZIALE (GIALLO) */
+        /* Stili per SALVATAGGIO PARZIALE (GIALLO) */
         .targa-list-item.status-parziale {
             background-color: #ffc107 !important; /* Giallo Bootstrap "warning" */
         }
@@ -750,7 +761,7 @@
         if (inputElement.type === 'checkbox') return !inputElement.checked;
         if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0;
         if (inputElement.type === 'text' || inputElement.type === 'url' || inputElement.tagName === 'TEXTAREA') return inputElement.value.trim() === "";
-        return true; // Default assumption for other types
+        return true;
     }
 
     function getSectionInputs(sectionElementId) {
@@ -770,18 +781,16 @@
         inputs.forEach(input => {
             let isDefault;
             const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined;
-            const currentValue = input.type === 'checkbox' ? input.checked : input.value;
 
-            if (savedValue !== undefined) { // Considera i dati salvati se disponibili
+            if (savedValue !== undefined) {
                 if (input.type === 'checkbox') {
                     isDefault = !savedValue;
-                } else { // SELECT
+                } else {
                     isDefault = (savedValue === "" || (input.options.length > 0 && savedValue === input.options[0].value));
                 }
-            } else { // Altrimenti, considera il valore corrente dell'elemento
+            } else {
                  isDefault = isInputDefault(input);
             }
-
 
             if (!isDefault) {
                 allDefault = false;
@@ -814,12 +823,8 @@
             if (activeRadio) activeRadio.checked = false;
             if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
 
-            // Il valore del dropdown del piazzale viene impostato da setupSheetFilterDropdown
-            // che legge da localStorage. Non resettarlo qui a 'all'.
-            // if (sheetFilterDropdown) sheetFilterDropdown.value = 'all'; // RIMOSSA QUESTA RIGA
-
             if (listaTargheCompleta.length > 0 && typeof popolaTargheFiltrate === 'function') {
-                popolaTargheFiltrate(); // Ripopola usando il filtro piazzale corrente (o salvato)
+                popolaTargheFiltrate();
             }
             targaSelezionataGlobalmente = null;
             updateNavButtonColors();
@@ -875,9 +880,9 @@
                 }
             }
             alert(`${c} elementi cancellati.`);
-            if(sheetFilterDropdown) sheetFilterDropdown.value = 'all'; // Resetta anche il dropdown del filtro
+            if(sheetFilterDropdown) sheetFilterDropdown.value = 'all';
             populateSavedTargasList();
-            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); // Ricarica e ripopola le targhe
+            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();
             if (typeof showView === 'function') showView('landing');
         }
     }
@@ -898,7 +903,7 @@
             sheetFilterDropdown.value = savedPiazzaleFilter;
         } else {
             sheetFilterDropdown.value = 'all';
-            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); // Salva 'all' se non c'era nulla o non valido
+            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');
         }
 
         sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange);
@@ -1060,8 +1065,8 @@
                 if (targaListContainer) targaListContainer.innerHTML = '';
                 return;
             }
-            setupSheetFilterDropdown(); // Imposta il dropdown e il suo valore (da localStorage o default)
-            popolaTargheFiltrate(); // Popola le targhe usando il filtro corretto
+            setupSheetFilterDropdown();
+            popolaTargheFiltrate();
         } catch(e) {
             console.error("Errore caricamento/popolamento targhe:",e);
             if(targheLoadingStatus) targheLoadingStatus.textContent=`Errore: ${e.message}.`;
@@ -1093,17 +1098,16 @@
 
         const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el));
 
-        if (startIndex === -1 && allVisibleElementsInSection.length > 0) { // Tutti valorizzati
-            return; // Non iniziare l'animazione se tutti i campi sono già compilati
+        if (startIndex === -1 && allVisibleElementsInSection.length > 0) {
+            return;
         }
-        if (allVisibleElementsInSection.length === 0) { // Nessun elemento eleggibile
+        if (allVisibleElementsInSection.length === 0) {
              return;
         }
 
-        // Prendi solo gli elementi da startIndex in poi (o tutti se startIndex è 0)
         const elementsToAnimate = allVisibleElementsInSection.slice(startIndex >= 0 ? startIndex : 0);
 
-        if (elementsToAnimate.length === 0) return; // Nessun elemento non valorizzato trovato da animare
+        if (elementsToAnimate.length === 0) return;
 
         let currentIndex = 0;
         let activeListeners = [];
@@ -1121,10 +1125,7 @@
             if (currentIndex >= elementsToAnimate.length) {
                 return;
             }
-
             const currentElement = elementsToAnimate[currentIndex];
-
-            // Se l'elemento è diventato valorizzato nel frattempo, salta
             if (!isInputDefault(currentElement)) {
                 currentIndex++;
                 animateNextElement();
@@ -1134,16 +1135,21 @@
             currentElement.classList.add('animate-me');
             currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            const onValueChange = (event) => { // Aggiunto event
-                // Per i select, assicurarsi che il cambiamento sia effettivo e non solo un focus out
-                if (event.type === 'change' || (event.type === 'blur' && currentElement.tagName !== 'SELECT')) {
-                     if (isInputDefault(currentElement) && currentElement.tagName === 'SELECT' && event.type === 'blur') {
-                        // Non rimuovere l'animazione per i select su blur se sono ancora default
-                        return;
-                    }
+            const onValueChange = (event) => {
+                let processChange = false;
+                if (event.type === 'change') {
+                    processChange = true;
+                } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {
+                    processChange = true;
+                } else if (event.type === 'blur' && currentElement.tagName === 'SELECT' && !isInputDefault(currentElement)) {
+                     processChange = true; // Per i select, processa su blur solo se hanno effettivamente cambiato valore da default
+                }
+
+
+                if (processChange) {
                     currentElement.classList.remove('animate-me');
                     currentElement.removeEventListener('change', onValueChange);
-                    currentElement.removeEventListener('blur', onValueChange); // Rimuovi anche il blur listener
+                    currentElement.removeEventListener('blur', onValueChange);
                     activeListeners = activeListeners.filter(listener => listener.element !== currentElement);
                     currentIndex++;
                     setTimeout(animateNextElement, 50);
@@ -1151,14 +1157,11 @@
             };
 
             currentElement.addEventListener('change', onValueChange);
-             // Aggiungi un listener per 'blur' per i select, per gestire il caso in cui non cambiano valore ma perdono focus
-            if (currentElement.tagName === 'SELECT') {
+            if (currentElement.tagName === 'SELECT' || currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') { // Aggiungi blur per text e textarea
                 currentElement.addEventListener('blur', onValueChange);
-            }
-            activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
-            if (currentElement.tagName === 'SELECT') {
                  activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange});
             }
+            activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
         }
         animateNextElement();
     }
@@ -1175,7 +1178,7 @@
         updateNavButtonColors();
         const targetSectionElement = document.getElementById(targetId + 'Section');
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
-             setTimeout(initSequentialAnimation, 100); // Leggero ritardo per assicurare che la sezione sia visibile
+             setTimeout(initSequentialAnimation, 100);
         } else if (targetId === 'riepilogo') {
             generateSummary();
         }
@@ -1261,8 +1264,8 @@
     }
 
     async function loadAppContent() {
-        showView('landing'); // Mostra la landing page, che ora userà il filtro salvato se esiste
-        await caricaEPopolaTarghe(); // caricaEPopolaTarghe chiama setupSheetFilterDropdown e popolaTargheFiltrate
+        showView('landing');
+        await caricaEPopolaTarghe();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1310,24 +1313,31 @@
                 const exitCurtain = document.getElementById('exit-curtain');
                 const mainContentWrapper = document.getElementById('mainContentWrapper');
                 const pageHeader = document.getElementById('pageHeaderContainer');
+
                 if (exitCurtain) {
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none';
                     if (pageHeader) pageHeader.style.display = 'none';
                     document.body.style.paddingTop = '0px';
                     exitCurtain.style.display = 'flex';
+
                     const exitLoadingText = exitCurtain.querySelector('.loading-text');
                     if (exitLoadingText) exitLoadingText.textContent = 'CHIUSURA IN CORSO...';
                     const barContainer = exitCurtain.querySelector('.loader-bar-container');
-                    if(barContainer) barContainer.style.display = 'flex';
-                    setTimeout(() => {
-                        exitCurtain.classList.remove('hidden');
+                    if (barContainer) barContainer.style.display = 'flex';
+
+                    setTimeout(() => { // Fa partire la transizione CSS per opacity e visibility
                         exitCurtain.style.opacity = '1';
                         exitCurtain.style.visibility = 'visible';
-                    }, 20);
+                    }, 20); // Un piccolo delay per permettere al browser di applicare display:flex
+
+                    // Dopo 1 secondo, attiva Macrodroid e aggiorna il testo
                     setTimeout(() => {
+                        console.log("Triggering Macrodroid URL: https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi");
+                        window.location.href = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
+
                         if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata. Puoi chiudere questa scheda.';
-                        if(barContainer) barContainer.style.display = 'none';
-                    }, 2500);
+                        if (barContainer) barContainer.style.display = 'none';
+                    }, 1000); // 1000ms = 1 secondo
                 }
             });
         }
