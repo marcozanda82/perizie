@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Perizia Stato d'Uso Veicolo</title>
+    <style>
+        /* Stili per i cerchi in alto */
+        .header-circles {
+            display: flex;
+            justify-content: space-around; /* Distribuisce i cerchi equamente */
+            align-items: center;
+            width: 100%;
+            padding: 10px 0; /* Aggiunge un po' di spazio sopra e sotto */
+            box-sizing: border-box; /* Include padding nel calcolo della larghezza */
+            position: fixed; /* Rende i cerchi visibili su ogni pagina */
+            top: 20px; /* Sposta i cerchi leggermente più in basso */
+            left: 0;
+            background-color: #1e1e1e; /* Assicurati che lo sfondo del header copra il contenuto sottostante */
+            z-index: 1000; /* Assicurati che i cerchi siano sopra gli altri elementi */
+        }
+
+        .circle {
+            width: 2cm; /* Dimensione del cerchio raddoppiata */
+            height: 2cm; /* Rende l'elemento quadrato */
+            background-color: #ffffff; /* Colore del cerchio (puoi cambiarlo) */
+            border-radius: 50%; /* Rende l'elemento circolare */
+            flex-shrink: 0; /* Impedisce ai cerchi di rimpicciolirsi */
+        }
+
+        /* Stili generali per sfondo scuro e testo chiaro */
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #1e1e1e; /* Sfondo scuro */
+            color: #f0f0f0; /* Testo chiaro */
+            padding-top: 70px; /* Aggiungi padding al body per evitare che il contenuto venga coperto dal header fisso. Valore aumentato per i cerchi più grandi e spostati in basso. */
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff; /* Titolo bianco */
+        }
+
+        h2 {
+            color: #cccccc; /* Sottotitoli grigio chiaro */
+            border-bottom: 1px solid #444444; /* Bordo scuro */
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+         h3 {
+            color: #bbbbbb; /* Sottotitoli per Da fare/Completate */
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        label {
+            vertical-align: middle;
+        }
+
+        .nested-list {
+            margin-left: 30px;
+            margin-top: 5px;
+        }
+
+        /* Stili per la navigazione tra le sezioni */
+        #navButtons {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #navButtons button {
+            margin: 0 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            background-color: #333; /* Colore base */
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        #navButtons button:hover {
+            background-color: #555;
+            border-color: #777;
+        }
+
+        #navButtons button.active {
+            background-color: #007bff; /* Blu per sezione attiva */
+            border-color: #007bff;
+        }
+        #navButtons button.active:hover {
+            background-color: #0056b3;
+        }
+
+        /* Stati di compilazione */
+        #navButtons button.completed {
+            background-color: #28a745; /* Verde: Completata */
+            border-color: #28a745;
+        }
+         #navButtons button.completed:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        #navButtons button.partially-compiled {
+            background-color: #fd7e14; /* Arancione: Parzialmente Compilata */
+            border-color: #fd7e14;
+        }
+        #navButtons button.partially-compiled:hover {
+            background-color: #e66900;
+            border-color: #cc5c00;
+        }
+
+        #navButtons button.not-compiled {
+            background-color: #dc3545; /* Rosso: Non Compilata */
+            border-color: #dc3545;
+        }
+        #navButtons button.not-compiled:hover {
+            background-color: #c82333;
+            border-color: #b21f2c;
+        }
+
+
+        /* Stile per nascondere le sezioni non attive */
+        .category-section {
+            display: none;
+        }
+
+        .category-section.active {
+            display: block;
+        }
+
+        /* Contenitore per le liste Da fare e Completate affiancate */
+        .todo-completed-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .todo-section, .completed-section {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .reset-button, .total-reset-button {
+            display: block;
+            margin: 10px 0 5px 0;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .reset-button {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .reset-button:hover {
+            background-color: #e0a800;
+        }
+
+        .total-reset-button {
+            background-color: #6c757d; /* Grigio per Reset Totale */
+        }
+        .total-reset-button:hover {
+            background-color: #5a6268;
+        }
+        .button-group {
+            margin-top: 15px;
+        }
+
+        /* Media query per adattamento su schermi più piccoli */
+        @media (max-width: 600px) {
+            body {
+                margin: 10px;
+                padding-top: 80px; /* Aumenta padding top per schermi piccoli se necessario */
+            }
+            .nested-list {
+                margin-left: 15px;
+            }
+            #navButtons button {
+                margin: 5px 2px;
+                padding: 6px 10px;
+                font-size: 0.9em;
+            }
+             .todo-completed-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .reset-button, .total-reset-button {
+                width: 100%;
+                box-sizing: border-box;
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+             /* Adatta i cerchi in alto su schermi piccoli se necessario */
+            .header-circles {
+                 padding: 8px 0;
+                 top: 10px; /* Adatta la posizione verticale anche su schermi piccoli */
+            }
+            .circle {
+                width: 1.5cm; /* Riduci leggermente i cerchi se preferisci su schermi piccoli */
+                height: 1.5cm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-circles">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+    </div>
+    <h1>Checklist Perizia Stato d'Uso Veicolo</h1>
+
+    <div id="navButtons">
+        <button data-target="panoramiche">Foto Panoramiche</button>
+        <button data-target="interni">Foto Interni</button>
+        <button data-target="danni">Foto Danni</button>
+        <button data-target="pneumatici">Pneumatici</button>
+        <button data-target="verifiche">Verifiche Funzionali</button>
+    </div>
+
+    <div id="checklistContainer">
+
+        <div id="panoramicheSection" class="category-section">
+            <h2>Foto Panoramiche</h2>
+            <div class="todo-completed-container">
+                <div class="todo-section">
+                    <h3>Da fare</h3>
+                    <ul class="todo-list">
+                        <li><input type="checkbox" id="foto_ant_post"><label for="foto_ant_post">Foto ¾ anteriore del veicolo</label></li>
+                        <li><input type="checkbox" id="foto_post_veicolo"><label for="foto_post_veicolo">Foto ¾ posteriore del veicolo</label></li>
+                        <li><input type="checkbox" id="foto_tetto"><label for="foto_tetto">Foto del tetto (eventuali danni, stato vernice, tettuccio apribile se presente)</label></li>
+                        <li><input type="checkbox" id="foto_proiettori"><label for="foto_proiettori">Foto dei proiettori anteriori e posteriori e dei relativi supporti (integrità, trasparenza)</label></li>
+                        <li><input type="checkbox" id="foto_parabrezza"><label for="foto_parabrezza">Foto del parabrezza (eventuali crepe, scheggiature, stato guarnizioni)</label></li>
+                    </ul>
+                </div>
+                <div class="completed-section">
+                    <h3>Completate</h3>
+                    <ul class="completed-list"></ul>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="reset-button" data-section-id="panoramicheSection">Reset Sezione</button>
+                <button class="total-reset-button">Reset Totale</button>
+            </div>
+        </div>
+
+        <div id="interniSection" class="category-section">
+            <h2>Foto Interni</h2>
+             <div class="todo-completed-container">
+                <div class="todo-section">
+                    <h3>Da fare</h3>
+                    <ul class="todo-list">
+                        <li><input type="checkbox" id="foto_selleria"><label for="foto_selleria">Foto della selleria completa (pannelli porta, sedili anteriori e posteriori, poggiatesta)</label></li>
+                        <li><input type="checkbox" id="foto_accessori_interni"><label for="foto_accessori_interni">Foto dettagliata degli accessori interni ben visibili (es. comandi al volante, bracciolo, etc.)</label></li>
+                        <li><input type="checkbox" id="foto_quadro_strumenti"><label for="foto_quadro_strumenti">Foto del quadro strumenti acceso (con eventuali spie visibili)</label></li>
+                        <li><input type="checkbox" id="foto_radio_navi"><label for="foto_radio_navi">Foto del sistema radio/navigazione acceso (se presente)</label></li>
+                        <li><input type="checkbox" id="foto_km"><label for="foto_km">Foto del contachilometri (KM attuali)</label></li>
+                        <li><input type="checkbox" id="foto_vano_posteriore"><label for="foto_vano_posteriore">Foto del vano posteriore/vano di carico (stato generale, rivestimenti, eventuali danni)</label></li>
+                        <li><input type="checkbox" id="foto_vano_motore"><label for="foto_vano_motore">Foto del vano motore (stato generale, livelli visibili, eventuali perdite)</label></li>
+                        <li><input type="checkbox" id="foto_intarder"><label for="foto_intarder">Foto della presenza dell'intarder (se applicabile)</label></li>
+                         <li>
+                            <input type="checkbox" id="foto_documenti_main"><label for="foto_documenti_main">Foto dei documenti del veicolo:</label>
+                            <ul class="nested-list">
+                                <li><input type="checkbox" id="documenti_carta_circolazione"><label for="documenti_carta_circolazione">Carta di circolazione (fronte e retro)</label></li>
+                                <li><input type="checkbox" id="documenti_libretto_uso"><label for="documenti_libretto_uso">Libretto uso e manutenzione (se presente)</label></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div class="completed-section">
+                    <h3>Completate</h3>
+                    <ul class="completed-list"></ul>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="reset-button" data-section-id="interniSection">Reset Sezione</button>
+                <button class="total-reset-button">Reset Totale</button>
+            </div>
+        </div>
+
+        <div id="danniSection" class="category-section">
+            <h2>Foto Danni</h2>
+             <div class="todo-completed-container">
+                <div class="todo-section">
+                    <h3>Da fare</h3>
+                    <ul class="todo-list">
+                        <li><input type="checkbox" id="foto_danni_externi"><label for="foto_danni_externi">Foto dettagliate di tutti i danni esterni riscontrati (graffi, ammaccature, ruggine, rotture)</label></li>
+                        <li><input type="checkbox" id="foto_danni_interni"><label for="foto_danni_interni">Foto dettagliate di tutti i danni interni riscontrati (strappi, bruciature, rotture plastiche)</label></li>
+                    </ul>
+                </div>
+                <div class="completed-section">
+                    <h3>Completate</h3>
+                    <ul class="completed-list"></ul>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="reset-button" data-section-id="danniSection">Reset Sezione</button>
+                <button class="total-reset-button">Reset Totale</button>
+            </div>
+        </div>
+
+        <div id="pneumaticiSection" class="category-section">
+            <h2>Pneumatici</h2>
+             <div class="todo-completed-container">
+                <div class="todo-section">
+                    <h3>Da fare</h3>
+                    <ul class="todo-list">
+                         <li>
+                            <input type="checkbox" id="foto_pneumatici_main"><label for="foto_pneumatici_main">Foto di ciascun pneumatico indicando:</label>
+                            <ul class="nested-list">
+                                <li><input type="checkbox" id="pneumatici_marca"><label for="pneumatici_marca">Marca</label></li>
+                                <li><input type="checkbox" id="pneumatici_modello"><label for="pneumatici_modello">Modello</label></li>
+                                <li><input type="checkbox" id="pneumatici_battistrada"><label for="pneumatici_battistrada">Stato del battistrada (eventualmente con misuratore di profondità)</label></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div class="completed-section">
+                    <h3>Completate</h3>
+                    <ul class="completed-list"></ul>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="reset-button" data-section-id="pneumaticiSection">Reset Sezione</button>
+                <button class="total-reset-button">Reset Totale</button>
+            </div>
+        </div>
+
+        <div id="verificheSection" class="category-section">
+            <h2>Verifiche Funzionali e Documentali</h2>
+             <div class="todo-completed-container">
+                <div class="todo-section">
+                    <h3>Da fare</h3>
+                    <ul class="todo-list">
+                        <li><input type="checkbox" id="verifica_motore"><label for="verifica_motore">Verifica del funzionamento del motore (avviamento, regolarità minimo, assenza rumori anomali)</label></li>
+                        <li><input type="checkbox" id="prova_guida"><label for="prova_guida">Breve prova di guida su piazzale (ove possibile, per verificare cambio, freni, sterzo)</label></li>
+                        <li>
+                            <input type="checkbox" id="verifica_allestimento_main"><label for="verifica_allestimento_main">Se il veicolo è allestito:</label>
+                            <ul class="nested-list">
+                                <li><input type="checkbox" id="allestimento_funzionamento"><label for="allestimento_funzionamento">Verifica del funzionamento dell'allestimento</label></li>
+                                <li><input type="checkbox" id="allestimento_targhetta_ce"><label for="allestimento_targhetta_ce">Foto della targhetta CE dell'allestimento</label></li>
+                                <li><input type="checkbox" id="allestimento_conformita"><label for="allestimento_conformita">Foto della dichiarazione di conformità dell'allestimento (se disponibile)</label></li>
+                                <li><input type="checkbox" id="allestimento_manuali"><label for="allestimento_manuali">Foto dei manuali d'uso dell'allestimento (se disponibili)</label></li>
+                            </ul>
+                        </li>
+                        <li><input type="checkbox" id="foto_verbale_depositario"><label for="foto_verbale_depositario">Fotografare il verbale del depositario (se presente/applicabile)</label></li>
+                    </ul>
+                </div>
+                <div class="completed-section">
+                    <h3>Completate</h3>
+                    <ul class="completed-list"></ul>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="reset-button" data-section-id="verificheSection">Reset Sezione</button>
+                <button class="total-reset-button">Reset Totale</button>
+            </div>
+        </div>
+
+    </div>
+<script>
+    const navButtons = document.querySelectorAll('#navButtons button');
+    const sections = document.querySelectorAll('.category-section');
+
+    function updateNavButtonState(category) {
+        const button = document.querySelector(`#navButtons button[data-target="${category}"]`);
+        const sectionId = category + 'Section';
+        const section = document.getElementById(sectionId);
+
+        if (button && section) {
+            const pendingCheckboxes = section.querySelectorAll('.todo-list input[type="checkbox"]').length;
+            const completedCheckboxes = section.querySelectorAll('.completed-list input[type="checkbox"]').length;
+            const totalCheckboxes = pendingCheckboxes + completedCheckboxes;
+
+            // Rimuovi classi di stato precedenti, tranne 'active'
+            button.classList.remove('completed', 'partially-compiled', 'not-compiled');
+
+            if (pendingCheckboxes === 0) { // Copre il caso totalCheckboxes === 0 e il caso in cui tutti sono completati
+                button.classList.add('completed'); // Verde
+            } else if (completedCheckboxes === 0) { // Tutti i task sono pendenti (e ce n'è almeno uno)
+                button.classList.add('not-compiled'); // Rosso
+            } else { // Alcuni completati, alcuni pendenti
+                button.classList.add('partially-compiled'); // Arancione
+            }
+        }
+    }
+
+    function showSection(targetId) {
+        sections.forEach(section => {
+            section.classList.toggle('active', section.id === targetId + 'Section');
+        });
+        navButtons.forEach(button => {
+            button.classList.toggle('active', button.dataset.target === targetId);
+            // Quando si cambia sezione, lo stato di compilazione della vecchia sezione non cambia
+            // ma quello della nuova sezione viene ricalcolato qui se necessario (già fatto da updateNavButtonState chiamato sotto)
+            // L'importante è che il pulsante target ottenga il suo stato corretto,
+            // e che 'active' non interferisca con i colori di compilazione.
+            // Lo stato di compilazione è già gestito da updateNavButtonState.
+            // Questa chiamata aggiornerà solo il pulsante della sezione appena attivata, se non fosse già corretto.
+            if (button.dataset.target === targetId) {
+                 updateNavButtonState(button.dataset.target);
+            }
+        });
+        // È meglio aggiornare lo stato di TUTTI i pulsanti quando si mostra una sezione?
+        // No, solo quello attivo, gli altri dovrebbero mantenere il loro stato.
+        // La chiamata updateNavButtonState(targetId) dentro showSection non è più strettamente necessaria qui
+        // se tutti gli altri eventi (check, reset) la chiamano correttamente.
+        // Tuttavia, per sicurezza, la lascio per la sezione attiva.
+    }
+
+    navButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            showSection(this.dataset.target);
+        });
+    });
+
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const listItem = this.closest('li');
+            const sectionContainer = this.closest('.todo-completed-container');
+
+            if (sectionContainer) {
+                const todoList = sectionContainer.querySelector('.todo-list');
+                const completedList = sectionContainer.querySelector('.completed-list');
+
+                if (this.checked) {
+                    if (completedList) completedList.appendChild(listItem);
+                } else {
+                    if (todoList) todoList.prepend(listItem);
+                }
+
+                const parentSection = this.closest('.category-section');
+                if (parentSection) {
+                    const category = parentSection.id.replace('Section', '');
+                    updateNavButtonState(category);
+                }
+            }
+        });
+    });
+
+    const resetSectionButtons = document.querySelectorAll('.reset-button');
+    resetSectionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const sectionIdToReset = this.dataset.sectionId;
+            const sectionToReset = document.getElementById(sectionIdToReset);
+
+            if (sectionToReset && confirm("Sei sicuro di voler resettare tutte le spunte in questa sezione?")) {
+                const todoList = sectionToReset.querySelector('.todo-list');
+                const completedList = sectionToReset.querySelector('.completed-list');
+
+                if (completedList && todoList) {
+                    Array.from(completedList.children).forEach(item => {
+                        const checkbox = item.querySelector('input[type="checkbox"]');
+                        if (checkbox) checkbox.checked = false;
+                        todoList.appendChild(item);
+                    });
+                }
+                 Array.from(todoList.children).forEach(item => { // Assicura che anche quelli già in todo siano unchecked
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = false;
+                });
+
+                const category = sectionIdToReset.replace('Section', '');
+                updateNavButtonState(category);
+            }
+        });
+    });
+
+    const totalResetButtons = document.querySelectorAll('.total-reset-button');
+    totalResetButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            if (confirm("Sei sicuro di voler resettare TUTTE le spunte dell'intera checklist?")) {
+                sections.forEach(section => {
+                    const todoList = section.querySelector('.todo-list');
+                    const completedList = section.querySelector('.completed-list');
+
+                    if (completedList && todoList) {
+                        Array.from(completedList.children).forEach(item => {
+                            const checkbox = item.querySelector('input[type="checkbox"]');
+                            if (checkbox) checkbox.checked = false;
+                            todoList.appendChild(item);
+                        });
+                    }
+                    Array.from(todoList.children).forEach(item => { // Assicura deselezione
+                        const checkbox = item.querySelector('input[type="checkbox"]');
+                        if (checkbox) checkbox.checked = false;
+                    });
+
+                    const category = section.id.replace('Section', '');
+                    updateNavButtonState(category);
+                });
+            }
+        });
+    });
+
+    // All'avvio, mostra la prima sezione e imposta lo stato iniziale di tutti i pulsanti di navigazione
+    if (navButtons.length > 0) {
+        showSection(navButtons[0].dataset.target); // Mostra la prima sezione
+        navButtons.forEach(button => { // Imposta lo stato per TUTTI i pulsanti
+            updateNavButtonState(button.dataset.target);
+        });
+    }
+</script>
+
+</body>
+</html>
