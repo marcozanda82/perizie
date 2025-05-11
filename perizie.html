@@ -5,14 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perizia Veicolo</title>
     <style>
-        /* ... (stili CSS di base invariati) ... */
+        /* Preloader Styles */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000; /* Pagina Nera */
+            z-index: 99999; 
+            display: flex; /* Nascosto di default, JS lo mostra se necessario */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            opacity: 1;
+            transition: opacity 0.7s ease-out, visibility 0.7s ease-out;
+            visibility: visible;
+        }
+        #preloader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        #preloader .loader-bar-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px; 
+        }
+        #preloader .loader-bar {
+            width: 15px;
+            height: 70px; /* Altezza ridotta per un look più compatto */
+            background-color: #007bff; /* Blu Elettrico base */
+            animation: barPulse 1.2s infinite ease-in-out;
+            box-shadow: 0 0 8px #007bff, 0 0 15px #00aeff; /* Glow blu */
+            border-radius: 3px;
+        }
+        #preloader .loader-bar:nth-child(2) { animation-delay: 0.2s; }
+        #preloader .loader-bar:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes barPulse {
+            0%, 100% { transform: scaleY(0.3); opacity: 0.6; }
+            50% { transform: scaleY(1); opacity: 1; }
+        }
+
+        #preloader .loading-text {
+            color: #00aeff; 
+            font-size: 1.6em;
+            letter-spacing: 1px;
+            animation: textGlow 1.8s infinite alternate ease-in-out;
+        }
+        @keyframes textGlow {
+          from { text-shadow: 0 0 5px #007bff, 0 0 10px #00aeff; opacity: 0.8;}
+          to   { text-shadow: 0 0 10px #0AF, 0 0 20px #0AF, 0 0 30px #0CF; opacity: 1;}
+        }
+
+
+        /* ... (resto degli stili CSS esistenti) ... */
         .header-circles { display: flex; justify-content: space-around; align-items: center; width: 100%; padding: 8px 0; box-sizing: border-box; }
         .circle { 
             width: 1.5cm; height: 1.5cm; background-color: #ffffff; 
             border-radius: 50%; flex-shrink: 0; 
             opacity: 0.8; 
-            transform: scale(1); 
-            box-shadow: none; 
         }
         body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; transition: padding-top 0.3s ease; }
         .content-wrapper { padding: 20px; }
@@ -91,27 +143,16 @@
         #navButtons button:hover, .action-button:hover, #procediConPeriziaBtn:hover { background-color: #0056b3; border-color: #004085; }
         #procediConPeriziaBtn:disabled { background-color: #555; border-color: #444; cursor: not-allowed; }
         
-        /* Animazione per il pulsante attivo */
         @keyframes activeButtonGlow {
-            0% {
-                box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset;
-            }
-            50% {
-                box-shadow: 0 0 10px rgba(0, 150, 255, 1), 0 0 15px rgba(0, 150, 255, 0.7) inset;
-            }
-            100% {
-                box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset;
-            }
+            0% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
+            50% { box-shadow: 0 0 10px rgba(0, 150, 255, 1), 0 0 15px rgba(0, 150, 255, 0.7) inset; }
+            100% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
         }
 
         #navButtons button.active { 
-            background-color: #0056b3 !important; 
-            border-color: #004085 !important; 
-            color: white !important; 
-            animation-name: activeButtonGlow;
-            animation-duration: 1.8s;
-            animation-iteration-count: infinite;
-            animation-timing-function: ease-in-out;
+            background-color: #0056b3 !important; border-color: #004085 !important; color: white !important; 
+            animation-name: activeButtonGlow; animation-duration: 1.8s;
+            animation-iteration-count: infinite; animation-timing-function: ease-in-out;
             animation-direction: alternate;
         }
         #navButtons button.nav-btn-completed { background-color: #28a745 !important; border-color: #1e7e34 !important; color: white !important; }
@@ -127,23 +168,15 @@
         .summary-item { margin-bottom: 8px; padding: 8px; background-color: #333; border-radius: 3px; }
         .summary-item strong { color: #00aeff; }
         .summary-anomaly {
-            background-color: #5d3d3d !important; 
-            color: #ffdddd !important;
-            border-left: 3px solid #ff8888;
-            padding-left: 10px !important; 
+            background-color: #5d3d3d !important; color: #ffdddd !important;
+            border-left: 3px solid #ff8888; padding-left: 10px !important; 
         }
-        .summary-anomaly strong {
-            color: #ffc0c0 !important;
-        }
+        .summary-anomaly strong { color: #ffc0c0 !important; }
         .summary-notes {
-            background-color: #3a3a4a !important; 
-            color: #e0e0ff !important;
-            border-left: 3px solid #8888ff;
-            padding-left: 10px !important;
+            background-color: #3a3a4a !important; color: #e0e0ff !important;
+            border-left: 3px solid #8888ff; padding-left: 10px !important;
         }
-        .summary-notes strong {
-            color: #c0c0ff !important;
-        }
+        .summary-notes strong { color: #c0c0ff !important; }
         
         .table-scroll-wrapper { overflow-x: auto; width: 100%; margin-bottom: 10px; border: 1px solid #444; border-radius: 4px; }
         .targa-list-table-content { min-width: 650px; }
@@ -231,34 +264,6 @@
         #sheetFilterContainer label { margin-right: 10px; color: #ccc; display: inline-block; }
         #sheetFilterDropdown { padding: 8px; background-color: #333; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; min-width: 250px; vertical-align: middle; }
 
-        @keyframes circlePulseHighlight {
-            0% {
-                transform: scale(1);
-                background-color: #ffffff;
-                opacity: 0.7;
-                box-shadow: none;
-            }
-            50% {
-                transform: scale(1.15);
-                background-color: #00aeff; 
-                opacity: 1;
-                box-shadow: 0 0 12px #00aeff, 0 0 18px #00aeff;
-            }
-            100% {
-                transform: scale(1);
-                background-color: #ffffff; 
-                opacity: 0.8; 
-                box-shadow: none;
-            }
-        }
-        .circle.play-startup-animation {
-            animation-name: circlePulseHighlight;
-            animation-duration: 0.7s;
-            animation-timing-function: ease-in-out;
-            animation-iteration-count: 1; 
-        }
-
-
         @media (max-width: 768px) {
             .content-wrapper { margin-top: 0; }
             .circle { width: 1.2cm; height: 1.2cm; }
@@ -300,6 +305,15 @@
     </style>
 </head>
 <body>
+    <div id="preloader" style="display: none;"> {/* Nascosto di default, JS gestisce la visibilità */}
+        <div class="loader-bar-container">
+            <div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+        </div>
+        <div class="loading-text">AVVIO IN CORSO...</div>
+    </div>
+
     <div id="pageHeaderContainer"> 
         <div class="header-circles">
             <div class="circle"></div> <div class="circle"></div> <div class="circle"></div> <div class="circle"></div>
@@ -456,6 +470,7 @@
         </div>
     </div>
 <script>
+    // ... (JavaScript precedente, inclusa la definizione delle costanti globali per gli elementi dell'header) ...
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection'); 
@@ -468,8 +483,8 @@
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons');
 
-    const navButtons = navButtonsContainer.querySelectorAll('#mainPageNavButtons button[data-target]'); // Seleziona solo i bottoni di navigazione perizia
-    const utilityButtons = navButtonsContainer.querySelectorAll('#utilityNavButtons button'); // Per Elenco Targhe e Salvataggi
+    const navButtons = navButtonsContainer.querySelectorAll('#mainPageNavButtons button[data-target]');
+    const utilityButtons = navButtonsContainer.querySelectorAll('#utilityNavButtons button');
 
 
     const sections = document.querySelectorAll('#checklistContainer .category-section');
@@ -727,7 +742,6 @@
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
         } else {
             let nonFixedHeaderHeight = 0;
-            // Per sicurezza, verifica che mainTitleGlobal esista e sia visibile prima di accedere a offsetHeight
             if (mainTitleGlobal && typeof getComputedStyle === 'function' && getComputedStyle(mainTitleGlobal).display !== 'none') { 
                  nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
             }
@@ -748,6 +762,7 @@
                 }
             } 
             alert(`${c} elementi cancellati.`); 
+            localStorage.removeItem(`${APP_PREFIX}preloaderPlayed_v2`); // Rimuovi anche il flag del preloader
             populateSavedTargasList(); 
             caricaEPopolaTarghe(); 
             showView('landing'); 
@@ -1089,32 +1104,46 @@
     }
     
     document.addEventListener('DOMContentLoaded', () => {
+        const preloader = document.getElementById('preloader');
+        const PRELOADER_FLAG = `${APP_PREFIX}preloaderPlayed_v2`; // Usa un nome versionato per il flag
+
+        async function initializeApp() {
+            if (!localStorage.getItem(PRELOADER_FLAG)) {
+                if(preloader) preloader.style.display = 'flex';
+                 // Non nascondere subito, ma dopo caricaEPopolaTarghe
+            } else {
+                if(preloader) preloader.style.display = 'none'; // Nascondi subito se già visto
+            }
+
+            showView('landing'); // Imposta la vista iniziale
+            await caricaEPopolaTarghe(); // Attendi il caricamento dei dati
+
+            if (!localStorage.getItem(PRELOADER_FLAG)) {
+                if(preloader) {
+                    preloader.classList.add('hidden');
+                    preloader.addEventListener('transitionend', () => {
+                        if (preloader.classList.contains('hidden')) {
+                            preloader.style.display = 'none';
+                        }
+                    }, { once: true });
+                }
+                localStorage.setItem(PRELOADER_FLAG, 'true');
+            } else {
+                 if(preloader && preloader.style.display !== 'none') { // Assicura che sia nascosto
+                    preloader.style.opacity = '0';
+                    preloader.style.visibility = 'hidden';
+                    preloader.style.display = 'none';
+                 }
+            }
+        }
+        
         if (isElectricVehicleCheckbox) { 
             isElectricVehicleCheckbox.addEventListener('change', handleElectricVehicleChange);
         }
-        handleElectricVehicleChange(); 
+        handleElectricVehicleChange(); // Stato iniziale cavi
 
-        const circlesForAnimation = pageHeaderContainer.querySelectorAll('.header-circles .circle');
-        if (circlesForAnimation.length > 0 && !sessionStorage.getItem('startupAnimationPlayed')) {
-            circlesForAnimation.forEach((circle, index) => {
-                circle.style.animation = 'none'; 
-                void circle.offsetWidth; 
+        initializeApp(); // Avvia l'app
 
-                setTimeout(() => {
-                    circle.classList.add('play-startup-animation');
-                }, index * 150 + 200); 
-            });
-            setTimeout(() => {
-                circlesForAnimation.forEach(circle => {
-                    circle.classList.remove('play-startup-animation');
-                });
-                sessionStorage.setItem('startupAnimationPlayed', 'true'); 
-            }, 700 + (circlesForAnimation.length * 150) + 500); 
-        }
-
-
-        showView('landing'); 
-        caricaEPopolaTarghe();
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history')); 
         if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData); 
