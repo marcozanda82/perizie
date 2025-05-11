@@ -72,8 +72,13 @@
         .loader-bar:nth-child(2) { animation-delay: 0.2s; }
         .loader-bar:nth-child(3) { animation-delay: 0.4s; }
 
+        /* Animazione barre per uscita normale (non glitch, non tv-off) */
         #exit-curtain:not(.glitching):not(.tv-off-effect) .loader-bar {
             animation-direction: reverse;
+        }
+         /* Assicura che barPulse continui normalmente durante il glitch */
+        #exit-curtain.glitching:not(.tv-off-effect) .loader-bar {
+            animation-direction: normal; 
         }
         
         @keyframes barPulse {
@@ -81,20 +86,21 @@
             50% { transform: scaleY(1); opacity: 1; }
         }
 
-        #preloader .loading-text, #exit-curtain .loading-text {
+        #preloader .loading-text, 
+        #exit-curtain .loading-text {
             font-size: 1.6em;
             letter-spacing: 1px;
-            /* textGlow non si applica più di default a #exit-curtain .loading-text se non specificato da JS o altre classi */
         }
+
         #preloader .loading-text {
             color: #00aeff;
             animation: textGlow 1.8s infinite alternate ease-in-out;
         }
-        /* Il colore e animazione per #exit-curtain .loading-text sarà gestito dinamicamente */
+        
+        /* Stile base per il testo di uscita, colore e animazione verranno gestiti da JS/classi specifiche */
         #exit-curtain .loading-text {
-             color: #ff8787; /* Colore base per chiusura normale, se visibile */
+             color: #ff8787; /* Colore di fallback o per la primissima fase "CHIUSURA IN CORSO" */
         }
-
 
         @keyframes textGlow {
           from { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; opacity: 0.8;}
@@ -102,15 +108,6 @@
         }
 
         /* Stili per l'effetto Glitch */
-        #exit-curtain.glitching .loader-bar-container {
-            /* Mantieni le barre standard visibili durante il glitch o nascondile: */
-            /* display: none !important; */ 
-        }
-         #exit-curtain.glitching:not(.tv-off-effect) .loader-bar { /* Assicura che barPulse continui normalmente durante il glitch */
-            animation-direction: normal; /* o rimuovi l'override */
-        }
-
-
         #exit-curtain.glitching .loading-text {
             animation: glitchText 0.8s infinite steps(1, end), textGlow 1.8s infinite alternate ease-in-out;
             color: #ff3030;
@@ -179,32 +176,35 @@
             90% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-1px) translateY(1px) skewX(1deg); opacity: 0.9;}
         }
 
-        /* Stili per l'effetto TV Off */
+        /* Stili per l'effetto TV Off sul testo */
         #exit-curtain.tv-off-effect .loading-text {
-            /* Sovrascrive animazioni precedenti come textGlow o glitchText */
-            animation: tvOffCollapse 0.4s forwards ease-out;
-            color: #FFFFFF; /* Testo bianco per contrasto su sfondo nero */
-            text-shadow: none; /* Rimuove eventuali ombre o bagliori */
-            transform-origin: center center; /* Assicura che il collasso avvenga verso il centro */
+            animation: tvOffTextCollapse 0.6s forwards cubic-bezier(0.4, 0, 0.2, 1);
+            color: #FFFFFF; 
+            text-shadow: none; 
+            transform-origin: center center;
         }
 
-        @keyframes tvOffCollapse {
+        @keyframes tvOffTextCollapse {
             0% {
-                transform: scaleX(1) scaleY(1);
+                transform: scale(1);
                 opacity: 1;
             }
-            70% {
-                /* Collassa orizzontalmente a una linea sottile */
-                transform: scaleX(0.03) scaleY(1);
+            40% { /* Testo si illumina e si espande leggermente */
+                transform: scale(1.05);
+                opacity: 1;
+                /* filter: brightness(1.5); Potrebbe essere troppo, ma è un'opzione */
+            }
+            80% {
+                /* Collassa orizzontalmente in una linea/punto molto sottile */
+                transform: scale(0.02, 0.8); 
                 opacity: 0.7;
             }
             100% {
-                /* Collassa la linea verticalmente e svanisce */
-                transform: scaleX(0.03) scaleY(0.03);
+                /* La linea/punto svanisce completamente */
+                transform: scale(0, 0);
                 opacity: 0;
             }
         }
-
 
         .header-circles { display: flex; justify-content: space-around; align-items: center; width: 100%; padding: 8px 0; box-sizing: border-box; }
         .circle {
@@ -306,7 +306,7 @@
         #landingPageSection, .category-section, #historyPageSection { padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a; max-width: 850px; margin-left: auto; margin-right: auto; }
 
         .category-section, #historyPageSection { display: none; }
-        #landingPageSection { display: block; } /* Modificato per essere visibile by default se il preloader lo copre */
+        #landingPageSection { display: block; }
         .category-section.active { display: block; }
 
         .summary-item { margin-bottom: 8px; padding: 8px; background-color: #333; border-radius: 3px; }
@@ -500,7 +500,8 @@
     </div>
 
     <div class="content-wrapper" id="mainContentWrapper">
-        <div id="landingPageSection" style="display: block;"> <h2 style="margin-top: 10px;">Seleziona Veicolo da Periziare</h2>
+        <div id="landingPageSection" style="display: block;">
+            <h2 style="margin-top: 10px;">Seleziona Veicolo da Periziare</h2>
             <div id="sheetFilterContainer">
                 <label for="sheetFilterDropdown">Filtra per Elenco:</label>
                 <select id="sheetFilterDropdown">
@@ -892,15 +893,13 @@
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
-        let bodyPaddingTopValue = '20px'; // Default padding
+        let bodyPaddingTopValue = '20px'; 
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
             navButtonsContainer.style.display = 'none';
             mainTitleGlobal.innerHTML = "Elenco Veicoli";
-            // Se le targhe sono già state caricate E il preloader non è più attivo, popola
-            // Altrimenti, caricaEPopolaTarghe si occuperà di popolarle dopo il caricamento
             if (listaTargheCompleta.length > 0 && 
                 (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
                 typeof popolaTargheFiltrate === 'function') {
@@ -924,25 +923,23 @@
                     ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
                     : "";
                 mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
-            } else { // history
+            } else { 
                 historyPageSection.style.display = 'block';
                 mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
                 populateSavedTargasList();
             }
             updateNavButtonColors();
-        } else { // Should not happen, but good for default
+        } else { 
             pageHeaderContainer.classList.remove('fixed-header');
             headerCircles.style.display = 'none';
             navButtonsContainer.style.display = 'none';
-            mainTitleGlobal.innerHTML = ""; // Clear title
+            mainTitleGlobal.innerHTML = ""; 
         }
 
-        // Adjust body padding based on fixed header presence and visibility
         if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
         } else {
             let nonFixedHeaderHeight = 0;
-            // Consider only mainTitleGlobal if it's the only visible part of a non-fixed header
             if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {
                  nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
             }
@@ -1135,9 +1132,7 @@
 
     async function caricaEPopolaTarghe() {
         const preloader = document.getElementById('preloader');
-        // Il messaggio in 'targheLoadingStatus' è visibile sotto il preloader semitrasparente
         if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server...";
-
 
         try {
             const r = await fetch(GOOGLE_SHEET_CSV_URL);
@@ -1156,6 +1151,7 @@
                 listaTargheCompleta = []; 
                 if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
                 if (targaListContainer) targaListContainer.innerHTML = '';
+                // Non nascondere il preloader qui, lo farà il blocco finally
                 return; 
             }
 
@@ -1174,6 +1170,7 @@
                 if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";
                  if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
                 if (targaListContainer) targaListContainer.innerHTML = '';
+                // Non nascondere il preloader qui
                 return; 
             }
             
@@ -1384,7 +1381,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         const preloader = document.getElementById('preloader');
 
-        // Setup event listeners and initial states
         if (tipoTrazioneSelect) {
             tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
         }
@@ -1398,7 +1394,7 @@
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
         
         async function initializeApplicationViewAndLoadData() {
-            showView('landing'); // Setup and display the landing page view first.
+            showView('landing'); 
 
             if (preloader) { 
                 preloader.style.display = 'flex';
@@ -1408,7 +1404,6 @@
                 const loadingText = preloader.querySelector('.loading-text');
                 if (loadingText) loadingText.textContent = 'CARICAMENTO ELENCO...';
             }
-
             await caricaEPopolaTarghe(); 
         }
 
@@ -1430,12 +1425,14 @@
                     const defaultCloseText = "CHIUSURA IN CORSO...";
                     const glitchText = "ERRORE DI SISTEMA...";
 
+                    // --- Fase 1: Animazione normale (0.8 secondi) ---
                     exitCurtain.classList.remove('glitching', 'tv-off-effect'); 
                     if (exitLoadingText) {
                         exitLoadingText.textContent = defaultCloseText;
-                        exitLoadingText.style.animation = 'textGlow 1.8s infinite alternate ease-in-out'; // Ripristina animazione glow base
+                        // Applica animazione glow e colore per la fase normale
+                        exitLoadingText.style.animation = 'textGlow 1.8s infinite alternate ease-in-out';
                         exitLoadingText.style.color = '#ff8787'; 
-                        exitLoadingText.style.textShadow = ''; 
+                        exitLoadingText.style.textShadow = ''; // textGlow gestirà l'ombra
                     }
                     exitCurtain.setAttribute('data-text', defaultCloseText);
                     if (barContainer) barContainer.style.display = 'flex'; 
@@ -1444,16 +1441,18 @@
                     exitCurtain.style.display = 'flex';
 
                     setTimeout(() => {
+                        // --- Fase 2: Effetto glitch (0.8 secondi) ---
                         exitCurtain.classList.add('glitching');
                         if (exitLoadingText) {
                            exitLoadingText.textContent = glitchText;
-                           // L'animazione per il glitch (glitchText, textGlow) è applicata da CSS tramite .glitching .loading-text
-                           // Ma per sicurezza, ressettiamo animation per farla ripartire correttamente
-                           exitLoadingText.style.animation = ''; // Lascia che CSS applichi le animazioni del glitch
+                           // Le animazioni per il glitch sono definite nel CSS per .glitching .loading-text
+                           // Resettare .style.animation qui permetterà al CSS di prendere il sopravvento
+                           exitLoadingText.style.animation = ''; 
                         }
                         exitCurtain.setAttribute('data-text', glitchText);
 
                         setTimeout(() => {
+                            // --- Fase 3: Visualizzazione testo "Applicazione terminata." (0.7 secondi) ---
                             exitCurtain.classList.remove('glitching');
                             if (exitLoadingText) {
                                 exitLoadingText.textContent = 'Applicazione terminata.';
@@ -1464,18 +1463,23 @@
                             if (barContainer) barContainer.style.display = 'none'; 
 
                             setTimeout(() => {
+                                // --- Fase 4: Effetto TV off sul testo (0.6 secondi) ---
                                 exitCurtain.classList.add('tv-off-effect');
-                                // L'animazione tvOffCollapse è applicata da CSS
+                                // L'animazione tvOffTextCollapse è applicata da CSS
 
                                 setTimeout(() => {
+                                    // --- Fase 5: Dopo l'animazione TV off ---
                                     const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
                                     fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
                                         .then(response => console.log('Macrodroid trigger request sent.'))
                                         .catch(error => console.error('Error sending Macrodroid trigger:', error));
-                                }, 400); 
-                            }, 700); 
-                        }, 800); 
-                    }, 800); 
+                                }, 600); // Corrisponde alla durata di tvOffTextCollapse (0.6s)
+
+                            }, 700); // Tempo di visualizzazione del testo "Applicazione terminata."
+
+                        }, 800); // Durata dell'effetto glitch
+
+                    }, 800); // Durata dell'animazione normale
                 }
             });
         }
