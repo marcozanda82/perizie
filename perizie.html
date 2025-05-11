@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perizia Veicolo</title>
     <style>
-        /* Preloader Styles */
-        #preloader {
+        /* Preloader & Exit Curtain Styles */
+        #preloader, #exit-curtain {
             position: fixed;
             top: 0;
             left: 0;
@@ -14,52 +14,66 @@
             height: 100%;
             background-color: #000000; /* Pagina Nera */
             z-index: 99999;
-            display: flex; /* Nascosto di default, JS lo mostra se necessario */
+            display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            opacity: 1;
-            transition: opacity 0.7s ease-out, visibility 0.7s ease-out;
-            visibility: visible;
+            opacity: 1; /* Default per preloader */
+            visibility: visible; /* Default per preloader */
         }
-        #preloader.hidden {
+        #preloader.hidden, #exit-curtain.hidden {
             opacity: 0;
             visibility: hidden;
+            transition: opacity 0.7s ease-out, visibility 0.7s ease-out;
         }
-        #preloader .loader-bar-container {
+        #exit-curtain { /* Inizialmente nascosto per exit-curtain */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.7s ease-in, visibility 0.7s ease-in; /* ease-in per apparire */
+        }
+
+        .loader-bar-container { /* Contenitore comune per le barre */
             display: flex;
             gap: 10px;
             margin-bottom: 25px;
         }
-        #preloader .loader-bar {
+        .loader-bar { /* Stile comune per le barre */
             width: 15px;
-            height: 70px; /* Altezza ridotta per un look più compatto */
-            background-color: #007bff; /* Blu Elettrico base */
+            height: 70px;
+            background-color: #007bff;
             animation: barPulse 1.2s infinite ease-in-out;
-            box-shadow: 0 0 8px #007bff, 0 0 15px #00aeff; /* Glow blu */
+            box-shadow: 0 0 8px #007bff, 0 0 15px #00aeff;
             border-radius: 3px;
         }
-        #preloader .loader-bar:nth-child(2) { animation-delay: 0.2s; }
-        #preloader .loader-bar:nth-child(3) { animation-delay: 0.4s; }
+        .loader-bar:nth-child(2) { animation-delay: 0.2s; }
+        .loader-bar:nth-child(3) { animation-delay: 0.4s; }
 
+        /* Animazione barre specifica per l'uscita */
+        #exit-curtain .loader-bar {
+            animation-direction: reverse;
+        }
+        /* Animazione base per le barre */
         @keyframes barPulse {
             0%, 100% { transform: scaleY(0.3); opacity: 0.6; }
             50% { transform: scaleY(1); opacity: 1; }
         }
 
-        #preloader .loading-text {
-            color: #00aeff;
+        /* Stile testo comune per preloader e uscita */
+        #preloader .loading-text, #exit-curtain .loading-text {
             font-size: 1.6em;
             letter-spacing: 1px;
             animation: textGlow 1.8s infinite alternate ease-in-out;
         }
-        @keyframes textGlow {
-          from { text-shadow: 0 0 5px #007bff, 0 0 10px #00aeff; opacity: 0.8;}
-          to   { text-shadow: 0 0 10px #0AF, 0 0 20px #0AF, 0 0 30px #0CF; opacity: 1;}
+        #preloader .loading-text {  color: #00aeff; } /* Blu per avvio */
+        #exit-curtain .loading-text { color: #ff8787; } /* Rosso/Arancio per chiusura */
+
+        @keyframes textGlow { /* Usato da entrambi, ma il colore è definito sopra */
+          from { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; opacity: 0.8;}
+          to   { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; opacity: 1;}
         }
 
 
-        /* ... (resto degli stili CSS esistenti) ... */
+        /* ... (resto degli stili CSS esistenti, assicurati che non ci siano conflitti) ... */
         .header-circles { display: flex; justify-content: space-around; align-items: center; width: 100%; padding: 8px 0; box-sizing: border-box; }
         .circle {
             width: 1.5cm; height: 1.5cm; background-color: #ffffff;
@@ -267,29 +281,24 @@
         /* Stili per l'animazione richiesta */
         .animate-me {
             animation: pulseHighlight 1.5s infinite alternate;
-            /* box-shadow: 0 0 8px #00aeff, 0 0 15px #007bff; */ /* Rimosso per evitare conflitto con outline */
             outline: 2px solid rgba(0, 123, 255, 0.0); /* Inizialmente trasparente */
             transition: outline 0.3s ease, box-shadow 0.3s ease; /* Transizione per rimozione */
         }
 
         @keyframes pulseHighlight {
             from {
-                /* transform: scale(1); */ /* Scala può causare reflow, preferisco outline/shadow */
                 outline: 2px solid rgba(0, 123, 255, 0.7);
                 box-shadow: 0 0 5px rgba(0, 123, 255, 0.5), 0 0 8px rgba(0, 123, 255, 0.3) inset;
             }
             to {
-                /* transform: scale(1.01); */
                 outline: 3px solid rgba(0, 150, 255, 1);
                 box-shadow: 0 0 10px rgba(0, 150, 255, 0.8), 0 0 12px rgba(0, 150, 255, 0.5) inset;
             }
         }
-        /* Assicura che gli elementi possano mostrare correttamente outline/shadow */
         input[type="checkbox"].animate-me, select.animate-me {
-            position: relative; /* Necessario per z-index se si sovrappongono */
-            z-index: 1; /* Per portare l'elemento animato in primo piano se necessario */
+            position: relative;
+            z-index: 1;
         }
-        /* Fine stili per l'animazione richiesta */
 
 
         @media (max-width: 768px) {
@@ -333,13 +342,22 @@
     </style>
 </head>
 <body>
-    <div id="preloader" style="display: none;"> {/* Nascosto di default, JS gestisce la visibilità */}
+    <div id="preloader">
         <div class="loader-bar-container">
             <div class="loader-bar"></div>
             <div class="loader-bar"></div>
             <div class="loader-bar"></div>
         </div>
         <div class="loading-text">AVVIO IN CORSO...</div>
+    </div>
+
+    <div id="exit-curtain">
+        <div class="loader-bar-container">
+            <div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+        </div>
+        <div class="loading-text">CHIUSURA IN CORSO...</div>
     </div>
 
     <div id="pageHeaderContainer">
@@ -357,6 +375,7 @@
             <div id="utilityNavButtons">
                 <button id="backToListBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe</button>
                 <button id="historyBtn" class="action-button" style="background-color: #17a2b8; border-color: #117a8b;">Salvataggi</button>
+                <button id="exitAppBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Esci</button>
             </div>
         </div>
     </div>
@@ -519,6 +538,7 @@
     const summaryContent = document.getElementById('summaryContent');
     const backToListBtn = pageHeaderContainer.querySelector('#backToListBtn');
     const historyBtn = pageHeaderContainer.querySelector('#historyBtn');
+    const exitAppBtn = pageHeaderContainer.querySelector('#exitAppBtn'); // Bottone Esci
     const clearAllProgressBtn = document.getElementById('clearAllProgressBtn');
     const backToLandingFromHistoryBtn = document.getElementById('backToLandingFromHistoryBtn');
     const saveAndReturnBtn = document.getElementById('saveAndReturnBtn');
@@ -790,7 +810,7 @@
                 }
             }
             alert(`${c} elementi cancellati.`);
-            localStorage.removeItem(`${APP_PREFIX}preloaderPlayed_v2`); // Rimuovi anche il flag del preloader
+            // localStorage.removeItem(`${APP_PREFIX}preloaderPlayed_v2`); // Non più usato per il preloader ad ogni avvio
             populateSavedTargasList();
             caricaEPopolaTarghe();
             showView('landing');
@@ -1007,9 +1027,8 @@
         }
     }
 
-    procediConPeriziaBtn.addEventListener('click', () => { if(targaSelezionataGlobalmente){ showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstNav = Array.from(navButtons).find(b=>b.dataset.target && b.id!=='backToListBtn' && b.id!=='historyBtn'); if(firstNav)showSection(firstNav.dataset.target); else if(navButtons.length>0&&navButtons[0].dataset.target)showSection(navButtons[0].dataset.target);} else alert("Seleziona targa.");});
+    procediConPeriziaBtn.addEventListener('click', () => { if(targaSelezionataGlobalmente){ showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstNav = Array.from(navButtons).find(b=>b.dataset.target && b.id!=='backToListBtn' && b.id!=='historyBtn' && b.id!=='exitAppBtn'); if(firstNav)showSection(firstNav.dataset.target); else if(navButtons.length>0&&navButtons[0].dataset.target)showSection(navButtons[0].dataset.target);} else alert("Seleziona targa.");});
 
-    // NUOVA FUNZIONE PER L'ANIMAZIONE SEQUENZIALE
     function initSequentialAnimation() {
         const checklistContainerDiv = document.getElementById('checklistContainer');
         if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return;
@@ -1017,14 +1036,11 @@
         const activeSection = checklistContainerDiv.querySelector('.category-section.active');
         if (!activeSection) return;
 
-        // Rimuovi animazioni precedenti da qualsiasi elemento se ancora presenti
         activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me'));
 
         const elementsToAnimate = Array.from(
             activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)')
         ).filter(el => {
-            // Controlla se l'elemento è visibile (offsetParent non è null)
-            // e se l'elemento stesso o un suo parente stretto non ha 'display: none'
             let current = el;
             while (current && current !== activeSection.parentElement) {
                 if (getComputedStyle(current).display === 'none') return false;
@@ -1034,64 +1050,31 @@
         });
 
         let currentIndex = 0;
-        let activeListeners = []; // Per tenere traccia dei listener attivi e rimuoverli correttamente
+        let activeListeners = [];
 
         function clearAllActiveAnimationListeners() {
             activeListeners.forEach(({element, type, handler}) => {
                 element.removeEventListener(type, handler);
-                element.classList.remove('animate-me'); // Assicura che l'animazione sia rimossa
+                element.classList.remove('animate-me');
             });
             activeListeners = [];
         }
-        // Pulisci i listener da una possibile esecuzione precedente su questa sezione
         clearAllActiveAnimationListeners();
 
 
         function animateNextElement() {
             if (currentIndex >= elementsToAnimate.length) {
-                return; // Tutti gli elementi processati
+                return;
             }
-
             const currentElement = elementsToAnimate[currentIndex];
-
-            // Se l'elemento è già valorizzato (es. da dati precaricati), salta l'animazione per questo.
-            let isAlreadyValued = false;
-            if (currentElement.type === 'checkbox') {
-                // Per i checkbox, "valorizzato" significa essere spuntato o non spuntato diversamente dal default (non spuntato)
-                // Ma la logica è "perde animazione una volta valorizzato", quindi se è già spuntato,
-                // non dovrebbe animare, ma questo cozza con l'idea di animare "uno alla volta".
-                // L'interpretazione più semplice è che l'animazione appare e scompare al primo "cambiamento".
-                // Se un campo è già valorizzato da localStorage, non dovrebbe animare.
-                // Il problema è che `loadProgress` viene chiamato prima di `showSection`.
-                // Potremmo aggiungere un check qui:
-                if (currentElement.checked || (currentElement.dataset.initialValue && currentElement.checked.toString() !== currentElement.dataset.initialValue)) {
-                   // isAlreadyValued = true; // Per ora, animiamo comunque e l'utente lo valuta
-                }
-            } else if (currentElement.tagName === 'SELECT') {
-                if (currentElement.value !== "" && currentElement.selectedIndex !==0) {
-                   // isAlreadyValued = true;
-                }
-            }
-
-            // if (isAlreadyValued) {
-            //     currentIndex++;
-            //     animateNextElement(); // Passa al successivo
-            //     return;
-            // }
-
-
             currentElement.classList.add('animate-me');
-            // currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Opzionale: scrolla all'elemento
 
             const onValueChange = () => {
                 currentElement.classList.remove('animate-me');
-                // Rimuovi il listener specifico
                 currentElement.removeEventListener('change', onValueChange);
                 activeListeners = activeListeners.filter(listener => listener.handler !== onValueChange);
-
-
                 currentIndex++;
-                setTimeout(animateNextElement, 50); // Breve ritardo per distinguere le animazioni
+                setTimeout(animateNextElement, 50);
             };
 
             currentElement.addEventListener('change', onValueChange);
@@ -1105,15 +1088,9 @@
 
 
     function showSection(targetId) {
-        // Prima di cambiare sezione, rimuovi tutte le classi 'animate-me' e i listener associati
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
             el.classList.remove('animate-me');
-            // Sarebbe meglio avere un modo per rimuovere specifici event listener,
-            // ma per ora la rimozione della classe interrompe l'effetto visivo.
-            // La nuova `initSequentialAnimation` gestisce meglio la pulizia dei listener.
         });
-
-
         sections.forEach(s => s.classList.toggle('active', s.id === targetId + 'Section'));
         navButtons.forEach(b => {
             b.classList.toggle('active', b.dataset.target === targetId);
@@ -1121,9 +1098,8 @@
         updateNavButtonColors();
 
         const targetSectionElement = document.getElementById(targetId + 'Section');
-        // Verifica se la sezione target è una delle sezioni della checklist e non il riepilogo
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
-             setTimeout(initSequentialAnimation, 50); // Leggero ritardo per permettere il rendering della sezione
+             setTimeout(initSequentialAnimation, 50);
         } else if (targetId === 'riepilogo') {
             generateSummary();
         }
@@ -1239,39 +1215,51 @@
         }
     }
 
+    async function loadAppContent() { // Funzione per caricare il contenuto dopo il preloader
+        showView('landing');
+        await caricaEPopolaTarghe();
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         const preloader = document.getElementById('preloader');
-        const PRELOADER_FLAG = `${APP_PREFIX}preloaderPlayed_v2`; // Usa un nome versionato per il flag
+        // const PRELOADER_FLAG = `${APP_PREFIX}preloaderPlayed_v2`; // Non più necessario
 
         async function initializeApp() {
-            if (!localStorage.getItem(PRELOADER_FLAG)) {
-                if(preloader) preloader.style.display = 'flex';
-                 // Non nascondere subito, ma dopo caricaEPopolaTarghe
-            } else {
-                if(preloader) preloader.style.display = 'none'; // Nascondi subito se già visto
-            }
+            if (preloader) {
+                preloader.style.display = 'flex';
+                preloader.classList.remove('hidden');
+                preloader.style.opacity = '1';
+                preloader.style.visibility = 'visible';
 
-            showView('landing'); // Imposta la vista iniziale
-            await caricaEPopolaTarghe(); // Attendi il caricamento dei dati
+                const loadingText = preloader.querySelector('.loading-text');
+                if (loadingText) loadingText.textContent = 'AVVIO IN CORSO...';
 
-            if (!localStorage.getItem(PRELOADER_FLAG)) {
-                if(preloader) {
-                    preloader.classList.add('hidden');
-                    preloader.addEventListener('transitionend', () => {
-                        if (preloader.classList.contains('hidden')) {
-                            preloader.style.display = 'none';
-                        }
-                    }, { once: true });
-                }
-                localStorage.setItem(PRELOADER_FLAG, 'true');
+                setTimeout(() => {
+                    if (preloader) {
+                        preloader.classList.add('hidden'); // Attiva la transizione CSS
+                        // La transizione CSS gestirà display: none tramite l'evento 'transitionend'
+                        // o un fallback timeout per sicurezza.
+                        const hidePreloaderOnEnd = () => {
+                            if (preloader.classList.contains('hidden') && preloader.style.opacity === '0') {
+                                preloader.style.display = 'none';
+                            }
+                            preloader.removeEventListener('transitionend', hidePreloaderOnEnd);
+                        };
+                        preloader.addEventListener('transitionend', hidePreloaderOnEnd);
+                        // Fallback se transitionend non si attiva correttamente
+                        setTimeout(() => {
+                           if (preloader.classList.contains('hidden') && preloader.style.opacity === '0') {
+                                preloader.style.display = 'none';
+                           }
+                        }, 750); // Durata transizione + piccolo buffer
+                    }
+                    loadAppContent(); // Carica il contenuto dell'app dopo che il preloader inizia a nascondersi
+                }, 3000); // Il preloader rimane visibile per 3 secondi, poi inizia la transizione di uscita
             } else {
-                 if(preloader && preloader.style.display !== 'none') { // Assicura che sia nascosto
-                    preloader.style.opacity = '0';
-                    preloader.style.visibility = 'hidden';
-                    preloader.style.display = 'none';
-                 }
+                loadAppContent(); // Carica direttamente se il preloader non esiste
             }
         }
+
 
         if (isElectricVehicleCheckbox) {
             isElectricVehicleCheckbox.addEventListener('change', handleElectricVehicleChange);
@@ -1286,6 +1274,41 @@
         if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
         if(saveAndReturnBtn)saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
+
+        // Gestione pulsante Esci
+        if (exitAppBtn) {
+            exitAppBtn.addEventListener('click', () => {
+                const exitCurtain = document.getElementById('exit-curtain');
+                const mainContentWrapper = document.getElementById('mainContentWrapper');
+                const pageHeader = document.getElementById('pageHeaderContainer');
+
+                if (exitCurtain) {
+                    if (mainContentWrapper) mainContentWrapper.style.display = 'none';
+                    if (pageHeader) pageHeader.style.display = 'none';
+                    document.body.style.paddingTop = '0px';
+
+                    exitCurtain.style.display = 'flex';
+                    const exitLoadingText = exitCurtain.querySelector('.loading-text');
+                    if (exitLoadingText) exitLoadingText.textContent = 'CHIUSURA IN CORSO...';
+
+                    const barContainer = exitCurtain.querySelector('.loader-bar-container');
+                    if(barContainer) barContainer.style.display = 'flex'; // Assicura sia visibile
+
+                    setTimeout(() => { // Permetti al display:flex di applicarsi prima della transizione di opacità
+                        exitCurtain.classList.remove('hidden'); // Rimuove hidden per attivare transizione di entrata
+                        exitCurtain.style.opacity = '1';
+                        exitCurtain.style.visibility = 'visible';
+                    }, 20);
+
+
+                    setTimeout(() => { // Dopo 2.5 secondi cambia testo e nasconde barre
+                        if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata. Puoi chiudere questa scheda.';
+                        if(barContainer) barContainer.style.display = 'none';
+                        // Non si può chiudere la tab programmaticamente in modo affidabile.
+                    }, 2500);
+                }
+            });
+        }
     });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
