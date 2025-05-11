@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perizia Veicolo</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUA6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Preloader & Exit Curtain Styles */
         #preloader, #exit-curtain {
@@ -75,6 +74,12 @@
 
 
         /* ... (resto degli stili CSS esistenti, assicurati che non ci siano conflitti) ... */
+        .header-circles { display: flex; justify-content: space-around; align-items: center; width: 100%; padding: 8px 0; box-sizing: border-box; }
+        .circle {
+            width: 1.5cm; height: 1.5cm; background-color: #ffffff;
+            border-radius: 50%; flex-shrink: 0;
+            opacity: 0.8;
+        }
         body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; transition: padding-top 0.3s ease; }
         .content-wrapper { padding: 20px; }
         h1, h2 { text-align: center; color: #ffffff; }
@@ -113,58 +118,6 @@
             padding-bottom: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
-        /* Nuovi stili per i pulsanti dell'header */
-        .header-icon-buttons {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            width: 100%;
-            padding: 5px 10px; /* Ridotto padding verticale */
-            box-sizing: border-box;
-        }
-        .header-btn {
-            background-color: #383838; /* Leggermente più scuro per distinguerli */
-            color: #e0e0e0;
-            border: 1px solid #555;
-            border-radius: 50%; /* Circolari */
-            width: 48px;  /* Dimensione base */
-            height: 48px; /* Dimensione base */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            padding: 0; /* Reset padding per controllo preciso */
-            box-sizing: border-box;
-            text-align: center;
-            font-size: 10px; /* Testo piccolo sotto icona */
-            line-height: 1.2;
-        }
-        .header-btn i {
-            font-size: 18px; /* Dimensione icona */
-            margin-bottom: 2px; /* Spazio tra icona e testo */
-            color: #00aeff; /* Colore icona */
-        }
-        .header-btn .btn-text {
-            display: block;
-            font-size: 0.9em; /* Relativo al font-size del bottone */
-            color: #ccc;
-        }
-        .header-btn:hover {
-            background-color: #4a4a4a;
-            transform: scale(1.05);
-        }
-        .header-btn:active {
-            transform: scale(0.95);
-            background-color: #555;
-        }
-        /* Colori specifici per le icone, se necessario */
-        #exitAppBtn i { color: #dc3545; } /* Rosso per Esci */
-        #headerGalleryBtn i { color: #fd7e14; } /* Arancione per Galleria */
-        #headerPeriziaBtn i { color: #20c997; } /* Verde acqua per Perizia */
-        #headerCameraBtn i { color: #0dcaf0; } /* Ciano per Fotocamera */
-
 
         #navButtons {
             display: flex;
@@ -191,7 +144,7 @@
             flex-wrap: wrap;
             margin-top: 5px;
         }
-        #utilityNavButtons button { /* Stile per i bottoni utility esistenti */
+        #utilityNavButtons button {
             margin: 3px 5px;
         }
 
@@ -282,11 +235,13 @@
         .delete-progress-btn { background-color: #dc3545; border-color: #c82333; color: white; padding: 3px 7px; font-size: 0.8em; line-height: 1; margin-left: 8px; margin-right: 8px; flex-shrink: 0; border-radius: 3px; }
         .delete-progress-btn:hover { background-color: #c82333; border-color: #bd2130; }
 
+        /* Colore NEUTRO/STANDARD per NESSUN SALVATAGGIO */
         .targa-list-item.status-da-vedere { background-color: #54542E !important; }
         .targa-list-item.status-da-vedere:hover { background-color: #666639 !important; }
         .targa-list-item.status-da-vedere label.radio-label-container .targa-col { color: #f0f0f0 !important; }
         .targa-list-item.status-da-vedere .targa-col-posizione input.posizione-input { background-color: #606038; color: #f0f0f0;}
 
+        /* Colore VERDE per TARGA COMPLETATA */
         .targa-list-item.status-visto { background-color: #2E4B35 !important; }
         .targa-list-item.status-visto:hover { background-color: #395c40 !important; }
         .targa-list-item.status-visto label.radio-label-container .targa-col-targa,
@@ -295,11 +250,13 @@
         .targa-list-item.status-visto label.radio-label-container .targa-col-piazzale { color: #a3cca3 !important; }
         .targa-list-item.status-visto .targa-col-posizione input.posizione-input { background-color: #384c3d; color: #d0e0d0; }
 
+        /* Colore ROSSO per TARGA URGENTE */
         .targa-list-item.urgent-item { background-color: #4d3232 !important; border-left: 3px solid #ff6b6b; }
         .targa-list-item.urgent-item:hover { background-color: #5e3f3f !important; }
         .targa-list-item.urgent-item:not(.completed) label.radio-label-container .targa-col { color: #ffc0c0 !important; }
         .targa-list-item.urgent-item:not(.completed) .targa-col-posizione input.posizione-input { background-color: #5a3e3e; color: #ffc0c0; }
 
+        /* Stili per testo e input su targhe COMPLETATE (sia urgenti che non) */
         .targa-list-item.completed label.radio-label-container .targa-col-targa,
         .targa-list-item.completed label.radio-label-container .targa-col-marca,
         .targa-list-item.completed label.radio-label-container .targa-col-modello,
@@ -315,6 +272,22 @@
         .targa-list-item.urgent-item.completed label.radio-label-container .targa-col-modello,
         .targa-list-item.urgent-item.completed label.radio-label-container .targa-col-piazzale { color: #a07c7c !important; }
         .targa-list-item.urgent-item.completed .targa-col-posizione input.posizione-input { background-color: #4a2e2e; color: #a07c7c; }
+
+        /* NUOVO: Stili per SALVATAGGIO PARZIALE (GIALLO) */
+        .targa-list-item.status-parziale {
+            background-color: #ffc107 !important; /* Giallo Bootstrap "warning" */
+        }
+        .targa-list-item.status-parziale:hover {
+            background-color: #e0a800 !important;
+        }
+        .targa-list-item.status-parziale label.radio-label-container .targa-col {
+            color: #212529 !important; /* Testo scuro per sfondo giallo */
+        }
+        .targa-list-item.status-parziale .targa-col-posizione input.posizione-input {
+            background-color: #ffe082; /* Sfondo input leggermente più chiaro */
+            color: #212529;
+            border-color: #ffc107;
+        }
 
         #targheLoadingStatus { text-align: center; padding: 10px; color: #00aeff; }
         #savedTargasListContainer { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #333; border-radius: 4px; margin-bottom: 20px; }
@@ -349,18 +322,25 @@
 
 
         @media (max-width: 768px) {
-            /* ... stili responsive esistenti ... */
-            .header-btn {
-                width: 42px;
-                height: 42px;
-                font-size: 9px;
+            .content-wrapper { margin-top: 0; }
+            .circle { width: 1.2cm; height: 1.2cm; }
+            #navButtons button, .action-button { padding: 8px 10px; font-size: 0.85em; }
+            #procediConPeriziaBtn { padding: 10px 15px; font-size: 1em; }
+
+            #mainPageNavButtons {
+                width: 100%;
+                padding: 5px;
+                box-sizing: border-box;
             }
-            .header-btn i {
-                font-size: 16px;
+             #mainPageNavButtons button {
+                font-size: 0.8em;
+                padding: 6px 8px;
             }
-            #mainPageNavButtons { width: 100%; padding: 5px; box-sizing: border-box;}
-            #mainPageNavButtons button { font-size: 0.8em; padding: 6px 8px;}
-            #utilityNavButtons button { font-size: 0.85em; padding: 8px 10px;}
+            #utilityNavButtons button {
+                font-size: 0.85em;
+                 padding: 8px 10px;
+            }
+
             input[type="text"], input[type="url"], select, textarea { width: 100%; box-sizing: border-box; }
             .table-scroll-wrapper { overflow-x: auto; }
             .targa-list-table-content { min-width: 600px; }
@@ -401,23 +381,8 @@
     </div>
 
     <div id="pageHeaderContainer">
-        <div class="header-icon-buttons">
-            <button id="exitAppBtn" class="header-btn" title="Esci dall'applicazione">
-                <i class="fas fa-sign-out-alt"></i>
-                <span class="btn-text">Esci</span>
-            </button>
-            <button id="headerGalleryBtn" class="header-btn" title="Galleria">
-                <i class="fas fa-images"></i>
-                <span class="btn-text">Galleria</span>
-            </button>
-            <button id="headerPeriziaBtn" class="header-btn" title="Elenco Perizie">
-                <i class="fas fa-clipboard-list"></i>
-                <span class="btn-text">Perizie</span>
-            </button>
-            <button id="headerCameraBtn" class="header-btn" title="Fotocamera">
-                <i class="fas fa-camera"></i>
-                <span class="btn-text">Camera</span>
-            </button>
+        <div class="header-circles">
+            <div class="circle"></div> <div class="circle"></div> <div class="circle"></div> <div class="circle"></div>
         </div>
         <h1 id="mainTitleGlobal">Checklist Perizia Veicolo</h1>
         <div id="navButtons">
@@ -430,6 +395,7 @@
             <div id="utilityNavButtons">
                 <button id="backToListBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe</button>
                 <button id="historyBtn" class="action-button" style="background-color: #17a2b8; border-color: #117a8b;">Salvataggi</button>
+                <button id="exitAppBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Esci</button>
             </div>
         </div>
     </div>
@@ -584,15 +550,16 @@
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
     const procediConPeriziaBtn = document.getElementById('procediConPeriziaBtn');
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
+    const headerCircles = pageHeaderContainer.querySelector('.header-circles');
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons');
     const navButtons = navButtonsContainer.querySelectorAll('#mainPageNavButtons button[data-target]');
     const utilityButtons = navButtonsContainer.querySelectorAll('#utilityNavButtons button');
     const sections = document.querySelectorAll('#checklistContainer .category-section');
     const summaryContent = document.getElementById('summaryContent');
-    const backToListBtn = document.getElementById('backToListBtn');
-    const historyBtn = document.getElementById('historyBtn');
-    const exitAppBtn = document.getElementById('exitAppBtn'); // Pulsante Esci nell'header
+    const backToListBtn = pageHeaderContainer.querySelector('#backToListBtn');
+    const historyBtn = pageHeaderContainer.querySelector('#historyBtn');
+    const exitAppBtn = pageHeaderContainer.querySelector('#exitAppBtn');
     const clearAllProgressBtn = document.getElementById('clearAllProgressBtn');
     const backToLandingFromHistoryBtn = document.getElementById('backToLandingFromHistoryBtn');
     const saveAndReturnBtn = document.getElementById('saveAndReturnBtn');
@@ -605,12 +572,6 @@
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
-    const LAST_SELECTED_PIAZZALE_KEY = `${APP_PREFIX}lastSelectedPiazzale`;
-
-    const headerGalleryBtn = document.getElementById('headerGalleryBtn');
-    const headerPeriziaBtn = document.getElementById('headerPeriziaBtn');
-    const headerCameraBtn = document.getElementById('headerCameraBtn');
-
 
     function handleTrazioneChange() {
         if (!tipoTrazioneSelect || !cavoRapidaSelect || !cavoDomesticaSelect) return;
@@ -622,6 +583,8 @@
             cavoRapidaSelect.value = "";
             cavoDomesticaSelect.value = "";
         }
+        // Forza un aggiornamento dello stato del pulsante di navigazione quando cambia la trazione
+        // perché i campi richiesti potrebbero cambiare.
         updateNavButtonColors();
     }
 
@@ -727,11 +690,11 @@
             alert(`Errore cancellazione dati per ${targa}.`);
         }
         if (typeof popolaTargheFiltrate === 'function') {
-             popolaTargheFiltrate();
+             popolaTargheFiltrate(); // Ripopola la lista per riflettere la cancellazione
         }
         if (targaSelezionataGlobalmente === targa) {
              targaSelezionataGlobalmente = null;
-             if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
+             procediConPeriziaBtn.disabled = true;
         }
     }
 
@@ -784,31 +747,33 @@
     async function handleSavePeriziaAndReturn() { if(!targaSelezionataGlobalmente){alert("No targa attiva.");return;} if(!saveProgress(targaSelezionataGlobalmente)){alert("Salvataggio dati fallito.");return;} if(document.getElementById('riepilogoSection').classList.contains('active')){generateSummary();} try{await generateAndDownloadScreenshot();}catch(e){console.warn("Screenshot fallito, ma dati salvati.");} markTargaAsCompleted(targaSelezionataGlobalmente); updateNavButtonColors(); alert(`Perizia per ${targaSelezionataGlobalmente} salvata, screenshot tentato, completata. Torno all'elenco.`); targaSelezionataGlobalmente=null;showView('landing');}
     function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
 
-    function isInputDefault(inputElement) {
-        if (!inputElement) return true;
-        if (inputElement.type === 'checkbox') return !inputElement.checked;
-        if (inputElement.tagName === 'SELECT') {
-            return inputElement.value === "" || inputElement.selectedIndex === 0;
-        }
-        return true;
-    }
+    function isInputDefault(inputElement) { if (inputElement.type === 'checkbox') return !inputElement.checked; if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0; return true; }
 
+    // MODIFICATA: Ora esclude i campi disabilitati
     function getSectionInputs(sectionElementId) {
         const sectionDiv = document.getElementById(sectionElementId);
         if (!sectionDiv) return [];
+        // Seleziona solo gli input e select che NON sono disabilitati
         return Array.from(sectionDiv.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)'));
     }
 
     function getSectionStatus(sectionElementId, targaData) {
-        const inputs = getSectionInputs(sectionElementId);
+        const inputs = getSectionInputs(sectionElementId); // Questa ora ritorna solo gli input abilitati
+
+        // Se non ci sono input abilitati da controllare (es. tutti i campi opzionali sono disabilitati),
+        // la sezione potrebbe essere considerata 'completed' o 'untouched' a seconda della logica desiderata.
+        // Per ora, se non ci sono input attivi, consideriamola 'completed'.
         if (inputs.length === 0) return 'completed';
+
         let allDefault = true;
         let allNonDefault = true;
         let hasAtLeastOneNonDefault = false;
+
         inputs.forEach(input => {
             let isDefault;
             const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined;
             const currentValue = input.type === 'checkbox' ? input.checked : input.value;
+
             if (input.type === 'checkbox') {
                 isDefault = (savedValue !== undefined ? !savedValue : !currentValue);
             } else { // SELECT
@@ -817,6 +782,7 @@
                     (currentValue === "" || (input.options.length > 0 && currentValue === input.options[0].value))
                 );
             }
+
             if (!isDefault) {
                 allDefault = false;
                 hasAtLeastOneNonDefault = true;
@@ -824,6 +790,7 @@
                 allNonDefault = false;
             }
         });
+
         if (allDefault) return 'untouched';
         if (allNonDefault) return 'completed';
         if (hasAtLeastOneNonDefault) return 'partial';
@@ -833,75 +800,54 @@
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
     function showView(viewName) {
-        if (landingPageSection) landingPageSection.style.display = 'none';
-        if (checklistContainer) checklistContainer.style.display = 'none';
-        if (historyPageSection) historyPageSection.style.display = 'none';
-        const headerIconButtons = document.querySelector('.header-icon-buttons');
-
-
+        landingPageSection.style.display = 'none';
+        checklistContainer.style.display = 'none';
+        historyPageSection.style.display = 'none';
         let bodyPaddingTopValue = '20px';
         if (viewName === 'landing') {
-            if (landingPageSection) landingPageSection.style.display = 'block';
-            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
-            if (headerIconButtons) headerIconButtons.style.display = 'flex';
-            if (navButtonsContainer) navButtonsContainer.style.display = 'none';
-            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
-
+            landingPageSection.style.display = 'block';
+            pageHeaderContainer.classList.add('fixed-header');
+            headerCircles.style.display = 'flex';
+            navButtonsContainer.style.display = 'none';
+            mainTitleGlobal.innerHTML = "Elenco Veicoli";
             const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked');
             if (activeRadio) activeRadio.checked = false;
-            if (procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
-
-            if (sheetFilterDropdown) {
-                const savedPiazzale = localStorage.getItem(LAST_SELECTED_PIAZZALE_KEY);
-                if (savedPiazzale) {
-                    const optionExists = Array.from(sheetFilterDropdown.options).some(opt => opt.value === savedPiazzale);
-                    if (optionExists) {
-                        sheetFilterDropdown.value = savedPiazzale;
-                        console.log('Restored piazzale filter in showView(landing):', savedPiazzale);
-                    } else {
-                        sheetFilterDropdown.value = 'all';
-                        localStorage.removeItem(LAST_SELECTED_PIAZZALE_KEY);
-                    }
-                } else {
-                    sheetFilterDropdown.value = 'all';
-                }
-            }
-
+            procediConPeriziaBtn.disabled = true;
+            if (sheetFilterDropdown) sheetFilterDropdown.value = 'all';
             if (listaTargheCompleta.length > 0 && typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
             }
             targaSelezionataGlobalmente = null;
             updateNavButtonColors();
         } else if (viewName === 'checklist' || viewName === 'history') {
-            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
-            if (headerIconButtons) headerIconButtons.style.display = 'flex';
-            if (navButtonsContainer) navButtonsContainer.style.display = 'flex';
+            pageHeaderContainer.classList.add('fixed-header');
+            headerCircles.style.display = 'flex';
+            navButtonsContainer.style.display = 'flex';
             if (viewName === 'checklist') {
                 if (!targaSelezionataGlobalmente) {
                     alert("Nessuna targa selezionata.");
                     showView('landing');
                     return;
                 }
-                if (checklistContainer) checklistContainer.style.display = 'block';
+                checklistContainer.style.display = 'block';
                 const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
                 let subIdentifier = (veicoloAttuale && (veicoloAttuale.marca || veicoloAttuale.modello))
                     ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
                     : "";
-                if (mainTitleGlobal) mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
-            } else { // history
-                if (historyPageSection) historyPageSection.style.display = 'block';
-                if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
+                mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
+            } else {
+                historyPageSection.style.display = 'block';
+                mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
                 populateSavedTargasList();
             }
             updateNavButtonColors();
-        } else { // Default or unknown view
-            if (pageHeaderContainer) pageHeaderContainer.classList.remove('fixed-header');
-            if (headerIconButtons) headerIconButtons.style.display = 'none';
-            if (navButtonsContainer) navButtonsContainer.style.display = 'none';
-            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
+        } else {
+            pageHeaderContainer.classList.remove('fixed-header');
+            headerCircles.style.display = 'none';
+            navButtonsContainer.style.display = 'none';
+            mainTitleGlobal.innerHTML = "";
         }
-
-        if (pageHeaderContainer && pageHeaderContainer.classList.contains('fixed-header')) {
+        if (pageHeaderContainer.classList.contains('fixed-header')) {
             pageHeaderContainer.style.display = 'block';
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
         } else {
@@ -946,16 +892,8 @@
     }
 
     function handleSheetFilterChange() {
-        const selectedPiazzale = sheetFilterDropdown.value;
-        try {
-            localStorage.setItem(LAST_SELECTED_PIAZZALE_KEY, selectedPiazzale);
-            console.log('Saved last selected piazzale:', selectedPiazzale);
-        } catch (e) {
-            console.error("Error saving last selected piazzale to localStorage:", e);
-        }
-
         popolaTargheFiltrate();
-        if (procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
+        procediConPeriziaBtn.disabled = true;
         const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked');
         if (activeRadio) activeRadio.checked = false;
         targaSelezionataGlobalmente = null;
@@ -975,11 +913,15 @@
         function getItemRank(item) {
             const isUrgent = item.isUrgent;
             const isCompleted = isTargaCompleted(item.targa);
-            if (isUrgent && !isCompleted) return 1;
-            if (!isUrgent && !isCompleted) return 2;
-            if (!isUrgent && isCompleted) return 3;
-            if (isUrgent && isCompleted) return 4;
-            return 5;
+            // Modifica per considerare anche lo stato di salvataggio parziale per l'ordinamento
+            const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
+
+            if (isUrgent && !isCompleted) return 1; // Urgente non completato (Rosso)
+            if (!isUrgent && !isCompleted && hasData) return 2; // Parziale (Giallo)
+            if (!isUrgent && !isCompleted && !hasData) return 3; // Neutro/Da vedere
+            if (!isUrgent && isCompleted) return 4; // Completato (Verde)
+            if (isUrgent && isCompleted) return 5; // Urgente e completato (Rosso con segno di spunta)
+            return 6; // Fallback
         }
         preliminaryFilteredList.sort((a, b) => {
             const rankA = getItemRank(a);
@@ -997,17 +939,25 @@
         filteredList.forEach((item, idx) => {
             const li = document.createElement('div');
             li.classList.add('targa-list-item');
+
+            // ========= INIZIO BLOCCO MODIFICATO PER LA COLORAZIONE =========
             const itemCompleted = isTargaCompleted(item.targa);
-            if (item.isUrgent) {
+            const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`); // Verifica se esistono dati salvati
+
+            if (item.isUrgent) { // Priorità 1: Urgente (Rosso)
                 li.classList.add('urgent-item');
-                if (itemCompleted) li.classList.add('completed');
-            } else {
                 if (itemCompleted) {
-                    li.classList.add('status-visto', 'completed');
-                } else {
-                    li.classList.add('status-da-vedere');
+                    li.classList.add('completed'); // Mantiene lo stile 'urgent' ma con indicatori 'completed'
                 }
+            } else if (itemCompleted) { // Priorità 2: Completato (Verde)
+                li.classList.add('status-visto', 'completed');
+            } else if (hasData) { // Priorità 3: Salvataggio Parziale (Giallo)
+                li.classList.add('status-parziale');
+            } else { // Priorità 4: Nessun Salvataggio (Neutro/Standard - colore di status-da-vedere)
+                li.classList.add('status-da-vedere');
             }
+            // ========= FINE BLOCCO MODIFICATO PER LA COLORAZIONE =========
+
             const rId = `targa_radio_filt_${idx}_${Date.now()}`;
             const rb = document.createElement('input');
             rb.type = 'radio'; rb.name = 'targa_selection_radio'; rb.value = item.targa; rb.id = rId;
@@ -1096,25 +1046,8 @@
                 if (targaListContainer) targaListContainer.innerHTML = '';
                 return;
             }
-            setupSheetFilterDropdown(); // Popola le opzioni del dropdown
-
-            // Applica il piazzale salvato dopo che le opzioni sono state create
-            if (sheetFilterDropdown) {
-                const savedPiazzale = localStorage.getItem(LAST_SELECTED_PIAZZALE_KEY);
-                if (savedPiazzale) {
-                    const optionExists = Array.from(sheetFilterDropdown.options).some(opt => opt.value === savedPiazzale);
-                    if (optionExists) {
-                        sheetFilterDropdown.value = savedPiazzale;
-                        console.log('Restored piazzale filter in caricaEPopolaTarghe:', savedPiazzale);
-                    } else {
-                        sheetFilterDropdown.value = 'all';
-                        localStorage.removeItem(LAST_SELECTED_PIAZZALE_KEY);
-                    }
-                } else {
-                     sheetFilterDropdown.value = 'all';
-                }
-            }
-            popolaTargheFiltrate(); // Popola la lista usando il filtro (potenzialmente ripristinato)
+            setupSheetFilterDropdown();
+            popolaTargheFiltrate();
         } catch(e) {
             console.error("Errore caricamento/popolamento targhe:",e);
             if(targheLoadingStatus) targheLoadingStatus.textContent=`Errore: ${e.message}.`;
@@ -1128,13 +1061,10 @@
     function initSequentialAnimation() {
         const checklistContainerDiv = document.getElementById('checklistContainer');
         if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return;
-
         const activeSection = checklistContainerDiv.querySelector('.category-section.active');
         if (!activeSection) return;
-
         activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me'));
-
-        const allPotentiallyAnimatableElements = Array.from(
+        const elementsToAnimate = Array.from(
             activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)')
         ).filter(el => {
             let current = el;
@@ -1144,26 +1074,7 @@
             }
             return el.offsetParent !== null;
         });
-
-        if (allPotentiallyAnimatableElements.length === 0) {
-            return;
-        }
-
-        let startingIndex = -1;
-        for (let i = 0; i < allPotentiallyAnimatableElements.length; i++) {
-            if (isInputDefault(allPotentiallyAnimatableElements[i])) {
-                startingIndex = i;
-                break;
-            }
-        }
-
-        if (startingIndex === -1) {
-            return;
-        }
-
-        const elementsToAnimate = allPotentiallyAnimatableElements;
-        let currentIndex = startingIndex;
-
+        let currentIndex = 0;
         let activeListeners = [];
         function clearAllActiveAnimationListeners() {
             activeListeners.forEach(({element, type, handler}) => {
@@ -1173,58 +1084,22 @@
             activeListeners = [];
         }
         clearAllActiveAnimationListeners();
-
         function animateNextElement() {
-            if (currentIndex >= elementsToAnimate.length) {
-                clearAllActiveAnimationListeners();
-                return;
-            }
-
+            if (currentIndex >= elementsToAnimate.length) return;
             const currentElement = elementsToAnimate[currentIndex];
-
-            if (!currentElement || currentElement.disabled || !isInputDefault(currentElement)) {
-                currentIndex++;
-                while(currentIndex < elementsToAnimate.length &&
-                      (!isInputDefault(elementsToAnimate[currentIndex]) || elementsToAnimate[currentIndex].disabled) ) {
-                    currentIndex++;
-                }
-                if (currentIndex < elementsToAnimate.length) {
-                     setTimeout(animateNextElement, 0);
-                } else {
-                    clearAllActiveAnimationListeners();
-                }
-                return;
-            }
-
             currentElement.classList.add('animate-me');
-
             const onValueChange = () => {
                 currentElement.classList.remove('animate-me');
                 currentElement.removeEventListener('change', onValueChange);
-                activeListeners = activeListeners.filter(listener => !(listener.element === currentElement && listener.handler === onValueChange));
-
+                activeListeners = activeListeners.filter(listener => listener.handler !== onValueChange);
                 currentIndex++;
-                while (currentIndex < elementsToAnimate.length &&
-                       (!isInputDefault(elementsToAnimate[currentIndex]) || elementsToAnimate[currentIndex].disabled) ) {
-                    currentIndex++;
-                }
-
-                if (currentIndex < elementsToAnimate.length) {
-                    setTimeout(animateNextElement, 50);
-                } else {
-                    clearAllActiveAnimationListeners();
-                }
+                setTimeout(animateNextElement, 50);
             };
-
             currentElement.addEventListener('change', onValueChange);
             activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
         }
-
-        if (currentIndex < elementsToAnimate.length) {
-            animateNextElement();
-        }
+        if (elementsToAnimate.length > 0) animateNextElement();
     }
-
 
     function showSection(targetId) {
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
@@ -1323,8 +1198,8 @@
     }
 
     async function loadAppContent() {
-        showView('landing'); // Questo ora tenterà di ripristinare il filtro
-        await caricaEPopolaTarghe(); // Questo anche, assicurando che le opzioni siano popolate prima del ripristino
+        showView('landing');
+        await caricaEPopolaTarghe();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1347,7 +1222,7 @@
                         }, 700);
                     }
                     loadAppContent();
-                }, 1500);
+                }, 1500); // Tempo avvio dimezzato
             } else {
                 loadAppContent();
             }
@@ -1356,7 +1231,7 @@
         if (tipoTrazioneSelect) {
             tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
         }
-        handleTrazioneChange(); // Chiamata iniziale
+        handleTrazioneChange();
 
         initializeApp();
 
@@ -1367,55 +1242,32 @@
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
 
-        const currentExitAppBtn = document.getElementById('exitAppBtn');
-        if (currentExitAppBtn) {
-            currentExitAppBtn.addEventListener('click', () => {
+        if (exitAppBtn) {
+            exitAppBtn.addEventListener('click', () => {
                 const exitCurtain = document.getElementById('exit-curtain');
                 const mainContentWrapper = document.getElementById('mainContentWrapper');
                 const pageHeader = document.getElementById('pageHeaderContainer');
-
                 if (exitCurtain) {
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none';
                     if (pageHeader) pageHeader.style.display = 'none';
                     document.body.style.paddingTop = '0px';
-
                     exitCurtain.style.display = 'flex';
                     const exitLoadingText = exitCurtain.querySelector('.loading-text');
                     if (exitLoadingText) exitLoadingText.textContent = 'CHIUSURA IN CORSO...';
                     const barContainer = exitCurtain.querySelector('.loader-bar-container');
                     if(barContainer) barContainer.style.display = 'flex';
-
                     setTimeout(() => {
                         exitCurtain.classList.remove('hidden');
                         exitCurtain.style.opacity = '1';
                         exitCurtain.style.visibility = 'visible';
                     }, 20);
-
                     setTimeout(() => {
                         if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata. Puoi chiudere questa scheda.';
                         if(barContainer) barContainer.style.display = 'none';
-
-                        const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
-                        fetch(macrodroidUrl.trim())
-                            .then(response => {
-                                if (!response.ok) {
-                                    console.warn('Macrodroid trigger HTTP request failed:', response.status, response.statusText);
-                                } else {
-                                    console.log('Macrodroid trigger HTTP request successful.');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error sending Macrodroid trigger HTTP request:', error);
-                            });
-                    }, 1250);
+                    }, 2500);
                 }
             });
         }
-
-        if(headerGalleryBtn) headerGalleryBtn.addEventListener('click', () => alert('Funzione Galleria non ancora implementata.'));
-        if(headerPeriziaBtn) headerPeriziaBtn.addEventListener('click', () => showView('landing'));
-        if(headerCameraBtn) headerCameraBtn.addEventListener('click', () => alert('Funzione Fotocamera non ancora implementata.'));
-
     });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
