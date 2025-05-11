@@ -148,14 +148,14 @@
             margin: 3px 5px;
         }
 
-        #navButtons button, .action-button, #procediConPeriziaBtn {
+        #navButtons button, .action-button /*, #procediConPeriziaBtn */ { /* Rimosso procediConPeriziaBtn dagli stili generici dei bottoni */
              padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-size: 0.9em;
         }
-        #procediConPeriziaBtn { display: block; margin: 15px auto; padding: 12px 25px; font-size: 1.1em; }
+        /* #procediConPeriziaBtn { display: block; margin: 15px auto; padding: 12px 25px; font-size: 1.1em; } */ /* Rimosso */
         .save-and-next-btn { background-color: #0069d9 !important; border-color: #005cbf !important; }
         .save-and-next-btn:hover { background-color: #0056b3 !important; border-color: #004085 !important; }
-        #navButtons button:hover, .action-button:hover, #procediConPeriziaBtn:hover { background-color: #0056b3; border-color: #004085; }
-        #procediConPeriziaBtn:disabled { background-color: #555; border-color: #444; cursor: not-allowed; }
+        #navButtons button:hover, .action-button:hover /*, #procediConPeriziaBtn:hover */ { background-color: #0056b3; border-color: #004085; }
+        /* #procediConPeriziaBtn:disabled { background-color: #555; border-color: #444; cursor: not-allowed; } */ /* Rimosso */
 
         @keyframes activeButtonGlow {
             0% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
@@ -194,21 +194,21 @@
 
         .table-scroll-wrapper { overflow-x: auto; width: 100%; margin-bottom: 10px; border: 1px solid #444; border-radius: 4px; }
         .targa-list-table-content { min-width: 650px; }
-        .targa-list-header { display: flex; font-weight: bold; padding: 0; border-bottom: 2px solid #777; color: #ddd; background-color: #3a3a3a; }
-        .targa-list-header .targa-col-radio-spacer { flex-basis: 45px; flex-shrink: 0; padding: 6px 8px; border-right: 1px solid #555; }
+        .targa-list-header { display: flex; font-weight: bold; padding: 0 10px 0 10px; border-bottom: 2px solid #777; color: #ddd; background-color: #3a3a3a; }
+        /* .targa-list-header .targa-col-radio-spacer { flex-basis: 45px; flex-shrink: 0; padding: 6px 8px; border-right: 1px solid #555; } */ /* Rimosso */
         .targa-list-header .targa-col { padding: 6px 8px; border-right: 1px solid #555; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1;}
         .targa-list-header .targa-col:last-child { border-right: none; }
         .targa-list-header .targa-col-actions { flex-basis: 60px; text-align: center; flex-grow: 0; }
 
         #targaListContainer { margin-top: 0; max-height: 350px; overflow-y: auto; overflow-x: visible; padding: 0; }
-        .targa-list-item { display: flex; align-items: center; border-bottom: 1px solid #444; }
+        .targa-list-item { display: flex; align-items: center; border-bottom: 1px solid #444; padding: 0 10px 0 10px; } /* Aggiunto padding laterale */
         .targa-list-item:last-child { border-bottom: none; }
-        .targa-list-item input[type="radio"] { margin: 0 0 0 10px; padding: 10px 0px 10px 0px; border-right: 1px solid #444; margin-right:0; padding-right:10px; flex-shrink: 0; min-width: 35px; box-sizing: content-box; }
+        /* .targa-list-item input[type="radio"] { margin: 0 0 0 10px; padding: 10px 0px 10px 0px; border-right: 1px solid #444; margin-right:0; padding-right:10px; flex-shrink: 0; min-width: 35px; box-sizing: content-box; } */ /* Rimosso */
 
-        label.radio-label-container {
+        /* label.radio-label-container { // Rimosso o non più rilevante
             display: flex; flex-grow: 1; cursor: pointer; color: #f0f0f0; padding: 0;
             min-width: calc(100% - 45px - 60px); align-items: center;
-        }
+        } */
         .targa-list-item .targa-col {
             padding: 8px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             border-right: 1px solid #444; text-align: left; flex-grow: 1; display: flex; align-items: center;
@@ -216,11 +216,22 @@
         .targa-list-item .targa-col:last-child { border-right: none; }
 
         .targa-col-targa    { flex-basis: 15%; min-width: 80px;}
+        .targa-col-targa.clickable-targa { /* Stile per targa cliccabile */
+            cursor: pointer;
+            color: #8ab4f8; /* Blu chiaro per indicare interattività */
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .targa-list-item:hover .targa-col-targa.clickable-targa {
+            color: #a1c5ff; /* Più chiaro su hover */
+            text-decoration: underline;
+        }
+
         .targa-col-posizione{ flex-basis: 15%; min-width: 70px; padding: 4px !important; }
         .targa-col-marca    { flex-basis: 20%; min-width: 100px;}
         .targa-col-modello  { flex-basis: 25%; min-width: 110px;}
         .targa-col-piazzale { flex-basis: 20%; min-width: 80px;}
-        .targa-col-actions  { flex-basis: 60px; flex-grow: 0; }
+        .targa-col-actions  { flex-basis: 60px; flex-grow: 0; text-align: center; /* Assicura allineamento del bottone X */ }
 
         .targa-col-posizione input.posizione-input {
             width: 100%; padding: 6px 4px; margin: 0; box-sizing: border-box;
@@ -232,7 +243,7 @@
             background-color: #484848; border-color: #777; outline: none;
         }
 
-        .delete-progress-btn { background-color: #dc3545; border-color: #c82333; color: white; padding: 3px 7px; font-size: 0.8em; line-height: 1; margin-left: 8px; margin-right: 8px; flex-shrink: 0; border-radius: 3px; }
+        .delete-progress-btn { background-color: #dc3545; border-color: #c82333; color: white; padding: 3px 7px; font-size: 0.8em; line-height: 1; /* margin-left: 8px; margin-right: 8px; Rimosso, gestito da flex-grow:0 e text-align su targa-col-actions */ flex-shrink: 0; border-radius: 3px; }
         .delete-progress-btn:hover { background-color: #c82333; border-color: #bd2130; }
 
         /* Colore GRIGIO per NESSUN SALVATAGGIO / NESSUNA PRIORITA' / NON COMPLETATO (Neutro) */
@@ -242,8 +253,14 @@
         .targa-list-item.status-da-vedere:hover {
             background-color: #454545 !important; /* Grigio leggermente più chiaro per hover */
         }
-        .targa-list-item.status-da-vedere label.radio-label-container .targa-col {
-            color: #f0f0f0 !important; /* Testo chiaro standard, leggibile su sfondo scuro */
+        .targa-list-item.status-da-vedere .targa-col { /* Testo per tutte le colonne in stato "da-vedere" */
+            color: #f0f0f0 !important;
+        }
+        .targa-list-item.status-da-vedere .targa-col-targa.clickable-targa { /* Sovrascrive il colore per la targa cliccabile */
+             color: #8ab4f8 !important;
+        }
+        .targa-list-item.status-da-vedere:hover .targa-col-targa.clickable-targa {
+            color: #a1c5ff !important;
         }
         .targa-list-item.status-da-vedere .targa-col-posizione input.posizione-input {
             background-color: #4f4f4f; /* Sfondo input coordinato */
@@ -255,33 +272,40 @@
         /* Colore VERDE per TARGA COMPLETATA */
         .targa-list-item.status-visto { background-color: #2E4B35 !important; }
         .targa-list-item.status-visto:hover { background-color: #395c40 !important; }
-        .targa-list-item.status-visto label.radio-label-container .targa-col-targa,
-        .targa-list-item.status-visto label.radio-label-container .targa-col-marca,
-        .targa-list-item.status-visto label.radio-label-container .targa-col-modello,
-        .targa-list-item.status-visto label.radio-label-container .targa-col-piazzale { color: #a3cca3 !important; }
+        .targa-list-item.status-visto .targa-col-targa,
+        .targa-list-item.status-visto .targa-col-marca,
+        .targa-list-item.status-visto .targa-col-modello,
+        .targa-list-item.status-visto .targa-col-piazzale { color: #a3cca3 !important; }
+        .targa-list-item.status-visto .targa-col-targa.clickable-targa { color: #81c784 !important; } /* Targa cliccabile verde più brillante */
+        .targa-list-item.status-visto:hover .targa-col-targa.clickable-targa { color: #9ccc65 !important; }
+
         .targa-list-item.status-visto .targa-col-posizione input.posizione-input { background-color: #384c3d; color: #d0e0d0; }
 
         /* Colore ROSSO per TARGA URGENTE */
         .targa-list-item.urgent-item { background-color: #4d3232 !important; border-left: 3px solid #ff6b6b; }
         .targa-list-item.urgent-item:hover { background-color: #5e3f3f !important; }
-        .targa-list-item.urgent-item:not(.completed) label.radio-label-container .targa-col { color: #ffc0c0 !important; }
+        .targa-list-item.urgent-item:not(.completed) .targa-col { color: #ffc0c0 !important; }
+        .targa-list-item.urgent-item:not(.completed) .targa-col-targa.clickable-targa { color: #ff8a80 !important; } /* Targa cliccabile rossa più brillante */
+        .targa-list-item.urgent-item:not(.completed):hover .targa-col-targa.clickable-targa { color: #ff5252 !important; }
         .targa-list-item.urgent-item:not(.completed) .targa-col-posizione input.posizione-input { background-color: #5a3e3e; color: #ffc0c0; }
 
         /* Stili per testo e input su targhe COMPLETATE (sia urgenti che non) */
-        .targa-list-item.completed label.radio-label-container .targa-col-targa,
-        .targa-list-item.completed label.radio-label-container .targa-col-marca,
-        .targa-list-item.completed label.radio-label-container .targa-col-modello,
-        .targa-list-item.completed label.radio-label-container .targa-col-piazzale { color: #888 !important; }
+        .targa-list-item.completed .targa-col-targa,
+        .targa-list-item.completed .targa-col-marca,
+        .targa-list-item.completed .targa-col-modello,
+        .targa-list-item.completed .targa-col-piazzale { color: #888 !important; }
 
-        .targa-list-item.status-visto.completed label.radio-label-container .targa-col-targa,
-        .targa-list-item.status-visto.completed label.radio-label-container .targa-col-marca,
-        .targa-list-item.status-visto.completed label.radio-label-container .targa-col-modello,
-        .targa-list-item.status-visto.completed label.radio-label-container .targa-col-piazzale { color: #a3cca3 !important; }
+        .targa-list-item.status-visto.completed .targa-col-targa,
+        .targa-list-item.status-visto.completed .targa-col-marca,
+        .targa-list-item.status-visto.completed .targa-col-modello,
+        .targa-list-item.status-visto.completed .targa-col-piazzale { color: #a3cca3 !important; }
+        .targa-list-item.status-visto.completed .targa-col-targa.clickable-targa { color: #81c784 !important; }
 
-        .targa-list-item.urgent-item.completed label.radio-label-container .targa-col-targa,
-        .targa-list-item.urgent-item.completed label.radio-label-container .targa-col-marca,
-        .targa-list-item.urgent-item.completed label.radio-label-container .targa-col-modello,
-        .targa-list-item.urgent-item.completed label.radio-label-container .targa-col-piazzale { color: #a07c7c !important; }
+        .targa-list-item.urgent-item.completed .targa-col-targa,
+        .targa-list-item.urgent-item.completed .targa-col-marca,
+        .targa-list-item.urgent-item.completed .targa-col-modello,
+        .targa-list-item.urgent-item.completed .targa-col-piazzale { color: #a07c7c !important; }
+        .targa-list-item.urgent-item.completed .targa-col-targa.clickable-targa { color: #ff8a80 !important; }
         .targa-list-item.urgent-item.completed .targa-col-posizione input.posizione-input { background-color: #4a2e2e; color: #a07c7c; }
 
         /* Stili per SALVATAGGIO PARZIALE (GIALLO) */
@@ -291,8 +315,14 @@
         .targa-list-item.status-parziale:hover {
             background-color: #e0a800 !important;
         }
-        .targa-list-item.status-parziale label.radio-label-container .targa-col {
+        .targa-list-item.status-parziale .targa-col { /* Testo per tutte le colonne in stato parziale */
             color: #212529 !important; /* Testo scuro per sfondo giallo */
+        }
+        .targa-list-item.status-parziale .targa-col-targa.clickable-targa { /* Sovrascrive per la targa cliccabile, se necessario un colore diverso dal testo generale */
+             color: #b8860b !important; /* Un giallo/ocra più scuro per il link targa */
+        }
+         .targa-list-item.status-parziale:hover .targa-col-targa.clickable-targa {
+            color: #8B4513 !important; /* Ancora più scuro su hover */
         }
         .targa-list-item.status-parziale .targa-col-posizione input.posizione-input {
             background-color: #ffe082; /* Sfondo input leggermente più chiaro */
@@ -336,7 +366,7 @@
             .content-wrapper { margin-top: 0; }
             .circle { width: 1.2cm; height: 1.2cm; }
             #navButtons button, .action-button { padding: 8px 10px; font-size: 0.85em; }
-            #procediConPeriziaBtn { padding: 10px 15px; font-size: 1em; }
+            /* #procediConPeriziaBtn { padding: 10px 15px; font-size: 1em; } */ /* Rimosso */
 
             #mainPageNavButtons {
                 width: 100%;
@@ -354,13 +384,13 @@
 
             input[type="text"], input[type="url"], select, textarea { width: 100%; box-sizing: border-box; }
             .table-scroll-wrapper { overflow-x: auto; }
-            .targa-list-table-content { min-width: 600px; }
+            .targa-list-table-content { min-width: 600px; } /* Potrebbe necessitare aggiustamento dopo rimozione colonna radio */
             .targa-list-header { display: flex !important; }
             .targa-list-header .targa-col, .targa-list-item .targa-col { padding: 6px 5px; }
-            .targa-list-header .targa-col-radio-spacer { flex-basis: 35px; padding: 6px 5px; }
-            .targa-list-item input[type="radio"] { min-width: 25px; padding-right: 5px; }
+            /* .targa-list-header .targa-col-radio-spacer { flex-basis: 35px; padding: 6px 5px; } */ /* Rimosso */
+            /* .targa-list-item input[type="radio"] { min-width: 25px; padding-right: 5px; } */ /* Rimosso */
             .delete-progress-btn { padding: 5px 8px; }
-            label.radio-label-container { min-width: calc(100% - 35px - 50px); }
+            /* label.radio-label-container { min-width: calc(100% - 35px - 50px); } */ /* Rimosso o non più rilevante */
             .targa-col-targa    { min-width: 70px;}
             .targa-col-posizione{ min-width: 60px;}
             .targa-col-marca    { min-width: 80px;}
@@ -422,13 +452,10 @@
                 </select>
             </div>
 
-            <button id="procediConPeriziaBtn" disabled>Procedi alla Perizia</button>
-
             <div id="targheLoadingStatus">Caricamento targhe in corso...</div>
             <div class="table-scroll-wrapper">
                 <div class="targa-list-table-content">
                     <div class="targa-list-header">
-                        <div class="targa-col-radio-spacer"></div>
                         <span class="targa-col targa-col-targa">Targa</span>
                         <span class="targa-col targa-col-posizione">Posizione</span>
                         <span class="targa-col targa-col-marca">Marca</span>
@@ -559,7 +586,7 @@
     const targaListContainer = document.getElementById('targaListContainer');
     const savedTargasListContainer = document.getElementById('savedTargasListContainer');
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
-    const procediConPeriziaBtn = document.getElementById('procediConPeriziaBtn');
+    // const procediConPeriziaBtn = document.getElementById('procediConPeriziaBtn'); // RIMOSSO
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
     const headerCircles = pageHeaderContainer.querySelector('.header-circles');
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
@@ -703,7 +730,7 @@
         }
         if (targaSelezionataGlobalmente === targa) {
              targaSelezionataGlobalmente = null;
-             if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
+             // if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true; // RIMOSSO
         }
     }
 
@@ -819,9 +846,9 @@
             headerCircles.style.display = 'flex';
             navButtonsContainer.style.display = 'none';
             mainTitleGlobal.innerHTML = "Elenco Veicoli";
-            const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked');
-            if (activeRadio) activeRadio.checked = false;
-            if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
+            // const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked'); // RIMOSSO
+            // if (activeRadio) activeRadio.checked = false; // RIMOSSO
+            // if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true; // RIMOSSO
 
             if (listaTargheCompleta.length > 0 && typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
@@ -915,17 +942,17 @@
             localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value);
         }
         popolaTargheFiltrate();
-        if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
-        const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked');
-        if (activeRadio) activeRadio.checked = false;
-        targaSelezionataGlobalmente = null;
+        // if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true; // RIMOSSO
+        // const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked'); // RIMOSSO
+        // if (activeRadio) activeRadio.checked = false; // RIMOSSO
+        targaSelezionataGlobalmente = null; // Corretto: deseleziona la targa logica quando il filtro cambia
     }
 
     function popolaTargheFiltrate() {
         const tEl = document.getElementById('targaListContainer');
         if (!tEl) return;
         tEl.innerHTML = '';
-        if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
+        // if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true; // RIMOSSO
 
         const selectedSource = sheetFilterDropdown ? sheetFilterDropdown.value : 'all';
         let preliminaryFilteredList = selectedSource === 'all'
@@ -977,15 +1004,37 @@
                 li.classList.add('status-da-vedere');
             }
 
-            const rId = `targa_radio_filt_${idx}_${Date.now()}`;
-            const rb = document.createElement('input');
-            rb.type = 'radio'; rb.name = 'targa_selection_radio'; rb.value = item.targa; rb.id = rId;
-            li.appendChild(rb);
-            const lab = document.createElement('label');
-            lab.htmlFor = rId; lab.classList.add('radio-label-container');
+            // const rId = `targa_radio_filt_${idx}_${Date.now()}`; // RIMOSSO
+            // const rb = document.createElement('input'); // RIMOSSO
+            // rb.type = 'radio'; rb.name = 'targa_selection_radio'; rb.value = item.targa; rb.id = rId; // RIMOSSO
+            // li.appendChild(rb); // RIMOSSO
+
+            // const lab = document.createElement('label'); // RIMOSSO
+            // lab.htmlFor = rId; // RIMOSSO
+            // lab.classList.add('radio-label-container'); // RIMOSSO
+
             const targaCol = document.createElement('span');
-            targaCol.classList.add('targa-col', 'targa-col-targa'); targaCol.textContent = item.targa || 'N/D';
-            lab.appendChild(targaCol);
+            targaCol.classList.add('targa-col', 'targa-col-targa', 'clickable-targa');
+            targaCol.textContent = item.targa || 'N/D';
+            targaCol.dataset.targaValue = item.targa;
+
+            targaCol.addEventListener('click', function() {
+                const selectedTarga = this.dataset.targaValue;
+                if (selectedTarga) {
+                    targaSelezionataGlobalmente = selectedTarga;
+                    console.log(`Targa ${targaSelezionataGlobalmente} selezionata per perizia.`);
+                    showView('checklist');
+                    loadProgress(targaSelezionataGlobalmente);
+                    const firstNav = Array.from(navButtons).find(b => b.dataset.target && b.id !== 'backToListBtn' && b.id !== 'historyBtn' && b.id !== 'exitAppBtn');
+                    if (firstNav) {
+                        showSection(firstNav.dataset.target);
+                    } else if (navButtons.length > 0 && navButtons[0].dataset.target) {
+                        showSection(navButtons[0].dataset.target);
+                    }
+                }
+            });
+            li.appendChild(targaCol); // Aggiunto targaCol direttamente a li
+
             const posizioneCol = document.createElement('span');
             posizioneCol.classList.add('targa-col', 'targa-col-posizione');
             const posizioneInput = document.createElement('input');
@@ -1006,17 +1055,24 @@
             });
             posizioneInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { event.preventDefault(); this.blur(); }});
             posizioneCol.appendChild(posizioneInput);
-            lab.appendChild(posizioneCol);
+            li.appendChild(posizioneCol); // Aggiunto posizioneCol direttamente a li
+
             const marcaCol = document.createElement('span');
             marcaCol.classList.add('targa-col', 'targa-col-marca'); marcaCol.textContent = item.marca || 'N/D';
-            lab.appendChild(marcaCol);
+            li.appendChild(marcaCol); // Aggiunto marcaCol direttamente a li
+
             const modelloCol = document.createElement('span');
             modelloCol.classList.add('targa-col', 'targa-col-modello'); modelloCol.textContent = item.modello || 'N/D';
-            lab.appendChild(modelloCol);
+            li.appendChild(modelloCol); // Aggiunto modelloCol direttamente a li
+
             const piazzaleCol = document.createElement('span');
             piazzaleCol.classList.add('targa-col', 'targa-col-piazzale'); piazzaleCol.textContent = item.piazzale || 'N/D';
-            lab.appendChild(piazzaleCol);
-            li.appendChild(lab);
+            li.appendChild(piazzaleCol); // Aggiunto piazzaleCol direttamente a li
+
+            // Azioni (bottone X)
+            const actionsCol = document.createElement('span'); // Contenitore per il bottone X
+            actionsCol.classList.add('targa-col', 'targa-col-actions');
+
             const delB = document.createElement('button');
             delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = item.targa;
             delB.title = `Cancella progressi per ${item.targa}`; delB.textContent = 'X';
@@ -1026,23 +1082,20 @@
                     deleteProgressForTarga(tDel);
                 }
             });
-            li.appendChild(delB);
+            actionsCol.appendChild(delB);
+            li.appendChild(actionsCol);
+
             tEl.appendChild(li);
         });
-        document.querySelectorAll('input[name="targa_selection_radio"]').forEach(r => {
-            r.addEventListener('change', function() {
-                if (this.checked) {
-                    targaSelezionataGlobalmente = this.value;
-                    if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = false;
-                }
-            });
-        });
-        if(targheLoadingStatus) targheLoadingStatus.textContent = "Seleziona targa dall'elenco:";
+        // Rimosso il blocco di event listener per i radio button
+        // document.querySelectorAll('input[name="targa_selection_radio"]').forEach(r => { ... });
+
+        if(targheLoadingStatus) targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
     }
 
     async function caricaEPopolaTarghe() {
         if(targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento...";
-        if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
+        // if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true; // RIMOSSO
         try {
             const r=await fetch(GOOGLE_SHEET_CSV_URL);
             if(!r.ok){let e=`HTTP ${r.status}.`;if(r.status===0)e="Rete/CORS.";else if(r.status===404)e="CSV(404).";else if(r.status===403)e="Accesso(403).";throw new Error(e);}
@@ -1075,7 +1128,8 @@
         }
     }
 
-    if(procediConPeriziaBtn) procediConPeriziaBtn.addEventListener('click', () => { if(targaSelezionataGlobalmente){ showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstNav = Array.from(navButtons).find(b=>b.dataset.target && b.id!=='backToListBtn' && b.id!=='historyBtn' && b.id!=='exitAppBtn'); if(firstNav)showSection(firstNav.dataset.target); else if(navButtons.length>0&&navButtons[0].dataset.target)showSection(navButtons[0].dataset.target);} else alert("Seleziona targa.");});
+    // Rimosso l'event listener per procediConPeriziaBtn
+    // if(procediConPeriziaBtn) procediConPeriziaBtn.addEventListener('click', () => { ... });
 
     function initSequentialAnimation() {
         const checklistContainerDiv = document.getElementById('checklistContainer');
