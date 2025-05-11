@@ -563,8 +563,6 @@
             cavoRapidaSelect.value = "";
             cavoDomesticaSelect.value = "";
         }
-        // Forza un aggiornamento dello stato del pulsante di navigazione quando cambia la trazione
-        // perché i campi richiesti potrebbero cambiare.
         updateNavButtonColors();
     }
 
@@ -729,31 +727,22 @@
 
     function isInputDefault(inputElement) { if (inputElement.type === 'checkbox') return !inputElement.checked; if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0; return true; }
 
-    // MODIFICATA: Ora esclude i campi disabilitati
     function getSectionInputs(sectionElementId) {
         const sectionDiv = document.getElementById(sectionElementId);
         if (!sectionDiv) return [];
-        // Seleziona solo gli input e select che NON sono disabilitati
         return Array.from(sectionDiv.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)'));
     }
 
     function getSectionStatus(sectionElementId, targaData) {
-        const inputs = getSectionInputs(sectionElementId); // Questa ora ritorna solo gli input abilitati
-
-        // Se non ci sono input abilitati da controllare (es. tutti i campi opzionali sono disabilitati),
-        // la sezione potrebbe essere considerata 'completed' o 'untouched' a seconda della logica desiderata.
-        // Per ora, se non ci sono input attivi, consideriamola 'completed'.
+        const inputs = getSectionInputs(sectionElementId);
         if (inputs.length === 0) return 'completed';
-
         let allDefault = true;
         let allNonDefault = true;
         let hasAtLeastOneNonDefault = false;
-
         inputs.forEach(input => {
             let isDefault;
             const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined;
             const currentValue = input.type === 'checkbox' ? input.checked : input.value;
-
             if (input.type === 'checkbox') {
                 isDefault = (savedValue !== undefined ? !savedValue : !currentValue);
             } else { // SELECT
@@ -762,7 +751,6 @@
                     (currentValue === "" || (input.options.length > 0 && currentValue === input.options[0].value))
                 );
             }
-
             if (!isDefault) {
                 allDefault = false;
                 hasAtLeastOneNonDefault = true;
@@ -770,7 +758,6 @@
                 allNonDefault = false;
             }
         });
-
         if (allDefault) return 'untouched';
         if (allNonDefault) return 'completed';
         if (hasAtLeastOneNonDefault) return 'partial';
@@ -1215,24 +1202,44 @@
                 const exitCurtain = document.getElementById('exit-curtain');
                 const mainContentWrapper = document.getElementById('mainContentWrapper');
                 const pageHeader = document.getElementById('pageHeaderContainer');
+
                 if (exitCurtain) {
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none';
                     if (pageHeader) pageHeader.style.display = 'none';
                     document.body.style.paddingTop = '0px';
+
                     exitCurtain.style.display = 'flex';
                     const exitLoadingText = exitCurtain.querySelector('.loading-text');
                     if (exitLoadingText) exitLoadingText.textContent = 'CHIUSURA IN CORSO...';
                     const barContainer = exitCurtain.querySelector('.loader-bar-container');
                     if(barContainer) barContainer.style.display = 'flex';
-                    setTimeout(() => {
+
+                    setTimeout(() => { // Permetti al display:flex di applicarsi prima della transizione di opacità
                         exitCurtain.classList.remove('hidden');
                         exitCurtain.style.opacity = '1';
                         exitCurtain.style.visibility = 'visible';
                     }, 20);
+
+
+                    // Timeout per la durata dell'animazione "CHIUSURA IN CORSO..." (dimezzata)
                     setTimeout(() => {
                         if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata. Puoi chiudere questa scheda.';
-                        if(barContainer) barContainer.style.display = 'none';
-                    }, 2500);
+                        if(barContainer) barContainer.style.display = 'none'; // Nascondi le barre
+
+                        // Trigger Macrodroid Webhook DOPO che l'animazione è terminata e il testo è cambiato
+                        const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
+                        fetch(macrodroidUrl.trim())
+                            .then(response => {
+                                if (!response.ok) {
+                                    console.warn('Macrodroid trigger HTTP request failed:', response.status, response.statusText);
+                                } else {
+                                    console.log('Macrodroid trigger HTTP request successful.');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error sending Macrodroid trigger HTTP request:', error);
+                            });
+                    }, 1250); // DURATA ANIMAZIONE USCITA DIMEZZATA (era 2500ms)
                 }
             });
         }
