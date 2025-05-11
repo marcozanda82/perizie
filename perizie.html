@@ -730,7 +730,6 @@
         }
         if (targaSelezionataGlobalmente === targa) {
              targaSelezionataGlobalmente = null;
-             // if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true; // RIMOSSO
         }
     }
 
@@ -942,17 +941,13 @@
             localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value);
         }
         popolaTargheFiltrate();
-        // if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true; // RIMOSSO
-        // const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked'); // RIMOSSO
-        // if (activeRadio) activeRadio.checked = false; // RIMOSSO
-        targaSelezionataGlobalmente = null; // Corretto: deseleziona la targa logica quando il filtro cambia
+        targaSelezionataGlobalmente = null;
     }
 
     function popolaTargheFiltrate() {
         const tEl = document.getElementById('targaListContainer');
         if (!tEl) return;
         tEl.innerHTML = '';
-        // if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true; // RIMOSSO
 
         const selectedSource = sheetFilterDropdown ? sheetFilterDropdown.value : 'all';
         let preliminaryFilteredList = selectedSource === 'all'
@@ -1004,15 +999,6 @@
                 li.classList.add('status-da-vedere');
             }
 
-            // const rId = `targa_radio_filt_${idx}_${Date.now()}`; // RIMOSSO
-            // const rb = document.createElement('input'); // RIMOSSO
-            // rb.type = 'radio'; rb.name = 'targa_selection_radio'; rb.value = item.targa; rb.id = rId; // RIMOSSO
-            // li.appendChild(rb); // RIMOSSO
-
-            // const lab = document.createElement('label'); // RIMOSSO
-            // lab.htmlFor = rId; // RIMOSSO
-            // lab.classList.add('radio-label-container'); // RIMOSSO
-
             const targaCol = document.createElement('span');
             targaCol.classList.add('targa-col', 'targa-col-targa', 'clickable-targa');
             targaCol.textContent = item.targa || 'N/D';
@@ -1033,7 +1019,7 @@
                     }
                 }
             });
-            li.appendChild(targaCol); // Aggiunto targaCol direttamente a li
+            li.appendChild(targaCol);
 
             const posizioneCol = document.createElement('span');
             posizioneCol.classList.add('targa-col', 'targa-col-posizione');
@@ -1055,24 +1041,22 @@
             });
             posizioneInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { event.preventDefault(); this.blur(); }});
             posizioneCol.appendChild(posizioneInput);
-            li.appendChild(posizioneCol); // Aggiunto posizioneCol direttamente a li
+            li.appendChild(posizioneCol);
 
             const marcaCol = document.createElement('span');
             marcaCol.classList.add('targa-col', 'targa-col-marca'); marcaCol.textContent = item.marca || 'N/D';
-            li.appendChild(marcaCol); // Aggiunto marcaCol direttamente a li
+            li.appendChild(marcaCol);
 
             const modelloCol = document.createElement('span');
             modelloCol.classList.add('targa-col', 'targa-col-modello'); modelloCol.textContent = item.modello || 'N/D';
-            li.appendChild(modelloCol); // Aggiunto modelloCol direttamente a li
+            li.appendChild(modelloCol);
 
             const piazzaleCol = document.createElement('span');
             piazzaleCol.classList.add('targa-col', 'targa-col-piazzale'); piazzaleCol.textContent = item.piazzale || 'N/D';
-            li.appendChild(piazzaleCol); // Aggiunto piazzaleCol direttamente a li
+            li.appendChild(piazzaleCol);
 
-            // Azioni (bottone X)
-            const actionsCol = document.createElement('span'); // Contenitore per il bottone X
+            const actionsCol = document.createElement('span');
             actionsCol.classList.add('targa-col', 'targa-col-actions');
-
             const delB = document.createElement('button');
             delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = item.targa;
             delB.title = `Cancella progressi per ${item.targa}`; delB.textContent = 'X';
@@ -1087,15 +1071,12 @@
 
             tEl.appendChild(li);
         });
-        // Rimosso il blocco di event listener per i radio button
-        // document.querySelectorAll('input[name="targa_selection_radio"]').forEach(r => { ... });
 
         if(targheLoadingStatus) targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
     }
 
     async function caricaEPopolaTarghe() {
         if(targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento...";
-        // if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true; // RIMOSSO
         try {
             const r=await fetch(GOOGLE_SHEET_CSV_URL);
             if(!r.ok){let e=`HTTP ${r.status}.`;if(r.status===0)e="Rete/CORS.";else if(r.status===404)e="CSV(404).";else if(r.status===403)e="Accesso(403).";throw new Error(e);}
@@ -1127,9 +1108,6 @@
             if (targaListContainer) targaListContainer.innerHTML = '';
         }
     }
-
-    // Rimosso l'event listener per procediConPeriziaBtn
-    // if(procediConPeriziaBtn) procediConPeriziaBtn.addEventListener('click', () => { ... });
 
     function initSequentialAnimation() {
         const checklistContainerDiv = document.getElementById('checklistContainer');
@@ -1390,7 +1368,7 @@
                             .then(response => console.log('Macrodroid trigger request sent.'))
                             .catch(error => console.error('Error sending Macrodroid trigger:', error));
 
-                        if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata. Puoi chiudere questa scheda.';
+                        if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata.'; // MODIFICATO
                         if (barContainer) barContainer.style.display = 'none';
                     }, 1000);
                 }
