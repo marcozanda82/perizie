@@ -235,7 +235,7 @@
         .delete-progress-btn { background-color: #dc3545; border-color: #c82333; color: white; padding: 3px 7px; font-size: 0.8em; line-height: 1; margin-left: 8px; margin-right: 8px; flex-shrink: 0; border-radius: 3px; }
         .delete-progress-btn:hover { background-color: #c82333; border-color: #bd2130; }
 
-        /* MODIFICATO: Colore GRIGIO per NESSUN SALVATAGGIO / NESSUNA PRIORITA' / NON COMPLETATO (Neutro) */
+        /* Colore GRIGIO per NESSUN SALVATAGGIO / NESSUNA PRIORITA' / NON COMPLETATO (Neutro) */
         .targa-list-item.status-da-vedere {
             background-color: #383838 !important; /* Grigio scuro neutro */
         }
@@ -1142,9 +1142,8 @@
                 } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {
                     processChange = true;
                 } else if (event.type === 'blur' && currentElement.tagName === 'SELECT' && !isInputDefault(currentElement)) {
-                     processChange = true; // Per i select, processa su blur solo se hanno effettivamente cambiato valore da default
+                     processChange = true;
                 }
-
 
                 if (processChange) {
                     currentElement.classList.remove('animate-me');
@@ -1157,7 +1156,7 @@
             };
 
             currentElement.addEventListener('change', onValueChange);
-            if (currentElement.tagName === 'SELECT' || currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') { // Aggiungi blur per text e textarea
+            if (currentElement.tagName === 'SELECT' || currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') {
                 currentElement.addEventListener('blur', onValueChange);
                  activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange});
             }
@@ -1325,19 +1324,21 @@
                     const barContainer = exitCurtain.querySelector('.loader-bar-container');
                     if (barContainer) barContainer.style.display = 'flex';
 
-                    setTimeout(() => { // Fa partire la transizione CSS per opacity e visibility
+                    setTimeout(() => {
                         exitCurtain.style.opacity = '1';
                         exitCurtain.style.visibility = 'visible';
-                    }, 20); // Un piccolo delay per permettere al browser di applicare display:flex
+                    }, 20);
 
-                    // Dopo 1 secondo, attiva Macrodroid e aggiorna il testo
                     setTimeout(() => {
-                        console.log("Triggering Macrodroid URL: https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi");
-                        window.location.href = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
+                        const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
+                        console.log("Attempting to trigger Macrodroid URL (no navigation): " + macrodroidUrl);
+                        fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
+                            .then(response => console.log('Macrodroid trigger request sent.'))
+                            .catch(error => console.error('Error sending Macrodroid trigger:', error));
 
                         if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata. Puoi chiudere questa scheda.';
                         if (barContainer) barContainer.style.display = 'none';
-                    }, 1000); // 1000ms = 1 secondo
+                    }, 1000);
                 }
             });
         }
