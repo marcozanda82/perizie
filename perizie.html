@@ -13,7 +13,7 @@
             width: 100%;
             height: 100%;
             background-color: #000000; /* Pagina Nera */
-            z-index: 99999; 
+            z-index: 99999;
             display: flex; /* Nascosto di default, JS lo mostra se necessario */
             justify-content: center;
             align-items: center;
@@ -29,7 +29,7 @@
         #preloader .loader-bar-container {
             display: flex;
             gap: 10px;
-            margin-bottom: 25px; 
+            margin-bottom: 25px;
         }
         #preloader .loader-bar {
             width: 15px;
@@ -48,7 +48,7 @@
         }
 
         #preloader .loading-text {
-            color: #00aeff; 
+            color: #00aeff;
             font-size: 1.6em;
             letter-spacing: 1px;
             animation: textGlow 1.8s infinite alternate ease-in-out;
@@ -61,10 +61,10 @@
 
         /* ... (resto degli stili CSS esistenti) ... */
         .header-circles { display: flex; justify-content: space-around; align-items: center; width: 100%; padding: 8px 0; box-sizing: border-box; }
-        .circle { 
-            width: 1.5cm; height: 1.5cm; background-color: #ffffff; 
-            border-radius: 50%; flex-shrink: 0; 
-            opacity: 0.8; 
+        .circle {
+            width: 1.5cm; height: 1.5cm; background-color: #ffffff;
+            border-radius: 50%; flex-shrink: 0;
+            opacity: 0.8;
         }
         body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; transition: padding-top 0.3s ease; }
         .content-wrapper { padding: 20px; }
@@ -84,7 +84,7 @@
 
         .category-section ul li > input[type="checkbox"] {
             vertical-align: middle;
-            margin-right: 4px; 
+            margin-right: 4px;
         }
         .category-section ul li > input[type="checkbox"] + label {
             display: inline-block;
@@ -101,56 +101,56 @@
             position: fixed;
             top: 0;
             left: 0;
-            padding-bottom: 5px; 
+            padding-bottom: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
-        
-        #navButtons { 
+
+        #navButtons {
             display: flex;
-            flex-direction: column; 
-            align-items: center; 
+            flex-direction: column;
+            align-items: center;
             width: 100%;
         }
         #mainPageNavButtons {
             display: flex;
             justify-content: center;
-            flex-wrap: nowrap; 
-            overflow-x: auto; 
+            flex-wrap: nowrap;
+            overflow-x: auto;
             padding: 5px 0;
-            width: calc(100% - 20px); 
-            max-width: 700px; 
+            width: calc(100% - 20px);
+            max-width: 700px;
         }
         #mainPageNavButtons button {
-            margin: 3px; 
-            flex-shrink: 0; 
+            margin: 3px;
+            flex-shrink: 0;
         }
         #utilityNavButtons {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap; 
+            flex-wrap: wrap;
             margin-top: 5px;
         }
         #utilityNavButtons button {
-            margin: 3px 5px; 
+            margin: 3px 5px;
         }
 
-        #navButtons button, .action-button, #procediConPeriziaBtn { 
-             padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-size: 0.9em; 
+        #navButtons button, .action-button, #procediConPeriziaBtn {
+             padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-size: 0.9em;
         }
         #procediConPeriziaBtn { display: block; margin: 15px auto; padding: 12px 25px; font-size: 1.1em; }
         .save-and-next-btn { background-color: #0069d9 !important; border-color: #005cbf !important; }
         .save-and-next-btn:hover { background-color: #0056b3 !important; border-color: #004085 !important; }
         #navButtons button:hover, .action-button:hover, #procediConPeriziaBtn:hover { background-color: #0056b3; border-color: #004085; }
         #procediConPeriziaBtn:disabled { background-color: #555; border-color: #444; cursor: not-allowed; }
-        
+
         @keyframes activeButtonGlow {
             0% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
             50% { box-shadow: 0 0 10px rgba(0, 150, 255, 1), 0 0 15px rgba(0, 150, 255, 0.7) inset; }
             100% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
         }
 
-        #navButtons button.active { 
-            background-color: #0056b3 !important; border-color: #004085 !important; color: white !important; 
+        #navButtons button.active {
+            background-color: #0056b3 !important; border-color: #004085 !important; color: white !important;
             animation-name: activeButtonGlow; animation-duration: 1.8s;
             animation-iteration-count: infinite; animation-timing-function: ease-in-out;
             animation-direction: alternate;
@@ -160,16 +160,16 @@
         #navButtons button.nav-btn-untouched { background-color: #dc3545 !important; border-color: #c82333 !important; color: white !important; }
 
         #landingPageSection, .category-section, #historyPageSection { padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a; max-width: 850px; margin-left: auto; margin-right: auto; }
-        
-        .category-section, #historyPageSection { display: none; } 
-        #landingPageSection { display: block; } 
+
+        .category-section, #historyPageSection { display: none; }
+        #landingPageSection { display: block; }
         .category-section.active { display: block; }
-        
+
         .summary-item { margin-bottom: 8px; padding: 8px; background-color: #333; border-radius: 3px; }
         .summary-item strong { color: #00aeff; }
         .summary-anomaly {
             background-color: #5d3d3d !important; color: #ffdddd !important;
-            border-left: 3px solid #ff8888; padding-left: 10px !important; 
+            border-left: 3px solid #ff8888; padding-left: 10px !important;
         }
         .summary-anomaly strong { color: #ffc0c0 !important; }
         .summary-notes {
@@ -177,7 +177,7 @@
             border-left: 3px solid #8888ff; padding-left: 10px !important;
         }
         .summary-notes strong { color: #c0c0ff !important; }
-        
+
         .table-scroll-wrapper { overflow-x: auto; width: 100%; margin-bottom: 10px; border: 1px solid #444; border-radius: 4px; }
         .targa-list-table-content { min-width: 650px; }
         .targa-list-header { display: flex; font-weight: bold; padding: 0; border-bottom: 2px solid #777; color: #ddd; background-color: #3a3a3a; }
@@ -190,22 +190,22 @@
         .targa-list-item { display: flex; align-items: center; border-bottom: 1px solid #444; }
         .targa-list-item:last-child { border-bottom: none; }
         .targa-list-item input[type="radio"] { margin: 0 0 0 10px; padding: 10px 0px 10px 0px; border-right: 1px solid #444; margin-right:0; padding-right:10px; flex-shrink: 0; min-width: 35px; box-sizing: content-box; }
-        
-        label.radio-label-container { 
-            display: flex; flex-grow: 1; cursor: pointer; color: #f0f0f0; padding: 0; 
-            min-width: calc(100% - 45px - 60px); align-items: center; 
+
+        label.radio-label-container {
+            display: flex; flex-grow: 1; cursor: pointer; color: #f0f0f0; padding: 0;
+            min-width: calc(100% - 45px - 60px); align-items: center;
         }
-        .targa-list-item .targa-col { 
-            padding: 8px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+        .targa-list-item .targa-col {
+            padding: 8px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             border-right: 1px solid #444; text-align: left; flex-grow: 1; display: flex; align-items: center;
         }
         .targa-list-item .targa-col:last-child { border-right: none; }
-        
+
         .targa-col-targa    { flex-basis: 15%; min-width: 80px;}
-        .targa-col-posizione{ flex-basis: 15%; min-width: 70px; padding: 4px !important; } 
+        .targa-col-posizione{ flex-basis: 15%; min-width: 70px; padding: 4px !important; }
         .targa-col-marca    { flex-basis: 20%; min-width: 100px;}
-        .targa-col-modello  { flex-basis: 25%; min-width: 110px;} 
-        .targa-col-piazzale { flex-basis: 20%; min-width: 80px;}  
+        .targa-col-modello  { flex-basis: 25%; min-width: 110px;}
+        .targa-col-piazzale { flex-basis: 20%; min-width: 80px;}
         .targa-col-actions  { flex-basis: 60px; flex-grow: 0; }
 
         .targa-col-posizione input.posizione-input {
@@ -243,7 +243,7 @@
         .targa-list-item.completed label.radio-label-container .targa-col-marca,
         .targa-list-item.completed label.radio-label-container .targa-col-modello,
         .targa-list-item.completed label.radio-label-container .targa-col-piazzale { color: #888 !important; }
-        
+
         .targa-list-item.status-visto.completed label.radio-label-container .targa-col-targa,
         .targa-list-item.status-visto.completed label.radio-label-container .targa-col-marca,
         .targa-list-item.status-visto.completed label.radio-label-container .targa-col-modello,
@@ -264,19 +264,47 @@
         #sheetFilterContainer label { margin-right: 10px; color: #ccc; display: inline-block; }
         #sheetFilterDropdown { padding: 8px; background-color: #333; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; min-width: 250px; vertical-align: middle; }
 
+        /* Stili per l'animazione richiesta */
+        .animate-me {
+            animation: pulseHighlight 1.5s infinite alternate;
+            /* box-shadow: 0 0 8px #00aeff, 0 0 15px #007bff; */ /* Rimosso per evitare conflitto con outline */
+            outline: 2px solid rgba(0, 123, 255, 0.0); /* Inizialmente trasparente */
+            transition: outline 0.3s ease, box-shadow 0.3s ease; /* Transizione per rimozione */
+        }
+
+        @keyframes pulseHighlight {
+            from {
+                /* transform: scale(1); */ /* Scala può causare reflow, preferisco outline/shadow */
+                outline: 2px solid rgba(0, 123, 255, 0.7);
+                box-shadow: 0 0 5px rgba(0, 123, 255, 0.5), 0 0 8px rgba(0, 123, 255, 0.3) inset;
+            }
+            to {
+                /* transform: scale(1.01); */
+                outline: 3px solid rgba(0, 150, 255, 1);
+                box-shadow: 0 0 10px rgba(0, 150, 255, 0.8), 0 0 12px rgba(0, 150, 255, 0.5) inset;
+            }
+        }
+        /* Assicura che gli elementi possano mostrare correttamente outline/shadow */
+        input[type="checkbox"].animate-me, select.animate-me {
+            position: relative; /* Necessario per z-index se si sovrappongono */
+            z-index: 1; /* Per portare l'elemento animato in primo piano se necessario */
+        }
+        /* Fine stili per l'animazione richiesta */
+
+
         @media (max-width: 768px) {
             .content-wrapper { margin-top: 0; }
             .circle { width: 1.2cm; height: 1.2cm; }
-            #navButtons button, .action-button { padding: 8px 10px; font-size: 0.85em; } 
+            #navButtons button, .action-button { padding: 8px 10px; font-size: 0.85em; }
             #procediConPeriziaBtn { padding: 10px 15px; font-size: 1em; }
 
             #mainPageNavButtons {
-                width: 100%; 
-                padding: 5px; 
+                width: 100%;
+                padding: 5px;
                 box-sizing: border-box;
             }
              #mainPageNavButtons button {
-                font-size: 0.8em; 
+                font-size: 0.8em;
                 padding: 6px 8px;
             }
             #utilityNavButtons button {
@@ -286,13 +314,13 @@
 
             input[type="text"], input[type="url"], select, textarea { width: 100%; box-sizing: border-box; }
             .table-scroll-wrapper { overflow-x: auto; }
-            .targa-list-table-content { min-width: 600px; } 
+            .targa-list-table-content { min-width: 600px; }
             .targa-list-header { display: flex !important; }
             .targa-list-header .targa-col, .targa-list-item .targa-col { padding: 6px 5px; }
             .targa-list-header .targa-col-radio-spacer { flex-basis: 35px; padding: 6px 5px; }
             .targa-list-item input[type="radio"] { min-width: 25px; padding-right: 5px; }
             .delete-progress-btn { padding: 5px 8px; }
-            label.radio-label-container { min-width: calc(100% - 35px - 50px); } 
+            label.radio-label-container { min-width: calc(100% - 35px - 50px); }
             .targa-col-targa    { min-width: 70px;}
             .targa-col-posizione{ min-width: 60px;}
             .targa-col-marca    { min-width: 80px;}
@@ -314,12 +342,12 @@
         <div class="loading-text">AVVIO IN CORSO...</div>
     </div>
 
-    <div id="pageHeaderContainer"> 
+    <div id="pageHeaderContainer">
         <div class="header-circles">
             <div class="circle"></div> <div class="circle"></div> <div class="circle"></div> <div class="circle"></div>
         </div>
-        <h1 id="mainTitleGlobal">Checklist Perizia Veicolo</h1> 
-        <div id="navButtons"> 
+        <h1 id="mainTitleGlobal">Checklist Perizia Veicolo</h1>
+        <div id="navButtons">
             <div id="mainPageNavButtons">
                 <button data-target="remarketing">1. Remarketing</button>
                 <button data-target="pneumatici">2. Pneumatici</button>
@@ -334,23 +362,23 @@
     </div>
 
     <div class="content-wrapper" id="mainContentWrapper">
-        <div id="landingPageSection" style="display: block;"> 
+        <div id="landingPageSection" style="display: block;">
             <h2 style="margin-top: 10px;">Seleziona Veicolo da Periziare</h2>
-            
+
             <div id="sheetFilterContainer">
                 <label for="sheetFilterDropdown">Filtra per Elenco:</label>
                 <select id="sheetFilterDropdown">
                     <option value="all">Tutti gli Elenchi</option>
                 </select>
             </div>
-            
+
             <button id="procediConPeriziaBtn" disabled>Procedi alla Perizia</button>
 
             <div id="targheLoadingStatus">Caricamento targhe in corso...</div>
             <div class="table-scroll-wrapper">
-                <div class="targa-list-table-content"> 
+                <div class="targa-list-table-content">
                     <div class="targa-list-header">
-                        <div class="targa-col-radio-spacer"></div> 
+                        <div class="targa-col-radio-spacer"></div>
                         <span class="targa-col targa-col-targa">Targa</span>
                         <span class="targa-col targa-col-posizione">Posizione</span>
                         <span class="targa-col targa-col-marca">Marca</span>
@@ -367,16 +395,16 @@
             <div id="remarketingSection" class="category-section">
                 <h2 class="section-title">1. Foto Remarketing</h2>
                 <ul>
-                    <li> 
+                    <li>
                         <input type="checkbox" id="is_electric_vehicle">
                         <label for="is_electric_vehicle">Veicolo a trazione elettrica</label>
                     </li>
                     <li><input type="checkbox" id="foto_angolari"><label for="foto_angolari">Foto angolari (3/4)</label></li>
-                    <li> 
+                    <li>
                         <input type="checkbox" id="foto_vano_carico">
                         <label for="foto_vano_carico">Vano Carico</label>
                     </li>
-                    <li> 
+                    <li>
                         <label for="tipo_equipaggiamento">Equipaggiamento:</label>
                         <select id="tipo_equipaggiamento">
                             <option value="">Seleziona...</option>
@@ -473,12 +501,12 @@
     // ... (JavaScript precedente, inclusa la definizione delle costanti globali per gli elementi dell'header) ...
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
-    const historyPageSection = document.getElementById('historyPageSection'); 
+    const historyPageSection = document.getElementById('historyPageSection');
     const targaListContainer = document.getElementById('targaListContainer');
-    const savedTargasListContainer = document.getElementById('savedTargasListContainer'); 
+    const savedTargasListContainer = document.getElementById('savedTargasListContainer');
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
     const procediConPeriziaBtn = document.getElementById('procediConPeriziaBtn');
-    const pageHeaderContainer = document.getElementById('pageHeaderContainer'); 
+    const pageHeaderContainer = document.getElementById('pageHeaderContainer');
     const headerCircles = pageHeaderContainer.querySelector('.header-circles');
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons');
@@ -489,30 +517,30 @@
 
     const sections = document.querySelectorAll('#checklistContainer .category-section');
     const summaryContent = document.getElementById('summaryContent');
-    const backToListBtn = pageHeaderContainer.querySelector('#backToListBtn'); 
-    const historyBtn = pageHeaderContainer.querySelector('#historyBtn'); 
-    const clearAllProgressBtn = document.getElementById('clearAllProgressBtn'); 
-    const backToLandingFromHistoryBtn = document.getElementById('backToLandingFromHistoryBtn'); 
-    const saveAndReturnBtn = document.getElementById('saveAndReturnBtn'); 
+    const backToListBtn = pageHeaderContainer.querySelector('#backToListBtn');
+    const historyBtn = pageHeaderContainer.querySelector('#historyBtn');
+    const clearAllProgressBtn = document.getElementById('clearAllProgressBtn');
+    const backToLandingFromHistoryBtn = document.getElementById('backToLandingFromHistoryBtn');
+    const saveAndReturnBtn = document.getElementById('saveAndReturnBtn');
     const saveAndNextButtons = document.querySelectorAll('.save-and-next-btn');
-    const sheetFilterDropdown = document.getElementById('sheetFilterDropdown'); 
+    const sheetFilterDropdown = document.getElementById('sheetFilterDropdown');
     const isElectricVehicleCheckbox = document.getElementById('is_electric_vehicle');
     const cavoRapidaSelect = document.getElementById('cavo_ricarica_rapida');
     const cavoDomesticaSelect = document.getElementById('cavo_ricarica_domestica');
 
-    const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv'; 
+    const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
-    const APP_PREFIX = 'periziaApp_'; 
+    const APP_PREFIX = 'periziaApp_';
 
     function handleElectricVehicleChange() {
-        if (!isElectricVehicleCheckbox || !cavoRapidaSelect || !cavoDomesticaSelect) return; 
+        if (!isElectricVehicleCheckbox || !cavoRapidaSelect || !cavoDomesticaSelect) return;
         const isChecked = isElectricVehicleCheckbox.checked;
         cavoRapidaSelect.disabled = !isChecked;
         cavoDomesticaSelect.disabled = !isChecked;
         if (!isChecked) {
-            cavoRapidaSelect.value = ""; 
-            cavoDomesticaSelect.value = ""; 
+            cavoRapidaSelect.value = "";
+            cavoDomesticaSelect.value = "";
         }
     }
 
@@ -535,31 +563,31 @@
         }
     }
 
-    function resetChecklistForm() { 
-        const els = document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea'); 
+    function resetChecklistForm() {
+        const els = document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea');
         els.forEach(el => {
             if (el.type === 'checkbox') el.checked = false;
             else if (el.tagName === 'SELECT') el.selectedIndex = 0;
             else el.value = '';
-        }); 
+        });
         if (cavoRapidaSelect) cavoRapidaSelect.disabled = true;
         if (cavoDomesticaSelect) cavoDomesticaSelect.disabled = true;
-        console.log("Modulo resettato."); 
+        console.log("Modulo resettato.");
     }
 
-    function saveProgress(targa) { 
-        if(!targa){console.warn("Nessuna targa attiva per il salvataggio.");return false;} 
-        const data = {}; 
+    function saveProgress(targa) {
+        if(!targa){console.warn("Nessuna targa attiva per il salvataggio.");return false;}
+        const data = {};
         document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => {
             if (el.id) {
                 if (el.type === 'checkbox') data[el.id] = el.checked;
                 else data[el.id] = el.value;
             }
-        }); 
+        });
         try {
             localStorage.setItem(`${APP_PREFIX}data_${targa}`, JSON.stringify(data));
-            console.log(`Progresso salvato per la targa ${targa}.`); 
-            updateNavButtonColors(); 
+            console.log(`Progresso salvato per la targa ${targa}.`);
+            updateNavButtonColors();
             return true;
         } catch(e) {
             console.error("Errore durante il salvataggio in localStorage:", e);
@@ -568,19 +596,19 @@
         }
     }
 
-    function loadProgress(targa) { 
-        if(!targa) return; 
-        resetChecklistForm(); 
+    function loadProgress(targa) {
+        if(!targa) return;
+        resetChecklistForm();
         try {
-            const json = localStorage.getItem(`${APP_PREFIX}data_${targa}`); 
+            const json = localStorage.getItem(`${APP_PREFIX}data_${targa}`);
             if (json) {
-                const data = JSON.parse(json); 
+                const data = JSON.parse(json);
                 document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => {
                     if (el.id && data.hasOwnProperty(el.id)) {
                         if (el.type === 'checkbox') el.checked = data[el.id];
                         else el.value = data[el.id];
                     }
-                }); 
+                });
                 console.log(`Progresso caricato per la targa ${targa}.`);
             } else {
                 console.log(`Nessun dato salvato trovato per la targa ${targa}.`);
@@ -588,18 +616,18 @@
             if (isElectricVehicleCheckbox) {
                  handleElectricVehicleChange();
             }
-            updateNavButtonColors(); 
+            updateNavButtonColors();
         } catch(e) {
-            console.error("Errore durante il caricamento da localStorage:", e); 
+            console.error("Errore durante il caricamento da localStorage:", e);
             updateNavButtonColors();
         }
     }
     function getCompletedTarghe() { try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){return{};}}
     function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa} marked complete.`);}catch(e){console.error("LS Mark Err:",e);}}
     function isTargaCompleted(targa) { const completed=getCompletedTarghe(); return !!(completed[targa]); }
-    
-    function deleteProgressForTarga(targa) { 
-        if(!targa){return;} 
+
+    function deleteProgressForTarga(targa) {
+        if(!targa){return;}
         try {
             localStorage.removeItem(`${APP_PREFIX}data_${targa}`);
             console.log(`Dati modulo rimossi per ${targa}.`);
@@ -609,7 +637,7 @@
                 localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));
                 console.log(`Stato completamento rimosso per ${targa}.`);
             }
-            localStorage.removeItem(`${APP_PREFIX}posizione_${targa}`); 
+            localStorage.removeItem(`${APP_PREFIX}posizione_${targa}`);
             console.log(`Dati posizione rimossi per ${targa}.`);
 
         } catch(e) {
@@ -619,7 +647,7 @@
         if (typeof popolaTargheFiltrate === 'function') {
              popolaTargheFiltrate();
         }
-        if (targaSelezionataGlobalmente === targa) { 
+        if (targaSelezionataGlobalmente === targa) {
              targaSelezionataGlobalmente = null;
              procediConPeriziaBtn.disabled = true;
         }
@@ -639,26 +667,26 @@
 
             setTimeout(() => {
                 console.log("Inizio generazione screenshot...");
-                riepilogoSection.scrollTop = 0; 
+                riepilogoSection.scrollTop = 0;
                 html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false })
                     .then(canvas => {
                         const link = document.createElement('a');
-                        
+
                         let targaSanitized = 'sconosciuta';
                         let piazzaleSanitized = 'piazzale_sconosciuto';
 
                         if (targaSelezionataGlobalmente) {
-                            targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_'); 
-                            
+                            targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_');
+
                             const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
                             if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") {
                                 piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_');
-                                if (!piazzaleSanitized) piazzaleSanitized = 'N_D'; 
+                                if (!piazzaleSanitized) piazzaleSanitized = 'N_D';
                             } else {
-                                piazzaleSanitized = 'N_D'; 
+                                piazzaleSanitized = 'N_D';
                             }
                         }
-                        
+
                         link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`;
                         link.href = canvas.toDataURL('image/png');
                         document.body.appendChild(link);
@@ -672,12 +700,12 @@
                         alert("Si è verificato un errore durante la generazione dello screenshot.");
                         reject(error);
                     });
-            }, 100); 
+            }, 100);
         });
     }
     async function handleSavePeriziaAndReturn() { if(!targaSelezionataGlobalmente){alert("No targa attiva.");return;} if(!saveProgress(targaSelezionataGlobalmente)){alert("Salvataggio dati fallito.");return;} if(document.getElementById('riepilogoSection').classList.contains('active')){generateSummary();} try{await generateAndDownloadScreenshot();}catch(e){console.warn("Screenshot fallito, ma dati salvati.");} markTargaAsCompleted(targaSelezionataGlobalmente); updateNavButtonColors(); alert(`Perizia per ${targaSelezionataGlobalmente} salvata, screenshot tentato, completata. Torno all'elenco.`); targaSelezionataGlobalmente=null;showView('landing');}
     function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
-    
+
     function isInputDefault(inputElement) { if (inputElement.type === 'checkbox') return !inputElement.checked; if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0; return true; }
     function getSectionInputs(sectionElementId) { const sectionDiv = document.getElementById(sectionElementId); if (!sectionDiv) return []; return sectionDiv.querySelectorAll('input[type="checkbox"], select'); }
     function getSectionStatus(sectionElementId, targaData) { const inputs = getSectionInputs(sectionElementId); if (inputs.length === 0) return 'completed'; let allDefault = true; let allNonDefault = true; let hasAtLeastOneNonDefault = false; inputs.forEach(input => { let isDefault; const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined; if (input.type === 'checkbox') { isDefault = (savedValue !== undefined ? !savedValue : !input.checked); } else { isDefault = (savedValue !== undefined ? (savedValue === "" || savedValue === input.options[0].value) : (input.value === "" || input.selectedIndex === 0)); } if (!isDefault) { allDefault = false; hasAtLeastOneNonDefault = true; } else { allNonDefault = false; } }); if (allDefault) return 'untouched'; if (allNonDefault) return 'completed'; if (hasAtLeastOneNonDefault) return 'partial'; return 'untouched'; }
@@ -688,15 +716,15 @@
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
 
-        let bodyPaddingTopValue = '20px'; 
+        let bodyPaddingTopValue = '20px';
 
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
-            pageHeaderContainer.classList.add('fixed-header'); 
+            pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
-            navButtonsContainer.style.display = 'none'; 
-            mainTitleGlobal.innerHTML = "Elenco Veicoli"; 
-            
+            navButtonsContainer.style.display = 'none';
+            mainTitleGlobal.innerHTML = "Elenco Veicoli";
+
             const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked');
             if (activeRadio) activeRadio.checked = false;
             procediConPeriziaBtn.disabled = true;
@@ -705,7 +733,7 @@
                 popolaTargheFiltrate();
             }
             targaSelezionataGlobalmente = null;
-            updateNavButtonColors(); 
+            updateNavButtonColors();
 
         } else if (viewName === 'checklist' || viewName === 'history') {
             pageHeaderContainer.classList.add('fixed-header');
@@ -715,8 +743,8 @@
             if (viewName === 'checklist') {
                 if (!targaSelezionataGlobalmente) {
                     alert("Nessuna targa selezionata.");
-                    showView('landing'); 
-                    return; 
+                    showView('landing');
+                    return;
                 }
                 checklistContainer.style.display = 'block';
                 const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
@@ -724,93 +752,93 @@
                     ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
                     : "";
                 mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
-            } else { 
+            } else {
                 historyPageSection.style.display = 'block';
                 mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
                 populateSavedTargasList();
             }
             updateNavButtonColors();
-        } else { 
+        } else {
             pageHeaderContainer.classList.remove('fixed-header');
             headerCircles.style.display = 'none';
             navButtonsContainer.style.display = 'none';
-            mainTitleGlobal.innerHTML = ""; 
+            mainTitleGlobal.innerHTML = "";
         }
-        
+
         if (pageHeaderContainer.classList.contains('fixed-header')) {
-            pageHeaderContainer.style.display = 'block'; 
+            pageHeaderContainer.style.display = 'block';
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
         } else {
             let nonFixedHeaderHeight = 0;
-            if (mainTitleGlobal && typeof getComputedStyle === 'function' && getComputedStyle(mainTitleGlobal).display !== 'none') { 
+            if (mainTitleGlobal && typeof getComputedStyle === 'function' && getComputedStyle(mainTitleGlobal).display !== 'none') {
                  nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
             }
             bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
         }
         document.body.style.paddingTop = bodyPaddingTopValue;
     }
-    
+
     function populateSavedTargasList() { savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targa = key.substring(`${APP_PREFIX}data_`.length); if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa);}}} if (tempSavedTargas.length > 0) hasSaves = true; tempSavedTargas.sort(); tempSavedTargas.forEach(targa => { const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' }; let displayText = targa; let details = []; if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`); if (details.length > 0) { displayText += ` - ${details.join(' ')}`; } const button = document.createElement('button'); button.classList.add('saved-targa-button'); button.textContent = displayText; button.dataset.targa = targa; button.addEventListener('click', function() { targaSelezionataGlobalmente = this.dataset.targa; showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstChecklistNavButton = Array.from(navButtons).find(btn => btn.dataset.target && btn.id !== 'backToListBtn' && btn.id !== 'historyBtn'); if (firstChecklistNavButton) { showSection(firstChecklistNavButton.dataset.target); } else if (navButtons.length > 0 && navButtons[0].dataset.target) { showSection(navButtons[0].dataset.target); }}); savedTargasListContainer.appendChild(button); }); if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>'; } }
-    
-    function clearAllSavedData() { 
-        if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni)?\n\nAzione irreversibile.")) { 
-            let c = 0; 
-            for (let i=localStorage.length-1;i>=0;i--) { 
-                const k=localStorage.key(i); 
-                if (k.startsWith(APP_PREFIX)) { 
+
+    function clearAllSavedData() {
+        if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni)?\n\nAzione irreversibile.")) {
+            let c = 0;
+            for (let i=localStorage.length-1;i>=0;i--) {
+                const k=localStorage.key(i);
+                if (k.startsWith(APP_PREFIX)) {
                     localStorage.removeItem(k);c++;
                 }
-            } 
-            alert(`${c} elementi cancellati.`); 
+            }
+            alert(`${c} elementi cancellati.`);
             localStorage.removeItem(`${APP_PREFIX}preloaderPlayed_v2`); // Rimuovi anche il flag del preloader
-            populateSavedTargasList(); 
-            caricaEPopolaTarghe(); 
-            showView('landing'); 
-        } 
+            populateSavedTargasList();
+            caricaEPopolaTarghe();
+            showView('landing');
+        }
     }
-    
+
     function setupSheetFilterDropdown() {
         if (!sheetFilterDropdown) return;
         const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== ''))];
-        sheetFilterDropdown.innerHTML = ''; 
+        sheetFilterDropdown.innerHTML = '';
         sources.forEach(source => {
             const option = document.createElement('option');
             option.value = source;
             option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source;
             sheetFilterDropdown.appendChild(option);
         });
-        sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange); 
+        sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange);
         sheetFilterDropdown.addEventListener('change', handleSheetFilterChange);
     }
 
     function handleSheetFilterChange() {
         popolaTargheFiltrate();
-        procediConPeriziaBtn.disabled = true; 
+        procediConPeriziaBtn.disabled = true;
         const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked');
-        if (activeRadio) activeRadio.checked = false; 
-        targaSelezionataGlobalmente = null; 
+        if (activeRadio) activeRadio.checked = false;
+        targaSelezionataGlobalmente = null;
     }
 
     function popolaTargheFiltrate() {
         const tEl = document.getElementById('targaListContainer');
-        tEl.innerHTML = ''; 
+        tEl.innerHTML = '';
         procediConPeriziaBtn.disabled = true;
 
         const selectedSource = sheetFilterDropdown ? sheetFilterDropdown.value : 'all';
-        
+
         let preliminaryFilteredList = selectedSource === 'all'
-            ? [...listaTargheCompleta] 
+            ? [...listaTargheCompleta]
             : listaTargheCompleta.filter(item => item.piazzale === selectedSource);
 
         function getItemRank(item) {
             const isUrgent = item.isUrgent;
             const isCompleted = isTargaCompleted(item.targa);
 
-            if (isUrgent && !isCompleted) return 1; 
-            if (!isUrgent && !isCompleted) return 2; 
-            if (!isUrgent && isCompleted) return 3; 
-            if (isUrgent && isCompleted) return 4;   
-            return 5; 
+            if (isUrgent && !isCompleted) return 1;
+            if (!isUrgent && !isCompleted) return 2;
+            if (!isUrgent && isCompleted) return 3;
+            if (isUrgent && isCompleted) return 4;
+            return 5;
         }
 
         preliminaryFilteredList.sort((a, b) => {
@@ -820,9 +848,9 @@
             if (rankA !== rankB) {
                 return rankA - rankB;
             }
-            return a.targa.localeCompare(b.targa); 
+            return a.targa.localeCompare(b.targa);
         });
-        
+
         const filteredList = preliminaryFilteredList;
 
         if (filteredList.length === 0) {
@@ -834,27 +862,27 @@
         filteredList.forEach((item, idx) => {
             const li = document.createElement('div');
             li.classList.add('targa-list-item');
-            
+
             const itemCompleted = isTargaCompleted(item.targa);
 
             if (item.isUrgent) {
                 li.classList.add('urgent-item');
                 if (itemCompleted) {
-                    li.classList.add('completed'); 
+                    li.classList.add('completed');
                 }
             } else {
                 if (itemCompleted) {
                     li.classList.add('status-visto');
-                    li.classList.add('completed'); 
+                    li.classList.add('completed');
                 } else {
                     li.classList.add('status-da-vedere');
                 }
             }
 
-            const rId = `targa_radio_filt_${idx}_${Date.now()}`; 
+            const rId = `targa_radio_filt_${idx}_${Date.now()}`;
             const rb = document.createElement('input');
             rb.type = 'radio';
-            rb.name = 'targa_selection_radio'; 
+            rb.name = 'targa_selection_radio';
             rb.value = item.targa;
             rb.id = rId;
             li.appendChild(rb);
@@ -867,36 +895,36 @@
             targaCol.classList.add('targa-col', 'targa-col-targa');
             targaCol.textContent = item.targa || 'N/D';
             lab.appendChild(targaCol);
-            
+
             const posizioneCol = document.createElement('span');
             posizioneCol.classList.add('targa-col', 'targa-col-posizione');
             const posizioneInput = document.createElement('input');
             posizioneInput.type = 'text';
-            posizioneInput.classList.add('posizione-input'); 
+            posizioneInput.classList.add('posizione-input');
             posizioneInput.dataset.targa = item.targa;
             posizioneInput.placeholder = 'Pos.';
-            posizioneInput.maxLength = 5; 
+            posizioneInput.maxLength = 5;
             posizioneInput.value = loadPosizioneForTarga(item.targa);
             posizioneInput.addEventListener('mousedown', (e) => e.stopPropagation());
             posizioneInput.addEventListener('click', (e) => e.stopPropagation());
             posizioneInput.addEventListener('focus', (e) => e.stopPropagation());
             posizioneInput.addEventListener('blur', function() {
                 const newPosition = this.value.trim().toUpperCase();
-                if (newPosition !== loadPosizioneForTarga(this.dataset.targa)) { 
+                if (newPosition !== loadPosizioneForTarga(this.dataset.targa)) {
                     savePosizioneForTarga(this.dataset.targa, newPosition);
                     this.style.transition = 'background-color 0.3s ease';
-                    this.style.backgroundColor = 'rgba(76, 175, 80, 0.2)'; 
+                    this.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
                     setTimeout(() => { this.style.backgroundColor = ''; }, 1000);
                 }
             });
             posizioneInput.addEventListener('keypress', function(event) {
                 if (event.key === 'Enter') {
-                    event.preventDefault(); 
-                    this.blur(); 
+                    event.preventDefault();
+                    this.blur();
                 }
             });
             posizioneCol.appendChild(posizioneInput);
-            lab.appendChild(posizioneCol); 
+            lab.appendChild(posizioneCol);
 
             const marcaCol = document.createElement('span');
             marcaCol.classList.add('targa-col', 'targa-col-marca');
@@ -923,7 +951,7 @@
             delB.addEventListener('click', function() {
                 const tDel = this.dataset.targa;
                 if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (inclusa posizione)?\n\nAzione irreversibile.`)) {
-                    deleteProgressForTarga(tDel); 
+                    deleteProgressForTarga(tDel);
                 }
             });
             li.appendChild(delB);
@@ -942,16 +970,16 @@
     }
 
 
-    async function caricaEPopolaTarghe() { 
-        targheLoadingStatus.textContent = "Caricamento..."; 
-        procediConPeriziaBtn.disabled = true; 
-        try { 
-            const r=await fetch(GOOGLE_SHEET_CSV_URL); 
-            if(!r.ok){let e=`HTTP ${r.status}.`;if(r.status===0)e="Rete/CORS.";else if(r.status===404)e="CSV(404).";else if(r.status===403)e="Accesso(403).";throw new Error(e);} 
-            const csv=await r.text(); 
-            const lines=csv.split(/\r\n|\n|\r/).filter(l=>l.trim()!==''); 
-            if(lines.length===0){targheLoadingStatus.textContent="No dati CSV.";return;} 
-            
+    async function caricaEPopolaTarghe() {
+        targheLoadingStatus.textContent = "Caricamento...";
+        procediConPeriziaBtn.disabled = true;
+        try {
+            const r=await fetch(GOOGLE_SHEET_CSV_URL);
+            if(!r.ok){let e=`HTTP ${r.status}.`;if(r.status===0)e="Rete/CORS.";else if(r.status===404)e="CSV(404).";else if(r.status===403)e="Accesso(403).";throw new Error(e);}
+            const csv=await r.text();
+            const lines=csv.split(/\r\n|\n|\r/).filter(l=>l.trim()!=='');
+            if(lines.length===0){targheLoadingStatus.textContent="No dati CSV.";return;}
+
             listaTargheCompleta = lines.map(l => {
                 const p = l.split(',');
                 return {
@@ -959,18 +987,18 @@
                     marca: (p[1] || '').trim().replace(/^"|"$/g, ''),
                     modello: (p[2] || '').trim().replace(/^"|"$/g, ''),
                     piazzale: (p[3] || '').trim().replace(/^"|"$/g, ''),
-                    isUrgent: (p[4] || '').trim().toUpperCase() === 'URGENTE' 
+                    isUrgent: (p[4] || '').trim().toUpperCase() === 'URGENTE'
                 };
             }).filter(i => i.targa && i.targa.length > 3);
-            
+
             if(listaTargheCompleta.length===0){
                 targheLoadingStatus.textContent="No targhe valide nel CSV.";
                 if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
-                if (targaListContainer) targaListContainer.innerHTML = ''; 
+                if (targaListContainer) targaListContainer.innerHTML = '';
                 return;
             }
-            setupSheetFilterDropdown(); 
-            popolaTargheFiltrate(); 
+            setupSheetFilterDropdown();
+            popolaTargheFiltrate();
         } catch(e) {
             console.error("Errore caricamento/popolamento targhe:",e);
             targheLoadingStatus.textContent=`Errore: ${e.message}.`;
@@ -978,39 +1006,147 @@
             if (targaListContainer) targaListContainer.innerHTML = '';
         }
     }
-    
+
     procediConPeriziaBtn.addEventListener('click', () => { if(targaSelezionataGlobalmente){ showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstNav = Array.from(navButtons).find(b=>b.dataset.target && b.id!=='backToListBtn' && b.id!=='historyBtn'); if(firstNav)showSection(firstNav.dataset.target); else if(navButtons.length>0&&navButtons[0].dataset.target)showSection(navButtons[0].dataset.target);} else alert("Seleziona targa.");});
-    
-    function showSection(targetId) {
-        sections.forEach(s=>s.classList.toggle('active',s.id === targetId + 'Section'));
-        navButtons.forEach(b => { 
-            if (b.dataset.target === targetId) {
-                b.classList.add('active');
-            } else {
-                b.classList.remove('active');
+
+    // NUOVA FUNZIONE PER L'ANIMAZIONE SEQUENZIALE
+    function initSequentialAnimation() {
+        const checklistContainerDiv = document.getElementById('checklistContainer');
+        if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return;
+
+        const activeSection = checklistContainerDiv.querySelector('.category-section.active');
+        if (!activeSection) return;
+
+        // Rimuovi animazioni precedenti da qualsiasi elemento se ancora presenti
+        activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me'));
+
+        const elementsToAnimate = Array.from(
+            activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)')
+        ).filter(el => {
+            // Controlla se l'elemento è visibile (offsetParent non è null)
+            // e se l'elemento stesso o un suo parente stretto non ha 'display: none'
+            let current = el;
+            while (current && current !== activeSection.parentElement) {
+                if (getComputedStyle(current).display === 'none') return false;
+                current = current.parentElement;
             }
+            return el.offsetParent !== null;
         });
-        updateNavButtonColors(); 
-        if (targetId === 'riepilogo') generateSummary();
+
+        let currentIndex = 0;
+        let activeListeners = []; // Per tenere traccia dei listener attivi e rimuoverli correttamente
+
+        function clearAllActiveAnimationListeners() {
+            activeListeners.forEach(({element, type, handler}) => {
+                element.removeEventListener(type, handler);
+                element.classList.remove('animate-me'); // Assicura che l'animazione sia rimossa
+            });
+            activeListeners = [];
+        }
+        // Pulisci i listener da una possibile esecuzione precedente su questa sezione
+        clearAllActiveAnimationListeners();
+
+
+        function animateNextElement() {
+            if (currentIndex >= elementsToAnimate.length) {
+                return; // Tutti gli elementi processati
+            }
+
+            const currentElement = elementsToAnimate[currentIndex];
+
+            // Se l'elemento è già valorizzato (es. da dati precaricati), salta l'animazione per questo.
+            let isAlreadyValued = false;
+            if (currentElement.type === 'checkbox') {
+                // Per i checkbox, "valorizzato" significa essere spuntato o non spuntato diversamente dal default (non spuntato)
+                // Ma la logica è "perde animazione una volta valorizzato", quindi se è già spuntato,
+                // non dovrebbe animare, ma questo cozza con l'idea di animare "uno alla volta".
+                // L'interpretazione più semplice è che l'animazione appare e scompare al primo "cambiamento".
+                // Se un campo è già valorizzato da localStorage, non dovrebbe animare.
+                // Il problema è che `loadProgress` viene chiamato prima di `showSection`.
+                // Potremmo aggiungere un check qui:
+                if (currentElement.checked || (currentElement.dataset.initialValue && currentElement.checked.toString() !== currentElement.dataset.initialValue)) {
+                   // isAlreadyValued = true; // Per ora, animiamo comunque e l'utente lo valuta
+                }
+            } else if (currentElement.tagName === 'SELECT') {
+                if (currentElement.value !== "" && currentElement.selectedIndex !==0) {
+                   // isAlreadyValued = true;
+                }
+            }
+
+            // if (isAlreadyValued) {
+            //     currentIndex++;
+            //     animateNextElement(); // Passa al successivo
+            //     return;
+            // }
+
+
+            currentElement.classList.add('animate-me');
+            // currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Opzionale: scrolla all'elemento
+
+            const onValueChange = () => {
+                currentElement.classList.remove('animate-me');
+                // Rimuovi il listener specifico
+                currentElement.removeEventListener('change', onValueChange);
+                activeListeners = activeListeners.filter(listener => listener.handler !== onValueChange);
+
+
+                currentIndex++;
+                setTimeout(animateNextElement, 50); // Breve ritardo per distinguere le animazioni
+            };
+
+            currentElement.addEventListener('change', onValueChange);
+            activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
+        }
+
+        if (elementsToAnimate.length > 0) {
+            animateNextElement();
+        }
     }
 
+
+    function showSection(targetId) {
+        // Prima di cambiare sezione, rimuovi tutte le classi 'animate-me' e i listener associati
+        document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
+            el.classList.remove('animate-me');
+            // Sarebbe meglio avere un modo per rimuovere specifici event listener,
+            // ma per ora la rimozione della classe interrompe l'effetto visivo.
+            // La nuova `initSequentialAnimation` gestisce meglio la pulizia dei listener.
+        });
+
+
+        sections.forEach(s => s.classList.toggle('active', s.id === targetId + 'Section'));
+        navButtons.forEach(b => {
+            b.classList.toggle('active', b.dataset.target === targetId);
+        });
+        updateNavButtonColors();
+
+        const targetSectionElement = document.getElementById(targetId + 'Section');
+        // Verifica se la sezione target è una delle sezioni della checklist e non il riepilogo
+        if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
+             setTimeout(initSequentialAnimation, 50); // Leggero ritardo per permettere il rendering della sezione
+        } else if (targetId === 'riepilogo') {
+            generateSummary();
+        }
+    }
+
+
     navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
-    
+
     function getSelectText(id) {
         const el = document.getElementById(id);
         if (el && el.value !== "") {
             if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) {
                 return el.options[el.selectedIndex].text;
             }
-            return el.value; 
+            return el.value;
         }
-        return "N/S"; 
+        return "N/S";
     }
 
     function generateSummary() {
-        summaryContent.innerHTML = ''; 
+        summaryContent.innerHTML = '';
         let targa = targaSelezionataGlobalmente || "N/D";
-        
+
         function createSummaryItem(label, value, isAnomaly = false) {
             const itemDiv = document.createElement('div');
             itemDiv.classList.add('summary-item');
@@ -1020,7 +1156,7 @@
             itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`;
             return itemDiv;
         }
-        
+
         summaryContent.appendChild(createSummaryItem("Targa", targa));
 
         if (targaSelezionataGlobalmente) {
@@ -1058,7 +1194,7 @@
 
         let cdcStato = getSelectText('stato_cdc');
         summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante"));
-        
+
         summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente"));
         summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente"));
 
@@ -1081,11 +1217,11 @@
             let pneuStato = getSelectText(pneu.id);
             summaryContent.appendChild(createSummaryItem(pneu.label, pneuStato, pneuStato === "Non conforme"));
         });
-        
+
         summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`;
         summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK'));
         summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK'));
-        
+
         const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : "";
         if (noteDanniValue) {
             const noteDiv = document.createElement('div');
@@ -1095,14 +1231,14 @@
             const contentDiv = document.createElement('div');
             contentDiv.style.whiteSpace = 'pre-wrap';
             contentDiv.style.paddingLeft = '10px';
-            contentDiv.textContent = noteDanniValue; 
-            
+            contentDiv.textContent = noteDanniValue;
+
             noteDiv.appendChild(strongNode);
             noteDiv.appendChild(contentDiv);
             summaryContent.appendChild(noteDiv);
         }
     }
-    
+
     document.addEventListener('DOMContentLoaded', () => {
         const preloader = document.getElementById('preloader');
         const PRELOADER_FLAG = `${APP_PREFIX}preloaderPlayed_v2`; // Usa un nome versionato per il flag
@@ -1136,8 +1272,8 @@
                  }
             }
         }
-        
-        if (isElectricVehicleCheckbox) { 
+
+        if (isElectricVehicleCheckbox) {
             isElectricVehicleCheckbox.addEventListener('change', handleElectricVehicleChange);
         }
         handleElectricVehicleChange(); // Stato iniziale cavi
@@ -1145,9 +1281,9 @@
         initializeApp(); // Avvia l'app
 
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
-        if(historyBtn) historyBtn.addEventListener('click', () => showView('history')); 
-        if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData); 
-        if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing')); 
+        if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
+        if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData);
+        if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
         if(saveAndReturnBtn)saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
     });
