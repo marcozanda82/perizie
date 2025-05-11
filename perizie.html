@@ -55,7 +55,7 @@
         #exit-curtain.visible-no-transition { /* Per mostrare subito senza transizione di fade-in */
             opacity: 1;
             visibility: visible;
-            transition: none;
+            transition: none; /* Nessuna transizione di opacità o visibilità quando questa classe è presente */
         }
 
         .loader-bar-container { /* Contenitore comune per le barre */
@@ -103,6 +103,10 @@
             /* Puoi nascondere le barre standard durante il glitch: */
             /* display: none !important; */
             /* Oppure farle glitchare anch'esse con un'animazione specifica */
+            /* Se le barre devono continuare l'animazione barPulse normale durante il glitch, assicurarsi che
+               #exit-curtain:not(.glitching) .loader-bar non venga sovrascritto in modo che animation-direction: reverse;
+               non si applichi. Potrebbe essere necessario rimuovere animation-direction: reverse; da .loader-bar
+               dentro a #exit-curtain.glitching se barPulse deve andare avanti. */
         }
 
         #exit-curtain.glitching .loading-text {
@@ -1378,44 +1382,49 @@
 
                     const exitLoadingText = exitCurtain.querySelector('.loading-text');
                     const barContainer = exitCurtain.querySelector('.loader-bar-container');
-
-                    // Imposta il testo per l'effetto glitch sull'attributo data-text
                     const defaultCloseText = "CHIUSURA IN CORSO...";
-                    exitCurtain.setAttribute('data-text', exitLoadingText ? exitLoadingText.textContent : defaultCloseText);
+                    const glitchText = "ERRORE DI SISTEMA..."; // Testo per la fase glitch
 
-                    // 1. Mostra subito la tendina senza transizione per il glitch
+                    // Fase 1: Animazione normale (0.8 secondi)
+                    // Assicura che la classe 'glitching' sia rimossa e imposta il testo iniziale
+                    exitCurtain.classList.remove('glitching');
+                    if (exitLoadingText) exitLoadingText.textContent = defaultCloseText;
+                    exitCurtain.setAttribute('data-text', defaultCloseText); // Imposta data-text per il testo base del glitch
+                    if (barContainer) barContainer.style.display = 'flex'; // Mostra le barre di caricamento
+
+                    // Mostra immediatamente la tendina senza transizione di fade-in per questa fase
                     exitCurtain.classList.add('visible-no-transition');
-                    exitCurtain.style.display = 'flex'; // Assicura che sia visibile e flex
+                    exitCurtain.style.display = 'flex';
 
-                    // 2. Applica l'effetto glitch
-                    exitCurtain.classList.add('glitching');
-                    if (exitLoadingText) exitLoadingText.textContent = 'SYSTEM FAILURE... SHUTDOWN IMMINENT...'; // Testo durante il glitch
-                    if (barContainer) barContainer.style.display = 'flex'; // Mantieni le barre visibili o nascondile: barContainer.style.display = 'none';
-
-                    const glitchDuration = 2000; // Durata dell'effetto glitch in ms (es. 2 secondi)
-
+                    // Dopo 0.8 secondi, avvia l'effetto glitch
                     setTimeout(() => {
-                        // Rimuovi l'effetto glitch
-                        exitCurtain.classList.remove('glitching');
-                        // Non rimuovere 'visible-no-transition' qui se vuoi che rimanga visibile
-                        // Invece, lascia che la transizione di opacity definita su #exit-curtain (senza .glitching)
-                        // gestisca un eventuale fade-out se opacity viene cambiata a 0.
-                        // Per ora, semplicemente cambiamo il testo.
+                        // Fase 2: Effetto glitch (0.8 secondi)
+                        exitCurtain.classList.add('glitching');
+                        if (exitLoadingText) exitLoadingText.textContent = glitchText;
+                        // Aggiorna data-text se vuoi che il testo base del glitch cambi
+                        exitCurtain.setAttribute('data-text', glitchText); 
 
-                        if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata.';
-                        if (barContainer) barContainer.style.display = 'none'; // Nascondi le barre dopo il glitch
+                        // Dopo altri 0.8 secondi, termina l'effetto glitch e mostra lo stato finale
+                        setTimeout(() => {
+                            // Fase 3: Stato finale post-glitch
+                            exitCurtain.classList.remove('glitching');
+                            // Ripristina il testo e nascondi le barre se necessario, o lascialo come l'ultimo testo del glitch
+                            if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata.';
+                            if (barContainer) barContainer.style.display = 'none'; // Nascondi le barre
 
-                        // La tendina (#exit-curtain) rimarrà visibile con opacità 1
-                        // perché .visible-no-transition è ancora lì (o opacity:1 è l'ultimo stato).
+                            // La tendina rimane visibile con opacità 1
+                            // grazie a 'visible-no-transition' o perché opacity:1 è l'ultimo stato.
 
-                        // Chiamata a Macrodroid
-                        const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
-                        console.log("Attempting to trigger Macrodroid URL (no navigation): " + macrodroidUrl);
-                        fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
-                            .then(response => console.log('Macrodroid trigger request sent.'))
-                            .catch(error => console.error('Error sending Macrodroid trigger:', error));
+                            // Chiamata a Macrodroid
+                            const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
+                            console.log("Attempting to trigger Macrodroid URL (no navigation): " + macrodroidUrl);
+                            fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
+                                .then(response => console.log('Macrodroid trigger request sent.'))
+                                .catch(error => console.error('Error sending Macrodroid trigger:', error));
 
-                    }, glitchDuration);
+                        }, 800); // Durata dell'effetto glitch: 0.8 secondi
+
+                    }, 800); // Durata dell'animazione normale: 0.8 secondi
                 }
             });
         }
