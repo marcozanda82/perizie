@@ -21,7 +21,7 @@
             opacity: 1; /* Default per preloader */
             visibility: visible; /* Default per preloader */
         }
-        #preloader.hidden, #exit-curtain.hidden {
+        #preloader.hidden, #exit-curtain.hidden { /* La classe hidden gestisce la scomparsa */
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.7s ease-out, visibility 0.7s ease-out;
@@ -342,8 +342,7 @@
     </style>
 </head>
 <body>
-    <div id="preloader">
-        <div class="loader-bar-container">
+    <div id="preloader"> <div class="loader-bar-container">
             <div class="loader-bar"></div>
             <div class="loader-bar"></div>
             <div class="loader-bar"></div>
@@ -351,10 +350,8 @@
         <div class="loading-text">AVVIO IN CORSO...</div>
     </div>
 
-    <div id="exit-curtain">
-        <div class="loader-bar-container">
-            <div class="loader-bar"></div>
-            <div class="loader-bar"></div>
+    <div id="exit-curtain"> <div class="loader-bar-container">
+            <div class="loader-bar"></div> <div class="loader-bar"></div>
             <div class="loader-bar"></div>
         </div>
         <div class="loading-text">CHIUSURA IN CORSO...</div>
@@ -517,7 +514,7 @@
         </div>
     </div>
 <script>
-    // ... (JavaScript precedente, inclusa la definizione delle costanti globali per gli elementi dell'header) ...
+    // Variabili globali (mantenute come prima)
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
@@ -529,16 +526,13 @@
     const headerCircles = pageHeaderContainer.querySelector('.header-circles');
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons');
-
     const navButtons = navButtonsContainer.querySelectorAll('#mainPageNavButtons button[data-target]');
     const utilityButtons = navButtonsContainer.querySelectorAll('#utilityNavButtons button');
-
-
     const sections = document.querySelectorAll('#checklistContainer .category-section');
     const summaryContent = document.getElementById('summaryContent');
     const backToListBtn = pageHeaderContainer.querySelector('#backToListBtn');
     const historyBtn = pageHeaderContainer.querySelector('#historyBtn');
-    const exitAppBtn = pageHeaderContainer.querySelector('#exitAppBtn'); // Bottone Esci
+    const exitAppBtn = pageHeaderContainer.querySelector('#exitAppBtn');
     const clearAllProgressBtn = document.getElementById('clearAllProgressBtn');
     const backToLandingFromHistoryBtn = document.getElementById('backToLandingFromHistoryBtn');
     const saveAndReturnBtn = document.getElementById('saveAndReturnBtn');
@@ -547,12 +541,12 @@
     const isElectricVehicleCheckbox = document.getElementById('is_electric_vehicle');
     const cavoRapidaSelect = document.getElementById('cavo_ricarica_rapida');
     const cavoDomesticaSelect = document.getElementById('cavo_ricarica_domestica');
-
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
 
+    // Funzioni esistenti (mantenute come prima, eccetto initializeApp e aggiunta di loadAppContent)
     function handleElectricVehicleChange() {
         if (!isElectricVehicleCheckbox || !cavoRapidaSelect || !cavoDomesticaSelect) return;
         const isChecked = isElectricVehicleCheckbox.checked;
@@ -691,13 +685,10 @@
                 html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false })
                     .then(canvas => {
                         const link = document.createElement('a');
-
                         let targaSanitized = 'sconosciuta';
                         let piazzaleSanitized = 'piazzale_sconosciuto';
-
                         if (targaSelezionataGlobalmente) {
                             targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_');
-
                             const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
                             if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") {
                                 piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_');
@@ -706,7 +697,6 @@
                                 piazzaleSanitized = 'N_D';
                             }
                         }
-
                         link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`;
                         link.href = canvas.toDataURL('image/png');
                         document.body.appendChild(link);
@@ -735,16 +725,13 @@
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
-
         let bodyPaddingTopValue = '20px';
-
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
             navButtonsContainer.style.display = 'none';
             mainTitleGlobal.innerHTML = "Elenco Veicoli";
-
             const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked');
             if (activeRadio) activeRadio.checked = false;
             procediConPeriziaBtn.disabled = true;
@@ -754,12 +741,10 @@
             }
             targaSelezionataGlobalmente = null;
             updateNavButtonColors();
-
         } else if (viewName === 'checklist' || viewName === 'history') {
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
             navButtonsContainer.style.display = 'flex';
-
             if (viewName === 'checklist') {
                 if (!targaSelezionataGlobalmente) {
                     alert("Nessuna targa selezionata.");
@@ -784,7 +769,6 @@
             navButtonsContainer.style.display = 'none';
             mainTitleGlobal.innerHTML = "";
         }
-
         if (pageHeaderContainer.classList.contains('fixed-header')) {
             pageHeaderContainer.style.display = 'block';
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
@@ -799,7 +783,6 @@
     }
 
     function populateSavedTargasList() { savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targa = key.substring(`${APP_PREFIX}data_`.length); if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa);}}} if (tempSavedTargas.length > 0) hasSaves = true; tempSavedTargas.sort(); tempSavedTargas.forEach(targa => { const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' }; let displayText = targa; let details = []; if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`); if (details.length > 0) { displayText += ` - ${details.join(' ')}`; } const button = document.createElement('button'); button.classList.add('saved-targa-button'); button.textContent = displayText; button.dataset.targa = targa; button.addEventListener('click', function() { targaSelezionataGlobalmente = this.dataset.targa; showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstChecklistNavButton = Array.from(navButtons).find(btn => btn.dataset.target && btn.id !== 'backToListBtn' && btn.id !== 'historyBtn'); if (firstChecklistNavButton) { showSection(firstChecklistNavButton.dataset.target); } else if (navButtons.length > 0 && navButtons[0].dataset.target) { showSection(navButtons[0].dataset.target); }}); savedTargasListContainer.appendChild(button); }); if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>'; } }
-
     function clearAllSavedData() {
         if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni)?\n\nAzione irreversibile.")) {
             let c = 0;
@@ -810,10 +793,9 @@
                 }
             }
             alert(`${c} elementi cancellati.`);
-            // localStorage.removeItem(`${APP_PREFIX}preloaderPlayed_v2`); // Non più usato per il preloader ad ogni avvio
             populateSavedTargasList();
-            caricaEPopolaTarghe();
-            showView('landing');
+            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); // Ricarica le targhe per aggiornare lo stato
+            if (typeof showView === 'function') showView('landing');
         }
     }
 
@@ -841,11 +823,11 @@
 
     function popolaTargheFiltrate() {
         const tEl = document.getElementById('targaListContainer');
+        if (!tEl) return;
         tEl.innerHTML = '';
-        procediConPeriziaBtn.disabled = true;
+        if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
 
         const selectedSource = sheetFilterDropdown ? sheetFilterDropdown.value : 'all';
-
         let preliminaryFilteredList = selectedSource === 'all'
             ? [...listaTargheCompleta]
             : listaTargheCompleta.filter(item => item.piazzale === selectedSource);
@@ -853,78 +835,54 @@
         function getItemRank(item) {
             const isUrgent = item.isUrgent;
             const isCompleted = isTargaCompleted(item.targa);
-
             if (isUrgent && !isCompleted) return 1;
             if (!isUrgent && !isCompleted) return 2;
             if (!isUrgent && isCompleted) return 3;
             if (isUrgent && isCompleted) return 4;
             return 5;
         }
-
         preliminaryFilteredList.sort((a, b) => {
             const rankA = getItemRank(a);
             const rankB = getItemRank(b);
-
-            if (rankA !== rankB) {
-                return rankA - rankB;
-            }
+            if (rankA !== rankB) return rankA - rankB;
             return a.targa.localeCompare(b.targa);
         });
-
         const filteredList = preliminaryFilteredList;
 
         if (filteredList.length === 0) {
             tEl.innerHTML = '<p style="text-align:center; padding:10px; color: #aaa;">Nessuna targa trovata per questo filtro.</p>';
-            targheLoadingStatus.textContent = selectedSource === 'all' ? "Nessuna targa nel CSV." : `Nessuna targa per l'elenco: ${selectedSource}.`;
+            if(targheLoadingStatus) targheLoadingStatus.textContent = selectedSource === 'all' ? "Nessuna targa nel CSV." : `Nessuna targa per l'elenco: ${selectedSource}.`;
             return;
         }
-
         filteredList.forEach((item, idx) => {
             const li = document.createElement('div');
             li.classList.add('targa-list-item');
-
             const itemCompleted = isTargaCompleted(item.targa);
-
             if (item.isUrgent) {
                 li.classList.add('urgent-item');
-                if (itemCompleted) {
-                    li.classList.add('completed');
-                }
+                if (itemCompleted) li.classList.add('completed');
             } else {
                 if (itemCompleted) {
-                    li.classList.add('status-visto');
-                    li.classList.add('completed');
+                    li.classList.add('status-visto', 'completed');
                 } else {
                     li.classList.add('status-da-vedere');
                 }
             }
-
             const rId = `targa_radio_filt_${idx}_${Date.now()}`;
             const rb = document.createElement('input');
-            rb.type = 'radio';
-            rb.name = 'targa_selection_radio';
-            rb.value = item.targa;
-            rb.id = rId;
+            rb.type = 'radio'; rb.name = 'targa_selection_radio'; rb.value = item.targa; rb.id = rId;
             li.appendChild(rb);
-
             const lab = document.createElement('label');
-            lab.htmlFor = rId;
-            lab.classList.add('radio-label-container');
-
+            lab.htmlFor = rId; lab.classList.add('radio-label-container');
             const targaCol = document.createElement('span');
-            targaCol.classList.add('targa-col', 'targa-col-targa');
-            targaCol.textContent = item.targa || 'N/D';
+            targaCol.classList.add('targa-col', 'targa-col-targa'); targaCol.textContent = item.targa || 'N/D';
             lab.appendChild(targaCol);
-
             const posizioneCol = document.createElement('span');
             posizioneCol.classList.add('targa-col', 'targa-col-posizione');
             const posizioneInput = document.createElement('input');
-            posizioneInput.type = 'text';
-            posizioneInput.classList.add('posizione-input');
-            posizioneInput.dataset.targa = item.targa;
-            posizioneInput.placeholder = 'Pos.';
-            posizioneInput.maxLength = 5;
-            posizioneInput.value = loadPosizioneForTarga(item.targa);
+            posizioneInput.type = 'text'; posizioneInput.classList.add('posizione-input');
+            posizioneInput.dataset.targa = item.targa; posizioneInput.placeholder = 'Pos.';
+            posizioneInput.maxLength = 5; posizioneInput.value = loadPosizioneForTarga(item.targa);
             posizioneInput.addEventListener('mousedown', (e) => e.stopPropagation());
             posizioneInput.addEventListener('click', (e) => e.stopPropagation());
             posizioneInput.addEventListener('focus', (e) => e.stopPropagation());
@@ -937,37 +895,22 @@
                     setTimeout(() => { this.style.backgroundColor = ''; }, 1000);
                 }
             });
-            posizioneInput.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    this.blur();
-                }
-            });
+            posizioneInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { event.preventDefault(); this.blur(); }});
             posizioneCol.appendChild(posizioneInput);
             lab.appendChild(posizioneCol);
-
             const marcaCol = document.createElement('span');
-            marcaCol.classList.add('targa-col', 'targa-col-marca');
-            marcaCol.textContent = item.marca || 'N/D';
+            marcaCol.classList.add('targa-col', 'targa-col-marca'); marcaCol.textContent = item.marca || 'N/D';
             lab.appendChild(marcaCol);
-
             const modelloCol = document.createElement('span');
-            modelloCol.classList.add('targa-col', 'targa-col-modello');
-            modelloCol.textContent = item.modello || 'N/D';
+            modelloCol.classList.add('targa-col', 'targa-col-modello'); modelloCol.textContent = item.modello || 'N/D';
             lab.appendChild(modelloCol);
-
             const piazzaleCol = document.createElement('span');
-            piazzaleCol.classList.add('targa-col', 'targa-col-piazzale');
-            piazzaleCol.textContent = item.piazzale || 'N/D';
+            piazzaleCol.classList.add('targa-col', 'targa-col-piazzale'); piazzaleCol.textContent = item.piazzale || 'N/D';
             lab.appendChild(piazzaleCol);
-
             li.appendChild(lab);
-
             const delB = document.createElement('button');
-            delB.classList.add('action-button', 'delete-progress-btn');
-            delB.dataset.targa = item.targa;
-            delB.title = `Cancella progressi per ${item.targa}`;
-            delB.textContent = 'X';
+            delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = item.targa;
+            delB.title = `Cancella progressi per ${item.targa}`; delB.textContent = 'X';
             delB.addEventListener('click', function() {
                 const tDel = this.dataset.targa;
                 if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (inclusa posizione)?\n\nAzione irreversibile.`)) {
@@ -977,29 +920,26 @@
             li.appendChild(delB);
             tEl.appendChild(li);
         });
-
         document.querySelectorAll('input[name="targa_selection_radio"]').forEach(r => {
             r.addEventListener('change', function() {
                 if (this.checked) {
                     targaSelezionataGlobalmente = this.value;
-                    procediConPeriziaBtn.disabled = false;
+                    if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = false;
                 }
             });
         });
-        targheLoadingStatus.textContent = "Seleziona targa dall'elenco:";
+        if(targheLoadingStatus) targheLoadingStatus.textContent = "Seleziona targa dall'elenco:";
     }
 
-
     async function caricaEPopolaTarghe() {
-        targheLoadingStatus.textContent = "Caricamento...";
-        procediConPeriziaBtn.disabled = true;
+        if(targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento...";
+        if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
         try {
             const r=await fetch(GOOGLE_SHEET_CSV_URL);
             if(!r.ok){let e=`HTTP ${r.status}.`;if(r.status===0)e="Rete/CORS.";else if(r.status===404)e="CSV(404).";else if(r.status===403)e="Accesso(403).";throw new Error(e);}
             const csv=await r.text();
             const lines=csv.split(/\r\n|\n|\r/).filter(l=>l.trim()!=='');
-            if(lines.length===0){targheLoadingStatus.textContent="No dati CSV.";return;}
-
+            if(lines.length===0){if(targheLoadingStatus) targheLoadingStatus.textContent="No dati CSV.";return;}
             listaTargheCompleta = lines.map(l => {
                 const p = l.split(',');
                 return {
@@ -1010,9 +950,8 @@
                     isUrgent: (p[4] || '').trim().toUpperCase() === 'URGENTE'
                 };
             }).filter(i => i.targa && i.targa.length > 3);
-
             if(listaTargheCompleta.length===0){
-                targheLoadingStatus.textContent="No targhe valide nel CSV.";
+                if(targheLoadingStatus) targheLoadingStatus.textContent="No targhe valide nel CSV.";
                 if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
                 if (targaListContainer) targaListContainer.innerHTML = '';
                 return;
@@ -1021,23 +960,20 @@
             popolaTargheFiltrate();
         } catch(e) {
             console.error("Errore caricamento/popolamento targhe:",e);
-            targheLoadingStatus.textContent=`Errore: ${e.message}.`;
+            if(targheLoadingStatus) targheLoadingStatus.textContent=`Errore: ${e.message}.`;
             if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
             if (targaListContainer) targaListContainer.innerHTML = '';
         }
     }
 
-    procediConPeriziaBtn.addEventListener('click', () => { if(targaSelezionataGlobalmente){ showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstNav = Array.from(navButtons).find(b=>b.dataset.target && b.id!=='backToListBtn' && b.id!=='historyBtn' && b.id!=='exitAppBtn'); if(firstNav)showSection(firstNav.dataset.target); else if(navButtons.length>0&&navButtons[0].dataset.target)showSection(navButtons[0].dataset.target);} else alert("Seleziona targa.");});
+    if(procediConPeriziaBtn) procediConPeriziaBtn.addEventListener('click', () => { if(targaSelezionataGlobalmente){ showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstNav = Array.from(navButtons).find(b=>b.dataset.target && b.id!=='backToListBtn' && b.id!=='historyBtn' && b.id!=='exitAppBtn'); if(firstNav)showSection(firstNav.dataset.target); else if(navButtons.length>0&&navButtons[0].dataset.target)showSection(navButtons[0].dataset.target);} else alert("Seleziona targa.");});
 
     function initSequentialAnimation() {
         const checklistContainerDiv = document.getElementById('checklistContainer');
         if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return;
-
         const activeSection = checklistContainerDiv.querySelector('.category-section.active');
         if (!activeSection) return;
-
         activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me'));
-
         const elementsToAnimate = Array.from(
             activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)')
         ).filter(el => {
@@ -1048,10 +984,8 @@
             }
             return el.offsetParent !== null;
         });
-
         let currentIndex = 0;
         let activeListeners = [];
-
         function clearAllActiveAnimationListeners() {
             activeListeners.forEach(({element, type, handler}) => {
                 element.removeEventListener(type, handler);
@@ -1060,15 +994,10 @@
             activeListeners = [];
         }
         clearAllActiveAnimationListeners();
-
-
         function animateNextElement() {
-            if (currentIndex >= elementsToAnimate.length) {
-                return;
-            }
+            if (currentIndex >= elementsToAnimate.length) return;
             const currentElement = elementsToAnimate[currentIndex];
             currentElement.classList.add('animate-me');
-
             const onValueChange = () => {
                 currentElement.classList.remove('animate-me');
                 currentElement.removeEventListener('change', onValueChange);
@@ -1076,16 +1005,11 @@
                 currentIndex++;
                 setTimeout(animateNextElement, 50);
             };
-
             currentElement.addEventListener('change', onValueChange);
             activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
         }
-
-        if (elementsToAnimate.length > 0) {
-            animateNextElement();
-        }
+        if (elementsToAnimate.length > 0) animateNextElement();
     }
-
 
     function showSection(targetId) {
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
@@ -1096,7 +1020,6 @@
             b.classList.toggle('active', b.dataset.target === targetId);
         });
         updateNavButtonColors();
-
         const targetSectionElement = document.getElementById(targetId + 'Section');
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
              setTimeout(initSequentialAnimation, 50);
@@ -1104,7 +1027,6 @@
             generateSummary();
         }
     }
-
 
     navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
 
@@ -1122,149 +1044,112 @@
     function generateSummary() {
         summaryContent.innerHTML = '';
         let targa = targaSelezionataGlobalmente || "N/D";
-
         function createSummaryItem(label, value, isAnomaly = false) {
             const itemDiv = document.createElement('div');
             itemDiv.classList.add('summary-item');
-            if (isAnomaly) {
-                itemDiv.classList.add('summary-anomaly');
-            }
+            if (isAnomaly) itemDiv.classList.add('summary-anomaly');
             itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`;
             return itemDiv;
         }
-
         summaryContent.appendChild(createSummaryItem("Targa", targa));
-
         if (targaSelezionataGlobalmente) {
             const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
-            let marcaVeicolo = "N/D";
-            let modelloVeicolo = "N/D";
-
+            let marcaVeicolo = "N/D", modelloVeicolo = "N/D";
             if (veicoloAttuale) {
                 marcaVeicolo = veicoloAttuale.marca || "N/D";
                 modelloVeicolo = veicoloAttuale.modello || "N/D";
             }
             summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo));
             summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo));
-
-            const posizioneVeicolo = loadPosizioneForTarga(targaSelezionataGlobalmente);
-            summaryContent.appendChild(createSummaryItem("Posizione", posizioneVeicolo || "N/D"));
+            summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D"));
         } else {
             summaryContent.appendChild(createSummaryItem("Marca", "N/D"));
             summaryContent.appendChild(createSummaryItem("Modello", "N/D"));
             summaryContent.appendChild(createSummaryItem("Posizione", "N/D"));
         }
-
         summaryContent.innerHTML += `<h3>Remarketing:</h3>`;
         const isEV = document.getElementById('is_electric_vehicle') && document.getElementById('is_electric_vehicle').checked;
         summaryContent.appendChild(createSummaryItem("Trazione Elettrica", isEV ? "Sì" : "No"));
-
-        let equipaggiamento = getSelectText('tipo_equipaggiamento');
-        let presenzaEquip = getSelectText('equipaggiamento_presenza');
+        let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza');
         let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante");
         summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante"));
         summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia));
-
         let kmStato = getSelectText('stato_chilometri');
         summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili"));
-
         let cdcStato = getSelectText('stato_cdc');
         summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante"));
-
         summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente"));
         summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente"));
-
         if (isEV) {
             summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`;
-            let cavoRapidaStato = getSelectText('cavo_ricarica_rapida');
-            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaStato, cavoRapidaStato === "Non Presente"));
-
-            let cavoDomesticaStato = getSelectText('cavo_ricarica_domestica');
-            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaStato, cavoDomesticaStato === "Non Presente"));
+            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", getSelectText('cavo_ricarica_rapida'), getSelectText('cavo_ricarica_rapida') === "Non Presente"));
+            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", getSelectText('cavo_ricarica_domestica'), getSelectText('cavo_ricarica_domestica') === "Non Presente"));
         }
-
-
         summaryContent.innerHTML += `<h3>Pneumatici:</h3>`;
-        const pneumaticiFields = [
-            { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' },
-            { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }
-        ];
-        pneumaticiFields.forEach(pneu => {
-            let pneuStato = getSelectText(pneu.id);
-            summaryContent.appendChild(createSummaryItem(pneu.label, pneuStato, pneuStato === "Non conforme"));
-        });
-
+        const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }];
+        pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); });
         summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`;
         summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK'));
         summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK'));
-
         const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : "";
         if (noteDanniValue) {
             const noteDiv = document.createElement('div');
             noteDiv.classList.add('summary-item', 'summary-notes');
-            const strongNode = document.createElement('strong');
-            strongNode.textContent = "Note Danni/Verifiche: ";
+            const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: ";
             const contentDiv = document.createElement('div');
-            contentDiv.style.whiteSpace = 'pre-wrap';
-            contentDiv.style.paddingLeft = '10px';
-            contentDiv.textContent = noteDanniValue;
-
-            noteDiv.appendChild(strongNode);
-            noteDiv.appendChild(contentDiv);
+            contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue;
+            noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv);
             summaryContent.appendChild(noteDiv);
         }
     }
 
-    async function loadAppContent() { // Funzione per caricare il contenuto dopo il preloader
+    // Funzione separata per caricare il contenuto dell'app dopo il preloader
+    async function loadAppContent() {
         showView('landing');
         await caricaEPopolaTarghe();
+        // Qui potrebbero esserci altre inizializzazioni specifiche dell'app
+        // che devono avvenire dopo il caricamento delle targhe.
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        // Riferimento al preloader spostato qui per essere accessibile da initializeApp
         const preloader = document.getElementById('preloader');
-        // const PRELOADER_FLAG = `${APP_PREFIX}preloaderPlayed_v2`; // Non più necessario
 
         async function initializeApp() {
             if (preloader) {
+                // Assicura che il preloader sia visibile all'inizio
                 preloader.style.display = 'flex';
-                preloader.classList.remove('hidden');
+                preloader.classList.remove('hidden'); // Rimuovi 'hidden' se presente da stati precedenti
                 preloader.style.opacity = '1';
                 preloader.style.visibility = 'visible';
 
                 const loadingText = preloader.querySelector('.loading-text');
                 if (loadingText) loadingText.textContent = 'AVVIO IN CORSO...';
 
+                // Dopo 3 secondi, inizia a nascondere il preloader e carica il contenuto dell'app
                 setTimeout(() => {
                     if (preloader) {
-                        preloader.classList.add('hidden'); // Attiva la transizione CSS
-                        // La transizione CSS gestirà display: none tramite l'evento 'transitionend'
-                        // o un fallback timeout per sicurezza.
-                        const hidePreloaderOnEnd = () => {
-                            if (preloader.classList.contains('hidden') && preloader.style.opacity === '0') {
-                                preloader.style.display = 'none';
-                            }
-                            preloader.removeEventListener('transitionend', hidePreloaderOnEnd);
-                        };
-                        preloader.addEventListener('transitionend', hidePreloaderOnEnd);
-                        // Fallback se transitionend non si attiva correttamente
+                        preloader.classList.add('hidden'); // Questo attiverà la transizione CSS
+
+                        // Dopo la durata della transizione (0.7s), imposta display a none
                         setTimeout(() => {
-                           if (preloader.classList.contains('hidden') && preloader.style.opacity === '0') {
-                                preloader.style.display = 'none';
-                           }
-                        }, 750); // Durata transizione + piccolo buffer
+                            if(preloader) preloader.style.display = 'none';
+                        }, 700); // Corrisponde alla durata della transizione in CSS (0.7s)
                     }
-                    loadAppContent(); // Carica il contenuto dell'app dopo che il preloader inizia a nascondersi
-                }, 3000); // Il preloader rimane visibile per 3 secondi, poi inizia la transizione di uscita
+                    // Carica il contenuto principale dell'applicazione.
+                    // Questo può iniziare mentre il preloader sta svanendo.
+                    loadAppContent();
+                }, 3000); // Il preloader rimane visibile per 3 secondi
             } else {
-                loadAppContent(); // Carica direttamente se il preloader non esiste
+                // Se l'elemento preloader non esiste per qualche motivo, carica il contenuto direttamente
+                loadAppContent();
             }
         }
-
 
         if (isElectricVehicleCheckbox) {
             isElectricVehicleCheckbox.addEventListener('change', handleElectricVehicleChange);
         }
-        handleElectricVehicleChange(); // Stato iniziale cavi
+        handleElectricVehicleChange();
 
         initializeApp(); // Avvia l'app
 
@@ -1272,10 +1157,9 @@
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
         if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData);
         if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
-        if(saveAndReturnBtn)saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn);
+        if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
 
-        // Gestione pulsante Esci
         if (exitAppBtn) {
             exitAppBtn.addEventListener('click', () => {
                 const exitCurtain = document.getElementById('exit-curtain');
@@ -1290,21 +1174,18 @@
                     exitCurtain.style.display = 'flex';
                     const exitLoadingText = exitCurtain.querySelector('.loading-text');
                     if (exitLoadingText) exitLoadingText.textContent = 'CHIUSURA IN CORSO...';
-
                     const barContainer = exitCurtain.querySelector('.loader-bar-container');
-                    if(barContainer) barContainer.style.display = 'flex'; // Assicura sia visibile
+                    if(barContainer) barContainer.style.display = 'flex';
 
-                    setTimeout(() => { // Permetti al display:flex di applicarsi prima della transizione di opacità
-                        exitCurtain.classList.remove('hidden'); // Rimuove hidden per attivare transizione di entrata
+                    setTimeout(() => {
+                        exitCurtain.classList.remove('hidden');
                         exitCurtain.style.opacity = '1';
                         exitCurtain.style.visibility = 'visible';
                     }, 20);
 
-
-                    setTimeout(() => { // Dopo 2.5 secondi cambia testo e nasconde barre
+                    setTimeout(() => {
                         if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata. Puoi chiudere questa scheda.';
                         if(barContainer) barContainer.style.display = 'none';
-                        // Non si può chiudere la tab programmaticamente in modo affidabile.
                     }, 2500);
                 }
             });
