@@ -725,7 +725,19 @@
     async function handleSavePeriziaAndReturn() { if(!targaSelezionataGlobalmente){alert("No targa attiva.");return;} if(!saveProgress(targaSelezionataGlobalmente)){alert("Salvataggio dati fallito.");return;} if(document.getElementById('riepilogoSection').classList.contains('active')){generateSummary();} try{await generateAndDownloadScreenshot();}catch(e){console.warn("Screenshot fallito, ma dati salvati.");} markTargaAsCompleted(targaSelezionataGlobalmente); updateNavButtonColors(); alert(`Perizia per ${targaSelezionataGlobalmente} salvata, screenshot tentato, completata. Torno all'elenco.`); targaSelezionataGlobalmente=null;showView('landing');}
     function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
 
-    function isInputDefault(inputElement) { if (inputElement.type === 'checkbox') return !inputElement.checked; if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0; return true; }
+    function isInputDefault(inputElement) {
+        if (!inputElement) return true; // Consider null/undefined as default (or unvalued)
+        if (inputElement.disabled) return false; // Consider disabled elements as "not needing valuation" thus not default for animation start.
+                                                // This means animation won't start on a disabled field.
+        if (inputElement.type === 'checkbox') return !inputElement.checked;
+        if (inputElement.tagName === 'SELECT') {
+            return inputElement.value === "" || inputElement.selectedIndex === 0;
+        }
+        // Default for other types, or if no specific check, assume it's default if empty.
+        // For this app, only checkbox and select are animated.
+        return true;
+    }
+
 
     function getSectionInputs(sectionElementId) {
         const sectionDiv = document.getElementById(sectionElementId);
@@ -1016,10 +1028,13 @@
     function initSequentialAnimation() {
         const checklistContainerDiv = document.getElementById('checklistContainer');
         if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return;
+
         const activeSection = checklistContainerDiv.querySelector('.category-section.active');
         if (!activeSection) return;
+
         activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me'));
-        const elementsToAnimate = Array.from(
+
+        const allPotentiallyAnimatableElements = Array.from(
             activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)')
         ).filter(el => {
             let current = el;
@@ -1029,8 +1044,24 @@
             }
             return el.offsetParent !== null;
         });
-        let currentIndex = 0;
+
+        let startingIndex = -1;
+        for (let i = 0; i < allPotentiallyAnimatableElements.length; i++) {
+            if (isInputDefault(allPotentiallyAnimatableElements[i])) {
+                startingIndex = i;
+                break;
+            }
+        }
+
+        if (startingIndex === -1) { // Tutti gli elementi sono valorizzati o non ci sono elementi
+            return;
+        }
+
+        const elementsToAnimate = allPotentiallyAnimatableElements;
+        let currentIndex = startingIndex; // Inizia l'animazione dal primo elemento non valorizzato
+
         let activeListeners = [];
+
         function clearAllActiveAnimationListeners() {
             activeListeners.forEach(({element, type, handler}) => {
                 element.removeEventListener(type, handler);
@@ -1039,21 +1070,56 @@
             activeListeners = [];
         }
         clearAllActiveAnimationListeners();
+
         function animateNextElement() {
-            if (currentIndex >= elementsToAnimate.length) return;
+            if (currentIndex >= elementsToAnimate.length) {
+                return;
+            }
+
             const currentElement = elementsToAnimate[currentIndex];
+
+            // Se l'elemento corrente è già valorizzato (non dovrebbe succedere con la logica di startingIndex e il while sotto),
+            // o se è disabilitato (di nuovo, non dovrebbe succedere a causa del querySelectorAll iniziale), salta.
+            if (!isInputDefault(currentElement) || currentElement.disabled) {
+                currentIndex++;
+                // Trova il prossimo elemento effettivamente non valorizzato e abilitato
+                while(currentIndex < elementsToAnimate.length && (!isInputDefault(elementsToAnimate[currentIndex]) || elementsToAnimate[currentIndex].disabled)) {
+                    currentIndex++;
+                }
+                if (currentIndex < elementsToAnimate.length) {
+                     setTimeout(animateNextElement, 0); // Prova subito il prossimo
+                }
+                return;
+            }
+
             currentElement.classList.add('animate-me');
+            // currentElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+
+
             const onValueChange = () => {
                 currentElement.classList.remove('animate-me');
                 currentElement.removeEventListener('change', onValueChange);
-                activeListeners = activeListeners.filter(listener => listener.handler !== onValueChange);
+                activeListeners = activeListeners.filter(listener => !(listener.element === currentElement && listener.handler === onValueChange));
+
                 currentIndex++;
-                setTimeout(animateNextElement, 50);
+                // Muoviti al prossimo elemento non valorizzato e abilitato
+                while (currentIndex < elementsToAnimate.length && (!isInputDefault(elementsToAnimate[currentIndex]) || elementsToAnimate[currentIndex].disabled) ) {
+                    currentIndex++;
+                }
+
+                if (currentIndex < elementsToAnimate.length) {
+                    setTimeout(animateNextElement, 50);
+                }
             };
+
             currentElement.addEventListener('change', onValueChange);
             activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
         }
-        if (elementsToAnimate.length > 0) animateNextElement();
+
+        // Assicurati che startingIndex sia valido prima di iniziare
+        if (elementsToAnimate.length > 0 && startingIndex < elementsToAnimate.length) {
+            animateNextElement();
+        }
     }
 
     function showSection(targetId) {
@@ -1214,19 +1280,16 @@
                     const barContainer = exitCurtain.querySelector('.loader-bar-container');
                     if(barContainer) barContainer.style.display = 'flex';
 
-                    setTimeout(() => { // Permetti al display:flex di applicarsi prima della transizione di opacità
+                    setTimeout(() => {
                         exitCurtain.classList.remove('hidden');
                         exitCurtain.style.opacity = '1';
                         exitCurtain.style.visibility = 'visible';
                     }, 20);
 
-
-                    // Timeout per la durata dell'animazione "CHIUSURA IN CORSO..." (dimezzata)
                     setTimeout(() => {
                         if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata. Puoi chiudere questa scheda.';
-                        if(barContainer) barContainer.style.display = 'none'; // Nascondi le barre
+                        if(barContainer) barContainer.style.display = 'none';
 
-                        // Trigger Macrodroid Webhook DOPO che l'animazione è terminata e il testo è cambiato
                         const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
                         fetch(macrodroidUrl.trim())
                             .then(response => {
@@ -1239,7 +1302,7 @@
                             .catch(error => {
                                 console.error('Error sending Macrodroid trigger HTTP request:', error);
                             });
-                    }, 1250); // DURATA ANIMAZIONE USCITA DIMEZZATA (era 2500ms)
+                    }, 1250); // DURATA ANIMAZIONE USCITA DIMEZZATA
                 }
             });
         }
