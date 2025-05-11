@@ -12,13 +12,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.75); /* Sfondo semitrasparente */
+            background-color: rgba(0, 0, 0, 0.75); /* Sfondo semitrasparente per preloader */
             z-index: 99999;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            opacity: 1; /* Opacità dell'elemento preloader stesso */
+            opacity: 1;
             visibility: visible;
         }
         #preloader.hidden {
@@ -27,7 +27,6 @@
             transition: opacity 0.7s ease-out, visibility 0.7s ease-out;
         }
 
-        /* Modifiche per #exit-curtain e aggiunta stili glitch */
         #exit-curtain {
             position: fixed;
             top: 0;
@@ -36,12 +35,12 @@
             height: 100%;
             background-color: #000000;
             z-index: 99999;
-            display: flex; 
+            display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            opacity: 0; 
-            visibility: hidden; 
+            opacity: 0;
+            visibility: hidden;
             transition: opacity 0.5s ease-in, visibility 0.5s ease-in;
         }
 
@@ -51,18 +50,18 @@
              transition: opacity 0.7s ease-out, visibility 0.7s ease-out;
         }
 
-        #exit-curtain.visible-no-transition { 
+        #exit-curtain.visible-no-transition {
             opacity: 1;
             visibility: visible;
             transition: none;
         }
 
-        .loader-bar-container { 
+        .loader-bar-container {
             display: flex;
             gap: 10px;
             margin-bottom: 25px;
         }
-        .loader-bar { 
+        .loader-bar {
             width: 15px;
             height: 70px;
             background-color: #007bff;
@@ -73,8 +72,8 @@
         .loader-bar:nth-child(2) { animation-delay: 0.2s; }
         .loader-bar:nth-child(3) { animation-delay: 0.4s; }
 
-        #exit-curtain:not(.glitching) .loader-bar {
-            animation-direction: reverse; 
+        #exit-curtain:not(.glitching):not(.tv-off-effect) .loader-bar {
+            animation-direction: reverse;
         }
         
         @keyframes barPulse {
@@ -85,54 +84,67 @@
         #preloader .loading-text, #exit-curtain .loading-text {
             font-size: 1.6em;
             letter-spacing: 1px;
+            /* textGlow non si applica più di default a #exit-curtain .loading-text se non specificato da JS o altre classi */
+        }
+        #preloader .loading-text {
+            color: #00aeff;
             animation: textGlow 1.8s infinite alternate ease-in-out;
         }
-        #preloader .loading-text {  color: #00aeff; } 
-        #exit-curtain .loading-text { color: #ff8787; } 
+        /* Il colore e animazione per #exit-curtain .loading-text sarà gestito dinamicamente */
+        #exit-curtain .loading-text {
+             color: #ff8787; /* Colore base per chiusura normale, se visibile */
+        }
 
-        @keyframes textGlow { 
+
+        @keyframes textGlow {
           from { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; opacity: 0.8;}
           to   { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; opacity: 1;}
         }
 
+        /* Stili per l'effetto Glitch */
         #exit-curtain.glitching .loader-bar-container {
-            /* Stili opzionali per barre durante glitch */
+            /* Mantieni le barre standard visibili durante il glitch o nascondile: */
+            /* display: none !important; */ 
         }
+         #exit-curtain.glitching:not(.tv-off-effect) .loader-bar { /* Assicura che barPulse continui normalmente durante il glitch */
+            animation-direction: normal; /* o rimuovi l'override */
+        }
+
 
         #exit-curtain.glitching .loading-text {
             animation: glitchText 0.8s infinite steps(1, end), textGlow 1.8s infinite alternate ease-in-out;
-            color: #ff3030; 
-            position: relative; 
+            color: #ff3030;
+            position: relative;
             z-index: 10;
         }
 
         #exit-curtain.glitching::before,
         #exit-curtain.glitching::after {
-            content: attr(data-text); 
+            content: attr(data-text);
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%); 
-            width: auto; 
-            padding: 0 20px; 
+            transform: translate(-50%, -50%);
+            width: auto;
+            padding: 0 20px;
             text-align: center;
-            font-size: 1.6em; 
-            letter-spacing: 1px; 
+            font-size: 1.6em;
+            letter-spacing: 1px;
             background: #000000;
             overflow: hidden;
-            clip-path: inset(50% 50% 50% 50%); 
-            z-index: 5; 
+            clip-path: inset(50% 50% 50% 50%);
+            z-index: 5;
         }
 
         #exit-curtain.glitching::before {
-            color: #00ffff; 
+            color: #00ffff;
             animation: glitchEffect 0.3s infinite linear alternate-reverse;
         }
 
         #exit-curtain.glitching::after {
-            color: #ff00ff; 
+            color: #ff00ff;
             animation: glitchEffect 0.2s infinite linear alternate-reverse, glitchSkew 0.5s infinite linear alternate;
-            animation-delay: -0.1s; 
+            animation-delay: -0.1s;
         }
 
         @keyframes glitchEffect {
@@ -166,6 +178,33 @@
             80% { text-shadow: 0px -2px 3px red, 0px 2px 5px blue, 0 0 1px white; transform: translateX(1px) translateY(-2px) skewX(-5deg); opacity: 1;}
             90% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-1px) translateY(1px) skewX(1deg); opacity: 0.9;}
         }
+
+        /* Stili per l'effetto TV Off */
+        #exit-curtain.tv-off-effect .loading-text {
+            /* Sovrascrive animazioni precedenti come textGlow o glitchText */
+            animation: tvOffCollapse 0.4s forwards ease-out;
+            color: #FFFFFF; /* Testo bianco per contrasto su sfondo nero */
+            text-shadow: none; /* Rimuove eventuali ombre o bagliori */
+            transform-origin: center center; /* Assicura che il collasso avvenga verso il centro */
+        }
+
+        @keyframes tvOffCollapse {
+            0% {
+                transform: scaleX(1) scaleY(1);
+                opacity: 1;
+            }
+            70% {
+                /* Collassa orizzontalmente a una linea sottile */
+                transform: scaleX(0.03) scaleY(1);
+                opacity: 0.7;
+            }
+            100% {
+                /* Collassa la linea verticalmente e svanisce */
+                transform: scaleX(0.03) scaleY(0.03);
+                opacity: 0;
+            }
+        }
+
 
         .header-circles { display: flex; justify-content: space-around; align-items: center; width: 100%; padding: 8px 0; box-sizing: border-box; }
         .circle {
@@ -267,7 +306,7 @@
         #landingPageSection, .category-section, #historyPageSection { padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a; max-width: 850px; margin-left: auto; margin-right: auto; }
 
         .category-section, #historyPageSection { display: none; }
-        #landingPageSection { display: block; }
+        #landingPageSection { display: block; } /* Modificato per essere visibile by default se il preloader lo copre */
         .category-section.active { display: block; }
 
         .summary-item { margin-bottom: 8px; padding: 8px; background-color: #333; border-radius: 3px; }
@@ -431,7 +470,8 @@
         <div class="loading-text">AVVIO IN CORSO...</div>
     </div>
 
-    <div id="exit-curtain" data-text="CHIUSURA IN CORSO..."> <div class="loader-bar-container">
+    <div id="exit-curtain" data-text="CHIUSURA IN CORSO...">
+        <div class="loader-bar-container">
             <div class="loader-bar"></div>
             <div class="loader-bar"></div>
             <div class="loader-bar"></div>
@@ -460,8 +500,7 @@
     </div>
 
     <div class="content-wrapper" id="mainContentWrapper">
-        <div id="landingPageSection" style="display: block;">
-            <h2 style="margin-top: 10px;">Seleziona Veicolo da Periziare</h2>
+        <div id="landingPageSection" style="display: block;"> <h2 style="margin-top: 10px;">Seleziona Veicolo da Periziare</h2>
             <div id="sheetFilterContainer">
                 <label for="sheetFilterDropdown">Filtra per Elenco:</label>
                 <select id="sheetFilterDropdown">
@@ -853,16 +892,19 @@
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
-        let bodyPaddingTopValue = '20px';
+        let bodyPaddingTopValue = '20px'; // Default padding
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
             navButtonsContainer.style.display = 'none';
             mainTitleGlobal.innerHTML = "Elenco Veicoli";
-            if (listaTargheCompleta.length > 0 && typeof popolaTargheFiltrate === 'function') {
-                // Non chiamare popolaTargheFiltrate() qui se il preloader è ancora attivo
-                // Sarà chiamato da caricaEPopolaTarghe()
+            // Se le targhe sono già state caricate E il preloader non è più attivo, popola
+            // Altrimenti, caricaEPopolaTarghe si occuperà di popolarle dopo il caricamento
+            if (listaTargheCompleta.length > 0 && 
+                (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
+                typeof popolaTargheFiltrate === 'function') {
+                popolaTargheFiltrate();
             }
             targaSelezionataGlobalmente = null;
             updateNavButtonColors();
@@ -882,24 +924,26 @@
                     ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
                     : "";
                 mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
-            } else {
+            } else { // history
                 historyPageSection.style.display = 'block';
                 mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
                 populateSavedTargasList();
             }
             updateNavButtonColors();
-        } else {
+        } else { // Should not happen, but good for default
             pageHeaderContainer.classList.remove('fixed-header');
             headerCircles.style.display = 'none';
             navButtonsContainer.style.display = 'none';
-            mainTitleGlobal.innerHTML = "";
+            mainTitleGlobal.innerHTML = ""; // Clear title
         }
-        if (pageHeaderContainer.classList.contains('fixed-header')) {
-            pageHeaderContainer.style.display = 'block';
+
+        // Adjust body padding based on fixed header presence and visibility
+        if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
         } else {
             let nonFixedHeaderHeight = 0;
-            if (mainTitleGlobal && typeof getComputedStyle === 'function' && getComputedStyle(mainTitleGlobal).display !== 'none') {
+            // Consider only mainTitleGlobal if it's the only visible part of a non-fixed header
+            if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {
                  nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
             }
             bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
@@ -1090,15 +1134,16 @@
     }
 
     async function caricaEPopolaTarghe() {
-        const preloader = document.getElementById('preloader'); // Ensure preloader ref is available
-        // The message in 'targheLoadingStatus' might be hidden by preloader, but that's ok.
-        // The preloader itself has a message.
+        const preloader = document.getElementById('preloader');
+        // Il messaggio in 'targheLoadingStatus' è visibile sotto il preloader semitrasparente
+        if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server...";
+
 
         try {
             const r = await fetch(GOOGLE_SHEET_CSV_URL);
             if (!r.ok) {
                 let e = `HTTP ${r.status}.`;
-                if (r.status === 0) e = "Rete/CORS.";
+                if (r.status === 0) e = "Errore di rete o CORS.";
                 else if (r.status === 404) e = "File CSV non trovato (404).";
                 else if (r.status === 403) e = "Accesso al file CSV negato (403).";
                 throw new Error(e);
@@ -1108,10 +1153,10 @@
             
             if (lines.length === 0) {
                 if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV.";
-                listaTargheCompleta = []; // Ensure list is empty
+                listaTargheCompleta = []; 
                 if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
                 if (targaListContainer) targaListContainer.innerHTML = '';
-                return; // Exit early if no lines
+                return; 
             }
 
             listaTargheCompleta = lines.map(l => {
@@ -1129,7 +1174,7 @@
                 if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";
                  if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
                 if (targaListContainer) targaListContainer.innerHTML = '';
-                return; // Exit if no valid plates
+                return; 
             }
             
             setupSheetFilterDropdown();
@@ -1140,13 +1185,13 @@
             if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`;
             if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
             if (targaListContainer) targaListContainer.innerHTML = '';
-             listaTargheCompleta = []; // Ensure list is empty on error too
+             listaTargheCompleta = []; 
         } finally {
             if (preloader) {
                 preloader.classList.add('hidden');
                 setTimeout(() => {
                     if (preloader) preloader.style.display = 'none';
-                }, 700); // Match CSS transition duration
+                }, 700); 
             }
         }
     }
@@ -1336,7 +1381,6 @@
         }
     }
 
-
     document.addEventListener('DOMContentLoaded', () => {
         const preloader = document.getElementById('preloader');
 
@@ -1353,11 +1397,10 @@
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
         
-        // New initialization sequence
         async function initializeApplicationViewAndLoadData() {
             showView('landing'); // Setup and display the landing page view first.
 
-            if (preloader) { // Then, display the preloader overlay.
+            if (preloader) { 
                 preloader.style.display = 'flex';
                 preloader.classList.remove('hidden');
                 preloader.style.opacity = '1'; 
@@ -1366,12 +1409,11 @@
                 if (loadingText) loadingText.textContent = 'CARICAMENTO ELENCO...';
             }
 
-            await caricaEPopolaTarghe(); // Load data. Preloader will be hidden within this function.
+            await caricaEPopolaTarghe(); 
         }
 
-        initializeApplicationViewAndLoadData(); // Start the application loading process
+        initializeApplicationViewAndLoadData();
 
-        // Exit button logic (remains as previously modified)
         if (exitAppBtn) {
             exitAppBtn.addEventListener('click', () => {
                 const exitCurtain = document.getElementById('exit-curtain');
@@ -1381,16 +1423,21 @@
                 if (exitCurtain) {
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none';
                     if (pageHeader) pageHeader.style.display = 'none';
-                    document.body.style.paddingTop = '0px'; 
+                    document.body.style.paddingTop = '0px';
 
                     const exitLoadingText = exitCurtain.querySelector('.loading-text');
                     const barContainer = exitCurtain.querySelector('.loader-bar-container');
                     const defaultCloseText = "CHIUSURA IN CORSO...";
-                    const glitchText = "ERRORE DI SISTEMA..."; 
+                    const glitchText = "ERRORE DI SISTEMA...";
 
-                    exitCurtain.classList.remove('glitching');
-                    if (exitLoadingText) exitLoadingText.textContent = defaultCloseText;
-                    exitCurtain.setAttribute('data-text', defaultCloseText); 
+                    exitCurtain.classList.remove('glitching', 'tv-off-effect'); 
+                    if (exitLoadingText) {
+                        exitLoadingText.textContent = defaultCloseText;
+                        exitLoadingText.style.animation = 'textGlow 1.8s infinite alternate ease-in-out'; // Ripristina animazione glow base
+                        exitLoadingText.style.color = '#ff8787'; 
+                        exitLoadingText.style.textShadow = ''; 
+                    }
+                    exitCurtain.setAttribute('data-text', defaultCloseText);
                     if (barContainer) barContainer.style.display = 'flex'; 
 
                     exitCurtain.classList.add('visible-no-transition');
@@ -1398,19 +1445,35 @@
 
                     setTimeout(() => {
                         exitCurtain.classList.add('glitching');
-                        if (exitLoadingText) exitLoadingText.textContent = glitchText;
-                        exitCurtain.setAttribute('data-text', glitchText); 
+                        if (exitLoadingText) {
+                           exitLoadingText.textContent = glitchText;
+                           // L'animazione per il glitch (glitchText, textGlow) è applicata da CSS tramite .glitching .loading-text
+                           // Ma per sicurezza, ressettiamo animation per farla ripartire correttamente
+                           exitLoadingText.style.animation = ''; // Lascia che CSS applichi le animazioni del glitch
+                        }
+                        exitCurtain.setAttribute('data-text', glitchText);
 
                         setTimeout(() => {
                             exitCurtain.classList.remove('glitching');
-                            if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata.';
+                            if (exitLoadingText) {
+                                exitLoadingText.textContent = 'Applicazione terminata.';
+                                exitLoadingText.style.animation = 'none'; 
+                                exitLoadingText.style.color = '#FFFFFF';     
+                                exitLoadingText.style.textShadow = 'none';    
+                            }
                             if (barContainer) barContainer.style.display = 'none'; 
 
-                            const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
-                            fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
-                                .then(response => console.log('Macrodroid trigger request sent.'))
-                                .catch(error => console.error('Error sending Macrodroid trigger:', error));
+                            setTimeout(() => {
+                                exitCurtain.classList.add('tv-off-effect');
+                                // L'animazione tvOffCollapse è applicata da CSS
 
+                                setTimeout(() => {
+                                    const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
+                                    fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
+                                        .then(response => console.log('Macrodroid trigger request sent.'))
+                                        .catch(error => console.error('Error sending Macrodroid trigger:', error));
+                                }, 400); 
+                            }, 700); 
                         }, 800); 
                     }, 800); 
                 }
