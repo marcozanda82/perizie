@@ -12,16 +12,16 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #000000; /* Pagina Nera */
+            background-color: rgba(0, 0, 0, 0.75); /* Sfondo semitrasparente */
             z-index: 99999;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            opacity: 1; /* Default per preloader */
-            visibility: visible; /* Default per preloader */
+            opacity: 1; /* Opacità dell'elemento preloader stesso */
+            visibility: visible;
         }
-        #preloader.hidden { /* La classe hidden gestisce la scomparsa */
+        #preloader.hidden {
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.7s ease-out, visibility 0.7s ease-out;
@@ -36,34 +36,33 @@
             height: 100%;
             background-color: #000000;
             z-index: 99999;
-            display: flex; /* Mantenuto flex per allineamento */
+            display: flex; 
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            opacity: 0; /* Inizia trasparente */
-            visibility: hidden; /* Inizia nascosto */
-            /* La transizione standard si applicherà quando .visible-no-transition e .glitching vengono rimosse */
+            opacity: 0; 
+            visibility: hidden; 
             transition: opacity 0.5s ease-in, visibility 0.5s ease-in;
         }
 
-        #exit-curtain.hidden { /* Usato se si vuole nascondere con transizione standard */
+        #exit-curtain.hidden {
              opacity: 0;
              visibility: hidden;
              transition: opacity 0.7s ease-out, visibility 0.7s ease-out;
         }
 
-        #exit-curtain.visible-no-transition { /* Per mostrare subito senza transizione di fade-in */
+        #exit-curtain.visible-no-transition { 
             opacity: 1;
             visibility: visible;
-            transition: none; /* Nessuna transizione di opacità o visibilità quando questa classe è presente */
+            transition: none;
         }
 
-        .loader-bar-container { /* Contenitore comune per le barre */
+        .loader-bar-container { 
             display: flex;
             gap: 10px;
             margin-bottom: 25px;
         }
-        .loader-bar { /* Stile comune per le barre */
+        .loader-bar { 
             width: 15px;
             height: 70px;
             background-color: #007bff;
@@ -74,76 +73,66 @@
         .loader-bar:nth-child(2) { animation-delay: 0.2s; }
         .loader-bar:nth-child(3) { animation-delay: 0.4s; }
 
-        /* Animazione barre specifica per l'uscita (non glitch) */
         #exit-curtain:not(.glitching) .loader-bar {
-            animation-direction: reverse; /* Le barre si "svuotano" o animano al contrario */
+            animation-direction: reverse; 
         }
-        /* Animazione base per le barre */
+        
         @keyframes barPulse {
             0%, 100% { transform: scaleY(0.3); opacity: 0.6; }
             50% { transform: scaleY(1); opacity: 1; }
         }
 
-        /* Stile testo comune per preloader e uscita */
         #preloader .loading-text, #exit-curtain .loading-text {
             font-size: 1.6em;
             letter-spacing: 1px;
             animation: textGlow 1.8s infinite alternate ease-in-out;
         }
-        #preloader .loading-text {  color: #00aeff; } /* Blu per avvio */
-        #exit-curtain .loading-text { color: #ff8787; } /* Rosso/Arancio per chiusura standard */
+        #preloader .loading-text {  color: #00aeff; } 
+        #exit-curtain .loading-text { color: #ff8787; } 
 
-        @keyframes textGlow { /* Usato da entrambi, ma il colore è definito sopra */
+        @keyframes textGlow { 
           from { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; opacity: 0.8;}
           to   { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; opacity: 1;}
         }
 
-        /* Stili per l'effetto Glitch */
         #exit-curtain.glitching .loader-bar-container {
-            /* Puoi nascondere le barre standard durante il glitch: */
-            /* display: none !important; */
-            /* Oppure farle glitchare anch'esse con un'animazione specifica */
-            /* Se le barre devono continuare l'animazione barPulse normale durante il glitch, assicurarsi che
-               #exit-curtain:not(.glitching) .loader-bar non venga sovrascritto in modo che animation-direction: reverse;
-               non si applichi. Potrebbe essere necessario rimuovere animation-direction: reverse; da .loader-bar
-               dentro a #exit-curtain.glitching se barPulse deve andare avanti. */
+            /* Stili opzionali per barre durante glitch */
         }
 
         #exit-curtain.glitching .loading-text {
             animation: glitchText 0.8s infinite steps(1, end), textGlow 1.8s infinite alternate ease-in-out;
-            color: #ff3030; /* Rosso più intenso per il glitch */
-            position: relative; /* Per z-index se necessario sopra gli pseudo-elementi */
+            color: #ff3030; 
+            position: relative; 
             z-index: 10;
         }
 
         #exit-curtain.glitching::before,
         #exit-curtain.glitching::after {
-            content: attr(data-text); /* Usa il testo dall'attributo per il glitch */
+            content: attr(data-text); 
             position: absolute;
-            /* Allineamento al centro, ma le animazioni lo sposteranno */
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%); /* Centra base */
-            width: auto; /* Lascia che il testo determini la larghezza */
-            padding: 0 20px; /* Un po' di padding per non tagliare i bordi */
+            transform: translate(-50%, -50%); 
+            width: auto; 
+            padding: 0 20px; 
             text-align: center;
-            font-size: 1.6em; /* Deve corrispondere a .loading-text */
-            letter-spacing: 1px; /* Deve corrispondere a .loading-text */
+            font-size: 1.6em; 
+            letter-spacing: 1px; 
             background: #000000;
             overflow: hidden;
-            clip-path: inset(50% 50% 50% 50%); /* Inizia clippato */
-            z-index: 5; /* Sotto il testo principale ma sopra lo sfondo */
+            clip-path: inset(50% 50% 50% 50%); 
+            z-index: 5; 
         }
 
         #exit-curtain.glitching::before {
-            color: #00ffff; /* Ciano */
+            color: #00ffff; 
             animation: glitchEffect 0.3s infinite linear alternate-reverse;
         }
 
         #exit-curtain.glitching::after {
-            color: #ff00ff; /* Magenta */
+            color: #ff00ff; 
             animation: glitchEffect 0.2s infinite linear alternate-reverse, glitchSkew 0.5s infinite linear alternate;
-            animation-delay: -0.1s; /* Sfasamento */
+            animation-delay: -0.1s; 
         }
 
         @keyframes glitchEffect {
@@ -178,8 +167,6 @@
             90% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-1px) translateY(1px) skewX(1deg); opacity: 0.9;}
         }
 
-
-        /* ... (resto degli stili CSS esistenti, assicurati che non ci siano conflitti) ... */
         .header-circles { display: flex; justify-content: space-around; align-items: center; width: 100%; padding: 8px 0; box-sizing: border-box; }
         .circle {
             width: 1.5cm; height: 1.5cm; background-color: #ffffff;
@@ -254,14 +241,12 @@
             margin: 3px 5px;
         }
 
-        #navButtons button, .action-button /*, #procediConPeriziaBtn */ { /* Rimosso procediConPeriziaBtn dagli stili generici dei bottoni */
+        #navButtons button, .action-button {
              padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-size: 0.9em;
         }
-        /* #procediConPeriziaBtn { display: block; margin: 15px auto; padding: 12px 25px; font-size: 1.1em; } */ /* Rimosso */
         .save-and-next-btn { background-color: #0069d9 !important; border-color: #005cbf !important; }
         .save-and-next-btn:hover { background-color: #0056b3 !important; border-color: #004085 !important; }
-        #navButtons button:hover, .action-button:hover /*, #procediConPeriziaBtn:hover */ { background-color: #0056b3; border-color: #004085; }
-        /* #procediConPeriziaBtn:disabled { background-color: #555; border-color: #444; cursor: not-allowed; } */ /* Rimosso */
+        #navButtons button:hover, .action-button:hover { background-color: #0056b3; border-color: #004085; }
 
         @keyframes activeButtonGlow {
             0% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
@@ -378,7 +363,6 @@
         .targa-list-item.status-visto.completed .targa-col-modello,
         .targa-list-item.status-visto.completed .targa-col-piazzale { color: #a3cca3 !important; }
         .targa-list-item.status-visto.completed .targa-col-targa.clickable-targa { color: #81c784 !important; }
-        .targa-list-item.urgent-item.completed .tarka-col-targa, /* ERRORE DI BATTITURA: tarka -> targa */
         .targa-list-item.urgent-item.completed .targa-col-targa,
         .targa-list-item.urgent-item.completed .targa-col-marca,
         .targa-list-item.urgent-item.completed .targa-col-modello,
@@ -877,7 +861,8 @@
             navButtonsContainer.style.display = 'none';
             mainTitleGlobal.innerHTML = "Elenco Veicoli";
             if (listaTargheCompleta.length > 0 && typeof popolaTargheFiltrate === 'function') {
-                popolaTargheFiltrate();
+                // Non chiamare popolaTargheFiltrate() qui se il preloader è ancora attivo
+                // Sarà chiamato da caricaEPopolaTarghe()
             }
             targaSelezionataGlobalmente = null;
             updateNavButtonColors();
@@ -934,9 +919,9 @@
             }
             alert(`${c} elementi cancellati.`);
             if(sheetFilterDropdown) sheetFilterDropdown.value = 'all';
-            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); // Reset also the filter preference
+            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); 
             populateSavedTargasList();
-            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); // Ricarica e ripopola
+            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); 
             if (typeof showView === 'function') showView('landing');
         }
     }
@@ -1017,14 +1002,14 @@
             if (item.isUrgent) {
                 li.classList.add('urgent-item');
                 if (itemCompleted) {
-                    li.classList.add('completed'); // Urgent and completed
+                    li.classList.add('completed');
                 }
             } else if (itemCompleted) {
-                li.classList.add('status-visto', 'completed'); // Not urgent but completed
+                li.classList.add('status-visto', 'completed'); 
             } else if (hasData) {
-                li.classList.add('status-parziale'); // Not completed, but has data
+                li.classList.add('status-parziale'); 
             } else {
-                li.classList.add('status-da-vedere'); // Untouched
+                li.classList.add('status-da-vedere'); 
             }
 
             const targaCol = document.createElement('span');
@@ -1089,7 +1074,7 @@
             delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = item.targa;
             delB.title = `Cancella progressi per ${item.targa}`; delB.textContent = 'X';
             delB.addEventListener('click', function(event) {
-                event.stopPropagation(); // Evita che il click si propaghi al targaCol
+                event.stopPropagation(); 
                 const tDel = this.dataset.targa;
                 if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (inclusa posizione)?\n\nAzione irreversibile.`)) {
                     deleteProgressForTarga(tDel);
@@ -1105,13 +1090,30 @@
     }
 
     async function caricaEPopolaTarghe() {
-        if(targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento...";
+        const preloader = document.getElementById('preloader'); // Ensure preloader ref is available
+        // The message in 'targheLoadingStatus' might be hidden by preloader, but that's ok.
+        // The preloader itself has a message.
+
         try {
-            const r=await fetch(GOOGLE_SHEET_CSV_URL);
-            if(!r.ok){let e=`HTTP ${r.status}.`;if(r.status===0)e="Rete/CORS.";else if(r.status===404)e="CSV(404).";else if(r.status===403)e="Accesso(403).";throw new Error(e);}
-            const csv=await r.text();
-            const lines=csv.split(/\r\n|\n|\r/).filter(l=>l.trim()!=='');
-            if(lines.length===0){if(targheLoadingStatus) targheLoadingStatus.textContent="No dati CSV.";return;}
+            const r = await fetch(GOOGLE_SHEET_CSV_URL);
+            if (!r.ok) {
+                let e = `HTTP ${r.status}.`;
+                if (r.status === 0) e = "Rete/CORS.";
+                else if (r.status === 404) e = "File CSV non trovato (404).";
+                else if (r.status === 403) e = "Accesso al file CSV negato (403).";
+                throw new Error(e);
+            }
+            const csv = await r.text();
+            const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== '');
+            
+            if (lines.length === 0) {
+                if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV.";
+                listaTargheCompleta = []; // Ensure list is empty
+                if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
+                if (targaListContainer) targaListContainer.innerHTML = '';
+                return; // Exit early if no lines
+            }
+
             listaTargheCompleta = lines.map(l => {
                 const p = l.split(',');
                 return {
@@ -1122,19 +1124,30 @@
                     isUrgent: (p[4] || '').trim().toUpperCase() === 'URGENTE'
                 };
             }).filter(i => i.targa && i.targa.length > 3);
-            if(listaTargheCompleta.length===0){
-                if(targheLoadingStatus) targheLoadingStatus.textContent="No targhe valide nel CSV.";
-                if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
+
+            if (listaTargheCompleta.length === 0) {
+                if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";
+                 if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
                 if (targaListContainer) targaListContainer.innerHTML = '';
-                return;
+                return; // Exit if no valid plates
             }
+            
             setupSheetFilterDropdown();
             popolaTargheFiltrate();
-        } catch(e) {
-            console.error("Errore caricamento/popolamento targhe:",e);
-            if(targheLoadingStatus) targheLoadingStatus.textContent=`Errore: ${e.message}.`;
+
+        } catch (e) {
+            console.error("Errore caricamento/popolamento targhe:", e);
+            if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`;
             if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
             if (targaListContainer) targaListContainer.innerHTML = '';
+             listaTargheCompleta = []; // Ensure list is empty on error too
+        } finally {
+            if (preloader) {
+                preloader.classList.add('hidden');
+                setTimeout(() => {
+                    if (preloader) preloader.style.display = 'none';
+                }, 700); // Match CSS transition duration
+            }
         }
     }
 
@@ -1323,43 +1336,15 @@
         }
     }
 
-    async function loadAppContent() {
-        showView('landing');
-        await caricaEPopolaTarghe();
-    }
 
     document.addEventListener('DOMContentLoaded', () => {
         const preloader = document.getElementById('preloader');
 
-        async function initializeApp() {
-            if (preloader) {
-                preloader.style.display = 'flex';
-                preloader.classList.remove('hidden');
-                preloader.style.opacity = '1';
-                preloader.style.visibility = 'visible';
-                const loadingText = preloader.querySelector('.loading-text');
-                if (loadingText) loadingText.textContent = 'AVVIO IN CORSO...';
-
-                setTimeout(() => {
-                    if (preloader) {
-                        preloader.classList.add('hidden');
-                        setTimeout(() => {
-                            if(preloader) preloader.style.display = 'none';
-                        }, 700);
-                    }
-                    loadAppContent();
-                }, 1500);
-            } else {
-                loadAppContent();
-            }
-        }
-
+        // Setup event listeners and initial states
         if (tipoTrazioneSelect) {
             tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
         }
-        handleTrazioneChange(); // Call once on init
-
-        initializeApp();
+        handleTrazioneChange(); 
 
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
@@ -1367,8 +1352,26 @@
         if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
+        
+        // New initialization sequence
+        async function initializeApplicationViewAndLoadData() {
+            showView('landing'); // Setup and display the landing page view first.
 
-        // MODIFIED exitAppBtn listener
+            if (preloader) { // Then, display the preloader overlay.
+                preloader.style.display = 'flex';
+                preloader.classList.remove('hidden');
+                preloader.style.opacity = '1'; 
+                preloader.style.visibility = 'visible';
+                const loadingText = preloader.querySelector('.loading-text');
+                if (loadingText) loadingText.textContent = 'CARICAMENTO ELENCO...';
+            }
+
+            await caricaEPopolaTarghe(); // Load data. Preloader will be hidden within this function.
+        }
+
+        initializeApplicationViewAndLoadData(); // Start the application loading process
+
+        // Exit button logic (remains as previously modified)
         if (exitAppBtn) {
             exitAppBtn.addEventListener('click', () => {
                 const exitCurtain = document.getElementById('exit-curtain');
@@ -1378,53 +1381,38 @@
                 if (exitCurtain) {
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none';
                     if (pageHeader) pageHeader.style.display = 'none';
-                    document.body.style.paddingTop = '0px'; // Reset padding
+                    document.body.style.paddingTop = '0px'; 
 
                     const exitLoadingText = exitCurtain.querySelector('.loading-text');
                     const barContainer = exitCurtain.querySelector('.loader-bar-container');
                     const defaultCloseText = "CHIUSURA IN CORSO...";
-                    const glitchText = "ERRORE DI SISTEMA..."; // Testo per la fase glitch
+                    const glitchText = "ERRORE DI SISTEMA..."; 
 
-                    // Fase 1: Animazione normale (0.8 secondi)
-                    // Assicura che la classe 'glitching' sia rimossa e imposta il testo iniziale
                     exitCurtain.classList.remove('glitching');
                     if (exitLoadingText) exitLoadingText.textContent = defaultCloseText;
-                    exitCurtain.setAttribute('data-text', defaultCloseText); // Imposta data-text per il testo base del glitch
-                    if (barContainer) barContainer.style.display = 'flex'; // Mostra le barre di caricamento
+                    exitCurtain.setAttribute('data-text', defaultCloseText); 
+                    if (barContainer) barContainer.style.display = 'flex'; 
 
-                    // Mostra immediatamente la tendina senza transizione di fade-in per questa fase
                     exitCurtain.classList.add('visible-no-transition');
                     exitCurtain.style.display = 'flex';
 
-                    // Dopo 0.8 secondi, avvia l'effetto glitch
                     setTimeout(() => {
-                        // Fase 2: Effetto glitch (0.8 secondi)
                         exitCurtain.classList.add('glitching');
                         if (exitLoadingText) exitLoadingText.textContent = glitchText;
-                        // Aggiorna data-text se vuoi che il testo base del glitch cambi
                         exitCurtain.setAttribute('data-text', glitchText); 
 
-                        // Dopo altri 0.8 secondi, termina l'effetto glitch e mostra lo stato finale
                         setTimeout(() => {
-                            // Fase 3: Stato finale post-glitch
                             exitCurtain.classList.remove('glitching');
-                            // Ripristina il testo e nascondi le barre se necessario, o lascialo come l'ultimo testo del glitch
                             if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata.';
-                            if (barContainer) barContainer.style.display = 'none'; // Nascondi le barre
+                            if (barContainer) barContainer.style.display = 'none'; 
 
-                            // La tendina rimane visibile con opacità 1
-                            // grazie a 'visible-no-transition' o perché opacity:1 è l'ultimo stato.
-
-                            // Chiamata a Macrodroid
                             const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
-                            console.log("Attempting to trigger Macrodroid URL (no navigation): " + macrodroidUrl);
                             fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
                                 .then(response => console.log('Macrodroid trigger request sent.'))
                                 .catch(error => console.error('Error sending Macrodroid trigger:', error));
 
-                        }, 800); // Durata dell'effetto glitch: 0.8 secondi
-
-                    }, 800); // Durata dell'animazione normale: 0.8 secondi
+                        }, 800); 
+                    }, 800); 
                 }
             });
         }
