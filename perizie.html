@@ -74,7 +74,7 @@
         }
 
 
-        /* ... (resto degli stili CSS esistenti) ... */
+        /* ... (resto degli stili CSS esistenti, assicurati che non ci siano conflitti) ... */
         body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; transition: padding-top 0.3s ease; }
         .content-wrapper { padding: 20px; }
         h1, h2 { text-align: center; color: #ffffff; }
@@ -160,7 +160,7 @@
             background-color: #555;
         }
         /* Colori specifici per le icone, se necessario */
-        #headerExitBtn i { color: #dc3545; } /* Rosso per Esci */
+        #exitAppBtn i { color: #dc3545; } /* Rosso per Esci */
         #headerGalleryBtn i { color: #fd7e14; } /* Arancione per Galleria */
         #headerPeriziaBtn i { color: #20c997; } /* Verde acqua per Perizia */
         #headerCameraBtn i { color: #0dcaf0; } /* Ciano per Fotocamera */
@@ -430,7 +430,7 @@
             <div id="utilityNavButtons">
                 <button id="backToListBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe</button>
                 <button id="historyBtn" class="action-button" style="background-color: #17a2b8; border-color: #117a8b;">Salvataggi</button>
-                </div>
+            </div>
         </div>
     </div>
 
@@ -584,16 +584,15 @@
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
     const procediConPeriziaBtn = document.getElementById('procediConPeriziaBtn');
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
-    // const headerCircles = pageHeaderContainer.querySelector('.header-circles'); // Rimosso
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons');
     const navButtons = navButtonsContainer.querySelectorAll('#mainPageNavButtons button[data-target]');
-    const utilityButtons = navButtonsContainer.querySelectorAll('#utilityNavButtons button'); // Utility buttons originali
+    const utilityButtons = navButtonsContainer.querySelectorAll('#utilityNavButtons button');
     const sections = document.querySelectorAll('#checklistContainer .category-section');
     const summaryContent = document.getElementById('summaryContent');
-    const backToListBtn = document.getElementById('backToListBtn'); // Modificato selettore
-    const historyBtn = document.getElementById('historyBtn'); // Modificato selettore
-    const exitAppBtn = document.getElementById('exitAppBtn'); // Ora questo è il pulsante nell'header
+    const backToListBtn = document.getElementById('backToListBtn');
+    const historyBtn = document.getElementById('historyBtn');
+    const exitAppBtn = document.getElementById('exitAppBtn'); // Pulsante Esci nell'header
     const clearAllProgressBtn = document.getElementById('clearAllProgressBtn');
     const backToLandingFromHistoryBtn = document.getElementById('backToLandingFromHistoryBtn');
     const saveAndReturnBtn = document.getElementById('saveAndReturnBtn');
@@ -606,8 +605,8 @@
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
+    const LAST_SELECTED_PIAZZALE_KEY = `${APP_PREFIX}lastSelectedPiazzale`;
 
-    // Nuovi pulsanti header
     const headerGalleryBtn = document.getElementById('headerGalleryBtn');
     const headerPeriziaBtn = document.getElementById('headerPeriziaBtn');
     const headerCameraBtn = document.getElementById('headerCameraBtn');
@@ -732,7 +731,7 @@
         }
         if (targaSelezionataGlobalmente === targa) {
              targaSelezionataGlobalmente = null;
-             procediConPeriziaBtn.disabled = true;
+             if(procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
         }
     }
 
@@ -787,7 +786,6 @@
 
     function isInputDefault(inputElement) {
         if (!inputElement) return true;
-        // Non consideriamo 'disabled' qui perché getSectionInputs già filtra per :not(:disabled)
         if (inputElement.type === 'checkbox') return !inputElement.checked;
         if (inputElement.tagName === 'SELECT') {
             return inputElement.value === "" || inputElement.selectedIndex === 0;
@@ -835,55 +833,75 @@
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
     function showView(viewName) {
-        landingPageSection.style.display = 'none';
-        checklistContainer.style.display = 'none';
-        historyPageSection.style.display = 'none';
+        if (landingPageSection) landingPageSection.style.display = 'none';
+        if (checklistContainer) checklistContainer.style.display = 'none';
+        if (historyPageSection) historyPageSection.style.display = 'none';
+        const headerIconButtons = document.querySelector('.header-icon-buttons');
+
+
         let bodyPaddingTopValue = '20px';
         if (viewName === 'landing') {
-            landingPageSection.style.display = 'block';
-            pageHeaderContainer.classList.add('fixed-header');
-            // headerCircles.style.display = 'flex'; // Vecchi cerchi, ora gestito da header-icon-buttons
-            document.querySelector('.header-icon-buttons').style.display = 'flex';
-            navButtonsContainer.style.display = 'none';
-            mainTitleGlobal.innerHTML = "Elenco Veicoli";
+            if (landingPageSection) landingPageSection.style.display = 'block';
+            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
+            if (headerIconButtons) headerIconButtons.style.display = 'flex';
+            if (navButtonsContainer) navButtonsContainer.style.display = 'none';
+            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
+
             const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked');
             if (activeRadio) activeRadio.checked = false;
-            procediConPeriziaBtn.disabled = true;
-            if (sheetFilterDropdown) sheetFilterDropdown.value = 'all';
+            if (procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
+
+            if (sheetFilterDropdown) {
+                const savedPiazzale = localStorage.getItem(LAST_SELECTED_PIAZZALE_KEY);
+                if (savedPiazzale) {
+                    const optionExists = Array.from(sheetFilterDropdown.options).some(opt => opt.value === savedPiazzale);
+                    if (optionExists) {
+                        sheetFilterDropdown.value = savedPiazzale;
+                        console.log('Restored piazzale filter in showView(landing):', savedPiazzale);
+                    } else {
+                        sheetFilterDropdown.value = 'all';
+                        localStorage.removeItem(LAST_SELECTED_PIAZZALE_KEY);
+                    }
+                } else {
+                    sheetFilterDropdown.value = 'all';
+                }
+            }
+
             if (listaTargheCompleta.length > 0 && typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
             }
             targaSelezionataGlobalmente = null;
             updateNavButtonColors();
         } else if (viewName === 'checklist' || viewName === 'history') {
-            pageHeaderContainer.classList.add('fixed-header');
-            document.querySelector('.header-icon-buttons').style.display = 'flex';
-            navButtonsContainer.style.display = 'flex';
+            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
+            if (headerIconButtons) headerIconButtons.style.display = 'flex';
+            if (navButtonsContainer) navButtonsContainer.style.display = 'flex';
             if (viewName === 'checklist') {
                 if (!targaSelezionataGlobalmente) {
                     alert("Nessuna targa selezionata.");
                     showView('landing');
                     return;
                 }
-                checklistContainer.style.display = 'block';
+                if (checklistContainer) checklistContainer.style.display = 'block';
                 const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
                 let subIdentifier = (veicoloAttuale && (veicoloAttuale.marca || veicoloAttuale.modello))
                     ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
                     : "";
-                mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
-            } else {
-                historyPageSection.style.display = 'block';
-                mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
+                if (mainTitleGlobal) mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
+            } else { // history
+                if (historyPageSection) historyPageSection.style.display = 'block';
+                if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
                 populateSavedTargasList();
             }
             updateNavButtonColors();
-        } else {
-            pageHeaderContainer.classList.remove('fixed-header');
-            document.querySelector('.header-icon-buttons').style.display = 'none';
-            navButtonsContainer.style.display = 'none';
-            mainTitleGlobal.innerHTML = "";
+        } else { // Default or unknown view
+            if (pageHeaderContainer) pageHeaderContainer.classList.remove('fixed-header');
+            if (headerIconButtons) headerIconButtons.style.display = 'none';
+            if (navButtonsContainer) navButtonsContainer.style.display = 'none';
+            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
         }
-        if (pageHeaderContainer.classList.contains('fixed-header')) {
+
+        if (pageHeaderContainer && pageHeaderContainer.classList.contains('fixed-header')) {
             pageHeaderContainer.style.display = 'block';
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
         } else {
@@ -928,8 +946,16 @@
     }
 
     function handleSheetFilterChange() {
+        const selectedPiazzale = sheetFilterDropdown.value;
+        try {
+            localStorage.setItem(LAST_SELECTED_PIAZZALE_KEY, selectedPiazzale);
+            console.log('Saved last selected piazzale:', selectedPiazzale);
+        } catch (e) {
+            console.error("Error saving last selected piazzale to localStorage:", e);
+        }
+
         popolaTargheFiltrate();
-        procediConPeriziaBtn.disabled = true;
+        if (procediConPeriziaBtn) procediConPeriziaBtn.disabled = true;
         const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked');
         if (activeRadio) activeRadio.checked = false;
         targaSelezionataGlobalmente = null;
@@ -1070,8 +1096,25 @@
                 if (targaListContainer) targaListContainer.innerHTML = '';
                 return;
             }
-            setupSheetFilterDropdown();
-            popolaTargheFiltrate();
+            setupSheetFilterDropdown(); // Popola le opzioni del dropdown
+
+            // Applica il piazzale salvato dopo che le opzioni sono state create
+            if (sheetFilterDropdown) {
+                const savedPiazzale = localStorage.getItem(LAST_SELECTED_PIAZZALE_KEY);
+                if (savedPiazzale) {
+                    const optionExists = Array.from(sheetFilterDropdown.options).some(opt => opt.value === savedPiazzale);
+                    if (optionExists) {
+                        sheetFilterDropdown.value = savedPiazzale;
+                        console.log('Restored piazzale filter in caricaEPopolaTarghe:', savedPiazzale);
+                    } else {
+                        sheetFilterDropdown.value = 'all';
+                        localStorage.removeItem(LAST_SELECTED_PIAZZALE_KEY);
+                    }
+                } else {
+                     sheetFilterDropdown.value = 'all';
+                }
+            }
+            popolaTargheFiltrate(); // Popola la lista usando il filtro (potenzialmente ripristinato)
         } catch(e) {
             console.error("Errore caricamento/popolamento targhe:",e);
             if(targheLoadingStatus) targheLoadingStatus.textContent=`Errore: ${e.message}.`;
@@ -1280,8 +1323,8 @@
     }
 
     async function loadAppContent() {
-        showView('landing');
-        await caricaEPopolaTarghe();
+        showView('landing'); // Questo ora tenterà di ripristinare il filtro
+        await caricaEPopolaTarghe(); // Questo anche, assicurando che le opzioni siano popolate prima del ripristino
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1313,7 +1356,7 @@
         if (tipoTrazioneSelect) {
             tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
         }
-        handleTrazioneChange();
+        handleTrazioneChange(); // Chiamata iniziale
 
         initializeApp();
 
@@ -1324,8 +1367,7 @@
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
 
-        // Event listener per il pulsante Esci (ora nell'header, con ID exitAppBtn)
-        const currentExitAppBtn = document.getElementById('exitAppBtn'); // Assicura di prendere il riferimento corretto
+        const currentExitAppBtn = document.getElementById('exitAppBtn');
         if (currentExitAppBtn) {
             currentExitAppBtn.addEventListener('click', () => {
                 const exitCurtain = document.getElementById('exit-curtain');
@@ -1370,9 +1412,8 @@
             });
         }
 
-        // Placeholder per i nuovi pulsanti header
         if(headerGalleryBtn) headerGalleryBtn.addEventListener('click', () => alert('Funzione Galleria non ancora implementata.'));
-        if(headerPeriziaBtn) headerPeriziaBtn.addEventListener('click', () => showView('landing')); // Torna all'elenco perizie/targhe
+        if(headerPeriziaBtn) headerPeriziaBtn.addEventListener('click', () => showView('landing'));
         if(headerCameraBtn) headerCameraBtn.addEventListener('click', () => alert('Funzione Fotocamera non ancora implementata.'));
 
     });
