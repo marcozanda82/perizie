@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perizia Veicolo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUA6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Preloader & Exit Curtain Styles */
         #preloader, #exit-curtain {
@@ -73,13 +74,7 @@
         }
 
 
-        /* ... (resto degli stili CSS esistenti, assicurati che non ci siano conflitti) ... */
-        .header-circles { display: flex; justify-content: space-around; align-items: center; width: 100%; padding: 8px 0; box-sizing: border-box; }
-        .circle {
-            width: 1.5cm; height: 1.5cm; background-color: #ffffff;
-            border-radius: 50%; flex-shrink: 0;
-            opacity: 0.8;
-        }
+        /* ... (resto degli stili CSS esistenti) ... */
         body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; transition: padding-top 0.3s ease; }
         .content-wrapper { padding: 20px; }
         h1, h2 { text-align: center; color: #ffffff; }
@@ -118,6 +113,58 @@
             padding-bottom: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
+        /* Nuovi stili per i pulsanti dell'header */
+        .header-icon-buttons {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            padding: 5px 10px; /* Ridotto padding verticale */
+            box-sizing: border-box;
+        }
+        .header-btn {
+            background-color: #383838; /* Leggermente più scuro per distinguerli */
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 50%; /* Circolari */
+            width: 48px;  /* Dimensione base */
+            height: 48px; /* Dimensione base */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            padding: 0; /* Reset padding per controllo preciso */
+            box-sizing: border-box;
+            text-align: center;
+            font-size: 10px; /* Testo piccolo sotto icona */
+            line-height: 1.2;
+        }
+        .header-btn i {
+            font-size: 18px; /* Dimensione icona */
+            margin-bottom: 2px; /* Spazio tra icona e testo */
+            color: #00aeff; /* Colore icona */
+        }
+        .header-btn .btn-text {
+            display: block;
+            font-size: 0.9em; /* Relativo al font-size del bottone */
+            color: #ccc;
+        }
+        .header-btn:hover {
+            background-color: #4a4a4a;
+            transform: scale(1.05);
+        }
+        .header-btn:active {
+            transform: scale(0.95);
+            background-color: #555;
+        }
+        /* Colori specifici per le icone, se necessario */
+        #headerExitBtn i { color: #dc3545; } /* Rosso per Esci */
+        #headerGalleryBtn i { color: #fd7e14; } /* Arancione per Galleria */
+        #headerPeriziaBtn i { color: #20c997; } /* Verde acqua per Perizia */
+        #headerCameraBtn i { color: #0dcaf0; } /* Ciano per Fotocamera */
+
 
         #navButtons {
             display: flex;
@@ -144,7 +191,7 @@
             flex-wrap: wrap;
             margin-top: 5px;
         }
-        #utilityNavButtons button {
+        #utilityNavButtons button { /* Stile per i bottoni utility esistenti */
             margin: 3px 5px;
         }
 
@@ -302,25 +349,18 @@
 
 
         @media (max-width: 768px) {
-            .content-wrapper { margin-top: 0; }
-            .circle { width: 1.2cm; height: 1.2cm; }
-            #navButtons button, .action-button { padding: 8px 10px; font-size: 0.85em; }
-            #procediConPeriziaBtn { padding: 10px 15px; font-size: 1em; }
-
-            #mainPageNavButtons {
-                width: 100%;
-                padding: 5px;
-                box-sizing: border-box;
+            /* ... stili responsive esistenti ... */
+            .header-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 9px;
             }
-             #mainPageNavButtons button {
-                font-size: 0.8em;
-                padding: 6px 8px;
+            .header-btn i {
+                font-size: 16px;
             }
-            #utilityNavButtons button {
-                font-size: 0.85em;
-                 padding: 8px 10px;
-            }
-
+            #mainPageNavButtons { width: 100%; padding: 5px; box-sizing: border-box;}
+            #mainPageNavButtons button { font-size: 0.8em; padding: 6px 8px;}
+            #utilityNavButtons button { font-size: 0.85em; padding: 8px 10px;}
             input[type="text"], input[type="url"], select, textarea { width: 100%; box-sizing: border-box; }
             .table-scroll-wrapper { overflow-x: auto; }
             .targa-list-table-content { min-width: 600px; }
@@ -361,8 +401,23 @@
     </div>
 
     <div id="pageHeaderContainer">
-        <div class="header-circles">
-            <div class="circle"></div> <div class="circle"></div> <div class="circle"></div> <div class="circle"></div>
+        <div class="header-icon-buttons">
+            <button id="exitAppBtn" class="header-btn" title="Esci dall'applicazione">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="btn-text">Esci</span>
+            </button>
+            <button id="headerGalleryBtn" class="header-btn" title="Galleria">
+                <i class="fas fa-images"></i>
+                <span class="btn-text">Galleria</span>
+            </button>
+            <button id="headerPeriziaBtn" class="header-btn" title="Elenco Perizie">
+                <i class="fas fa-clipboard-list"></i>
+                <span class="btn-text">Perizie</span>
+            </button>
+            <button id="headerCameraBtn" class="header-btn" title="Fotocamera">
+                <i class="fas fa-camera"></i>
+                <span class="btn-text">Camera</span>
+            </button>
         </div>
         <h1 id="mainTitleGlobal">Checklist Perizia Veicolo</h1>
         <div id="navButtons">
@@ -375,8 +430,7 @@
             <div id="utilityNavButtons">
                 <button id="backToListBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe</button>
                 <button id="historyBtn" class="action-button" style="background-color: #17a2b8; border-color: #117a8b;">Salvataggi</button>
-                <button id="exitAppBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Esci</button>
-            </div>
+                </div>
         </div>
     </div>
 
@@ -530,16 +584,16 @@
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
     const procediConPeriziaBtn = document.getElementById('procediConPeriziaBtn');
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
-    const headerCircles = pageHeaderContainer.querySelector('.header-circles');
+    // const headerCircles = pageHeaderContainer.querySelector('.header-circles'); // Rimosso
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons');
     const navButtons = navButtonsContainer.querySelectorAll('#mainPageNavButtons button[data-target]');
-    const utilityButtons = navButtonsContainer.querySelectorAll('#utilityNavButtons button');
+    const utilityButtons = navButtonsContainer.querySelectorAll('#utilityNavButtons button'); // Utility buttons originali
     const sections = document.querySelectorAll('#checklistContainer .category-section');
     const summaryContent = document.getElementById('summaryContent');
-    const backToListBtn = pageHeaderContainer.querySelector('#backToListBtn');
-    const historyBtn = pageHeaderContainer.querySelector('#historyBtn');
-    const exitAppBtn = pageHeaderContainer.querySelector('#exitAppBtn');
+    const backToListBtn = document.getElementById('backToListBtn'); // Modificato selettore
+    const historyBtn = document.getElementById('historyBtn'); // Modificato selettore
+    const exitAppBtn = document.getElementById('exitAppBtn'); // Ora questo è il pulsante nell'header
     const clearAllProgressBtn = document.getElementById('clearAllProgressBtn');
     const backToLandingFromHistoryBtn = document.getElementById('backToLandingFromHistoryBtn');
     const saveAndReturnBtn = document.getElementById('saveAndReturnBtn');
@@ -552,6 +606,12 @@
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
+
+    // Nuovi pulsanti header
+    const headerGalleryBtn = document.getElementById('headerGalleryBtn');
+    const headerPeriziaBtn = document.getElementById('headerPeriziaBtn');
+    const headerCameraBtn = document.getElementById('headerCameraBtn');
+
 
     function handleTrazioneChange() {
         if (!tipoTrazioneSelect || !cavoRapidaSelect || !cavoDomesticaSelect) return;
@@ -726,18 +786,14 @@
     function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
 
     function isInputDefault(inputElement) {
-        if (!inputElement) return true; // Consider null/undefined as default (or unvalued)
-        if (inputElement.disabled) return false; // Consider disabled elements as "not needing valuation" thus not default for animation start.
-                                                // This means animation won't start on a disabled field.
+        if (!inputElement) return true;
+        // Non consideriamo 'disabled' qui perché getSectionInputs già filtra per :not(:disabled)
         if (inputElement.type === 'checkbox') return !inputElement.checked;
         if (inputElement.tagName === 'SELECT') {
             return inputElement.value === "" || inputElement.selectedIndex === 0;
         }
-        // Default for other types, or if no specific check, assume it's default if empty.
-        // For this app, only checkbox and select are animated.
         return true;
     }
-
 
     function getSectionInputs(sectionElementId) {
         const sectionDiv = document.getElementById(sectionElementId);
@@ -786,7 +842,8 @@
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
-            headerCircles.style.display = 'flex';
+            // headerCircles.style.display = 'flex'; // Vecchi cerchi, ora gestito da header-icon-buttons
+            document.querySelector('.header-icon-buttons').style.display = 'flex';
             navButtonsContainer.style.display = 'none';
             mainTitleGlobal.innerHTML = "Elenco Veicoli";
             const activeRadio = document.querySelector('input[name="targa_selection_radio"]:checked');
@@ -800,7 +857,7 @@
             updateNavButtonColors();
         } else if (viewName === 'checklist' || viewName === 'history') {
             pageHeaderContainer.classList.add('fixed-header');
-            headerCircles.style.display = 'flex';
+            document.querySelector('.header-icon-buttons').style.display = 'flex';
             navButtonsContainer.style.display = 'flex';
             if (viewName === 'checklist') {
                 if (!targaSelezionataGlobalmente) {
@@ -822,7 +879,7 @@
             updateNavButtonColors();
         } else {
             pageHeaderContainer.classList.remove('fixed-header');
-            headerCircles.style.display = 'none';
+            document.querySelector('.header-icon-buttons').style.display = 'none';
             navButtonsContainer.style.display = 'none';
             mainTitleGlobal.innerHTML = "";
         }
@@ -1045,6 +1102,10 @@
             return el.offsetParent !== null;
         });
 
+        if (allPotentiallyAnimatableElements.length === 0) {
+            return;
+        }
+
         let startingIndex = -1;
         for (let i = 0; i < allPotentiallyAnimatableElements.length; i++) {
             if (isInputDefault(allPotentiallyAnimatableElements[i])) {
@@ -1053,15 +1114,14 @@
             }
         }
 
-        if (startingIndex === -1) { // Tutti gli elementi sono valorizzati o non ci sono elementi
+        if (startingIndex === -1) {
             return;
         }
 
         const elementsToAnimate = allPotentiallyAnimatableElements;
-        let currentIndex = startingIndex; // Inizia l'animazione dal primo elemento non valorizzato
+        let currentIndex = startingIndex;
 
         let activeListeners = [];
-
         function clearAllActiveAnimationListeners() {
             activeListeners.forEach(({element, type, handler}) => {
                 element.removeEventListener(type, handler);
@@ -1073,28 +1133,27 @@
 
         function animateNextElement() {
             if (currentIndex >= elementsToAnimate.length) {
+                clearAllActiveAnimationListeners();
                 return;
             }
 
             const currentElement = elementsToAnimate[currentIndex];
 
-            // Se l'elemento corrente è già valorizzato (non dovrebbe succedere con la logica di startingIndex e il while sotto),
-            // o se è disabilitato (di nuovo, non dovrebbe succedere a causa del querySelectorAll iniziale), salta.
-            if (!isInputDefault(currentElement) || currentElement.disabled) {
+            if (!currentElement || currentElement.disabled || !isInputDefault(currentElement)) {
                 currentIndex++;
-                // Trova il prossimo elemento effettivamente non valorizzato e abilitato
-                while(currentIndex < elementsToAnimate.length && (!isInputDefault(elementsToAnimate[currentIndex]) || elementsToAnimate[currentIndex].disabled)) {
+                while(currentIndex < elementsToAnimate.length &&
+                      (!isInputDefault(elementsToAnimate[currentIndex]) || elementsToAnimate[currentIndex].disabled) ) {
                     currentIndex++;
                 }
                 if (currentIndex < elementsToAnimate.length) {
-                     setTimeout(animateNextElement, 0); // Prova subito il prossimo
+                     setTimeout(animateNextElement, 0);
+                } else {
+                    clearAllActiveAnimationListeners();
                 }
                 return;
             }
 
             currentElement.classList.add('animate-me');
-            // currentElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-
 
             const onValueChange = () => {
                 currentElement.classList.remove('animate-me');
@@ -1102,13 +1161,15 @@
                 activeListeners = activeListeners.filter(listener => !(listener.element === currentElement && listener.handler === onValueChange));
 
                 currentIndex++;
-                // Muoviti al prossimo elemento non valorizzato e abilitato
-                while (currentIndex < elementsToAnimate.length && (!isInputDefault(elementsToAnimate[currentIndex]) || elementsToAnimate[currentIndex].disabled) ) {
+                while (currentIndex < elementsToAnimate.length &&
+                       (!isInputDefault(elementsToAnimate[currentIndex]) || elementsToAnimate[currentIndex].disabled) ) {
                     currentIndex++;
                 }
 
                 if (currentIndex < elementsToAnimate.length) {
                     setTimeout(animateNextElement, 50);
+                } else {
+                    clearAllActiveAnimationListeners();
                 }
             };
 
@@ -1116,11 +1177,11 @@
             activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
         }
 
-        // Assicurati che startingIndex sia valido prima di iniziare
-        if (elementsToAnimate.length > 0 && startingIndex < elementsToAnimate.length) {
+        if (currentIndex < elementsToAnimate.length) {
             animateNextElement();
         }
     }
+
 
     function showSection(targetId) {
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
@@ -1243,7 +1304,7 @@
                         }, 700);
                     }
                     loadAppContent();
-                }, 1500); // Tempo avvio dimezzato
+                }, 1500);
             } else {
                 loadAppContent();
             }
@@ -1263,8 +1324,10 @@
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
 
-        if (exitAppBtn) {
-            exitAppBtn.addEventListener('click', () => {
+        // Event listener per il pulsante Esci (ora nell'header, con ID exitAppBtn)
+        const currentExitAppBtn = document.getElementById('exitAppBtn'); // Assicura di prendere il riferimento corretto
+        if (currentExitAppBtn) {
+            currentExitAppBtn.addEventListener('click', () => {
                 const exitCurtain = document.getElementById('exit-curtain');
                 const mainContentWrapper = document.getElementById('mainContentWrapper');
                 const pageHeader = document.getElementById('pageHeaderContainer');
@@ -1302,10 +1365,16 @@
                             .catch(error => {
                                 console.error('Error sending Macrodroid trigger HTTP request:', error);
                             });
-                    }, 1250); // DURATA ANIMAZIONE USCITA DIMEZZATA
+                    }, 1250);
                 }
             });
         }
+
+        // Placeholder per i nuovi pulsanti header
+        if(headerGalleryBtn) headerGalleryBtn.addEventListener('click', () => alert('Funzione Galleria non ancora implementata.'));
+        if(headerPeriziaBtn) headerPeriziaBtn.addEventListener('click', () => showView('landing')); // Torna all'elenco perizie/targhe
+        if(headerCameraBtn) headerCameraBtn.addEventListener('click', () => alert('Funzione Fotocamera non ancora implementata.'));
+
     });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
