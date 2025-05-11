@@ -412,8 +412,12 @@
                 <h2 class="section-title">1. Foto Remarketing</h2>
                 <ul>
                     <li>
-                        <input type="checkbox" id="is_electric_vehicle">
-                        <label for="is_electric_vehicle">Veicolo a trazione elettrica</label>
+                        <label for="tipo_trazione">Trazione veicolo:</label>
+                        <select id="tipo_trazione">
+                            <option value="">Seleziona...</option>
+                            <option value="endotermico">Endotermico</option>
+                            <option value="elettrico">Elettrico</option>
+                        </select>
                     </li>
                     <li><input type="checkbox" id="foto_angolari"><label for="foto_angolari">Foto angolari (3/4)</label></li>
                     <li>
@@ -514,7 +518,7 @@
         </div>
     </div>
 <script>
-    // Variabili globali (mantenute come prima)
+    // Variabili globali
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
@@ -538,7 +542,8 @@
     const saveAndReturnBtn = document.getElementById('saveAndReturnBtn');
     const saveAndNextButtons = document.querySelectorAll('.save-and-next-btn');
     const sheetFilterDropdown = document.getElementById('sheetFilterDropdown');
-    const isElectricVehicleCheckbox = document.getElementById('is_electric_vehicle');
+    // const isElectricVehicleCheckbox = document.getElementById('is_electric_vehicle'); // Rimosso
+    const tipoTrazioneSelect = document.getElementById('tipo_trazione'); // Nuovo selettore per trazione
     const cavoRapidaSelect = document.getElementById('cavo_ricarica_rapida');
     const cavoDomesticaSelect = document.getElementById('cavo_ricarica_domestica');
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
@@ -546,17 +551,23 @@
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
 
-    // Funzioni esistenti (mantenute come prima, eccetto initializeApp e aggiunta di loadAppContent)
-    function handleElectricVehicleChange() {
-        if (!isElectricVehicleCheckbox || !cavoRapidaSelect || !cavoDomesticaSelect) return;
-        const isChecked = isElectricVehicleCheckbox.checked;
-        cavoRapidaSelect.disabled = !isChecked;
-        cavoDomesticaSelect.disabled = !isChecked;
-        if (!isChecked) {
-            cavoRapidaSelect.value = "";
-            cavoDomesticaSelect.value = "";
+    // Logica Trazione Veicolo
+    function handleTrazioneChange() {
+        if (!tipoTrazioneSelect || !cavoRapidaSelect || !cavoDomesticaSelect) return;
+        const selectedTrazione = tipoTrazioneSelect.value;
+        const isElectric = selectedTrazione === 'elettrico';
+
+        cavoRapidaSelect.disabled = !isElectric;
+        cavoDomesticaSelect.disabled = !isElectric;
+
+        if (!isElectric) {
+            cavoRapidaSelect.value = ""; // Resetta se non elettrico
+            cavoDomesticaSelect.value = ""; // Resetta se non elettrico
         }
+        // Non è necessario un else per resettare se diventa elettrico,
+        // l'utente sceglierà se presenti o meno.
     }
+
 
     function savePosizioneForTarga(targa, posizione) {
         if (!targa) return;
@@ -584,8 +595,10 @@
             else if (el.tagName === 'SELECT') el.selectedIndex = 0;
             else el.value = '';
         });
-        if (cavoRapidaSelect) cavoRapidaSelect.disabled = true;
-        if (cavoDomesticaSelect) cavoDomesticaSelect.disabled = true;
+        // La logica di disabilitazione cavi viene gestita da handleTrazioneChange
+        if (tipoTrazioneSelect) { // Assicurati che l'elemento esista
+            handleTrazioneChange(); // Aggiorna stato cavi in base al reset di tipo_trazione
+        }
         console.log("Modulo resettato.");
     }
 
@@ -612,7 +625,7 @@
 
     function loadProgress(targa) {
         if(!targa) return;
-        resetChecklistForm();
+        resetChecklistForm(); // Resetta prima di caricare e chiama handleTrazioneChange
         try {
             const json = localStorage.getItem(`${APP_PREFIX}data_${targa}`);
             if (json) {
@@ -627,8 +640,10 @@
             } else {
                 console.log(`Nessun dato salvato trovato per la targa ${targa}.`);
             }
-            if (isElectricVehicleCheckbox) {
-                 handleElectricVehicleChange();
+            // Dopo aver caricato i valori, inclusa la selezione di tipo_trazione,
+            // aggiorna lo stato dei campi dipendenti.
+            if (tipoTrazioneSelect) {
+                 handleTrazioneChange();
             }
             updateNavButtonColors();
         } catch(e) {
@@ -794,7 +809,7 @@
             }
             alert(`${c} elementi cancellati.`);
             populateSavedTargasList();
-            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); // Ricarica le targhe per aggiornare lo stato
+            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();
             if (typeof showView === 'function') showView('landing');
         }
     }
@@ -1030,9 +1045,9 @@
 
     navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
 
-    function getSelectText(id) {
-        const el = document.getElementById(id);
-        if (el && el.value !== "") {
+    function getSelectText(selectElementOrId) {
+        const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId;
+        if (el && el.tagName === 'SELECT' && el.value !== "") {
             if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) {
                 return el.options[el.selectedIndex].text;
             }
@@ -1068,8 +1083,12 @@
             summaryContent.appendChild(createSummaryItem("Posizione", "N/D"));
         }
         summaryContent.innerHTML += `<h3>Remarketing:</h3>`;
-        const isEV = document.getElementById('is_electric_vehicle') && document.getElementById('is_electric_vehicle').checked;
-        summaryContent.appendChild(createSummaryItem("Trazione Elettrica", isEV ? "Sì" : "No"));
+
+        const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : "";
+        const isEV = tipoTrazioneValue === 'elettrico';
+        summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect)));
+
+
         let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza');
         let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante");
         summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante"));
@@ -1103,55 +1122,44 @@
         }
     }
 
-    // Funzione separata per caricare il contenuto dell'app dopo il preloader
     async function loadAppContent() {
         showView('landing');
         await caricaEPopolaTarghe();
-        // Qui potrebbero esserci altre inizializzazioni specifiche dell'app
-        // che devono avvenire dopo il caricamento delle targhe.
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Riferimento al preloader spostato qui per essere accessibile da initializeApp
         const preloader = document.getElementById('preloader');
 
         async function initializeApp() {
             if (preloader) {
-                // Assicura che il preloader sia visibile all'inizio
                 preloader.style.display = 'flex';
-                preloader.classList.remove('hidden'); // Rimuovi 'hidden' se presente da stati precedenti
+                preloader.classList.remove('hidden');
                 preloader.style.opacity = '1';
                 preloader.style.visibility = 'visible';
-
                 const loadingText = preloader.querySelector('.loading-text');
                 if (loadingText) loadingText.textContent = 'AVVIO IN CORSO...';
 
-                // Dopo 3 secondi, inizia a nascondere il preloader e carica il contenuto dell'app
-                setTimeout(() => {
+                setTimeout(() => { // TEMPO DIMEZZATO
                     if (preloader) {
-                        preloader.classList.add('hidden'); // Questo attiverà la transizione CSS
-
-                        // Dopo la durata della transizione (0.7s), imposta display a none
+                        preloader.classList.add('hidden');
                         setTimeout(() => {
                             if(preloader) preloader.style.display = 'none';
-                        }, 700); // Corrisponde alla durata della transizione in CSS (0.7s)
+                        }, 700);
                     }
-                    // Carica il contenuto principale dell'applicazione.
-                    // Questo può iniziare mentre il preloader sta svanendo.
                     loadAppContent();
-                }, 3000); // Il preloader rimane visibile per 3 secondi
+                }, 1500); // TEMPO DIMEZZATO DA 3000 A 1500
             } else {
-                // Se l'elemento preloader non esiste per qualche motivo, carica il contenuto direttamente
                 loadAppContent();
             }
         }
 
-        if (isElectricVehicleCheckbox) {
-            isElectricVehicleCheckbox.addEventListener('change', handleElectricVehicleChange);
+        // Event listener per il nuovo menu a tendina Trazione Veicolo
+        if (tipoTrazioneSelect) {
+            tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
         }
-        handleElectricVehicleChange();
+        handleTrazioneChange(); // Chiamata iniziale per impostare lo stato corretto dei cavi
 
-        initializeApp(); // Avvia l'app
+        initializeApp();
 
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
@@ -1165,24 +1173,20 @@
                 const exitCurtain = document.getElementById('exit-curtain');
                 const mainContentWrapper = document.getElementById('mainContentWrapper');
                 const pageHeader = document.getElementById('pageHeaderContainer');
-
                 if (exitCurtain) {
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none';
                     if (pageHeader) pageHeader.style.display = 'none';
                     document.body.style.paddingTop = '0px';
-
                     exitCurtain.style.display = 'flex';
                     const exitLoadingText = exitCurtain.querySelector('.loading-text');
                     if (exitLoadingText) exitLoadingText.textContent = 'CHIUSURA IN CORSO...';
                     const barContainer = exitCurtain.querySelector('.loader-bar-container');
                     if(barContainer) barContainer.style.display = 'flex';
-
                     setTimeout(() => {
                         exitCurtain.classList.remove('hidden');
                         exitCurtain.style.opacity = '1';
                         exitCurtain.style.visibility = 'visible';
                     }, 20);
-
                     setTimeout(() => {
                         if (exitLoadingText) exitLoadingText.textContent = 'Applicazione terminata. Puoi chiudere questa scheda.';
                         if(barContainer) barContainer.style.display = 'none';
