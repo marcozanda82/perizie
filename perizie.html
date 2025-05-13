@@ -726,6 +726,56 @@
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
 
+    // NUOVA MODIFICA: Funzione per fetchare l'ultima perizia da Google Sheets
+    async function fetchLatestPeriziaFromSheets(targa) {
+        if (!GOOGLE_SHEET_WEB_APP_URL) {
+            console.error("URL della Web App Google Sheets non configurato per il fetch.");
+            targheLoadingStatus.textContent = "URL Web App non configurato.";
+            return null;
+        }
+        // È BUONA PRATICA USARE UN PARAMETRO 'action' SE LO STESSO URL GESTISCE PIÙ AZIONI (POST, GET specifici)
+        const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=getPerizia&targa=${encodeURIComponent(targa)}&nocache=${new Date().getTime()}`;
+        console.log("Fetching latest perizia from Sheets for targa:", targa, "URL:", fetchUrl);
+        try {
+            const response = await fetch(fetchUrl, {
+                method: 'GET',
+                mode: 'cors', // Assicurati che il tuo Apps Script gestisca CORS e restituisca JSON
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Errore HTTP ${response.status} nel fetch da Sheets: ${errorText}`);
+                targheLoadingStatus.textContent = `Errore Sheets (${response.status}).`;
+                return null;
+            }
+
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const result = await response.json();
+                if (result.status === "success" && result.data) {
+                    console.log("Dati ricevuti da Sheets:", result.data);
+                    return result.data; // result.data dovrebbe essere { targa: "...", datiPerizia: {...}, timestamp: "...", completata: true/false }
+                } else if (result.status === "notfound") {
+                    console.log("Perizia non trovata in Sheets per targa:", targa);
+                    return null; // Nessun dato trovato è uno scenario valido
+                } else {
+                    console.warn("Risposta da Sheets non conteneva dati validi o status non era 'success'/'notfound':", result.message || result);
+                    return null;
+                }
+            } else {
+                const textResponse = await response.text();
+                console.error("Risposta da Sheets non era JSON:", textResponse);
+                targheLoadingStatus.textContent = "Errore formato risposta Sheets.";
+                return null;
+            }
+        } catch (error) {
+            console.error("Errore di rete o fetch generico durante il recupero da Sheets:", error);
+            targheLoadingStatus.textContent = "Errore di rete.";
+            return null;
+        }
+    }
+
+
     // Funzione per inviare una singola perizia a Google Sheets
     async function inviaPeriziaSingolaASheets(periziaDaInviare) {
         if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') {
@@ -741,13 +791,11 @@
                 mode: 'cors', 
                 cache: 'no-cache',
                 headers: {
-                    // 'Content-Type': 'application/json', // Cambiato per coerenza con doPost che si aspetta text/plain
-                    'Content-Type': 'text/plain;charset=utf-8',
+                    'Content-Type': 'text/plain;charset=utf-8', // Mantenuto per coerenza con doPost che parsa JSON da stringa
                 },
                 body: JSON.stringify(periziaDaInviare) 
             });
 
-            // Tenta di parsare la risposta come JSON, ma gestisci anche se è testo semplice
             let responseData;
             const contentType = response.headers.get("content-type");
             if (contentType && contentType.indexOf("application/json") !== -1) {
@@ -755,7 +803,6 @@
             } else {
                 const textResponse = await response.text();
                 console.warn("Risposta dal server non è JSON, ricevuta come testo:", textResponse);
-                // Prova a parsare comunque se sembra un JSON, altrimenti usa un messaggio di errore generico
                 try {
                     responseData = JSON.parse(textResponse);
                 } catch (e) {
@@ -765,7 +812,7 @@
             
             if (response.ok && responseData.status === "success") {
                 console.log("Perizia inviata con successo a Google Sheets:", responseData.message);
-                return { success: true, message: responseData.message };
+                return { success: true, message: responseData.message, data: responseData.data }; // NUOVA MODIFICA: ritorna anche i dati se il server li rimanda (es. timestamp aggiornato)
             } else {
                 console.error("Errore dall'API di Google Sheets o risposta non OK:", responseData.message || `HTTP Status ${response.status}`);
                 return { success: false, message: responseData.message || `Errore server (HTTP ${response.status})` };
@@ -908,9 +955,10 @@
                 else data[el.id] = el.value;
             }
         });
+        data.timestamp = new Date().toISOString(); // NUOVA MODIFICA: Aggiungi timestamp
         try {
             localStorage.setItem(`${APP_PREFIX}data_${targa}`, JSON.stringify(data));
-            console.log(`Progresso salvato per la targa ${targa}.`);
+            console.log(`Progresso salvato per la targa ${targa} con timestamp ${data.timestamp}.`);
             updateNavButtonColors();
             return true;
         } catch(e) {
@@ -922,7 +970,7 @@
 
     function loadProgress(targa) {
         if(!targa) return;
-        resetChecklistForm();
+        // resetChecklistForm(); // MODIFICATO: Non resettare qui, i dati verranno sovrascritti se presenti
         try {
             const json = localStorage.getItem(`${APP_PREFIX}data_${targa}`);
             if (json) {
@@ -933,9 +981,10 @@
                         else el.value = data[el.id];
                     }
                 });
-                console.log(`Progresso caricato per la targa ${targa}.`);
+                console.log(`Progresso caricato da localStorage per la targa ${targa}. Timestamp: ${data.timestamp || 'N/A'}`);
             } else {
-                console.log(`Nessun dato salvato trovato per la targa ${targa}.`);
+                console.log(`Nessun dato salvato in localStorage trovato per la targa ${targa}.`);
+                resetChecklistForm(); // Resetta solo se non ci sono dati
             }
             if (tipoTrazioneSelect) {
                  handleTrazioneChange();
@@ -943,12 +992,15 @@
             updateNavButtonColors();
         } catch(e) {
             console.error("Errore durante il caricamento da localStorage:", e);
+            resetChecklistForm(); // Resetta in caso di errore di parsing
             updateNavButtonColors();
         }
     }
     function getCompletedTarghe() { try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){return{};}}
     function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa} marked complete.`);}catch(e){console.error("LS Mark Err:",e);}}
-    function isTargaCompleted(targa) { const completed=getCompletedTarghe(); return !!(completed[targa]); }
+    // NUOVA MODIFICA: Funzione per rimuovere lo stato di completato
+    function unmarkTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe(); if(completed[targa]){ delete completed[targa]; localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed)); console.log(`${targa} unmarked as complete.`);}}catch(e){console.error("LS Unmark Err:",e);}}
+
 
     function deleteProgressForTarga(targa) {
         if(!targa){return;}
@@ -963,7 +1015,7 @@
             }
             localStorage.removeItem(`${APP_PREFIX}posizione_${targa}`);
             console.log(`Dati posizione rimossi per ${targa}.`);
-            localStorage.removeItem(`${APP_PREFIX}urgent_${targa}`); // Rimuovi anche lo stato di urgenza
+            localStorage.removeItem(`${APP_PREFIX}urgent_${targa}`); 
             console.log(`Dati urgenza rimossi per ${targa}.`);
 
 
@@ -1026,35 +1078,33 @@
         });
     }
     
-    // VERSIONE MODIFICATA DI handleSavePeriziaAndReturn
+    // MODIFICATO: handleSavePeriziaAndReturn
     async function handleSavePeriziaAndReturn() {
         if (!targaSelezionataGlobalmente) {
             alert("Nessuna targa attiva selezionata per il salvataggio.");
             return;
         }
 
-        if (!saveProgress(targaSelezionataGlobalmente)) { // Salva i progressi nel localStorage
+        if (!saveProgress(targaSelezionataGlobalmente)) { 
             alert("Salvataggio dati nel browser fallito. L'invio a Google Sheets non verrà tentato.");
             return;
         }
 
         if (document.getElementById('riepilogoSection').classList.contains('active')) {
-            generateSummary(); // Genera il riepilogo se la sezione è attiva
+            generateSummary(); 
         }
 
-        // 1. Raccogli i dati per l'invio a Google Sheets
-        let datiChecklistCorrente = {};
+        let datiChecklistCorrenteConTimestamp = {};
         try {
             const jsonString = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`);
             if (jsonString) {
-                datiChecklistCorrente = JSON.parse(jsonString);
+                datiChecklistCorrenteConTimestamp = JSON.parse(jsonString); // Questo ora include il timestamp
             }
         } catch (e) {
             console.error("Errore nel leggere i dati checklist dal localStorage per l'invio:", e);
             alert("Errore nel recuperare i dati per l'invio a Google Sheets.");
-            // Ripristina il pulsante in caso di errore precoce
             if (saveAndReturnBtn) {
-                saveAndReturnBtn.textContent = 'Salva Perizia'; // Testo originale
+                saveAndReturnBtn.textContent = 'Salva Perizia';
                 saveAndReturnBtn.disabled = false;
             }
             return;
@@ -1064,45 +1114,83 @@
             targa: targaSelezionataGlobalmente,
             posizione: loadPosizioneForTarga(targaSelezionataGlobalmente) || "",
             urgente: loadUrgentStatusForTarga(targaSelezionataGlobalmente) || false,
-            completata: false, // Verrà marcata come completata solo dopo il salvataggio
-            datiPerizia: datiChecklistCorrente // Questo contiene tutti i campi della checklist
+            completata: false, // Il server dovrebbe gestire e possibilmente ritornare lo stato di completamento
+            datiPerizia: datiChecklistCorrenteConTimestamp.datiPerizia || datiChecklistCorrenteConTimestamp, // Se il timestamp è top-level
+            timestamp: datiChecklistCorrenteConTimestamp.timestamp // Assicurati che il timestamp sia inviato
         };
+        // Rimuovi il timestamp annidato se datiPerizia è l'oggetto principale con il timestamp
+        if (periziaCompletaDaInviare.datiPerizia.timestamp && periziaCompletaDaInviare.timestamp === periziaCompletaDaInviare.datiPerizia.timestamp) {
+            // Se il timestamp è già dentro datiPerizia, non serve un altro campo timestamp top-level per l'invio,
+            // a meno che lo script GAS non se lo aspetti specificamente così.
+            // Per coerenza con saveProgress, il timestamp è dentro l'oggetto dati.
+            // L'oggetto inviato al server dovrebbe avere una struttura chiara per il timestamp.
+            // Assumiamo che il server si aspetti 'timestamp' al livello principale dell'oggetto perizia.
+            // Se 'datiPerizia' è l'intero oggetto salvato da saveProgress, allora contiene già il timestamp.
+            // Semplifichiamo:
+            periziaCompletaDaInviare.datiPerizia = datiChecklistCorrenteConTimestamp; // datiChecklistCorrenteConTimestamp è l'intero oggetto salvato con il timestamp dentro.
+            // L'oggetto `periziaCompletaDaInviare` inviato a sheets sarà tipo:
+            // { targa: "...", posizione: "...", urgente: false, completata: false, datiPerizia: { campo1: "val1", ..., timestamp: "2024..." } }
+            // Se il server GAS si aspetta il timestamp a livello principale, dovrai estrarlo:
+            // periziaCompletaDaInviare.timestamp = datiChecklistCorrenteConTimestamp.timestamp;
+            // delete datiChecklistCorrenteConTimestamp.timestamp; // opzionale, per non averlo duplicato
+            // periziaCompletaDaInviare.datiPerizia = datiChecklistCorrenteConTimestamp;
+            // PER QUESTA IMPLEMENTAZIONE, assumo che il server guarderà `periziaDaInviare.datiPerizia.timestamp`
+        }
 
-        // Mostra un messaggio di attesa
+
         const originalButtonText = saveAndReturnBtn.textContent;
         saveAndReturnBtn.textContent = 'Salvataggio in corso...';
         saveAndReturnBtn.disabled = true;
 
-        // 2. Prova a generare e scaricare lo screenshot
         try {
             await generateAndDownloadScreenshot();
         } catch (e) {
             console.warn("Generazione screenshot fallita, ma i dati sono stati salvati localmente. Si procederà con l'invio a Sheets.", e);
         }
 
-        // 3. Invia i dati a Google Sheets
         console.log("Preparazione invio a Sheets per targa:", targaSelezionataGlobalmente);
         const invioSheetsResult = await inviaPeriziaSingolaASheets(periziaCompletaDaInviare);
 
-        // 4. Marchia la targa come completata (localmente)
-        markTargaAsCompleted(targaSelezionataGlobalmente);
-        updateNavButtonColors(); // Aggiorna i colori dei pulsanti di navigazione
+        let finaleSalvataggioRiuscito = false;
+        if (invioSheetsResult.success) {
+            finaleSalvataggioRiuscito = true;
+            // NUOVA MODIFICA: Se il server ritorna dati (es. timestamp confermato/aggiornato o stato 'completata'), aggiorna localStorage
+            if (invioSheetsResult.data && invioSheetsResult.data.timestamp) {
+                let datiLocaliAggiornati = JSON.parse(localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`) || '{}');
+                datiLocaliAggiornati.timestamp = invioSheetsResult.data.timestamp; // Aggiorna con il timestamp del server
+                localStorage.setItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`, JSON.stringify(datiLocaliAggiornati));
+                console.log("Timestamp locale aggiornato con quello del server:", invioSheetsResult.data.timestamp);
+            }
+            if (invioSheetsResult.data && typeof invioSheetsResult.data.completata !== 'undefined') {
+                 if(invioSheetsResult.data.completata) {
+                    markTargaAsCompleted(targaSelezionataGlobalmente);
+                 } else {
+                    unmarkTargaAsCompleted(targaSelezionataGlobalmente); // Se il server dice che non è completa
+                 }
+            } else { // Fallback se il server non ritorna lo stato 'completata'
+                markTargaAsCompleted(targaSelezionataGlobalmente);
+            }
+        } else {
+            // Anche se fallisce l'invio a Sheets, i dati sono salvati localmente.
+            // L'utente potrebbe voler considerare la perizia "completata" localmente in attesa di una futura sincronizzazione.
+            // Per ora, la marchiamo completata localmente come prima.
+            markTargaAsCompleted(targaSelezionataGlobalmente);
+        }
+        
+        updateNavButtonColors(); 
 
-        // Ripristina il pulsante
         saveAndReturnBtn.textContent = originalButtonText;
         saveAndReturnBtn.disabled = false;
 
-        // Messaggio finale all'utente
         let alertMessage = `Perizia per ${targaSelezionataGlobalmente} salvata localmente e screenshot tentato.\n`;
-        if (invioSheetsResult.success) {
+        if (finaleSalvataggioRiuscito) {
             alertMessage += "Salvataggio su Google Sheets RIUSCITO!";
         } else {
             alertMessage += "Salvataggio su Google Sheets FALLITO: " + invioSheetsResult.message + "\nI dati sono comunque salvati nel browser.";
         }
         alert(alertMessage);
         
-        // targaSelezionataGlobalmente = null; // Non resettare qui, l'utente potrebbe voler rimanere sulla pagina
-        showView('landing'); // Torna all'elenco delle targhe
+        showView('landing'); 
     }
 
     function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
@@ -1158,7 +1246,7 @@
     }
 
 
-    function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
+    function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
     function showView(viewName) {
         landingPageSection.style.display = 'none';
@@ -1179,17 +1267,17 @@
                 typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
             }
-            targaSelezionataGlobalmente = null;
-            updateNavButtonColors();
+            targaSelezionataGlobalmente = null; // Deseleziona targa quando si torna alla landing
+            updateNavButtonColors(); // Aggiorna i colori dei pulsanti (reset)
         } else if (viewName === 'checklist' || viewName === 'history') {
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
 
             if (viewName === 'checklist') {
                  if (navButtonsContainer) navButtonsContainer.style.display = 'flex';
-                if (!targaSelezionataGlobalmente) {
-                    alert("Nessuna targa selezionata.");
-                    showView('landing');
+                if (!targaSelezionataGlobalmente) { // MODIFICATO: controllo più robusto
+                    console.warn("Tentativo di mostrare checklist senza targa selezionata. Reindirizzamento a landing.");
+                    showView('landing'); // Reindirizza se nessuna targa è selezionata
                     return;
                 }
                 checklistContainer.style.display = 'block';
@@ -1198,19 +1286,21 @@
                     ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
                     : "";
                 mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
-            } else { 
+                // updateNavButtonColors(); // Già chiamato sotto, o potrebbe essere specifico qui
+            } else { // History
                 historyPageSection.style.display = 'block';
                 mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
                 populateSavedTargasList();
             }
-            updateNavButtonColors();
-        } else { 
+            updateNavButtonColors(); // Assicurati che sia chiamato dopo che targaSelezionataGlobalmente è impostata (per checklist)
+        } else { // Altre viste (es. preloader)
             pageHeaderContainer.classList.remove('fixed-header');
             headerCircles.style.display = 'none';
             if (utilityNavButtons) utilityNavButtons.style.display = 'none';
             mainTitleGlobal.innerHTML = "";
         }
 
+        // Calcolo padding dinamico
         if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
         } else {
@@ -1223,7 +1313,104 @@
         document.body.style.paddingTop = bodyPaddingTopValue;
     }
 
-    function populateSavedTargasList() { savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targa = key.substring(`${APP_PREFIX}data_`.length); if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa);}}} if (tempSavedTargas.length > 0) hasSaves = true; tempSavedTargas.sort(); tempSavedTargas.forEach(targa => { const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' }; let displayText = targa; let details = []; if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`); if (details.length > 0) { displayText += ` - ${details.join(' ')}`; } const button = document.createElement('button'); button.classList.add('saved-targa-button'); button.textContent = displayText; button.dataset.targa = targa; button.addEventListener('click', function() { targaSelezionataGlobalmente = this.dataset.targa; showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstChecklistNavButton = Array.from(navButtons).find(btn => btn.dataset.target && btn.id !== 'backToListBtn' && btn.id !== 'historyBtn'); if (firstChecklistNavButton) { showSection(firstChecklistNavButton.dataset.target); } else if (navButtons.length > 0 && navButtons[0].dataset.target) { showSection(navButtons[0].dataset.target); }}); savedTargasListContainer.appendChild(button); }); if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>'; } }
+    // MODIFICATO: Logica di caricamento/sincronizzazione quando si clicca una targa o si carica da cronologia
+    async function handleTargaSelectionAndSync(selectedTarga) {
+        targaSelezionataGlobalmente = selectedTarga;
+        console.log(`Targa ${targaSelezionataGlobalmente} selezionata per perizia. Avvio sincronizzazione.`);
+        if (targheLoadingStatus) targheLoadingStatus.textContent = `Caricamento dati per ${selectedTarga}...`;
+
+        let localData = null;
+        let localTimestamp = null;
+        const localJson = localStorage.getItem(`${APP_PREFIX}data_${selectedTarga}`);
+        if (localJson) {
+            try {
+                localData = JSON.parse(localJson);
+                localTimestamp = localData.timestamp ? new Date(localData.timestamp) : null;
+            } catch (e) { console.error("Errore parsing dati locali:", e); localData = null; }
+        }
+
+        const sheetsPeriziaData = await fetchLatestPeriziaFromSheets(selectedTarga);
+        let sheetsData = null;
+        let sheetsTimestamp = null;
+
+        if (sheetsPeriziaData && sheetsPeriziaData.datiPerizia) { // fetchLatestPeriziaFromSheets ritorna l'oggetto {targa, datiPerizia, timestamp, completata}
+            sheetsData = sheetsPeriziaData.datiPerizia; // datiPerizia contiene i campi del form e il timestamp
+            sheetsTimestamp = sheetsPeriziaData.timestamp ? new Date(sheetsPeriziaData.timestamp) : null; // Usa il timestamp ritornato dal server
+        }
+        
+        let dataToLoad = null;
+
+        if (sheetsTimestamp && (!localTimestamp || sheetsTimestamp > localTimestamp)) {
+            console.log("Dati da Google Sheets sono più recenti. Uso quelli.");
+            dataToLoad = sheetsData; // sheetsData (che è sheetsPeriziaData.datiPerizia) contiene il timestamp
+            try {
+                localStorage.setItem(`${APP_PREFIX}data_${selectedTarga}`, JSON.stringify(dataToLoad));
+                if (typeof sheetsPeriziaData.completata !== 'undefined') {
+                    if (sheetsPeriziaData.completata) markTargaAsCompleted(selectedTarga);
+                    else unmarkTargaAsCompleted(selectedTarga);
+                }
+                console.log("Dati locali aggiornati con la versione da Sheets.");
+            } catch (e) { console.error("Errore nel salvare i dati da Sheets in localStorage:", e); }
+        } else if (localData) {
+            console.log("Dati locali sono più recenti o uguali, o Sheets non ha dati. Uso i dati locali.");
+            dataToLoad = localData;
+             // Se i dati locali sono più recenti di quelli (eventualmente) trovati su Sheets,
+             // si potrebbe considerare un invio automatico a Sheets, ma per ora l'invio avviene solo con "Salva Perizia".
+        } else {
+            console.log("Nessun dato locale o da Sheets (o Sheets non più recente). Inizio perizia da zero.");
+            resetChecklistForm(); // Carica un form vuoto
+        }
+
+        if (dataToLoad) {
+            loadProgress(selectedTarga); // Carica i dati scelti (locali aggiornati o locali originali) nel form
+        } else {
+            // Se dataToLoad è null (nessun dato locale e nessun dato da Sheets), loadProgress farà resetChecklistForm
+            loadProgress(selectedTarga);
+        }
+        
+        if (targheLoadingStatus) targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:"; // Reset status
+        showView('checklist');
+        const firstNav = Array.from(navButtons).find(b => b.dataset.target && !['backToListBtn', 'historyBtn', 'exitAppBtn'].includes(b.id));
+        if (firstNav) {
+            showSection(firstNav.dataset.target);
+        } else if (navButtons.length > 0 && navButtons[0].dataset.target) {
+            showSection(navButtons[0].dataset.target);
+        }
+    }
+
+    // MODIFICATO: Event listener per i bottoni nella cronologia
+    function populateSavedTargasList() {
+        savedTargasListContainer.innerHTML = ''; let hasSaves = false;
+        const tempSavedTargas = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(`${APP_PREFIX}data_`)) {
+                const targa = key.substring(`${APP_PREFIX}data_`.length);
+                if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa); }
+            }
+        }
+        if (tempSavedTargas.length > 0) hasSaves = true;
+        tempSavedTargas.sort();
+        tempSavedTargas.forEach(targa => {
+            const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' };
+            let displayText = targa;
+            let details = [];
+            if (vehicleDetails.marca) details.push(vehicleDetails.marca);
+            if (vehicleDetails.modello) details.push(vehicleDetails.modello);
+            if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`);
+            if (details.length > 0) { displayText += ` - ${details.join(' ')}`; }
+            const button = document.createElement('button');
+            button.classList.add('saved-targa-button');
+            button.textContent = displayText;
+            button.dataset.targa = targa;
+            button.addEventListener('click', async function() { // MODIFICATO ad async
+                await handleTargaSelectionAndSync(this.dataset.targa);
+            });
+            savedTargasListContainer.appendChild(button);
+        });
+        if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>';}
+    }
+
     function clearAllSavedData() {
         if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni, urgenze e filtro piazzale)?\n\nAzione irreversibile.")) {
             let c = 0;
@@ -1235,9 +1422,9 @@
             }
             alert(`${c} elementi cancellati.`);
             if(sheetFilterDropdown) sheetFilterDropdown.value = 'all';
-            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); // Resetta anche il filtro piazzale
+            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); 
             populateSavedTargasList();
-            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); // Ricarica la lista per riflettere le urgenze resettate
+            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); 
             if (typeof showView === 'function') showView('landing');
         }
     }
@@ -1284,15 +1471,24 @@
             : listaTargheCompleta.filter(item => item.piazzale === selectedSource);
 
         function getItemRank(item) {
-            const isUrgent = loadUrgentStatusForTarga(item.targa); // MODIFICATO: usa localStorage
+            const isUrgent = loadUrgentStatusForTarga(item.targa); 
             const isCompleted = isTargaCompleted(item.targa);
-            const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
+            const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
+            let hasData = false;
+            if (localDataJson) {
+                try {
+                    const parsedData = JSON.parse(localDataJson);
+                    // Considera dati se c'è qualcosa oltre al solo timestamp (se il timestamp è l'unico campo, potrebbe essere vuoto)
+                    hasData = Object.keys(parsedData).some(key => key !== 'timestamp' && parsedData[key] !== "" && parsedData[key] !== false && (!Array.isArray(parsedData[key]) || parsedData[key].length > 0) );
+                } catch (e) { /* ignore parsing error for ranking */ }
+            }
+
 
             if (isUrgent && !isCompleted) return 1;
-            if (!isUrgent && !isCompleted && hasData) return 2;
-            if (!isUrgent && !isCompleted && !hasData) return 3;
-            if (!isUrgent && isCompleted) return 4;
-            if (isUrgent && isCompleted) return 5;
+            if (!isUrgent && !isCompleted && hasData) return 2; // Parzialmente compilato, non urgente
+            if (!isUrgent && !isCompleted && !hasData) return 3; // Da vedere, non urgente
+            if (!isUrgent && isCompleted) return 4; // Completato, non urgente
+            if (isUrgent && isCompleted) return 5; // Completato, urgente (meno prioritario di urgente non completato)
             return 6;
         }
         preliminaryFilteredList.sort((a, b) => {
@@ -1313,10 +1509,14 @@
             li.classList.add('targa-list-item');
 
             const itemCompleted = isTargaCompleted(item.targa);
-            const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
-            const isItemUrgent = loadUrgentStatusForTarga(item.targa); // MODIFICATO: usa localStorage
+            const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
+            let hasData = false;
+            if (localDataJson) {
+                try { const parsed = JSON.parse(localDataJson); hasData = Object.keys(parsed).some(k => k !== 'timestamp'); } catch (e) {}
+            }
+            const isItemUrgent = loadUrgentStatusForTarga(item.targa); 
 
-            if (isItemUrgent) { // MODIFICATO
+            if (isItemUrgent) { 
                 li.classList.add('urgent-item');
                 if (itemCompleted) {
                     li.classList.add('completed');
@@ -1334,19 +1534,11 @@
             targaCol.textContent = item.targa || 'N/D';
             targaCol.dataset.targaValue = item.targa;
 
-            targaCol.addEventListener('click', function() {
-                const selectedTarga = this.dataset.targaValue;
-                if (selectedTarga) {
-                    targaSelezionataGlobalmente = selectedTarga;
-                    console.log(`Targa ${targaSelezionataGlobalmente} selezionata per perizia.`);
-                    showView('checklist');
-                    loadProgress(targaSelezionataGlobalmente);
-                    const firstNav = Array.from(navButtons).find(b => b.dataset.target && b.id !== 'backToListBtn' && b.id !== 'historyBtn' && b.id !== 'exitAppBtn');
-                    if (firstNav) {
-                        showSection(firstNav.dataset.target);
-                    } else if (navButtons.length > 0 && navButtons[0].dataset.target) {
-                        showSection(navButtons[0].dataset.target);
-                    }
+            // MODIFICATO: Event listener per le targhe
+            targaCol.addEventListener('click', async function() { // MODIFICATO ad async
+                const selectedTargaFromClick = this.dataset.targaValue;
+                if (selectedTargaFromClick) {
+                    await handleTargaSelectionAndSync(selectedTargaFromClick);
                 }
             });
             li.appendChild(targaCol);
@@ -1373,7 +1565,6 @@
             posizioneCol.appendChild(posizioneInput);
             li.appendChild(posizioneCol);
 
-            // NUOVA COLONNA URGENZA
             const urgenzaCol = document.createElement('span');
             urgenzaCol.classList.add('targa-col', 'targa-col-urgenza');
             const urgenzaCheckbox = document.createElement('input');
@@ -1385,7 +1576,7 @@
             urgenzaCheckbox.addEventListener('change', function() {
                 saveUrgentStatusForTarga(item.targa, this.checked);
                 this.title = this.checked ? "Togli urgenza" : "Marca come urgente";
-                popolaTargheFiltrate(); // Ricarica la lista per riflettere ordinamento/stile
+                popolaTargheFiltrate(); 
             });
             urgenzaCol.appendChild(urgenzaCheckbox);
             li.appendChild(urgenzaCol);
@@ -1429,7 +1620,7 @@
         if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server...";
 
         try {
-            const r = await fetch(GOOGLE_SHEET_CSV_URL);
+            const r = await fetch(GOOGLE_SHEET_CSV_URL + `&nocache=${new Date().getTime()}`); // Aggiungi nocache per evitare problemi di cache del browser
             if (!r.ok) {
                 let e = `HTTP ${r.status}.`;
                 if (r.status === 0) e = "Errore di rete o CORS.";
@@ -1455,7 +1646,6 @@
                     marca: (p[1] || '').trim().replace(/^"|"$/g, ''),
                     modello: (p[2] || '').trim().replace(/^"|"$/g, ''),
                     piazzale: (p[3] || '').trim().replace(/^"|"$/g, '')
-                    // RIMOSSO: isUrgent: (p[4] || '').trim().toUpperCase() === 'URGENTE'
                 };
             }).filter(i => i.targa && i.targa.length > 3);
 
@@ -1625,7 +1815,6 @@
             summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo));
             summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo));
             summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D"));
-            // Aggiungere Urgenza al riepilogo
             const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente);
             summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary));
 
