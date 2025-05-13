@@ -106,7 +106,7 @@
 
         #exit-curtain.glitching .loading-text {
             animation: glitchText 0.8s infinite steps(1, end), textGlow 1.8s infinite alternate ease-in-out;
-            color: #ff3030 !important; 
+            color: #ff3030 !important; /* Importante per sovrascrivere lo stile base */
             position: relative;
             z-index: 10;
         }
@@ -162,9 +162,11 @@
         @keyframes glitchText {
             0%, 100% { text-shadow: 0 0 3px red, 0 0 5px blue, 0 0 1px white; transform: translateX(0) translateY(0) skewX(0deg); opacity: 1;}
             10% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-2px) translateY(1px) skewX(5deg); opacity: 0.8;}
+            /* ... (altri keyframes del glitchText) ... */
             90% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-1px) translateY(1px) skewX(1deg); opacity: 0.9;}
         }
 
+        /* Stili per l'effetto Flash Out sul testo finale */
         #exit-curtain.flash-out-effect .loading-text {
             color: #FFFFFF !important;
             text-shadow: none !important;
@@ -173,15 +175,40 @@
         }
 
         @keyframes textFlashOut {
-            0% { opacity: 1; transform: scale(1); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-            50% { opacity: 1; transform: scale(1.1); color: #FFFFE0 !important; text-shadow: 0 0 15px #FFFFFF, 0 0 25px #FFFFFF, 0 0 35px #FFFFE0, 0 0 50px #FFFF99; }
-            99% { opacity: 0.8; transform: scale(1.05); }
-            100% { opacity: 0; transform: scale(0.8); text-shadow: none; color: transparent !important; }
+            0% {
+                opacity: 1;
+                transform: scale(1);
+                text-shadow: 0 0 5px rgba(255,255,255,0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+                color: #FFFFE0 !important;
+                text-shadow: 0 0 15px #FFFFFF,
+                             0 0 25px #FFFFFF,
+                             0 0 35px #FFFFE0,
+                             0 0 50px #FFFF99;
+            }
+            99% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.8);
+                text-shadow: none;
+                color: transparent !important;
+            }
         }
 
         .header-circles { display: flex; justify-content: space-around; align-items: center; width: 100%; padding: 8px 0; box-sizing: border-box; }
-        .circle { width: 1.5cm; height: 1.5cm; background-color: #ffffff; border-radius: 50%; flex-shrink: 0; opacity: 0.8; }
+        .circle {
+            width: 1.5cm; height: 1.5cm; background-color: #ffffff;
+            border-radius: 50%; flex-shrink: 0;
+            opacity: 0.8;
+        }
         body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; transition: padding-top 0.3s ease; }
+        /* ... (resto degli stili CSS come da versione precedente) ... */
         .content-wrapper { padding: 20px; }
         h1, h2 { text-align: center; color: #ffffff; }
         h1#mainTitleGlobal { line-height: 1.2; margin-bottom: 10px; margin-top: 5px; font-size: 1.6em;}
@@ -197,19 +224,62 @@
         label { vertical-align: middle; display: block; margin-bottom: 5px; color: #e0e0e0; }
         textarea {resize: vertical;}
 
-        .category-section ul li > input[type="checkbox"] { vertical-align: middle; margin-right: 4px; }
-        .category-section ul li > input[type="checkbox"] + label { display: inline-block; vertical-align: middle; margin-bottom: 0; }
+        .category-section ul li > input[type="checkbox"] {
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+        .category-section ul li > input[type="checkbox"] + label {
+            display: inline-block;
+            vertical-align: middle;
+            margin-bottom: 0;
+        }
 
-        #pageHeaderContainer { background-color: #1e1e1e; z-index: 1000; width: 100%; }
-        #pageHeaderContainer.fixed-header { position: fixed; top: 0; left: 0; padding-bottom: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        #pageHeaderContainer {
+            background-color: #1e1e1e;
+            z-index: 1000;
+            width: 100%;
+        }
+        #pageHeaderContainer.fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-bottom: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
 
-        #navButtons { display: flex; flex-direction: column; align-items: center; width: 100%; }
-        #mainPageNavButtons { display: flex; justify-content: center; flex-wrap: nowrap; overflow-x: auto; padding: 5px 0; width: calc(100% - 20px); max-width: 700px; }
-        #mainPageNavButtons button { margin: 3px; flex-shrink: 0; }
-        #utilityNavButtons { display: flex; justify-content: center; flex-wrap: wrap; margin-top: 5px; margin-bottom: 5px; }
-        #utilityNavButtons button { margin: 3px 5px; }
+        #navButtons { /* Contenitore per i pulsanti di navigazione principali delle sezioni */
+            display: flex;
+            flex-direction: column; /* Mantenuto per mainPageNavButtons se necessario */
+            align-items: center;
+            width: 100%;
+        }
+        #mainPageNavButtons { /* Pulsanti specifici per le sezioni della checklist */
+            display: flex;
+            justify-content: center;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 5px 0;
+            width: calc(100% - 20px);
+            max-width: 700px;
+        }
+        #mainPageNavButtons button {
+            margin: 3px;
+            flex-shrink: 0;
+        }
+        #utilityNavButtons { /* Pulsanti di utilità globali */
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 5px; /* Spazio sopra i pulsanti di utilità */
+            margin-bottom: 5px; /* Spazio sotto i pulsanti di utilità, prima del titolo */
+        }
+        #utilityNavButtons button {
+            margin: 3px 5px;
+        }
 
-        #navButtons button, .action-button { padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-size: 0.9em; }
+        #navButtons button, .action-button { /* Stile generale per tutti i pulsanti d'azione, inclusi quelli in utilityNavButtons */
+             padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-size: 0.9em;
+        }
         .save-and-next-btn { background-color: #0069d9 !important; border-color: #005cbf !important; }
         .save-and-next-btn:hover { background-color: #0056b3 !important; border-color: #004085 !important; }
         #navButtons button:hover, .action-button:hover { background-color: #0056b3; border-color: #004085; }
@@ -220,57 +290,112 @@
             100% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
         }
 
-        #navButtons button.active { background-color: #0056b3 !important; border-color: #004085 !important; color: white !important; animation-name: activeButtonGlow; animation-duration: 1.8s; animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-direction: alternate; }
+        #navButtons button.active { /* Solo per i pulsanti di navigazione delle sezioni */
+            background-color: #0056b3 !important; border-color: #004085 !important; color: white !important;
+            animation-name: activeButtonGlow; animation-duration: 1.8s;
+            animation-iteration-count: infinite; animation-timing-function: ease-in-out;
+            animation-direction: alternate;
+        }
         #navButtons button.nav-btn-completed { background-color: #28a745 !important; border-color: #1e7e34 !important; color: white !important; }
         #navButtons button.nav-btn-partial { background-color: #ffc107 !important; border-color: #e0a800 !important; color: #212529 !important; }
         #navButtons button.nav-btn-untouched { background-color: #dc3545 !important; border-color: #c82333 !important; color: white !important; }
 
         #landingPageSection, .category-section, #historyPageSection { padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a; max-width: 850px; margin-left: auto; margin-right: auto; }
+
         .category-section, #historyPageSection { display: none; }
         #landingPageSection { display: block; }
         .category-section.active { display: block; }
-        .category-section { position: relative; }
-        .fill-defaults-btn { position: absolute; top: 20px; right: 20px; width: 35px; height: 35px; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; font-size: 1.5em; line-height: 1; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: background-color 0.3s ease, box-shadow 0.3s ease; }
-        .fill-defaults-btn:hover { background-color: #0056b3; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-        .fill-defaults-btn:active { background-color: #004085; }
+
+        /* Stili per il bottone "Compila Default" */
+        .category-section {
+            position: relative; /* Necessario per il posizionamento assoluto del bottone */
+        }
+        .fill-defaults-btn {
+            position: absolute;
+            top: 20px; /* Aggiustato per allineamento con il titolo */
+            right: 20px;
+            width: 35px;
+            height: 35px;
+            background-color: #007bff; /* Blu per coerenza, o altro colore distintivo */
+            color: white;
+            border: 1px solid #0056b3;
+            border-radius: 4px;
+            font-size: 1.5em; /* Aumentata dimensione icona */
+            line-height: 1; /* Per centrare meglio il testo/simbolo */
+            cursor: pointer;
+            z-index: 10; /* Per assicurare che sia sopra altri elementi */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .fill-defaults-btn:hover {
+            background-color: #0056b3;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .fill-defaults-btn:active {
+             background-color: #004085;
+        }
+
 
         .summary-item { margin-bottom: 8px; padding: 8px; background-color: #333; border-radius: 3px; }
         .summary-item strong { color: #00aeff; }
-        .summary-anomaly { background-color: #5d3d3d !important; color: #ffdddd !important; border-left: 3px solid #ff8888; padding-left: 10px !important; }
+        .summary-anomaly {
+            background-color: #5d3d3d !important; color: #ffdddd !important;
+            border-left: 3px solid #ff8888; padding-left: 10px !important;
+        }
         .summary-anomaly strong { color: #ffc0c0 !important; }
-        .summary-notes { background-color: #3a3a4a !important; color: #e0e0ff !important; border-left: 3px solid #8888ff; padding-left: 10px !important; }
+        .summary-notes {
+            background-color: #3a3a4a !important; color: #e0e0ff !important;
+            border-left: 3px solid #8888ff; padding-left: 10px !important;
+        }
         .summary-notes strong { color: #c0c0ff !important; }
 
         .table-scroll-wrapper { overflow-x: auto; width: 100%; margin-bottom: 10px; border: 1px solid #444; border-radius: 4px; }
-        .targa-list-table-content { min-width: 700px; /* Aumentato per nuova colonna */ }
-        .targa-list-header { display: flex; font-weight: bold; padding: 0 10px; border-bottom: 2px solid #777; color: #ddd; background-color: #3a3a3a; }
+        .targa-list-table-content { min-width: 650px; }
+        .targa-list-header { display: flex; font-weight: bold; padding: 0 10px 0 10px; border-bottom: 2px solid #777; color: #ddd; background-color: #3a3a3a; }
         .targa-list-header .targa-col { padding: 6px 8px; border-right: 1px solid #555; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1;}
         .targa-list-header .targa-col:last-child { border-right: none; }
         .targa-list-header .targa-col-actions { flex-basis: 60px; text-align: center; flex-grow: 0; }
-        .targa-list-header .targa-col-urgente { flex-basis: 70px; text-align: center; flex-grow: 0; } /* NUOVO STILE */
-
 
         #targaListContainer { margin-top: 0; max-height: 350px; overflow-y: auto; overflow-x: visible; padding: 0; }
-        .targa-list-item { display: flex; align-items: center; border-bottom: 1px solid #444; padding: 0 10px; }
+        .targa-list-item { display: flex; align-items: center; border-bottom: 1px solid #444; padding: 0 10px 0 10px; }
         .targa-list-item:last-child { border-bottom: none; }
-        .targa-list-item .targa-col { padding: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-right: 1px solid #444; text-align: left; flex-grow: 1; display: flex; align-items: center; }
+        .targa-list-item .targa-col {
+            padding: 8px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            border-right: 1px solid #444; text-align: left; flex-grow: 1; display: flex; align-items: center;
+        }
         .targa-list-item .targa-col:last-child { border-right: none; }
 
         .targa-col-targa    { flex-basis: 15%; min-width: 80px;}
-        .targa-col-targa.clickable-targa { cursor: pointer; color: #8ab4f8; font-weight: 500; transition: color 0.2s ease; }
-        .targa-list-item:hover .targa-col-targa.clickable-targa { color: #a1c5ff; text-decoration: underline; }
+        .targa-col-targa.clickable-targa {
+            cursor: pointer;
+            color: #8ab4f8;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .targa-list-item:hover .targa-col-targa.clickable-targa {
+            color: #a1c5ff;
+            text-decoration: underline;
+        }
 
         .targa-col-posizione{ flex-basis: 15%; min-width: 70px; padding: 4px !important; }
-        .targa-col-marca    { flex-basis: 18%; min-width: 90px;} /* Ridotto leggermente */
-        .targa-col-modello  { flex-basis: 22%; min-width: 100px;} /* Ridotto leggermente */
-        .targa-col-piazzale { flex-basis: 18%; min-width: 70px;} /* Ridotto leggermente */
-        .targa-col-urgente { flex-basis: 70px; text-align: center; flex-grow: 0; padding: 4px !important; } /* NUOVO STILE */
-        .targa-col-urgente input[type="checkbox"] { margin: 0 auto; display: block; transform: scale(1.2); cursor: pointer;} /* NUOVO STILE */
+        .targa-col-marca    { flex-basis: 20%; min-width: 100px;}
+        .targa-col-modello  { flex-basis: 25%; min-width: 110px;}
+        .targa-col-piazzale { flex-basis: 20%; min-width: 80px;}
         .targa-col-actions  { flex-basis: 60px; flex-grow: 0; text-align: center; }
 
-
-        .targa-col-posizione input.posizione-input { width: 100%; padding: 6px 4px; margin: 0; box-sizing: border-box; background-color: #404040; color: #f0f0f0; border: 1px solid #5a5a5a; border-radius: 3px; font-size: 0.9em; text-align: center; }
-        .targa-col-posizione input.posizione-input:focus { background-color: #484848; border-color: #777; outline: none; }
+        .targa-col-posizione input.posizione-input {
+            width: 100%; padding: 6px 4px; margin: 0; box-sizing: border-box;
+            background-color: #404040; color: #f0f0f0;
+            border: 1px solid #5a5a5a; border-radius: 3px;
+            font-size: 0.9em; text-align: center;
+        }
+        .targa-col-posizione input.posizione-input:focus {
+            background-color: #484848; border-color: #777; outline: none;
+        }
 
         .delete-progress-btn { background-color: #dc3545; border-color: #c82333; color: white; padding: 3px 7px; font-size: 0.8em; line-height: 1; flex-shrink: 0; border-radius: 3px; }
         .delete-progress-btn:hover { background-color: #c82333; border-color: #bd2130; }
@@ -303,20 +428,17 @@
         .targa-list-item.completed .targa-col-marca,
         .targa-list-item.completed .targa-col-modello,
         .targa-list-item.completed .targa-col-piazzale { color: #888 !important; }
-        
         .targa-list-item.status-visto.completed .targa-col-targa,
         .targa-list-item.status-visto.completed .targa-col-marca,
         .targa-list-item.status-visto.completed .targa-col-modello,
         .targa-list-item.status-visto.completed .targa-col-piazzale { color: #a3cca3 !important; }
         .targa-list-item.status-visto.completed .targa-col-targa.clickable-targa { color: #81c784 !important; }
-
         .targa-list-item.urgent-item.completed .targa-col-targa,
         .targa-list-item.urgent-item.completed .targa-col-marca,
         .targa-list-item.urgent-item.completed .targa-col-modello,
         .targa-list-item.urgent-item.completed .targa-col-piazzale { color: #a07c7c !important; }
-        .targa-list-item.urgent-item.completed .targa-col-targa.clickable-targa { color: #ff8a80 !important; } /* Mantenere colore targa cliccabile anche se completata e urgente */
+        .targa-list-item.urgent-item.completed .targa-col-targa.clickable-targa { color: #ff8a80 !important; }
         .targa-list-item.urgent-item.completed .targa-col-posizione input.posizione-input { background-color: #4a2e2e; color: #a07c7c; }
-
 
         .targa-list-item.status-parziale { background-color: #ffc107 !important; }
         .targa-list-item.status-parziale:hover { background-color: #e0a800 !important; }
@@ -334,8 +456,15 @@
         #sheetFilterContainer label { margin-right: 10px; color: #ccc; display: inline-block; }
         #sheetFilterDropdown { padding: 8px; background-color: #333; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; min-width: 250px; vertical-align: middle; }
 
-        .animate-me { animation: pulseHighlight 1.5s infinite alternate; outline: 2px solid rgba(0, 123, 255, 0.0); transition: outline 0.3s ease, box-shadow 0.3s ease; }
-        @keyframes pulseHighlight { from { outline: 2px solid rgba(0, 123, 255, 0.7); box-shadow: 0 0 5px rgba(0, 123, 255, 0.5), 0 0 8px rgba(0, 123, 255, 0.3) inset; } to   { outline: 3px solid rgba(0, 150, 255, 1); box-shadow: 0 0 10px rgba(0, 150, 255, 0.8), 0 0 12px rgba(0, 150, 255, 0.5) inset; } }
+        .animate-me {
+            animation: pulseHighlight 1.5s infinite alternate;
+            outline: 2px solid rgba(0, 123, 255, 0.0);
+            transition: outline 0.3s ease, box-shadow 0.3s ease;
+        }
+        @keyframes pulseHighlight {
+            from { outline: 2px solid rgba(0, 123, 255, 0.7); box-shadow: 0 0 5px rgba(0, 123, 255, 0.5), 0 0 8px rgba(0, 123, 255, 0.3) inset; }
+            to   { outline: 3px solid rgba(0, 150, 255, 1); box-shadow: 0 0 10px rgba(0, 150, 255, 0.8), 0 0 12px rgba(0, 150, 255, 0.5) inset; }
+        }
         input[type="checkbox"].animate-me, select.animate-me { position: relative; z-index: 1; }
 
         @media (max-width: 768px) {
@@ -347,7 +476,7 @@
             #utilityNavButtons button { font-size: 0.85em; padding: 8px 10px; }
             input[type="text"], input[type="url"], select, textarea { width: 100%; box-sizing: border-box; }
             .table-scroll-wrapper { overflow-x: auto; }
-            .targa-list-table-content { min-width: 600px; } /* Potrebbe necessitare aggiustamento per la colonna urgente */
+            .targa-list-table-content { min-width: 600px; }
             .targa-list-header { display: flex !important; }
             .targa-list-header .targa-col, .targa-list-item .targa-col { padding: 6px 5px; }
             .delete-progress-btn { padding: 5px 8px; }
@@ -356,7 +485,6 @@
             .targa-col-marca    { min-width: 80px;}
             .targa-col-modello  { min-width: 90px;}
             .targa-col-piazzale { min-width: 70px;}
-            .targa-col-urgente { min-width: 50px; } /* Stile responsive per colonna urgente */
             #sheetFilterContainer { display: flex; flex-direction: column; align-items: stretch; }
             #sheetFilterContainer label { margin-bottom: 5px; margin-right: 0; text-align: left;}
             #sheetFilterDropdown { width: 100%; }
@@ -421,7 +549,7 @@
                         <span class="targa-col targa-col-marca">Marca</span>
                         <span class="targa-col targa-col-modello">Modello</span>
                         <span class="targa-col targa-col-piazzale">Piazzale</span>
-                        <span class="targa-col targa-col-urgente">Urgente</span> <span class="targa-col targa-col-actions">Azioni</span>
+                        <span class="targa-col targa-col-actions">Azioni</span>
                     </div>
                     <div id="targaListContainer"></div>
                 </div>
@@ -433,10 +561,29 @@
                 <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection">&#x2713;</button>
                 <h2 class="section-title">1. Foto Remarketing</h2>
                 <ul>
-                    <li> <label for="tipo_trazione">Trazione veicolo:</label> <select id="tipo_trazione"> <option value="">Seleziona...</option> <option value="endotermico">Endotermico</option> <option value="elettrico">Elettrico</option> </select> </li>
+                    <li>
+                        <label for="tipo_trazione">Trazione veicolo:</label>
+                        <select id="tipo_trazione">
+                            <option value="">Seleziona...</option>
+                            <option value="endotermico">Endotermico</option>
+                            <option value="elettrico">Elettrico</option>
+                        </select>
+                    </li>
                     <li><input type="checkbox" id="foto_angolari"><label for="foto_angolari">Foto angolari (3/4)</label></li>
-                    <li> <input type="checkbox" id="foto_vano_carico"> <label for="foto_vano_carico">Vano Carico</label> </li>
-                    <li> <label for="tipo_equipaggiamento">Equipaggiamento:</label> <select id="tipo_equipaggiamento"> <option value="">Seleziona...</option> <option value="kit_gonfia_ripara">Kit</option> <option value="ruota">Ruota</option> <option value="ruotino">Ruotino</option> <option value="runflat">Runflat</option> </select> </li>
+                    <li>
+                        <input type="checkbox" id="foto_vano_carico">
+                        <label for="foto_vano_carico">Vano Carico</label>
+                    </li>
+                    <li>
+                        <label for="tipo_equipaggiamento">Equipaggiamento:</label>
+                        <select id="tipo_equipaggiamento">
+                            <option value="">Seleziona...</option>
+                            <option value="kit_gonfia_ripara">Kit</option>
+                            <option value="ruota">Ruota</option>
+                            <option value="ruotino">Ruotino</option>
+                            <option value="runflat">Runflat</option>
+                        </select>
+                    </li>
                     <li><label for="equipaggiamento_presenza">Presenza equip.:</label><select id="equipaggiamento_presenza"><option value="">Seleziona...</option><option value="presente">Presente</option><option value="mancante">Mancante</option></select></li>
                     <li><input type="checkbox" id="foto_interni_pannelli"><label for="foto_interni_pannelli">Interni/pannelli</label></li>
                     <li><input type="checkbox" id="foto_cruscotto"><label for="foto_cruscotto">Cruscotto</label></li>
@@ -444,10 +591,40 @@
                     <li><label for="stato_cdc">CDC - Stato:</label><select id="stato_cdc"><option value="">Seleziona...</option><option value="originale">Originale</option><option value="copia_conforme">Copia conforme</option><option value="mancante">Mancante</option></select></li>
                     <li><input type="checkbox" id="foto_vano_motore"><label for="foto_vano_motore">Vano motore</label></li>
                     <li><input type="checkbox" id="foto_cofano_tetto"><label for="foto_cofano_tetto">Cofano e tetto</label></li>
-                    <li> <label for="chiave_telecomando">Chiave con telecomando:</label> <select id="chiave_telecomando"> <option value="">Seleziona...</option> <option value="presente">Presente</option> <option value="non_presente">Non Presente</option> </select> </li>
-                    <li> <label for="seconda_chiave">Seconda chiave:</label> <select id="seconda_chiave"> <option value="">Seleziona...</option> <option value="presente">Presente</option> <option value="non_presente">Non Presente</option> </select> </li>
-                    <li> <label for="cavo_ricarica_rapida">Cavo ricarica rapida:</label> <select id="cavo_ricarica_rapida" disabled> <option value="">Seleziona...</option> <option value="presente">Presente</option> <option value="non_presente">Non Presente</option> <option value="non_applicabile">Non Applicabile</option> </select> </li>
-                    <li> <label for="cavo_ricarica_domestica">Cavo ricarica domestica:</label> <select id="cavo_ricarica_domestica" disabled> <option value="">Seleziona...</option> <option value="presente">Presente</option> <option value="non_presente">Non Presente</option> <option value="non_applicabile">Non Applicabile</option> </select> </li>
+                    <li>
+                        <label for="chiave_telecomando">Chiave con telecomando:</label>
+                        <select id="chiave_telecomando">
+                            <option value="">Seleziona...</option>
+                            <option value="presente">Presente</option>
+                            <option value="non_presente">Non Presente</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label for="seconda_chiave">Seconda chiave:</label>
+                        <select id="seconda_chiave">
+                            <option value="">Seleziona...</option>
+                            <option value="presente">Presente</option>
+                            <option value="non_presente">Non Presente</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label for="cavo_ricarica_rapida">Cavo ricarica rapida:</label>
+                        <select id="cavo_ricarica_rapida" disabled>
+                            <option value="">Seleziona...</option>
+                            <option value="presente">Presente</option>
+                            <option value="non_presente">Non Presente</option>
+                            <option value="non_applicabile">Non Applicabile</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label for="cavo_ricarica_domestica">Cavo ricarica domestica:</label>
+                        <select id="cavo_ricarica_domestica" disabled>
+                            <option value="">Seleziona...</option>
+                            <option value="presente">Presente</option>
+                            <option value="non_presente">Non Presente</option>
+                            <option value="non_applicabile">Non Applicabile</option>
+                        </select>
+                    </li>
                 </ul>
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
             </div>
@@ -469,7 +646,10 @@
                     <li><label for="motore_accende">Motore si accende:</label><select id="motore_accende"><option value="">Seleziona...</option><option value="ok">OK</option><option value="non_ok">Non OK</option></select></li>
                     <li><label for="batteria_stato">Batteria:</label><select id="batteria_stato"><option value="">Seleziona...</option><option value="ok">OK</option><option value="non_ok">Non OK</option></select></li>
                     <li><input type="checkbox" id="foto_danni_generiche"><label for="foto_danni_generiche">Altre foto danni</label></li>
-                    <li> <label for="note_danni_verifiche">Note Danni/Verifiche:</label> <textarea id="note_danni_verifiche" rows="4"></textarea> </li>
+                    <li>
+                        <label for="note_danni_verifiche">Note Danni/Verifiche:</label>
+                        <textarea id="note_danni_verifiche" rows="4"></textarea>
+                    </li>
                 </ul>
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Vai al Riepilogo</button></div>
             </div>
@@ -525,45 +705,11 @@
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
 
-    // --- NUOVE FUNZIONI PER GESTIRE URGENZA IN LOCALSTORAGE ---
-    function getUrgentTarghe() {
-        try {
-            const json = localStorage.getItem(`${APP_PREFIX}urgentTarghe`);
-            return json ? JSON.parse(json) : {}; 
-        } catch (e) {
-            console.error("Error loading urgent targhe from LS:", e);
-            return {};
-        }
-    }
-
-    function isTargaUrgent(targa) {
-        if (!targa) return false;
-        const urgentTarghe = getUrgentTarghe();
-        return !!urgentTarghe[targa]; 
-    }
-
-    function setTargaUrgent(targa, isUrgent) {
-        if (!targa) return;
-        try {
-            const urgentTarghe = getUrgentTarghe();
-            if (isUrgent) {
-                urgentTarghe[targa] = true;
-            } else {
-                delete urgentTarghe[targa]; 
-            }
-            localStorage.setItem(`${APP_PREFIX}urgentTarghe`, JSON.stringify(urgentTarghe));
-            console.log(`Urgency for targa ${targa} set to ${isUrgent}.`);
-        } catch (e) {
-            console.error("Error saving urgent targa to LS:", e);
-        }
-    }
-    // --- FINE NUOVE FUNZIONI URGENZA ---
-
-
     function fillSectionPositiveOrDefaults(sectionId) {
         const section = document.getElementById(sectionId);
         if (!section) return;
 
+        // Remarketing Section
         if (sectionId === 'remarketingSection') {
             if (tipoTrazioneSelect) tipoTrazioneSelect.value = 'endotermico';
             document.getElementById('foto_angolari').checked = true;
@@ -584,16 +730,20 @@
                 if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'presente';
             }
         }
+        // Pneumatici Section
         else if (sectionId === 'pneumaticiSection') {
             document.getElementById('pneumatico_as').value = 'conforme';
             document.getElementById('pneumatico_ad').value = 'conforme';
             document.getElementById('pneumatico_pd').value = 'conforme';
             document.getElementById('pneumatico_ps').value = 'conforme';
         }
+        // Danni/Verifiche Section
         else if (sectionId === 'danniVerificheSection') {
             document.getElementById('motore_accende').value = 'ok';
             document.getElementById('batteria_stato').value = 'ok';
+            // --- MODIFICA RICHIESTA: impostare foto_danni_generiche a true ---
             document.getElementById('foto_danni_generiche').checked = true; 
+            // --- FINE MODIFICA ---
             document.getElementById('note_danni_verifiche').value = 'Nessuna anomalia da segnalare.';
         }
 
@@ -713,21 +863,15 @@
         if(!targa){return;}
         try {
             localStorage.removeItem(`${APP_PREFIX}data_${targa}`);
-            localStorage.removeItem(`${APP_PREFIX}posizione_${targa}`); // Rimuovi anche posizione
-            // Rimuovi anche lo stato di urgenza per questa targa
-            const urgentTarghe = getUrgentTarghe();
-            if (urgentTarghe.hasOwnProperty(targa)) {
-                delete urgentTarghe[targa];
-                localStorage.setItem(`${APP_PREFIX}urgentTarghe`, JSON.stringify(urgentTarghe));
-            }
-            console.log(`Dati modulo, posizione e urgenza rimossi per ${targa}.`);
-            
+            console.log(`Dati modulo rimossi per ${targa}.`);
             const completed = getCompletedTarghe();
             if(completed.hasOwnProperty(targa)){
                 delete completed[targa];
                 localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));
                 console.log(`Stato completamento rimosso per ${targa}.`);
             }
+            localStorage.removeItem(`${APP_PREFIX}posizione_${targa}`);
+            console.log(`Dati posizione rimossi per ${targa}.`);
 
         } catch(e) {
             console.error(`Errore cancellazione dati per ${targa}:`,e);
@@ -744,8 +888,15 @@
     function generateAndDownloadScreenshot() {
         return new Promise((resolve, reject) => {
             const riepilogoSection = document.getElementById('riepilogoSection');
-            if (!riepilogoSection) { alert("Errore: Sezione Riepilogo non trovata per lo screenshot."); return reject("Sezione riepilogo non trovata"); }
-            if (typeof html2canvas === 'undefined') { alert("Errore: Libreria html2canvas non caricata."); return reject("html2canvas non caricata"); }
+            if (!riepilogoSection) {
+                alert("Errore: Sezione Riepilogo non trovata per lo screenshot.");
+                return reject("Sezione riepilogo non trovata");
+            }
+            if (typeof html2canvas === 'undefined') {
+                alert("Errore: Libreria html2canvas non caricata.");
+                return reject("html2canvas non caricata");
+            }
+
             setTimeout(() => {
                 console.log("Inizio generazione screenshot...");
                 riepilogoSection.scrollTop = 0;
@@ -760,7 +911,9 @@
                             if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") {
                                 piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_');
                                 if (!piazzaleSanitized) piazzaleSanitized = 'N_D';
-                            } else { piazzaleSanitized = 'N_D'; }
+                            } else {
+                                piazzaleSanitized = 'N_D';
+                            }
                         }
                         link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`;
                         link.href = canvas.toDataURL('image/png');
@@ -770,7 +923,11 @@
                         console.log(`Screenshot generato e download avviato: ${link.download}`);
                         resolve();
                     })
-                    .catch(error => { console.error("Errore durante la generazione dello screenshot:", error); alert("Si è verificato un errore durante la generazione dello screenshot."); reject(error); });
+                    .catch(error => {
+                        console.error("Errore durante la generazione dello screenshot:", error);
+                        alert("Si è verificato un errore durante la generazione dello screenshot.");
+                        reject(error);
+                    });
             }, 100);
         });
     }
@@ -794,33 +951,39 @@
     function getSectionStatus(sectionElementId, targaData) {
         const inputs = getSectionInputs(sectionElementId);
         if (inputs.length === 0) return 'completed';
-        let allDefault = true; let allNonDefault = true; let hasAtLeastOneNonDefault = false;
+
+        let allDefault = true;
+        let allNonDefault = true;
+        let hasAtLeastOneNonDefault = false;
+
         inputs.forEach(input => {
             let isDefault;
             const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined;
+
             if (savedValue !== undefined) {
-                if (input.type === 'checkbox') { isDefault = !savedValue; } 
-                else { isDefault = (savedValue === "" || (input.options.length > 0 && savedValue === input.options[0].value)); }
-            } else { isDefault = isInputDefault(input); }
-            if (!isDefault) { allDefault = false; hasAtLeastOneNonDefault = true; } 
-            else { allNonDefault = false; }
+                if (input.type === 'checkbox') {
+                    isDefault = !savedValue;
+                } else { 
+                    isDefault = (savedValue === "" || (input.options.length > 0 && savedValue === input.options[0].value));
+                }
+            } else {
+                 isDefault = isInputDefault(input); 
+            }
+
+            if (!isDefault) {
+                allDefault = false;
+                hasAtLeastOneNonDefault = true;
+            } else {
+                allNonDefault = false;
+            }
         });
-        if (allDefault) return 'untouched'; if (allNonDefault) return 'completed'; if (hasAtLeastOneNonDefault) return 'partial'; 
+
+        if (allDefault) return 'untouched';
+        if (allNonDefault) return 'completed';
+        if (hasAtLeastOneNonDefault) return 'partial'; 
         return 'untouched';
     }
 
-    function getItemRank(item) { // MODIFICATO PER USARE isTargaUrgent DA LOCALSTORAGE
-        const isUrgent = isTargaUrgent(item.targa); 
-        const isCompleted = isTargaCompleted(item.targa);
-        const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
-
-        if (isUrgent && !isCompleted) return 1;
-        if (!isUrgent && !isCompleted && hasData) return 2; 
-        if (!isUrgent && !isCompleted && !hasData) return 3; 
-        if (!isUrgent && isCompleted) return 4; 
-        if (isUrgent && isCompleted) return 5; 
-        return 6; 
-    }
 
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
@@ -838,7 +1001,9 @@
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
             mainTitleGlobal.innerHTML = "Elenco Veicoli";
-            if (listaTargheCompleta.length > 0 && (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) && typeof popolaTargheFiltrate === 'function') {
+            if (listaTargheCompleta.length > 0 &&
+                (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
+                typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
             }
             targaSelezionataGlobalmente = null;
@@ -849,10 +1014,16 @@
 
             if (viewName === 'checklist') {
                  if (navButtonsContainer) navButtonsContainer.style.display = 'flex';
-                if (!targaSelezionataGlobalmente) { alert("Nessuna targa selezionata."); showView('landing'); return; }
+                if (!targaSelezionataGlobalmente) {
+                    alert("Nessuna targa selezionata.");
+                    showView('landing');
+                    return;
+                }
                 checklistContainer.style.display = 'block';
                 const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
-                let subIdentifier = (veicoloAttuale && (veicoloAttuale.marca || veicoloAttuale.modello)) ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim() : "";
+                let subIdentifier = (veicoloAttuale && (veicoloAttuale.marca || veicoloAttuale.modello))
+                    ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
+                    : "";
                 mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
             } else { 
                 historyPageSection.style.display = 'block';
@@ -871,7 +1042,9 @@
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
         } else {
             let nonFixedHeaderHeight = 0;
-            if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) { nonFixedHeaderHeight = mainTitleGlobal.offsetHeight; }
+            if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {
+                 nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
+            }
             bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
         }
         document.body.style.paddingTop = bodyPaddingTopValue;
@@ -879,20 +1052,19 @@
 
     function populateSavedTargasList() { savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targa = key.substring(`${APP_PREFIX}data_`.length); if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa);}}} if (tempSavedTargas.length > 0) hasSaves = true; tempSavedTargas.sort(); tempSavedTargas.forEach(targa => { const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' }; let displayText = targa; let details = []; if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`); if (details.length > 0) { displayText += ` - ${details.join(' ')}`; } const button = document.createElement('button'); button.classList.add('saved-targa-button'); button.textContent = displayText; button.dataset.targa = targa; button.addEventListener('click', function() { targaSelezionataGlobalmente = this.dataset.targa; showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstChecklistNavButton = Array.from(navButtons).find(btn => btn.dataset.target && btn.id !== 'backToListBtn' && btn.id !== 'historyBtn'); if (firstChecklistNavButton) { showSection(firstChecklistNavButton.dataset.target); } else if (navButtons.length > 0 && navButtons[0].dataset.target) { showSection(navButtons[0].dataset.target); }}); savedTargasListContainer.appendChild(button); }); if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>'; } }
     function clearAllSavedData() {
-        if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni, urgenze e filtro piazzale)?\n\nAzione irreversibile.")) {
+        if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni e filtro piazzale)?\n\nAzione irreversibile.")) {
             let c = 0;
             for (let i=localStorage.length-1;i>=0;i--) {
                 const k=localStorage.key(i);
-                if (k.startsWith(APP_PREFIX)) { localStorage.removeItem(k);c++; }
+                if (k.startsWith(APP_PREFIX)) {
+                    localStorage.removeItem(k);c++;
+                }
             }
             alert(`${c} elementi cancellati.`);
             if(sheetFilterDropdown) sheetFilterDropdown.value = 'all';
-            // Non è necessario rimuovere selectedPiazzaleFilter esplicitamente se tutti gli item con APP_PREFIX sono rimossi.
-            // Ma per sicurezza, lo si può fare: localStorage.removeItem(`${APP_PREFIX}selectedPiazzaleFilter`);
-            // E per le urgenze: localStorage.removeItem(`${APP_PREFIX}urgentTarghe`);
-            // L'approccio del ciclo che rimuove tutto ciò che inizia con APP_PREFIX è più completo.
+            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');
             populateSavedTargasList();
-            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); // Ricarica e ripopola
+            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();
             if (typeof showView === 'function') showView('landing');
         }
     }
@@ -901,16 +1073,29 @@
         if (!sheetFilterDropdown) return;
         const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== ''))];
         sheetFilterDropdown.innerHTML = '';
-        sources.forEach(source => { const option = document.createElement('option'); option.value = source; option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source; sheetFilterDropdown.appendChild(option); });
+        sources.forEach(source => {
+            const option = document.createElement('option');
+            option.value = source;
+            option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source;
+            sheetFilterDropdown.appendChild(option);
+        });
+
         const savedPiazzaleFilter = localStorage.getItem(`${APP_PREFIX}selectedPiazzaleFilter`);
-        if (savedPiazzaleFilter && sources.includes(savedPiazzaleFilter)) { sheetFilterDropdown.value = savedPiazzaleFilter; } 
-        else { sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); }
+        if (savedPiazzaleFilter && sources.includes(savedPiazzaleFilter)) {
+            sheetFilterDropdown.value = savedPiazzaleFilter;
+        } else {
+            sheetFilterDropdown.value = 'all';
+            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');
+        }
+
         sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange);
         sheetFilterDropdown.addEventListener('change', handleSheetFilterChange);
     }
 
     function handleSheetFilterChange() {
-        if (sheetFilterDropdown) { localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value); }
+        if (sheetFilterDropdown) {
+            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value);
+        }
         popolaTargheFiltrate();
         targaSelezionataGlobalmente = null;
     }
@@ -925,6 +1110,18 @@
             ? [...listaTargheCompleta]
             : listaTargheCompleta.filter(item => item.piazzale === selectedSource);
 
+        function getItemRank(item) {
+            const isUrgent = item.isUrgent;
+            const isCompleted = isTargaCompleted(item.targa);
+            const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
+
+            if (isUrgent && !isCompleted) return 1;
+            if (!isUrgent && !isCompleted && hasData) return 2;
+            if (!isUrgent && !isCompleted && !hasData) return 3;
+            if (!isUrgent && isCompleted) return 4;
+            if (isUrgent && isCompleted) return 5;
+            return 6;
+        }
         preliminaryFilteredList.sort((a, b) => {
             const rankA = getItemRank(a);
             const rankB = getItemRank(b);
@@ -944,12 +1141,12 @@
 
             const itemCompleted = isTargaCompleted(item.targa);
             const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
-            const currentItemIsUrgent = isTargaUrgent(item.targa); // Leggi urgenza da localStorage
 
-            // Applica classi di stato
-            if (currentItemIsUrgent) {
+            if (item.isUrgent) {
                 li.classList.add('urgent-item');
-                if (itemCompleted) { li.classList.add('completed'); }
+                if (itemCompleted) {
+                    li.classList.add('completed');
+                }
             } else if (itemCompleted) {
                 li.classList.add('status-visto', 'completed');
             } else if (hasData) {
@@ -962,13 +1159,27 @@
             targaCol.classList.add('targa-col', 'targa-col-targa', 'clickable-targa');
             targaCol.textContent = item.targa || 'N/D';
             targaCol.dataset.targaValue = item.targa;
-            targaCol.addEventListener('click', function() { /* ... (invariato) ... */ });
+
+            targaCol.addEventListener('click', function() {
+                const selectedTarga = this.dataset.targaValue;
+                if (selectedTarga) {
+                    targaSelezionataGlobalmente = selectedTarga;
+                    console.log(`Targa ${targaSelezionataGlobalmente} selezionata per perizia.`);
+                    showView('checklist');
+                    loadProgress(targaSelezionataGlobalmente);
+                    const firstNav = Array.from(navButtons).find(b => b.dataset.target && b.id !== 'backToListBtn' && b.id !== 'historyBtn' && b.id !== 'exitAppBtn');
+                    if (firstNav) {
+                        showSection(firstNav.dataset.target);
+                    } else if (navButtons.length > 0 && navButtons[0].dataset.target) {
+                        showSection(navButtons[0].dataset.target);
+                    }
+                }
+            });
             li.appendChild(targaCol);
 
             const posizioneCol = document.createElement('span');
             posizioneCol.classList.add('targa-col', 'targa-col-posizione');
             const posizioneInput = document.createElement('input');
-            /* ... (input posizione invariato) ... */
             posizioneInput.type = 'text'; posizioneInput.classList.add('posizione-input');
             posizioneInput.dataset.targa = item.targa; posizioneInput.placeholder = 'Pos.';
             posizioneInput.maxLength = 5; posizioneInput.value = loadPosizioneForTarga(item.targa);
@@ -988,7 +1199,6 @@
             posizioneCol.appendChild(posizioneInput);
             li.appendChild(posizioneCol);
 
-
             const marcaCol = document.createElement('span');
             marcaCol.classList.add('targa-col', 'targa-col-marca'); marcaCol.textContent = item.marca || 'N/D';
             li.appendChild(marcaCol);
@@ -1001,40 +1211,16 @@
             piazzaleCol.classList.add('targa-col', 'targa-col-piazzale'); piazzaleCol.textContent = item.piazzale || 'N/D';
             li.appendChild(piazzaleCol);
 
-            // --- NUOVA COLONNA URGENTE CON CHECKBOX ---
-            const urgenteCol = document.createElement('span');
-            urgenteCol.classList.add('targa-col', 'targa-col-urgente');
-            const urgenteCheckbox = document.createElement('input');
-            urgenteCheckbox.type = 'checkbox';
-            urgenteCheckbox.checked = currentItemIsUrgent; // Imposta stato iniziale
-            urgenteCheckbox.dataset.targa = item.targa;
-            urgenteCheckbox.title = `Contrassegna ${item.targa} come urgente`;
-            urgenteCheckbox.addEventListener('click', function(event) { // Usare click per evitare problemi con change e stopPropagation
-                event.stopPropagation(); 
-            });
-            urgenteCheckbox.addEventListener('change', function(event) {
-                // event.stopPropagation(); // Potrebbe non essere necessario qui se click lo gestisce
-                const targaToToggle = this.dataset.targa;
-                const newUrgentState = this.checked;
-                setTargaUrgent(targaToToggle, newUrgentState);
-                popolaTargheFiltrate(); // Ricarica e riordina la lista
-            });
-            urgenteCol.appendChild(urgenteCheckbox);
-            li.appendChild(urgenteCol);
-            // --- FINE NUOVA COLONNA URGENTE ---
-
-
             const actionsCol = document.createElement('span');
             actionsCol.classList.add('targa-col', 'targa-col-actions');
             const delB = document.createElement('button');
-            /* ... (pulsante delete invariato) ... */
             delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = item.targa;
             delB.title = `Cancella progressi per ${item.targa}`; delB.textContent = 'X';
             delB.addEventListener('click', function(event) {
                 event.stopPropagation();
                 const tDel = this.dataset.targa;
-                if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (inclusa posizione e urgenza)?\n\nAzione irreversibile.`)) { // Aggiornato messaggio conferma
-                    deleteProgressForTarga(tDel); // deleteProgressForTarga ora rimuove anche l'urgenza
+                if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (inclusa posizione)?\n\nAzione irreversibile.`)) {
+                    deleteProgressForTarga(tDel);
                 }
             });
             actionsCol.appendChild(delB);
@@ -1052,37 +1238,245 @@
 
         try {
             const r = await fetch(GOOGLE_SHEET_CSV_URL);
-            if (!r.ok) { /* ... (gestione errori invariata) ... */ throw new Error(`HTTP ${r.status}.`);}
+            if (!r.ok) {
+                let e = `HTTP ${r.status}.`;
+                if (r.status === 0) e = "Errore di rete o CORS.";
+                else if (r.status === 404) e = "File CSV non trovato (404).";
+                else if (r.status === 403) e = "Accesso al file CSV negato (403).";
+                throw new Error(e);
+            }
             const csv = await r.text();
             const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== '');
 
-            if (lines.length === 0) { /* ... (gestione CSV vuoto invariata) ... */ return; }
+            if (lines.length === 0) {
+                if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV.";
+                listaTargheCompleta = [];
+                if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
+                if (targaListContainer) targaListContainer.innerHTML = '';
+                return;
+            }
 
-            listaTargheCompleta = lines.map(l => { // RIMOSSA LETTURA URGENZA DAL CSV
+            listaTargheCompleta = lines.map(l => {
                 const p = l.split(',');
                 return {
                     targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(),
                     marca: (p[1] || '').trim().replace(/^"|"$/g, ''),
                     modello: (p[2] || '').trim().replace(/^"|"$/g, ''),
-                    piazzale: (p[3] || '').trim().replace(/^"|"$/g, '')
-                    // La colonna 5 (indice 4) del CSV per l'urgenza non viene più letta qui
+                    piazzale: (p[3] || '').trim().replace(/^"|"$/g, ''),
+                    isUrgent: (p[4] || '').trim().toUpperCase() === 'URGENTE'
                 };
             }).filter(i => i.targa && i.targa.length > 3);
 
-            if (listaTargheCompleta.length === 0) { /* ... (gestione targhe non valide invariata) ... */ return; }
+            if (listaTargheCompleta.length === 0) {
+                if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";
+                 if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
+                if (targaListContainer) targaListContainer.innerHTML = '';
+                return;
+            }
 
             setupSheetFilterDropdown();
             popolaTargheFiltrate();
 
-        } catch (e) { /* ... (gestione errori invariata) ... */ } 
-        finally { /* ... (gestione preloader invariata) ... */ }
+        } catch (e) {
+            console.error("Errore caricamento/popolamento targhe:", e);
+            if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`;
+            if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
+            if (targaListContainer) targaListContainer.innerHTML = '';
+             listaTargheCompleta = [];
+        } finally {
+            if (preloader) {
+                preloader.classList.add('hidden');
+                setTimeout(() => {
+                    if (preloader) preloader.style.display = 'none';
+                }, 700);
+            }
+        }
     }
 
-    function initSequentialAnimation() { /* ... (invariato) ... */ }
-    function showSection(targetId) { /* ... (invariato) ... */ }
+    function initSequentialAnimation() {
+        const checklistContainerDiv = document.getElementById('checklistContainer');
+        if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return;
+        const activeSection = checklistContainerDiv.querySelector('.category-section.active');
+        if (!activeSection) return;
+
+        activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me'));
+
+        const allVisibleElementsInSection = Array.from(
+            activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled), textarea:not(:disabled)')
+        ).filter(el => {
+            let current = el;
+            while (current && current !== activeSection.parentElement) {
+                if (getComputedStyle(current).display === 'none' || getComputedStyle(current).visibility === 'hidden') return false;
+                current = current.parentElement;
+            }
+            return el.offsetParent !== null;
+        });
+
+        const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el));
+
+        if (startIndex === -1 && allVisibleElementsInSection.length > 0) {
+            return;
+        }
+        if (allVisibleElementsInSection.length === 0) {
+             return;
+        }
+
+        const elementsToAnimate = allVisibleElementsInSection.slice(startIndex >= 0 ? startIndex : 0);
+
+        if (elementsToAnimate.length === 0) return;
+
+        let currentIndex = 0;
+        let activeListeners = [];
+
+        function clearAllActiveAnimationListeners() {
+            activeListeners.forEach(({element, type, handler}) => {
+                element.removeEventListener(type, handler);
+                element.classList.remove('animate-me');
+            });
+            activeListeners = [];
+        }
+        clearAllActiveAnimationListeners();
+
+        function animateNextElement() {
+            if (currentIndex >= elementsToAnimate.length) {
+                return;
+            }
+            const currentElement = elementsToAnimate[currentIndex];
+            if (!isInputDefault(currentElement)) {
+                currentIndex++;
+                animateNextElement();
+                return;
+            }
+
+            currentElement.classList.add('animate-me');
+            currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            const onValueChange = (event) => {
+                let processChange = false;
+                if (event.type === 'change') {
+                    processChange = true;
+                } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {
+                    processChange = true;
+                } else if (event.type === 'blur' && currentElement.tagName === 'SELECT' && !isInputDefault(currentElement)) {
+                     processChange = true;
+                }
+
+                if (processChange) {
+                    currentElement.classList.remove('animate-me');
+                    currentElement.removeEventListener('change', onValueChange);
+                    currentElement.removeEventListener('blur', onValueChange);
+                    activeListeners = activeListeners.filter(listener => listener.element !== currentElement);
+                    currentIndex++;
+                    setTimeout(animateNextElement, 50);
+                }
+            };
+
+            currentElement.addEventListener('change', onValueChange);
+            if (currentElement.tagName === 'SELECT' || currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') {
+                currentElement.addEventListener('blur', onValueChange);
+                 activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange});
+            }
+            activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
+        }
+        animateNextElement();
+    }
+
+
+    function showSection(targetId) {
+        document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
+            el.classList.remove('animate-me');
+        });
+        sections.forEach(s => s.classList.toggle('active', s.id === targetId + 'Section'));
+        navButtons.forEach(b => { 
+            b.classList.toggle('active', b.dataset.target === targetId);
+        });
+        updateNavButtonColors(); 
+        const targetSectionElement = document.getElementById(targetId + 'Section');
+        if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
+             setTimeout(initSequentialAnimation, 100);
+        } else if (targetId === 'riepilogo') {
+            generateSummary();
+        }
+    }
+
     navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
-    function getSelectText(selectElementOrId) { /* ... (invariato) ... */ }
-    function generateSummary() { /* ... (invariato) ... */ }
+
+    function getSelectText(selectElementOrId) {
+        const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId;
+        if (el && el.tagName === 'SELECT' && el.value !== "") {
+            if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) {
+                return el.options[el.selectedIndex].text;
+            }
+            return el.value;
+        }
+        return "N/S";
+    }
+
+    function generateSummary() {
+        summaryContent.innerHTML = '';
+        let targa = targaSelezionataGlobalmente || "N/D";
+        function createSummaryItem(label, value, isAnomaly = false) {
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('summary-item');
+            if (isAnomaly) itemDiv.classList.add('summary-anomaly');
+            itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`;
+            return itemDiv;
+        }
+        summaryContent.appendChild(createSummaryItem("Targa", targa));
+        if (targaSelezionataGlobalmente) {
+            const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
+            let marcaVeicolo = "N/D", modelloVeicolo = "N/D";
+            if (veicoloAttuale) {
+                marcaVeicolo = veicoloAttuale.marca || "N/D";
+                modelloVeicolo = veicoloAttuale.modello || "N/D";
+            }
+            summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo));
+            summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo));
+            summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D"));
+        } else {
+            summaryContent.appendChild(createSummaryItem("Marca", "N/D"));
+            summaryContent.appendChild(createSummaryItem("Modello", "N/D"));
+            summaryContent.appendChild(createSummaryItem("Posizione", "N/D"));
+        }
+        summaryContent.innerHTML += `<h3>Remarketing:</h3>`;
+
+        const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : "";
+        const isEV = tipoTrazioneValue === 'elettrico';
+        summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect)));
+
+
+        let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza');
+        let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante");
+        summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante"));
+        summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia));
+        let kmStato = getSelectText('stato_chilometri');
+        summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili"));
+        let cdcStato = getSelectText('stato_cdc');
+        summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante"));
+        summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente"));
+        summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente"));
+        if (isEV) {
+            summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`;
+            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", getSelectText('cavo_ricarica_rapida'), getSelectText('cavo_ricarica_rapida') === "Non Presente"));
+            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", getSelectText('cavo_ricarica_domestica'), getSelectText('cavo_ricarica_domestica') === "Non Presente"));
+        }
+        summaryContent.innerHTML += `<h3>Pneumatici:</h3>`;
+        const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }];
+        pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); });
+        summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`;
+        summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK'));
+        summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK'));
+        const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : "";
+        if (noteDanniValue) {
+            const noteDiv = document.createElement('div');
+            noteDiv.classList.add('summary-item', 'summary-notes');
+            const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: ";
+            const contentDiv = document.createElement('div');
+            contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue;
+            noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv);
+            summaryContent.appendChild(noteDiv);
+        }
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
         const preloader = document.getElementById('preloader');
@@ -1091,15 +1485,25 @@
             button.addEventListener('click', function() { 
                 const sectionId = this.dataset.sectionid; 
                 const sectionTarget = sectionId.replace('Section', ''); 
+
                 if (sectionId) {
                     fillSectionPositiveOrDefaults(sectionId); 
+
                     if (saveProgress(targaSelezionataGlobalmente)) {
+                        
                         let currentSectionIndex = -1;
-                        navButtons.forEach((nb, index) => { if (nb.dataset.target === sectionTarget) { currentSectionIndex = index; } });
+                        navButtons.forEach((nb, index) => { 
+                            if (nb.dataset.target === sectionTarget) {
+                                currentSectionIndex = index;
+                            }
+                        });
+
                         if (currentSectionIndex !== -1) { 
                             if (currentSectionIndex < navButtons.length - 1) { 
                                 const nextNavButton = navButtons[currentSectionIndex + 1];
-                                if (nextNavButton && nextNavButton.dataset.target) { showSection(nextNavButton.dataset.target); }
+                                if (nextNavButton && nextNavButton.dataset.target) {
+                                    showSection(nextNavButton.dataset.target);
+                                }
                             }
                         }
                     }
@@ -1107,7 +1511,10 @@
             });
         });
 
-        if (tipoTrazioneSelect) { tipoTrazioneSelect.addEventListener('change', handleTrazioneChange); }
+
+        if (tipoTrazioneSelect) {
+            tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
+        }
         handleTrazioneChange();
 
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
@@ -1119,11 +1526,84 @@
 
         async function initializeApplicationViewAndLoadData() {
             showView('landing'); 
-            if (preloader) { /* ... (invariato) ... */ }
+
+            if (preloader) {
+                preloader.style.display = 'flex';
+                preloader.classList.remove('hidden');
+                preloader.style.opacity = '1';
+                preloader.style.visibility = 'visible';
+                const loadingText = preloader.querySelector('.loading-text');
+                if (loadingText) loadingText.textContent = 'CARICAMENTO ELENCO...';
+            }
             await caricaEPopolaTarghe();
         }
+
         initializeApplicationViewAndLoadData();
-        if (exitAppBtn) { exitAppBtn.addEventListener('click', () => { /* ... (logica uscita invariata) ... */ }); }
+
+        if (exitAppBtn) {
+            exitAppBtn.addEventListener('click', () => {
+                const exitCurtain = document.getElementById('exit-curtain');
+                const mainContentWrapper = document.getElementById('mainContentWrapper');
+                const pageHeader = document.getElementById('pageHeaderContainer');
+
+                if (exitCurtain) {
+                    if (mainContentWrapper) mainContentWrapper.style.display = 'none';
+                    if (pageHeader) pageHeader.style.display = 'none';
+                    document.body.style.paddingTop = '0px';
+
+                    const exitLoadingText = exitCurtain.querySelector('.loading-text');
+                    const barContainer = exitCurtain.querySelector('.loader-bar-container');
+                    const defaultCloseText = "CHIUSURA IN CORSO...";
+                    const glitchText = "ERRORE DI SISTEMA...";
+
+                    exitCurtain.classList.remove('glitching', 'flash-out-effect'); 
+                    if (exitLoadingText) {
+                        exitLoadingText.textContent = defaultCloseText;
+                        exitLoadingText.style.animation = 'textGlow 1.8s infinite alternate ease-in-out';
+                        exitLoadingText.style.color = '#ff8787';
+                        exitLoadingText.style.textShadow = '';
+                    }
+                    exitCurtain.setAttribute('data-text', defaultCloseText);
+                    if (barContainer) barContainer.style.display = 'flex';
+
+                    exitCurtain.classList.add('visible-no-transition');
+                    exitCurtain.style.display = 'flex';
+
+                    setTimeout(() => {
+                        exitCurtain.classList.add('glitching');
+                        if (exitLoadingText) {
+                           exitLoadingText.textContent = glitchText;
+                           exitLoadingText.style.animation = ''; 
+                        }
+                        exitCurtain.setAttribute('data-text', glitchText);
+
+                        setTimeout(() => {
+                            exitCurtain.classList.remove('glitching');
+                            if (exitLoadingText) {
+                                exitLoadingText.textContent = 'Applicazione terminata.';
+                                exitLoadingText.style.animation = 'none';
+                                exitLoadingText.style.color = '#FFFFFF';
+                                exitLoadingText.style.textShadow = 'none';
+                            }
+                            if (barContainer) barContainer.style.display = 'none';
+
+                            setTimeout(() => {
+                                exitCurtain.classList.add('flash-out-effect');
+                                setTimeout(() => {
+                                    const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
+                                    fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
+                                        .then(response => console.log('Macrodroid trigger request sent.'))
+                                        .catch(error => console.error('Error sending Macrodroid trigger:', error));
+                                }, 500); 
+
+                            }, 700); 
+
+                        }, 800); 
+
+                    }, 800); 
+                }
+            });
+        }
     });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
