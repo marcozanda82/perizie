@@ -354,11 +354,13 @@
         .summary-notes strong { color: #c0c0ff !important; }
 
         .table-scroll-wrapper { overflow-x: auto; width: 100%; margin-bottom: 10px; border: 1px solid #444; border-radius: 4px; }
-        .targa-list-table-content { min-width: 650px; }
+        .targa-list-table-content { min-width: 650px; } /* Aumentato per nuova colonna Urgenza */
         .targa-list-header { display: flex; font-weight: bold; padding: 0 10px 0 10px; border-bottom: 2px solid #777; color: #ddd; background-color: #3a3a3a; }
         .targa-list-header .targa-col { padding: 6px 8px; border-right: 1px solid #555; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1;}
         .targa-list-header .targa-col:last-child { border-right: none; }
         .targa-list-header .targa-col-actions { flex-basis: 60px; text-align: center; flex-grow: 0; }
+        .targa-list-header .targa-col-urgenza { flex-basis: 70px; text-align: center; flex-grow: 0; } /* Stile per header colonna Urgenza */
+
 
         #targaListContainer { margin-top: 0; max-height: 350px; overflow-y: auto; overflow-x: visible; padding: 0; }
         .targa-list-item { display: flex; align-items: center; border-bottom: 1px solid #444; padding: 0 10px 0 10px; }
@@ -369,7 +371,7 @@
         }
         .targa-list-item .targa-col:last-child { border-right: none; }
 
-        .targa-col-targa    { flex-basis: 15%; min-width: 80px;}
+        .targa-col-targa    { flex-basis: 13%; min-width: 75px;} /* Ridotto leggermente */
         .targa-col-targa.clickable-targa {
             cursor: pointer;
             color: #8ab4f8;
@@ -381,11 +383,14 @@
             text-decoration: underline;
         }
 
-        .targa-col-posizione{ flex-basis: 15%; min-width: 70px; padding: 4px !important; }
-        .targa-col-marca    { flex-basis: 20%; min-width: 100px;}
-        .targa-col-modello  { flex-basis: 25%; min-width: 110px;}
-        .targa-col-piazzale { flex-basis: 20%; min-width: 80px;}
-        .targa-col-actions  { flex-basis: 60px; flex-grow: 0; text-align: center; }
+        .targa-col-posizione{ flex-basis: 12%; min-width: 60px; padding: 4px !important; } /* Ridotto leggermente */
+        .targa-col-urgenza  { flex-basis: 10%; min-width: 50px; text-align: center; justify-content: center;} /* Nuova colonna Urgenza */
+        .targa-col-urgenza input[type="checkbox"] { margin: 0 auto; } /* Centra checkbox */
+        .targa-col-marca    { flex-basis: 18%; min-width: 90px;} /* Ridotto leggermente */
+        .targa-col-modello  { flex-basis: 22%; min-width: 100px;}/* Ridotto leggermente */
+        .targa-col-piazzale { flex-basis: 18%; min-width: 70px;} /* Ridotto leggermente */
+        .targa-col-actions  { flex-basis: 7%; min-width: 50px; flex-grow: 0; text-align: center; } /* Ridotto leggermente */
+
 
         .targa-col-posizione input.posizione-input {
             width: 100%; padding: 6px 4px; margin: 0; box-sizing: border-box;
@@ -423,6 +428,8 @@
         .targa-list-item.urgent-item:not(.completed) .targa-col-targa.clickable-targa { color: #ff8a80 !important; }
         .targa-list-item.urgent-item:not(.completed):hover .targa-col-targa.clickable-targa { color: #ff5252 !important; }
         .targa-list-item.urgent-item:not(.completed) .targa-col-posizione input.posizione-input { background-color: #5a3e3e; color: #ffc0c0; }
+        .targa-list-item.urgent-item:not(.completed) .targa-col-urgenza input[type="checkbox"] { accent-color: #ff8a80; }
+
 
         .targa-list-item.completed .targa-col-targa,
         .targa-list-item.completed .targa-col-marca,
@@ -439,6 +446,8 @@
         .targa-list-item.urgent-item.completed .targa-col-piazzale { color: #a07c7c !important; }
         .targa-list-item.urgent-item.completed .targa-col-targa.clickable-targa { color: #ff8a80 !important; }
         .targa-list-item.urgent-item.completed .targa-col-posizione input.posizione-input { background-color: #4a2e2e; color: #a07c7c; }
+        .targa-list-item.urgent-item.completed .targa-col-urgenza input[type="checkbox"] { accent-color: #a07c7c; }
+
 
         .targa-list-item.status-parziale { background-color: #ffc107 !important; }
         .targa-list-item.status-parziale:hover { background-color: #e0a800 !important; }
@@ -446,6 +455,8 @@
         .targa-list-item.status-parziale .targa-col-targa.clickable-targa { color: #b8860b !important; }
         .targa-list-item.status-parziale:hover .targa-col-targa.clickable-targa { color: #8B4513 !important; }
         .targa-list-item.status-parziale .targa-col-posizione input.posizione-input { background-color: #ffe082; color: #212529; border-color: #ffc107; }
+        .targa-list-item.status-parziale .targa-col-urgenza input[type="checkbox"] { accent-color: #b8860b; }
+
 
         #targheLoadingStatus { text-align: center; padding: 10px; color: #00aeff; }
         #savedTargasListContainer { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #333; border-radius: 4px; margin-bottom: 20px; }
@@ -476,15 +487,17 @@
             #utilityNavButtons button { font-size: 0.85em; padding: 8px 10px; }
             input[type="text"], input[type="url"], select, textarea { width: 100%; box-sizing: border-box; }
             .table-scroll-wrapper { overflow-x: auto; }
-            .targa-list-table-content { min-width: 600px; }
+            .targa-list-table-content { min-width: 600px; } /* Potrebbe necessitare aggiustamento ulteriore */
             .targa-list-header { display: flex !important; }
             .targa-list-header .targa-col, .targa-list-item .targa-col { padding: 6px 5px; }
             .delete-progress-btn { padding: 5px 8px; }
-            .targa-col-targa    { min-width: 70px;}
-            .targa-col-posizione{ min-width: 60px;}
-            .targa-col-marca    { min-width: 80px;}
-            .targa-col-modello  { min-width: 90px;}
-            .targa-col-piazzale { min-width: 70px;}
+            .targa-col-targa    { min-width: 65px;}
+            .targa-col-posizione{ min-width: 50px;}
+            .targa-col-urgenza  { min-width: 45px;}
+            .targa-col-marca    { min-width: 70px;}
+            .targa-col-modello  { min-width: 80px;}
+            .targa-col-piazzale { min-width: 60px;}
+            .targa-col-actions  { min-width: 40px;}
             #sheetFilterContainer { display: flex; flex-direction: column; align-items: stretch; }
             #sheetFilterContainer label { margin-bottom: 5px; margin-right: 0; text-align: left;}
             #sheetFilterDropdown { width: 100%; }
@@ -546,6 +559,7 @@
                     <div class="targa-list-header">
                         <span class="targa-col targa-col-targa">Targa</span>
                         <span class="targa-col targa-col-posizione">Posizione</span>
+                        <span class="targa-col targa-col-urgenza">Urgenza</span>
                         <span class="targa-col targa-col-marca">Marca</span>
                         <span class="targa-col targa-col-modello">Modello</span>
                         <span class="targa-col targa-col-piazzale">Piazzale</span>
@@ -741,9 +755,7 @@
         else if (sectionId === 'danniVerificheSection') {
             document.getElementById('motore_accende').value = 'ok';
             document.getElementById('batteria_stato').value = 'ok';
-            // --- MODIFICA RICHIESTA: impostare foto_danni_generiche a true ---
             document.getElementById('foto_danni_generiche').checked = true; 
-            // --- FINE MODIFICA ---
             document.getElementById('note_danni_verifiche').value = 'Nessuna anomalia da segnalare.';
         }
 
@@ -794,6 +806,28 @@
             return "";
         }
     }
+
+    // NUOVE FUNZIONI PER URGENZA
+    function saveUrgentStatusForTarga(targa, isUrgent) {
+        if (!targa) return;
+        try {
+            localStorage.setItem(`${APP_PREFIX}urgent_${targa}`, JSON.stringify(isUrgent));
+        } catch (e) {
+            console.error("Errore salvataggio stato urgenza LS:", e);
+        }
+    }
+
+    function loadUrgentStatusForTarga(targa) {
+        if (!targa) return false;
+        try {
+            const status = localStorage.getItem(`${APP_PREFIX}urgent_${targa}`);
+            return status ? JSON.parse(status) : false;
+        } catch (e) {
+            console.error("Errore caricamento stato urgenza LS:", e);
+            return false;
+        }
+    }
+
 
     function resetChecklistForm() {
         const els = document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea');
@@ -872,6 +906,9 @@
             }
             localStorage.removeItem(`${APP_PREFIX}posizione_${targa}`);
             console.log(`Dati posizione rimossi per ${targa}.`);
+            localStorage.removeItem(`${APP_PREFIX}urgent_${targa}`); // Rimuovi anche lo stato di urgenza
+            console.log(`Dati urgenza rimossi per ${targa}.`);
+
 
         } catch(e) {
             console.error(`Errore cancellazione dati per ${targa}:`,e);
@@ -1052,7 +1089,7 @@
 
     function populateSavedTargasList() { savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targa = key.substring(`${APP_PREFIX}data_`.length); if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa);}}} if (tempSavedTargas.length > 0) hasSaves = true; tempSavedTargas.sort(); tempSavedTargas.forEach(targa => { const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' }; let displayText = targa; let details = []; if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`); if (details.length > 0) { displayText += ` - ${details.join(' ')}`; } const button = document.createElement('button'); button.classList.add('saved-targa-button'); button.textContent = displayText; button.dataset.targa = targa; button.addEventListener('click', function() { targaSelezionataGlobalmente = this.dataset.targa; showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstChecklistNavButton = Array.from(navButtons).find(btn => btn.dataset.target && btn.id !== 'backToListBtn' && btn.id !== 'historyBtn'); if (firstChecklistNavButton) { showSection(firstChecklistNavButton.dataset.target); } else if (navButtons.length > 0 && navButtons[0].dataset.target) { showSection(navButtons[0].dataset.target); }}); savedTargasListContainer.appendChild(button); }); if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>'; } }
     function clearAllSavedData() {
-        if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni e filtro piazzale)?\n\nAzione irreversibile.")) {
+        if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni, urgenze e filtro piazzale)?\n\nAzione irreversibile.")) {
             let c = 0;
             for (let i=localStorage.length-1;i>=0;i--) {
                 const k=localStorage.key(i);
@@ -1062,9 +1099,9 @@
             }
             alert(`${c} elementi cancellati.`);
             if(sheetFilterDropdown) sheetFilterDropdown.value = 'all';
-            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');
+            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); // Resetta anche il filtro piazzale
             populateSavedTargasList();
-            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();
+            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); // Ricarica la lista per riflettere le urgenze resettate
             if (typeof showView === 'function') showView('landing');
         }
     }
@@ -1111,7 +1148,7 @@
             : listaTargheCompleta.filter(item => item.piazzale === selectedSource);
 
         function getItemRank(item) {
-            const isUrgent = item.isUrgent;
+            const isUrgent = loadUrgentStatusForTarga(item.targa); // MODIFICATO: usa localStorage
             const isCompleted = isTargaCompleted(item.targa);
             const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
 
@@ -1141,8 +1178,9 @@
 
             const itemCompleted = isTargaCompleted(item.targa);
             const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
+            const isItemUrgent = loadUrgentStatusForTarga(item.targa); // MODIFICATO: usa localStorage
 
-            if (item.isUrgent) {
+            if (isItemUrgent) { // MODIFICATO
                 li.classList.add('urgent-item');
                 if (itemCompleted) {
                     li.classList.add('completed');
@@ -1199,6 +1237,24 @@
             posizioneCol.appendChild(posizioneInput);
             li.appendChild(posizioneCol);
 
+            // NUOVA COLONNA URGENZA
+            const urgenzaCol = document.createElement('span');
+            urgenzaCol.classList.add('targa-col', 'targa-col-urgenza');
+            const urgenzaCheckbox = document.createElement('input');
+            urgenzaCheckbox.type = 'checkbox';
+            urgenzaCheckbox.checked = isItemUrgent;
+            urgenzaCheckbox.title = isItemUrgent ? "Togli urgenza" : "Marca come urgente";
+            urgenzaCheckbox.addEventListener('mousedown', (e) => e.stopPropagation());
+            urgenzaCheckbox.addEventListener('click', (e) => e.stopPropagation());
+            urgenzaCheckbox.addEventListener('change', function() {
+                saveUrgentStatusForTarga(item.targa, this.checked);
+                this.title = this.checked ? "Togli urgenza" : "Marca come urgente";
+                popolaTargheFiltrate(); // Ricarica la lista per riflettere ordinamento/stile
+            });
+            urgenzaCol.appendChild(urgenzaCheckbox);
+            li.appendChild(urgenzaCol);
+
+
             const marcaCol = document.createElement('span');
             marcaCol.classList.add('targa-col', 'targa-col-marca'); marcaCol.textContent = item.marca || 'N/D';
             li.appendChild(marcaCol);
@@ -1219,7 +1275,7 @@
             delB.addEventListener('click', function(event) {
                 event.stopPropagation();
                 const tDel = this.dataset.targa;
-                if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (inclusa posizione)?\n\nAzione irreversibile.`)) {
+                if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (inclusa posizione e urgenza)?\n\nAzione irreversibile.`)) {
                     deleteProgressForTarga(tDel);
                 }
             });
@@ -1262,8 +1318,8 @@
                     targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(),
                     marca: (p[1] || '').trim().replace(/^"|"$/g, ''),
                     modello: (p[2] || '').trim().replace(/^"|"$/g, ''),
-                    piazzale: (p[3] || '').trim().replace(/^"|"$/g, ''),
-                    isUrgent: (p[4] || '').trim().toUpperCase() === 'URGENTE'
+                    piazzale: (p[3] || '').trim().replace(/^"|"$/g, '')
+                    // RIMOSSO: isUrgent: (p[4] || '').trim().toUpperCase() === 'URGENTE'
                 };
             }).filter(i => i.targa && i.targa.length > 3);
 
@@ -1433,10 +1489,15 @@
             summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo));
             summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo));
             summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D"));
+            // Aggiungere Urgenza al riepilogo
+            const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente);
+            summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary));
+
         } else {
             summaryContent.appendChild(createSummaryItem("Marca", "N/D"));
             summaryContent.appendChild(createSummaryItem("Modello", "N/D"));
             summaryContent.appendChild(createSummaryItem("Posizione", "N/D"));
+            summaryContent.appendChild(createSummaryItem("Urgente", "N/D"));
         }
         summaryContent.innerHTML += `<h3>Remarketing:</h3>`;
 
