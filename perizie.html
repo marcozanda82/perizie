@@ -715,9 +715,66 @@
     const cavoRapidaSelect = document.getElementById('cavo_ricarica_rapida');
     const cavoDomesticaSelect = document.getElementById('cavo_ricarica_domestica');
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
+    
+    // ***** IMPORTANTE: INCOLLA QUI IL TUO URL WEB APP REALE *****
+    const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzyg8Anx1x16_lnfKdGkYTW5jnV3L0rUXnfcbglaGJoAJaAiC0Grv3kIFDa5TDzRTXNZw/exec'; 
+    // Esempio: const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/ABCDEFG-HIJKLMNOP/exec';
+    // LA RIGA QUI SOPRA DEVE ESSERE MODIFICATA CON IL TUO URL EFFETTIVO!
+    // URL FORNITO: https://script.google.com/macros/s/AKfycbzyg8Anx1x16_lnfKdGkYTW5jnV3L0rUXnfcbglaGJoAJaAiC0Grv3kIFDa5TDzRTXNZw/exec
+    
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
+
+    // Funzione per inviare una singola perizia a Google Sheets
+    async function inviaPeriziaSingolaASheets(periziaDaInviare) {
+        if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') {
+            console.error("URL della Web App Google Sheets non configurato.");
+            return { success: false, message: "URL Web App non configurato." };
+        }
+
+        console.log("Tentativo di invio perizia a Google Sheets:", periziaDaInviare);
+        
+        try {
+            const response = await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+                method: 'POST',
+                mode: 'cors', 
+                cache: 'no-cache',
+                headers: {
+                    // 'Content-Type': 'application/json', // Cambiato per coerenza con doPost che si aspetta text/plain
+                    'Content-Type': 'text/plain;charset=utf-8',
+                },
+                body: JSON.stringify(periziaDaInviare) 
+            });
+
+            // Tenta di parsare la risposta come JSON, ma gestisci anche se è testo semplice
+            let responseData;
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                responseData = await response.json();
+            } else {
+                const textResponse = await response.text();
+                console.warn("Risposta dal server non è JSON, ricevuta come testo:", textResponse);
+                // Prova a parsare comunque se sembra un JSON, altrimenti usa un messaggio di errore generico
+                try {
+                    responseData = JSON.parse(textResponse);
+                } catch (e) {
+                     responseData = { status: "error", message: "Risposta non JSON dal server: " + textResponse.substring(0,100) + "..."};
+                }
+            }
+            
+            if (response.ok && responseData.status === "success") {
+                console.log("Perizia inviata con successo a Google Sheets:", responseData.message);
+                return { success: true, message: responseData.message };
+            } else {
+                console.error("Errore dall'API di Google Sheets o risposta non OK:", responseData.message || `HTTP Status ${response.status}`);
+                return { success: false, message: responseData.message || `Errore server (HTTP ${response.status})` };
+            }
+        } catch (error) {
+            console.error("Errore di rete o fetch durante l'invio a Google Sheets:", error);
+            return { success: false, message: "Errore di rete: " + error.message };
+        }
+    }
 
     function fillSectionPositiveOrDefaults(sectionId) {
         const section = document.getElementById(sectionId);
@@ -968,7 +1025,86 @@
             }, 100);
         });
     }
-    async function handleSavePeriziaAndReturn() { if(!targaSelezionataGlobalmente){alert("No targa attiva.");return;} if(!saveProgress(targaSelezionataGlobalmente)){alert("Salvataggio dati fallito.");return;} if(document.getElementById('riepilogoSection').classList.contains('active')){generateSummary();} try{await generateAndDownloadScreenshot();}catch(e){console.warn("Screenshot fallito, ma dati salvati.");} markTargaAsCompleted(targaSelezionataGlobalmente); updateNavButtonColors(); alert(`Perizia per ${targaSelezionataGlobalmente} salvata, screenshot tentato, completata. Torno all'elenco.`); targaSelezionataGlobalmente=null;showView('landing');}
+    
+    // VERSIONE MODIFICATA DI handleSavePeriziaAndReturn
+    async function handleSavePeriziaAndReturn() {
+        if (!targaSelezionataGlobalmente) {
+            alert("Nessuna targa attiva selezionata per il salvataggio.");
+            return;
+        }
+
+        if (!saveProgress(targaSelezionataGlobalmente)) { // Salva i progressi nel localStorage
+            alert("Salvataggio dati nel browser fallito. L'invio a Google Sheets non verrà tentato.");
+            return;
+        }
+
+        if (document.getElementById('riepilogoSection').classList.contains('active')) {
+            generateSummary(); // Genera il riepilogo se la sezione è attiva
+        }
+
+        // 1. Raccogli i dati per l'invio a Google Sheets
+        let datiChecklistCorrente = {};
+        try {
+            const jsonString = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`);
+            if (jsonString) {
+                datiChecklistCorrente = JSON.parse(jsonString);
+            }
+        } catch (e) {
+            console.error("Errore nel leggere i dati checklist dal localStorage per l'invio:", e);
+            alert("Errore nel recuperare i dati per l'invio a Google Sheets.");
+            // Ripristina il pulsante in caso di errore precoce
+            if (saveAndReturnBtn) {
+                saveAndReturnBtn.textContent = 'Salva Perizia'; // Testo originale
+                saveAndReturnBtn.disabled = false;
+            }
+            return;
+        }
+
+        const periziaCompletaDaInviare = {
+            targa: targaSelezionataGlobalmente,
+            posizione: loadPosizioneForTarga(targaSelezionataGlobalmente) || "",
+            urgente: loadUrgentStatusForTarga(targaSelezionataGlobalmente) || false,
+            completata: false, // Verrà marcata come completata solo dopo il salvataggio
+            datiPerizia: datiChecklistCorrente // Questo contiene tutti i campi della checklist
+        };
+
+        // Mostra un messaggio di attesa
+        const originalButtonText = saveAndReturnBtn.textContent;
+        saveAndReturnBtn.textContent = 'Salvataggio in corso...';
+        saveAndReturnBtn.disabled = true;
+
+        // 2. Prova a generare e scaricare lo screenshot
+        try {
+            await generateAndDownloadScreenshot();
+        } catch (e) {
+            console.warn("Generazione screenshot fallita, ma i dati sono stati salvati localmente. Si procederà con l'invio a Sheets.", e);
+        }
+
+        // 3. Invia i dati a Google Sheets
+        console.log("Preparazione invio a Sheets per targa:", targaSelezionataGlobalmente);
+        const invioSheetsResult = await inviaPeriziaSingolaASheets(periziaCompletaDaInviare);
+
+        // 4. Marchia la targa come completata (localmente)
+        markTargaAsCompleted(targaSelezionataGlobalmente);
+        updateNavButtonColors(); // Aggiorna i colori dei pulsanti di navigazione
+
+        // Ripristina il pulsante
+        saveAndReturnBtn.textContent = originalButtonText;
+        saveAndReturnBtn.disabled = false;
+
+        // Messaggio finale all'utente
+        let alertMessage = `Perizia per ${targaSelezionataGlobalmente} salvata localmente e screenshot tentato.\n`;
+        if (invioSheetsResult.success) {
+            alertMessage += "Salvataggio su Google Sheets RIUSCITO!";
+        } else {
+            alertMessage += "Salvataggio su Google Sheets FALLITO: " + invioSheetsResult.message + "\nI dati sono comunque salvati nel browser.";
+        }
+        alert(alertMessage);
+        
+        // targaSelezionataGlobalmente = null; // Non resettare qui, l'utente potrebbe voler rimanere sulla pagina
+        showView('landing'); // Torna all'elenco delle targhe
+    }
+
     function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
 
     function isInputDefault(inputElement) {
