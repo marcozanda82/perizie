@@ -680,14 +680,12 @@
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
     const headerCircles = pageHeaderContainer.querySelector('.header-circles');
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
-    const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons'); // Questo ora si riferisce al contenitore dei pulsanti di sezione (mainPageNavButtons)
-    const mainPageNavButtons = navButtonsContainer.querySelector('#mainPageNavButtons'); // Pulsanti di navigazione delle sezioni
-    const utilityNavButtons = pageHeaderContainer.querySelector('#utilityNavButtons'); // Pulsanti di utilità (spostati)
+    const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons'); 
+    const mainPageNavButtons = navButtonsContainer.querySelector('#mainPageNavButtons'); 
+    const utilityNavButtons = pageHeaderContainer.querySelector('#utilityNavButtons'); 
 
-    // Aggiorniamo la variabile 'navButtons' per riferirsi solo ai pulsanti delle sezioni della checklist
     const navButtons = mainPageNavButtons.querySelectorAll('button[data-target]');
     
-    // I pulsanti di utilità sono già referenziati da 'utilityNavButtons', ma se servono individualmente:
     const backToListBtn = utilityNavButtons.querySelector('#backToListBtn');
     const historyBtn = utilityNavButtons.querySelector('#historyBtn');
     const exitAppBtn = utilityNavButtons.querySelector('#exitAppBtn');
@@ -726,8 +724,7 @@
             document.getElementById('foto_cofano_tetto').checked = true;
             document.getElementById('chiave_telecomando').value = 'presente';
             document.getElementById('seconda_chiave').value = 'presente';
-            handleTrazioneChange(); // Aggiorna i campi dei cavi in base alla trazione
-             //Se dopo handleTrazioneChange i campi sono ancora selezionabili (es. elettrico) li impostiamo
+            handleTrazioneChange(); 
             if (tipoTrazioneSelect && tipoTrazioneSelect.value === 'elettrico') {
                 if (cavoRapidaSelect) cavoRapidaSelect.value = 'presente';
                 if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'presente';
@@ -744,19 +741,18 @@
         else if (sectionId === 'danniVerificheSection') {
             document.getElementById('motore_accende').value = 'ok';
             document.getElementById('batteria_stato').value = 'ok';
-            document.getElementById('foto_danni_generiche').checked = false; // Default positivo: non ci sono ALTRI danni generici da segnalare
+            // --- MODIFICA RICHIESTA: impostare foto_danni_generiche a true ---
+            document.getElementById('foto_danni_generiche').checked = true; 
+            // --- FINE MODIFICA ---
             document.getElementById('note_danni_verifiche').value = 'Nessuna anomalia da segnalare.';
         }
 
-        // Aggiorna UI e animazioni
         updateNavButtonColors();
         if (typeof initSequentialAnimation === 'function') {
-            // Rimuove la classe animate-me da tutti gli elementi prima di ricalcolare
             section.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me'));
             initSequentialAnimation();
         }
         
-        // Simula un cambiamento per far scattare eventuali altri listener
         section.querySelectorAll('input, select, textarea').forEach(el => {
             const event = new Event('change', { bubbles: true });
             el.dispatchEvent(event);
@@ -771,11 +767,9 @@
         cavoRapidaSelect.disabled = !isElectric;
         cavoDomesticaSelect.disabled = !isElectric;
         if (!isElectric) {
-            cavoRapidaSelect.value = "non_applicabile"; // Imposta a non_applicabile se non elettrico
+            cavoRapidaSelect.value = "non_applicabile"; 
             cavoDomesticaSelect.value = "non_applicabile";
         } else {
-            // Se è elettrico e i valori sono vuoti o non_applicabile, li reimposta a "Seleziona..."
-            // per permettere all'utente o a fillSectionPositiveOrDefaults di scegliere "presente"
             if (cavoRapidaSelect.value === "" || cavoRapidaSelect.value === "non_applicabile") cavoRapidaSelect.value = "";
             if (cavoDomesticaSelect.value === "" || cavoDomesticaSelect.value === "non_applicabile") cavoDomesticaSelect.value = "";
         }
@@ -969,11 +963,11 @@
             if (savedValue !== undefined) {
                 if (input.type === 'checkbox') {
                     isDefault = !savedValue;
-                } else { // Per i select, consideriamo "default" se il valore salvato è vuoto o corrisponde al primo option (placeholder)
+                } else { 
                     isDefault = (savedValue === "" || (input.options.length > 0 && savedValue === input.options[0].value));
                 }
             } else {
-                 isDefault = isInputDefault(input); // Usa la logica originale se non ci sono dati salvati
+                 isDefault = isInputDefault(input); 
             }
 
             if (!isDefault) {
@@ -1487,44 +1481,35 @@
     document.addEventListener('DOMContentLoaded', () => {
         const preloader = document.getElementById('preloader');
 
-        // --- INIZIO MODIFICA PER BOTTONE COMPILA DEFAULT ---
         document.querySelectorAll('.fill-defaults-btn').forEach(button => {
-            button.addEventListener('click', function() { // 'this' qui è il .fill-defaults-btn cliccato
-                const sectionId = this.dataset.sectionid; // Es. "remarketingSection"
-                const sectionTarget = sectionId.replace('Section', ''); // Es. "remarketing"
+            button.addEventListener('click', function() { 
+                const sectionId = this.dataset.sectionid; 
+                const sectionTarget = sectionId.replace('Section', ''); 
 
                 if (sectionId) {
-                    fillSectionPositiveOrDefaults(sectionId); // Compila i campi
+                    fillSectionPositiveOrDefaults(sectionId); 
 
-                    // Logica "Salva e Prosegui"
                     if (saveProgress(targaSelezionataGlobalmente)) {
-                        // Il salvataggio è andato a buon fine (saveProgress gestisce gli alert in caso di fallimento)
                         
-                        // Naviga alla sezione successiva
                         let currentSectionIndex = -1;
-                        navButtons.forEach((nb, index) => { // navButtons sono i pulsanti principali (1. Remarketing, etc.)
+                        navButtons.forEach((nb, index) => { 
                             if (nb.dataset.target === sectionTarget) {
                                 currentSectionIndex = index;
                             }
                         });
 
-                        if (currentSectionIndex !== -1) { // Se la sezione corrente è stata trovata
-                            if (currentSectionIndex < navButtons.length - 1) { // Se non è l'ultimo pulsante (es. Riepilogo)
+                        if (currentSectionIndex !== -1) { 
+                            if (currentSectionIndex < navButtons.length - 1) { 
                                 const nextNavButton = navButtons[currentSectionIndex + 1];
                                 if (nextNavButton && nextNavButton.dataset.target) {
                                     showSection(nextNavButton.dataset.target);
                                 }
                             }
-                            // Se la sezione corrente è l'ultima prima del riepilogo (es. "danniVerifiche"),
-                            // la logica sopra la manderà correttamente a "riepilogo".
-                            // Non c'è un pulsante "fill-defaults" nella sezione riepilogo.
                         }
                     }
-                    // Se saveProgress fallisce, avrà mostrato un alert e non si prosegue.
                 }
             });
         });
-        // --- FINE MODIFICA PER BOTTONE COMPILA DEFAULT ---
 
 
         if (tipoTrazioneSelect) {
