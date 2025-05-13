@@ -71,7 +71,7 @@
         .content-wrapper { padding: 20px; max-width: 900px; margin-left: auto; margin-right: auto; }
         h1, h2, h3, h4 { text-align: center; color: var(--text-color); font-weight: 500; }
         h1#mainTitleGlobal {
-            line-height: 1.3; margin-bottom: 8px; margin-top: 8px; /* Spazio per i cerchi */
+            line-height: 1.3; margin-bottom: 8px; margin-top: 8px;
             font-size: 1.8em; font-weight: 700; letter-spacing: 0.5px;
         }
         h1#mainTitleGlobal span { font-size: 0.6em !important; color: var(--text-muted-color) !important; font-weight: 400 !important; display: block; margin-top: 4px; line-height: 1.2; }
@@ -97,7 +97,7 @@
         .category-section ul li > input[type="checkbox"] { margin-right: 8px; transform: scale(1.1); accent-color: var(--primary-accent-color); }
         .category-section ul li > input[type="checkbox"] + label { display: inline-block; vertical-align: middle; margin-bottom: 0; color: var(--text-color); font-weight: 400; font-size: 0.95em; }
 
-        #pageHeaderContainer { background-color: var(--card-bg-color); z-index: 1000; width: 100%; padding-bottom: 8px; /* Aumentato per più spazio */ box-shadow: 0 2px 8px var(--shadow-medium); }
+        #pageHeaderContainer { background-color: var(--card-bg-color); z-index: 1000; width: 100%; padding-bottom: 8px; box-shadow: 0 2px 8px var(--shadow-medium); }
         #pageHeaderContainer.fixed-header { position: fixed; top: 0; left: 0; }
 
         .header-circles { display: flex; justify-content: center; align-items: center; width: 100%; padding: 10px 0 5px 0; gap: 12px; box-sizing: border-box; }
@@ -105,7 +105,7 @@
         .header-circles:hover .circle { opacity: 0.7; }
         .circle:hover { opacity: 1; background-color: var(--primary-accent-color); transform: scale(1.2); }
 
-        #navButtons { display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 0; } /* Margin top rimosso dato che i cerchi sono sopra */
+        #navButtons { display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 0; }
         #utilityNavButtons { display: flex; justify-content: center; flex-wrap: wrap; margin-top: 8px; margin-bottom: 8px; gap: 8px; }
         #mainPageNavButtons { display: flex; justify-content: center; flex-wrap: nowrap; overflow-x: auto; padding: 5px 0; width: calc(100% - 30px); max-width: 750px; }
         #mainPageNavButtons button { margin: 0 5px; flex-shrink: 0; position: relative; padding: 10px 18px; }
@@ -172,7 +172,7 @@
         .targa-col-marca { flex-basis: 20%; min-width: 100px;}
         .targa-col-modello { flex-basis: 25%; min-width: 120px;}
         .targa-col-piazzale { flex-basis: 15%; min-width: 90px;}
-        .targa-col-actions { flex-basis: 5%; min-width: 50px; text-align: center; flex-grow: 0; }
+        .targa-col-actions { flex-basis: 5%; min-width: 50px; text-align: center; flex-grow: 0; justify-content: center;} /* Aggiunto justify-content */
         .targa-col-posizione input.posizione-input { width: 100%; padding: 8px 6px; margin: 0; box-sizing: border-box; background-color: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-small); font-size: 0.9em; text-align: center; }
         .targa-col-posizione input.posizione-input:focus { background-color: #3e4247; border-color: var(--primary-accent-color); }
         .delete-progress-btn { background-color: transparent; border: 1px solid var(--danger-color); color: var(--danger-color); padding: 5px 9px; font-size: 0.9em; line-height: 1; border-radius: var(--border-radius-small); transition: background-color 0.2s ease, color 0.2s ease; }
@@ -367,10 +367,10 @@
     const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons');
     const mainPageNavButtonsDiv = navButtonsContainer.querySelector('#mainPageNavButtons');
     const utilityNavButtonsDiv = navButtonsContainer.querySelector('#utilityNavButtons');
-    const navButtons = mainPageNavButtonsDiv.querySelectorAll('button[data-target]'); // Seleziona solo i bottoni delle sezioni
+    const navButtons = mainPageNavButtonsDiv.querySelectorAll('button[data-target]');
     const sections = document.querySelectorAll('#checklistContainer .category-section');
     const summaryContent = document.getElementById('summaryContent');
-    const backToListBtn = utilityNavButtonsDiv.querySelector('#backToListBtn'); // Assumendo che siano in utilityNavButtonsDiv
+    const backToListBtn = utilityNavButtonsDiv.querySelector('#backToListBtn');
     const historyBtn = utilityNavButtonsDiv.querySelector('#historyBtn');
     const exitAppBtn = utilityNavButtonsDiv.querySelector('#exitAppBtn');
     const clearAllProgressBtn = document.getElementById('clearAllProgressBtn');
@@ -574,7 +574,8 @@
 
     function updateNavButtonColors() {
         const isInactive = !targaSelezionataGlobalmente && checklistContainer.style.display === 'none';
-        if (isInactive && mainPageNavButtonsDiv.style.display === 'none') { // Modificato per controllare la visibilità di mainPageNavButtonsDiv
+         // Modificato per controllare la visibilità di mainPageNavButtonsDiv
+        if (isInactive && (!mainPageNavButtonsDiv || mainPageNavButtonsDiv.style.display === 'none')) {
             navButtons.forEach(btn => btn.className = ''); return;
         }
         const data = JSON.parse(localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`) || '{}');
@@ -594,7 +595,7 @@
         historyPageSection.style.display = 'none';
         const headerCirclesDiv = pageHeaderContainer.querySelector('.header-circles');
 
-        if (headerCirclesDiv) headerCirclesDiv.style.display = 'flex'; // Cerchi sempre visibili quando header è visibile
+        if (headerCirclesDiv) headerCirclesDiv.style.display = 'flex';
 
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
@@ -615,15 +616,10 @@
                 const veicolo = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
                 const subId = (veicolo && (veicolo.marca || veicolo.modello)) ? `${veicolo.marca || ''} ${veicolo.modello || ''}`.trim() : "";
                 mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<span>${subId}</span>`;
-                 // Assicura che i bottoni principali siano visibili per la checklist
-                if(mainPageNavButtonsDiv) mainPageNavButtonsDiv.style.display = 'flex';
-
             } else { // history
                 historyPageSection.style.display = 'block';
                 mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
                 populateSavedTargasList();
-                 // I bottoni principali potrebbero non servire qui, o sì, a seconda del design
-                if(mainPageNavButtonsDiv) mainPageNavButtonsDiv.style.display = 'flex'; // O 'none' se non desiderato
             }
         } else {
             if (headerCirclesDiv) headerCirclesDiv.style.display = 'none';
@@ -631,7 +627,7 @@
             if (mainPageNavButtonsDiv) mainPageNavButtonsDiv.style.display = 'none';
             mainTitleGlobal.innerHTML = "";
         }
-        pageHeaderContainer.classList.add('fixed-header'); // Header sempre fisso
+        pageHeaderContainer.classList.add('fixed-header');
         updateNavButtonColors();
 
         let bodyPaddingTop = '20px';
@@ -640,7 +636,6 @@
         }
         document.body.style.paddingTop = bodyPaddingTop;
     }
-
 
     function populateSavedTargasList() {
         savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSaves = [];
@@ -651,7 +646,7 @@
         hasSaves = tempSaves.length > 0;
         tempSaves.sort().forEach(targa => {
             const v = listaTargheCompleta.find(vh => vh.targa === targa) || {};
-            let display = `${targa} - ${v.marca || ''} ${v.modello || ''} ${v.piazzale ? `(${v.piazzale})` : ''}`.replace(/\s*-\s*jQuery/, "");
+            let display = `${targa} - ${v.marca || ''} ${v.modello || ''} ${v.piazzale ? `(${v.piazzale})` : ''}`.replace(/\s*-\s*$/, "");
             const btn = document.createElement('button'); btn.className = 'saved-targa-button'; btn.textContent = display; btn.dataset.targa = targa;
             btn.onclick = function() {
                 targaSelezionataGlobalmente = this.dataset.targa; showView('checklist'); loadProgress(this.dataset.targa);
@@ -700,20 +695,19 @@
         const headerEl = document.querySelector('.targa-list-table-content .targa-list-header');
         if (!tEl || !headerEl) return; tEl.innerHTML = '';
 
-        // Gestione dinamica colonna Urgente nell'header
         let urgenteHeaderCol = headerEl.querySelector('.targa-col-urgente');
         if (!urgenteHeaderCol) {
             urgenteHeaderCol = document.createElement('span');
             urgenteHeaderCol.className = 'targa-col targa-col-urgente';
             urgenteHeaderCol.textContent = 'Urg.';
-            // Assicurarsi che venga inserito come primo, ma solo se non esiste già.
-            // L'header originale non ha questa colonna, quindi la aggiungiamo.
-            // Se questo codice viene eseguito più volte, questa logica previene duplicati.
-            if (!headerEl.querySelector('.targa-col-urgente')) {
-                 headerEl.insertBefore(urgenteHeaderCol, headerEl.firstChild);
+            // Inserisce la colonna "Urg." solo se non esiste già, prima della colonna "Targa"
+            const targaHeaderCol = headerEl.querySelector('.targa-col-targa');
+            if (targaHeaderCol) {
+                 headerEl.insertBefore(urgenteHeaderCol, targaHeaderCol);
+            } else { // Fallback se la colonna targa non dovesse esistere (improbabile)
+                headerEl.insertBefore(urgenteHeaderCol, headerEl.firstChild);
             }
         }
-
 
         const selSource = sheetFilterDropdown ? sheetFilterDropdown.value : 'all';
         let filtered = (selSource === 'all') ? [...listaTargheCompleta] : listaTargheCompleta.filter(i => i.piazzale === selSource);
@@ -740,7 +734,8 @@
             ['mousedown','click'].forEach(evt => urgentCb.addEventListener(evt, e => e.stopPropagation()));
             urgenteCol.appendChild(urgentCb); li.appendChild(urgenteCol);
 
-            const createCol = (txt, ...cls) => { const c=document.createElement('span');c.className=['targa-col',...cls].join(' ');c.textContent=txt||'N/D';return c; };
+            const createCol = (txt, ...cls) => { const c=document.createElement('span');c.className=['targa-col',...cls].join(' '); if(txt !== undefined) {c.textContent=txt||'';} return c; }; // Modificato per non mettere N/D se txt è undefined
+
             const targaCol = createCol(item.targa, 'targa-col-targa', 'clickable-targa');
             targaCol.dataset.targaValue = item.targa;
             targaCol.onclick = function() {
@@ -749,7 +744,7 @@
                 if(firstNav) showSection(firstNav.dataset.target);};
             li.appendChild(targaCol);
 
-            const posCol = createCol('', 'targa-col-posizione');
+            const posCol = createCol(undefined, 'targa-col-posizione'); // undefined per non mostrare N/D
             const posIn = document.createElement('input'); posIn.type='text'; posIn.className='posizione-input'; posIn.dataset.targa=item.targa;
             posIn.placeholder='Pos.'; posIn.maxLength=5; posIn.value=loadPosizioneForTarga(item.targa);
             ['mousedown','click','focus'].forEach(evt => posIn.addEventListener(evt, e => e.stopPropagation()));
@@ -760,9 +755,11 @@
             posIn.onkeypress = function(e){if(e.key==='Enter'){e.preventDefault();this.blur();}};
             posCol.appendChild(posIn); li.appendChild(posCol);
 
-            li.appendChild(createCol(item.marca, 'targa-col-marca')); li.appendChild(createCol(item.modello, 'targa-col-modello'));
+            li.appendChild(createCol(item.marca, 'targa-col-marca'));
+            li.appendChild(createCol(item.modello, 'targa-col-modello'));
             li.appendChild(createCol(item.piazzale, 'targa-col-piazzale'));
-            const actCol = createCol('', 'targa-col-actions');
+
+            const actCol = createCol(undefined, 'targa-col-actions'); // undefined per non mostrare N/D
             const delB = document.createElement('button'); delB.className = 'action-button delete-progress-btn'; delB.dataset.targa=item.targa;
             delB.title = `Cancella ${item.targa}`; delB.innerHTML = '&#x1F5D1;';
             delB.onclick = function(e) { e.stopPropagation(); if(confirm(`Cancellare dati ${this.dataset.targa}?`)) deleteProgressForTarga(this.dataset.targa);};
@@ -779,7 +776,6 @@
             if (!r.ok) throw new Error(`HTTP ${r.status}. ${r.status === 0 ? "Rete/CORS?" : ""}`);
             const csv = await r.text(); const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim());
             if (lines.length === 0) throw new Error("CSV vuoto.");
-            // CORREZIONE: Rimosso "jQuery" dalla replace
             listaTargheCompleta = lines.map(l => { const p=l.split(','); return {targa:(p[0]||'').trim().replace(/^"|"$/g,'').toUpperCase(), marca:(p[1]||'').trim().replace(/^"|"$/g,''), modello:(p[2]||'').trim().replace(/^"|"$/g,''), piazzale:(p[3]||'').trim().replace(/^"|"$/g,'')}; }).filter(i => i.targa && i.targa.length > 3);
             if (listaTargheCompleta.length === 0) throw new Error("Nessuna targa valida nel CSV.");
             setupSheetFilterDropdown(); popolaTargheFiltrate();
@@ -816,7 +812,7 @@
     function showSection(targetId) {
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => el.classList.remove('animate-me'));
         sections.forEach(s => s.classList.toggle('active', s.id === targetId + 'Section'));
-        navButtons.forEach(b => b.classList.toggle('active', b.dataset.target === targetId)); // Qui si applica a `navButtons` (quelli delle sezioni)
+        navButtons.forEach(b => b.classList.toggle('active', b.dataset.target === targetId));
         updateNavButtonColors();
         if (targetId !== 'riepilogo' && document.getElementById(targetId + 'Section')?.classList.contains('active')) {
             setTimeout(initSequentialAnimation, 100);
