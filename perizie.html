@@ -4,321 +4,166 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perizia Veicolo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Preloader & Exit Curtain Styles */
-        #preloader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.75); /* Sfondo semitrasparente */
-            z-index: 99999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            opacity: 1;
-            visibility: visible;
-        }
-        #preloader.hidden {
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.7s ease-out, visibility 0.7s ease-out;
+        :root {
+            --bg-color: #23272a; /* Sfondo principale più scuro e desaturato */
+            --card-bg-color: #2c2f33; /* Sfondo per sezioni/card */
+            --input-bg-color: #36393f; /* Sfondo per input e select */
+            --text-color: #e1e1e1; /* Colore testo principale */
+            --text-muted-color: #99aab5; /* Testo secondario/meno importante */
+            --primary-accent-color: #61daff; /* Blu accento per focus, link, ecc. */
+            --border-color: #4f545c; /* Colore bordi generico */
+            --border-radius-small: 4px;
+            --border-radius-medium: 6px;
+            --border-radius-large: 8px;
+            --shadow-light: rgba(0, 0, 0, 0.1);
+            --shadow-medium: rgba(0, 0, 0, 0.2);
+            --font-family-main: 'Roboto', 'Segoe UI', Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+
+            --success-color: #43b581; /* Verde per completato/OK */
+            --warning-color: #faa61a; /* Giallo per parziale/attenzione */
+            --danger-color: #f04747;  /* Rosso per non toccato/errore */
+            --info-color: #7289da;    /* Blu per info/bottoni principali */
+            --secondary-color: #8e9297; /* Grigio per bottoni secondari */
         }
 
-        #exit-curtain {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000000;
-            z-index: 99999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.5s ease-in, visibility 0.5s ease-in;
-        }
-
-        #exit-curtain.hidden {
-             opacity: 0;
-             visibility: hidden;
-             transition: opacity 0.7s ease-out, visibility 0.7s ease-out;
-        }
-
-        #exit-curtain.visible-no-transition {
-            opacity: 1;
-            visibility: visible;
-            transition: none;
-        }
-
-        .loader-bar-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-        .loader-bar {
-            width: 15px;
-            height: 70px;
-            background-color: #007bff;
-            animation: barPulse 1.2s infinite ease-in-out;
-            box-shadow: 0 0 8px #007bff, 0 0 15px #00aeff;
-            border-radius: 3px;
-        }
+        /* Preloader & Exit Curtain Styles (Mantenuti come prima) */
+        #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); z-index: 99999; display: flex; justify-content: center; align-items: center; flex-direction: column; opacity: 1; visibility: visible; }
+        #preloader.hidden { opacity: 0; visibility: hidden; transition: opacity 0.7s ease-out, visibility 0.7s ease-out; }
+        #exit-curtain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #111; z-index: 99999; display: flex; justify-content: center; align-items: center; flex-direction: column; opacity: 0; visibility: hidden; transition: opacity 0.5s ease-in, visibility 0.5s ease-in; }
+        #exit-curtain.hidden { opacity: 0; visibility: hidden; transition: opacity 0.7s ease-out, visibility 0.7s ease-out; }
+        #exit-curtain.visible-no-transition { opacity: 1; visibility: visible; transition: none; }
+        .loader-bar-container { display: flex; gap: 10px; margin-bottom: 25px; }
+        .loader-bar { width: 15px; height: 70px; background-color: var(--primary-accent-color); animation: barPulse 1.2s infinite ease-in-out; box-shadow: 0 0 8px var(--primary-accent-color), 0 0 15px #00aeff; border-radius: 3px; }
         .loader-bar:nth-child(2) { animation-delay: 0.2s; }
         .loader-bar:nth-child(3) { animation-delay: 0.4s; }
+        #exit-curtain:not(.glitching):not(.flash-out-effect) .loader-bar { animation-direction: reverse; }
+        #exit-curtain.glitching:not(.flash-out-effect) .loader-bar { animation-direction: normal; }
+        @keyframes barPulse { 0%, 100% { transform: scaleY(0.3); opacity: 0.6; } 50% { transform: scaleY(1); opacity: 1; } }
+        #preloader .loading-text, #exit-curtain .loading-text { font-size: 1.6em; letter-spacing: 1px; }
+        #preloader .loading-text { color: var(--primary-accent-color); animation: textGlow 1.8s infinite alternate ease-in-out; }
+        #exit-curtain .loading-text { color: #ff8787; }
+        @keyframes textGlow { from { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; opacity: 0.8;} to { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; opacity: 1;} }
+        #exit-curtain.glitching .loading-text { animation: glitchText 0.8s infinite steps(1, end), textGlow 1.8s infinite alternate ease-in-out; color: #ff3030 !important; position: relative; z-index: 10; }
+        #exit-curtain.glitching::before, #exit-curtain.glitching::after { content: attr(data-text); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: auto; padding: 0 20px; text-align: center; font-size: 1.6em; letter-spacing: 1px; background: #111; overflow: hidden; clip-path: inset(50% 50% 50% 50%); z-index: 5; }
+        #exit-curtain.glitching::before { color: #00ffff; animation: glitchEffect 0.3s infinite linear alternate-reverse; }
+        #exit-curtain.glitching::after { color: #ff00ff; animation: glitchEffect 0.2s infinite linear alternate-reverse, glitchSkew 0.5s infinite linear alternate; animation-delay: -0.1s; }
+        @keyframes glitchEffect {0%{clip-path:inset(40% 0 30% 0);transform:translate(-50.5%,-50.1%) skewX(5deg);opacity:.8}10%{clip-path:inset(20% 0 70% 0);transform:translate(-50%,-50%) skewX(0);opacity:.7}20%{clip-path:inset(10% 0 55% 0);transform:translate(-49.8%,-50.2%) skewX(-3deg);opacity:.9}30%{clip-path:inset(50% 0 50% 0);transform:translate(-50%,-50%) skewX(0);opacity:.6}40%{clip-path:inset(60% 0 10% 0);transform:translate(-50.2%,-49.9%) skewY(2deg);opacity:1}50%{clip-path:inset(80% 0 5% 0);transform:translate(-50%,-50%) skewX(0);opacity:.75}60%{clip-path:inset(25% 0 40% 0);transform:translate(-50.1%,-50.3%) skewX(4deg);opacity:.85}70%{clip-path:inset(15% 0 75% 0);transform:translate(-50%,-50%) skewX(0);opacity:.9}80%{clip-path:inset(50% 0 20% 0);transform:translate(-49.9%,-49.8%) skewY(-3deg);opacity:1}90%{clip-path:inset(70% 0 10% 0);transform:translate(-50%,-50%) skewX(0);opacity:.6}100%{clip-path:inset(35% 0 45% 0);transform:translate(-50.3%,-50%) skewX(-2deg);opacity:.8}}
+        @keyframes glitchSkew { 0% { transform: translate(-50%, -50%) skew(-5deg, -2deg); } 100% { transform: translate(-50%, -50%) skew(5deg, 2deg); } }
+        @keyframes glitchText {0%,100%{text-shadow:0 0 3px red,0 0 5px blue,0 0 1px #fff;transform:translateX(0) translateY(0) skewX(0);opacity:1}10%{text-shadow:1px 1px 3px red,-1px -1px 5px blue,0 0 1px #fff;transform:translateX(-2px) translateY(1px) skewX(5deg);opacity:.8}90%{text-shadow:1px 1px 3px red,-1px -1px 5px blue,0 0 1px #fff;transform:translateX(-1px) translateY(1px) skewX(1deg);opacity:.9}}
+        #exit-curtain.flash-out-effect .loading-text { color: #FFF !important; text-shadow: none !important; animation: textFlashOut 0.5s forwards ease-out; transform-origin: center center; }
+        @keyframes textFlashOut {0%{opacity:1;transform:scale(1);text-shadow:0 0 5px rgba(255,255,255,.5)}50%{opacity:1;transform:scale(1.1);color:#FFFFE0 !important;text-shadow:0 0 15px #fff,0 0 25px #fff,0 0 35px #FFFFE0,0 0 50px #FFFF99}99%{opacity:.8;transform:scale(1.05)}100%{opacity:0;transform:scale(.8);text-shadow:none;color:transparent !important}}
+        /* Fine Stili Preloader/Exit */
 
-        #exit-curtain:not(.glitching):not(.flash-out-effect) .loader-bar {
-            animation-direction: reverse;
+        body {
+            font-family: var(--font-family-main);
+            line-height: 1.6;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: padding-top 0.3s ease;
         }
-        #exit-curtain.glitching:not(.flash-out-effect) .loader-bar {
-            animation-direction: normal;
+        .content-wrapper {
+            padding: 20px;
+            max-width: 900px; /* Leggermente più largo per un look moderno */
+            margin-left: auto;
+            margin-right: auto;
         }
-
-        @keyframes barPulse {
-            0%, 100% { transform: scaleY(0.3); opacity: 0.6; }
-            50% { transform: scaleY(1); opacity: 1; }
-        }
-
-        #preloader .loading-text,
-        #exit-curtain .loading-text {
-            font-size: 1.6em;
-            letter-spacing: 1px;
-        }
-
-        #preloader .loading-text {
-            color: #00aeff;
-            animation: textGlow 1.8s infinite alternate ease-in-out;
-        }
-
-        #exit-curtain .loading-text {
-             color: #ff8787;
-        }
-
-        @keyframes textGlow {
-          from { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; opacity: 0.8;}
-          to   { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; opacity: 1;}
-        }
-
-        #exit-curtain.glitching .loading-text {
-            animation: glitchText 0.8s infinite steps(1, end), textGlow 1.8s infinite alternate ease-in-out;
-            color: #ff3030 !important; /* Importante per sovrascrivere lo stile base */
-            position: relative;
-            z-index: 10;
-        }
-
-        #exit-curtain.glitching::before,
-        #exit-curtain.glitching::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: auto;
-            padding: 0 20px;
+        h1, h2, h3, h4 {
             text-align: center;
-            font-size: 1.6em;
-            letter-spacing: 1px;
-            background: #000000;
-            overflow: hidden;
-            clip-path: inset(50% 50% 50% 50%);
-            z-index: 5;
+            color: var(--text-color);
+            font-weight: 500; /* Un po' più leggero per un look moderno */
         }
+        h1#mainTitleGlobal {
+            line-height: 1.3;
+            margin-bottom: 15px;
+            margin-top: 10px;
+            font-size: 2em; /* Più grande */
+            font-weight: 700; /* Titolo principale più forte */
+            letter-spacing: 0.5px;
+        }
+        h1#mainTitleGlobal span { /* Per la parte "Marca Modello" */
+            font-size: 0.6em !important; /* Rispetto al titolo principale */
+            color: var(--text-muted-color) !important;
+            font-weight: 400 !important;
+            display: block;
+            margin-top: 4px;
+        }
+        h2.section-title {
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-top: 35px;
+            margin-bottom: 20px; /* Aggiunto spazio sotto il titolo sezione */
+            text-align: left;
+            font-size: 1.5em;
+            font-weight: 500;
+        }
+        h3 { font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; font-weight: 500; text-align: left;}
+        h4 { font-size: 1.15em; color: var(--text-muted-color); margin-top: 20px; margin-bottom: 10px; font-weight: 500; text-align: left;}
 
-        #exit-curtain.glitching::before {
-            color: #00ffff;
-            animation: glitchEffect 0.3s infinite linear alternate-reverse;
-        }
-
-        #exit-curtain.glitching::after {
-            color: #ff00ff;
-            animation: glitchEffect 0.2s infinite linear alternate-reverse, glitchSkew 0.5s infinite linear alternate;
-            animation-delay: -0.1s;
-        }
-
-        @keyframes glitchEffect {
-            0%    { clip-path: inset(40% 0 30% 0); transform: translate(-50.5%, -50.1%) skewX(5deg); opacity: 0.8; }
-            10%   { clip-path: inset(20% 0 70% 0); transform: translate(-50%, -50%) skewX(0deg); opacity: 0.7; }
-            20%   { clip-path: inset(10% 0 55% 0); transform: translate(-49.8%, -50.2%) skewX(-3deg); opacity: 0.9; }
-            30%   { clip-path: inset(50% 0 50% 0); transform: translate(-50%, -50%) skewX(0deg); opacity: 0.6; }
-            40%   { clip-path: inset(60% 0 10% 0); transform: translate(-50.2%, -49.9%) skewY(2deg); opacity: 1; }
-            50%   { clip-path: inset(80% 0  5% 0); transform: translate(-50%, -50%) skewX(0deg); opacity: 0.75; }
-            60%   { clip-path: inset(25% 0 40% 0); transform: translate(-50.1%, -50.3%) skewX(4deg); opacity: 0.85; }
-            70%   { clip-path: inset(15% 0 75% 0); transform: translate(-50%, -50%) skewX(0deg); opacity: 0.9; }
-            80%   { clip-path: inset(50% 0 20% 0); transform: translate(-49.9%, -49.8%) skewY(-3deg); opacity: 1; }
-            90%   { clip-path: inset(70% 0 10% 0); transform: translate(-50%, -50%) skewX(0deg); opacity: 0.6; }
-            100%  { clip-path: inset(35% 0 45% 0); transform: translate(-50.3%, -50.0%) skewX(-2deg); opacity: 0.8; }
-        }
-
-        @keyframes glitchSkew {
-            0%   { transform: translate(-50%, -50%) skew(-5deg, -2deg); }
-            100% { transform: translate(-50%, -50%) skew(5deg, 2deg); }
-        }
-
-        @keyframes glitchText {
-            0%, 100% { text-shadow: 0 0 3px red, 0 0 5px blue, 0 0 1px white; transform: translateX(0) translateY(0) skewX(0deg); opacity: 1;}
-            10% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-2px) translateY(1px) skewX(5deg); opacity: 0.8;}
-            /* ... (altri keyframes del glitchText) ... */
-            90% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-1px) translateY(1px) skewX(1deg); opacity: 0.9;}
-        }
-
-        /* Stili per l'effetto Flash Out sul testo finale */
-        #exit-curtain.flash-out-effect .loading-text {
-            color: #FFFFFF !important;
-            text-shadow: none !important;
-            animation: textFlashOut 0.5s forwards ease-out;
-            transform-origin: center center;
-        }
-
-        @keyframes textFlashOut {
-            0% {
-                opacity: 1;
-                transform: scale(1);
-                text-shadow: 0 0 5px rgba(255,255,255,0.5);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1.1);
-                color: #FFFFE0 !important;
-                text-shadow: 0 0 15px #FFFFFF,
-                             0 0 25px #FFFFFF,
-                             0 0 35px #FFFFE0,
-                             0 0 50px #FFFF99;
-            }
-            99% {
-                opacity: 0.8;
-                transform: scale(1.05);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0.8);
-                text-shadow: none;
-                color: transparent !important;
-            }
-        }
-
-        .header-circles { display: flex; justify-content: space-around; align-items: center; width: 100%; padding: 8px 0; box-sizing: border-box; }
-        .circle {
-            width: 1.5cm; height: 1.5cm; background-color: #ffffff;
-            border-radius: 50%; flex-shrink: 0;
-            opacity: 0.8;
-        }
-        body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; transition: padding-top 0.3s ease; }
-        .content-wrapper { padding: 20px; }
-        h1, h2 { text-align: center; color: #ffffff; }
-        h1#mainTitleGlobal { line-height: 1.2; margin-bottom: 10px; margin-top: 5px; font-size: 1.6em;}
-        h2.section-title { color: #cccccc; border-bottom: 1px solid #444444; padding-bottom: 5px; margin-top: 30px; text-align: left; }
-        h3, h4 { color: #bbbbbb; margin-top: 20px; margin-bottom: 10px; }
-        h4 {font-size: 1.1em; color: #c0c0c0; margin-top: 15px; margin-bottom: 8px;}
         ul { list-style-type: none; padding-left: 0; }
-        li { margin-bottom: 15px; }
-        input[type="checkbox"], input[type="text"], input[type="url"], select, input[type="radio"], textarea { margin-right: 8px; vertical-align: middle; padding: 8px; background-color: #333; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; margin-bottom: 5px; font-family: sans-serif;}
-        input[type="text"], input[type="url"], textarea { width: calc(100% - 20px); box-sizing: border-box; }
-        input[type="radio"] { margin-left: 5px; }
-        select { min-width: 220px; }
-        label { vertical-align: middle; display: block; margin-bottom: 5px; color: #e0e0e0; }
-        textarea {resize: vertical;}
+        li { margin-bottom: 18px; } /* Aumentato spazio tra items */
 
-        .category-section ul li > input[type="checkbox"] {
+        input[type="checkbox"], input[type="text"], input[type="url"], select, input[type="radio"], textarea {
             vertical-align: middle;
-            margin-right: 4px;
+            padding: 10px 12px; /* Più padding */
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-medium);
+            margin-bottom: 8px; /* Leggermente aumentato */
+            font-family: var(--font-family-main);
+            font-size: 0.95em;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input[type="text"], input[type="url"], textarea {
+            width: calc(100% - 26px); /* Adattato per nuovo padding */
+            box-sizing: border-box;
+        }
+        input[type="radio"] { margin-left: 5px; margin-right: 5px; }
+        select { min-width: 240px; }
+        label {
+            vertical-align: middle;
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted-color); /* Label più chiare */
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        textarea { resize: vertical; min-height: 80px; }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-accent-color);
+            box-shadow: 0 0 0 2px rgba(var(--primary-accent-color-rgb, 97, 218, 255), 0.3);
+        }
+        /* Stili specifici per checkbox per allineamento e aspetto */
+        .category-section ul li > input[type="checkbox"] {
+            margin-right: 8px; /* Più spazio */
+            transform: scale(1.1); /* Leggermente più grande */
+            accent-color: var(--primary-accent-color);
         }
         .category-section ul li > input[type="checkbox"] + label {
             display: inline-block;
             vertical-align: middle;
             margin-bottom: 0;
+            color: var(--text-color); /* Label checkbox più visibili */
+            font-weight: 400;
+            font-size: 0.95em;
         }
-
-        #pageHeaderContainer {
-            background-color: #1e1e1e;
-            z-index: 1000;
-            width: 100%;
-        }
-        #pageHeaderContainer.fixed-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            padding-bottom: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        }
-
-        #navButtons {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-        #mainPageNavButtons {
-            display: flex;
-            justify-content: center;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            padding: 5px 0;
-            width: calc(100% - 20px);
-            max-width: 700px;
-        }
-        #mainPageNavButtons button {
-            margin: 3px;
-            flex-shrink: 0;
-        }
-        #utilityNavButtons {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 5px;
-        }
-        #utilityNavButtons button {
-            margin: 3px 5px;
-        }
-
-        #navButtons button, .action-button {
-             padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-size: 0.9em;
-        }
-        .save-and-next-btn { background-color: #0069d9 !important; border-color: #005cbf !important; }
-        .save-and-next-btn:hover { background-color: #0056b3 !important; border-color: #004085 !important; }
-        #navButtons button:hover, .action-button:hover { background-color: #0056b3; border-color: #004085; }
-
-        @keyframes activeButtonGlow {
-            0% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
-            50% { box-shadow: 0 0 10px rgba(0, 150, 255, 1), 0 0 15px rgba(0, 150, 255, 0.7) inset; }
-            100% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
-        }
-
-        #navButtons button.active {
-            background-color: #0056b3 !important; border-color: #004085 !important; color: white !important;
-            animation-name: activeButtonGlow; animation-duration: 1.8s;
-            animation-iteration-count: infinite; animation-timing-function: ease-in-out;
-            animation-direction: alternate;
-        }
-        #navButtons button.nav-btn-completed { background-color: #28a745 !important; border-color: #1e7e34 !important; color: white !important; }
-        #navButtons button.nav-btn-partial { background-color: #ffc107 !important; border-color: #e0a800 !important; color: #212529 !important; }
-        #navButtons button.nav-btn-untouched { background-color: #dc3545 !important; border-color: #c82333 !important; color: white !important; }
-
-        #landingPageSection, .category-section, #historyPageSection { padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a; max-width: 850px; margin-left: auto; margin-right: auto; }
-
-        .category-section, #historyPageSection { display: none; }
-        #landingPageSection { display: block; }
-        .category-section.active { display: block; }
-
-        /* Stili per il bottone "Compila Default" */
-        .category-section {
-            position: relative;
-        }
+        /* Custom styling for the "Fill Defaults" button */
         .fill-defaults-btn {
             position: absolute;
-            top: 20px;
+            top: 25px;
             right: 20px;
-            width: 35px;
-            height: 35px;
-            background-color: #007bff;
+            width: 38px; /* Leggermente più grande */
+            height: 38px;
+            background-color: var(--info-color);
             color: white;
-            border: 1px solid #0056b3;
-            border-radius: 4px;
-            font-size: 1.5em;
+            border: none;
+            border-radius: var(--border-radius-medium);
+            font-size: 1.6em;
             line-height: 1;
             cursor: pointer;
             z-index: 10;
@@ -326,197 +171,296 @@
             align-items: center;
             justify-content: center;
             padding: 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 5px var(--shadow-medium);
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
         }
         .fill-defaults-btn:hover {
-            background-color: #0056b3;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            background-color: #5b6eae; /* Più scuro del --info-color */
+            box-shadow: 0 4px 8px var(--shadow-medium);
         }
         .fill-defaults-btn:active {
-             background-color: #004085;
+            transform: translateY(1px);
+            box-shadow: 0 1px 3px var(--shadow-light);
         }
 
 
-        .summary-item { margin-bottom: 8px; padding: 8px; background-color: #333; border-radius: 3px; }
-        .summary-item strong { color: #00aeff; }
+        #pageHeaderContainer {
+            background-color: var(--card-bg-color); /* Header con colore card */
+            z-index: 1000;
+            width: 100%;
+            padding-bottom: 10px; /* Più padding sotto */
+            box-shadow: 0 2px 8px var(--shadow-medium); /* Ombra più pronunciata */
+        }
+        #pageHeaderContainer.fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .header-circles { display: none; } /* Rimossi i cerchi */
+
+        #navButtons { display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 10px; }
+        #mainPageNavButtons { display: flex; justify-content: center; flex-wrap: nowrap; overflow-x: auto; padding: 8px 0; width: calc(100% - 30px); max-width: 750px; }
+        #mainPageNavButtons button {
+            margin: 0 5px; /* Spaziatura tra i bottoni */
+            flex-shrink: 0;
+            position: relative; /* Per l'indicatore ::after */
+            padding: 10px 18px; /* Più padding */
+        }
+        #mainPageNavButtons button::after { /* Indicatore per tab attiva */
+            content: '';
+            position: absolute;
+            bottom: -2px; /* Posizionato sotto il bottone */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background-color: var(--primary-accent-color);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        #mainPageNavButtons button.active::after {
+            width: 60%; /* Larghezza dell'indicatore quando attivo */
+        }
+
+        #utilityNavButtons { display: flex; justify-content: center; flex-wrap: wrap; margin-top: 10px; gap: 8px; }
+
+        #navButtons button, .action-button {
+            padding: 10px 18px; /* Padding consistente */
+            cursor: pointer;
+            background-color: var(--info-color);
+            color: white;
+            border: none; /* Bordi rimossi, affidamento a shadow */
+            border-radius: var(--border-radius-medium);
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+            font-size: 0.9em;
+            font-weight: 500;
+            box-shadow: 0 1px 3px var(--shadow-light);
+        }
+        #navButtons button:hover, .action-button:hover {
+            box-shadow: 0 3px 7px var(--shadow-medium);
+            transform: translateY(-1px); /* Leggero sollevamento */
+        }
+        #navButtons button:active, .action-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px var(--shadow-light);
+        }
+
+        .save-and-next-btn { background-color: var(--info-color) !important; }
+        .save-and-next-btn:hover { background-color: #5b6eae !important; } /* Più scuro di --info-color */
+
+        #navButtons button.active {
+            background-color: #5b6eae !important; /* Più scuro per tab attiva */
+            color: white !important;
+            box-shadow: inset 0 1px 3px var(--shadow-light), 0 1px 2px var(--shadow-light) !important;
+        }
+        #navButtons button.nav-btn-completed { background-color: var(--success-color) !important; }
+        #navButtons button.nav-btn-completed:hover { background-color: #3aa170 !important; }
+        #navButtons button.nav-btn-partial { background-color: var(--warning-color) !important; color: #23272a !important; }
+        #navButtons button.nav-btn-partial:hover { background-color: #e0900a !important; }
+        #navButtons button.nav-btn-untouched { background-color: var(--danger-color) !important; }
+        #navButtons button.nav-btn-untouched:hover { background-color: #d83f3f !important; }
+
+        /* Stili bottoni utility specifici */
+        #backToListBtn { background-color: var(--secondary-color) !important; }
+        #backToListBtn:hover { background-color: #7a7e83 !important; }
+        #historyBtn { background-color: #5bc0de !important; } /* Azzurro diverso */
+        #historyBtn:hover { background-color: #46b8da !important; }
+        #exitAppBtn, #clearAllProgressBtn { background-color: var(--danger-color) !important; }
+        #exitAppBtn:hover, #clearAllProgressBtn:hover { background-color: #d83f3f !important; }
+
+
+        #landingPageSection, .category-section, #historyPageSection {
+            padding: 25px; /* Più padding interno */
+            border: none; /* Rimosso bordo, uso di shadow */
+            border-radius: var(--border-radius-large); /* Angoli più arrotondati */
+            margin-top: 25px;
+            background-color: var(--card-bg-color);
+            max-width: 850px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 4px 12px var(--shadow-medium); /* Ombra più evidente */
+        }
+        .category-section, #historyPageSection { display: none; }
+        #landingPageSection { display: block; }
+        .category-section.active { display: block; }
+
+        /* Riepilogo */
+        .summary-item {
+            margin-bottom: 10px; padding: 12px; background-color: var(--input-bg-color);
+            border-radius: var(--border-radius-medium); border-left: 4px solid var(--border-color);
+        }
+        .summary-item strong { color: var(--primary-accent-color); font-weight: 500; }
         .summary-anomaly {
-            background-color: #5d3d3d !important; color: #ffdddd !important;
-            border-left: 3px solid #ff8888; padding-left: 10px !important;
+            background-color: rgba(var(--danger-rgb, 240, 71, 71), 0.15) !important;
+            border-left-color: var(--danger-color) !important;
+            color: var(--text-color) !important;
         }
-        .summary-anomaly strong { color: #ffc0c0 !important; }
+        .summary-anomaly strong { color: var(--danger-color) !important; }
         .summary-notes {
-            background-color: #3a3a4a !important; color: #e0e0ff !important;
-            border-left: 3px solid #8888ff; padding-left: 10px !important;
+            background-color: rgba(var(--primary-accent-rgb, 97, 218, 255), 0.1) !important;
+            border-left-color: var(--primary-accent-color) !important;
+            color: var(--text-color) !important;
         }
-        .summary-notes strong { color: #c0c0ff !important; }
+        .summary-notes strong { color: var(--primary-accent-color) !important; }
+        .summary-notes div { white-space: pre-wrap; padding-left: 10px; margin-top: 5px; font-size: 0.95em; }
 
-        .table-scroll-wrapper { overflow-x: auto; width: 100%; margin-bottom: 10px; border: 1px solid #444; border-radius: 4px; }
-        .targa-list-table-content { min-width: 700px; /* Aumentato per nuova colonna */ }
-        .targa-list-header { display: flex; font-weight: bold; padding: 0 10px 0 10px; border-bottom: 2px solid #777; color: #ddd; background-color: #3a3a3a; }
-        .targa-list-header .targa-col { padding: 6px 8px; border-right: 1px solid #555; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1;}
+
+        /* Stili Tabella Targhe */
+        .table-scroll-wrapper {
+            overflow-x: auto; width: 100%; margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-medium);
+            background-color: var(--input-bg-color); /* Sfondo leggero per la tabella */
+        }
+        .targa-list-table-content { min-width: 750px; /* Adattare in base al numero di colonne */ }
+        .targa-list-header {
+            display: flex; font-weight: 500; /* Più leggero */
+            padding: 0 10px; border-bottom: 2px solid var(--border-color);
+            color: var(--text-muted-color); background-color: var(--bg-color); /* Sfondo header più scuro */
+            font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .targa-list-header .targa-col { padding: 10px 12px; border-right: 1px solid var(--bg-color); }
         .targa-list-header .targa-col:last-child { border-right: none; }
 
-        #targaListContainer { margin-top: 0; max-height: 350px; overflow-y: auto; overflow-x: visible; padding: 0; }
-        .targa-list-item { display: flex; align-items: center; border-bottom: 1px solid #444; padding: 0 10px 0 10px; }
+        #targaListContainer { margin-top: 0; max-height: 400px; overflow-y: auto; padding: 0; }
+        .targa-list-item {
+            display: flex; align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 10px;
+            transition: background-color 0.2s ease;
+        }
         .targa-list-item:last-child { border-bottom: none; }
+        .targa-list-item:hover { background-color: rgba(var(--primary-accent-rgb, 97, 218, 255), 0.05); }
+
         .targa-list-item .targa-col {
-            padding: 8px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            border-right: 1px solid #444; text-align: left; flex-grow: 1; display: flex; align-items: center;
+            padding: 10px 12px; /* Aumentato padding */
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            border-right: 1px solid var(--border-color);
+            text-align: left; flex-grow: 1; display: flex; align-items: center;
+            font-size: 0.9em;
         }
         .targa-list-item .targa-col:last-child { border-right: none; }
 
-        /* Stili per checkbox Urgente */
-        .targa-list-header .targa-col-urgente,
-        .targa-list-item .targa-col-urgente {
-            flex-basis: 10%;
-            min-width: 70px;
-            text-align: center;
-            justify-content: center; /* Per centrare la checkbox */
-        }
-        .targa-col-urgente input[type="checkbox"] {
-            vertical-align: middle;
-            cursor: pointer;
-            transform: scale(1.2);
-            margin: 0;
-        }
-
-        .targa-col-targa    { flex-basis: 13%; min-width: 75px;}
+        .targa-col-urgente { flex-basis: 8%; min-width: 60px; justify-content: center; }
+        .targa-col-urgente input[type="checkbox"] { transform: scale(1.3); accent-color: var(--danger-color); margin:0; }
+        .targa-col-targa    { flex-basis: 15%; min-width: 90px;}
         .targa-col-targa.clickable-targa {
-            cursor: pointer;
-            color: #8ab4f8;
-            font-weight: 500;
-            transition: color 0.2s ease;
+            cursor: pointer; color: var(--primary-accent-color); font-weight: 500;
+            transition: color 0.2s ease, text-decoration 0.2s ease;
         }
-        .targa-list-item:hover .targa-col-targa.clickable-targa {
-            color: #a1c5ff;
-            text-decoration: underline;
-        }
-
-        .targa-col-posizione{ flex-basis: 12%; min-width: 65px; padding: 4px !important; }
-        .targa-col-marca    { flex-basis: 18%; min-width: 90px;}
-        .targa-col-modello  { flex-basis: 22%; min-width: 100px;}
-        .targa-col-piazzale { flex-basis: 18%; min-width: 70px;}
-        .targa-col-actions  { flex-basis: 7%; min-width: 50px; text-align: center; flex-grow: 0; }
-
+        .targa-list-item:hover .targa-col-targa.clickable-targa { color: #82e9ff; text-decoration: underline; }
+        .targa-col-posizione{ flex-basis: 12%; min-width: 70px; padding: 6px !important; }
+        .targa-col-marca    { flex-basis: 20%; min-width: 100px;}
+        .targa-col-modello  { flex-basis: 25%; min-width: 120px;}
+        .targa-col-piazzale { flex-basis: 15%; min-width: 90px;}
+        .targa-col-actions  { flex-basis: 5%; min-width: 50px; text-align: center; flex-grow: 0; }
 
         .targa-col-posizione input.posizione-input {
-            width: 100%; padding: 6px 4px; margin: 0; box-sizing: border-box;
-            background-color: #404040; color: #f0f0f0;
-            border: 1px solid #5a5a5a; border-radius: 3px;
+            width: 100%; padding: 8px 6px; margin: 0; box-sizing: border-box;
+            background-color: var(--bg-color); /* Leggermente più scuro dello sfondo riga */
+            color: var(--text-color);
+            border: 1px solid var(--border-color); border-radius: var(--border-radius-small);
             font-size: 0.9em; text-align: center;
         }
-        .targa-col-posizione input.posizione-input:focus {
-            background-color: #484848; border-color: #777; outline: none;
+        .targa-col-posizione input.posizione-input:focus { background-color: #3e4247; border-color: var(--primary-accent-color); }
+
+        .delete-progress-btn {
+            background-color: transparent; border: 1px solid var(--danger-color); color: var(--danger-color);
+            padding: 4px 8px; font-size: 0.8em; line-height: 1; border-radius: var(--border-radius-small);
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .delete-progress-btn:hover { background-color: var(--danger-color); color: white; }
+
+
+        /* Colori di stato per le righe della tabella */
+        .targa-list-item.status-da-vedere { background-color: transparent; }
+        .targa-list-item.status-da-vedere:hover { background-color: rgba(var(--primary-accent-rgb, 97, 218, 255), 0.05); }
+        .targa-list-item.status-da-vedere .targa-col { color: var(--text-color); }
+        .targa-list-item.status-da-vedere .targa-col-targa.clickable-targa { color: var(--primary-accent-color); }
+
+        .targa-list-item.status-visto { background-color: rgba(var(--success-rgb, 67, 181, 129), 0.1); }
+        .targa-list-item.status-visto:hover { background-color: rgba(var(--success-rgb, 67, 181, 129), 0.18); }
+        .targa-list-item.status-visto .targa-col { color: #b8e0c7; }
+        .targa-list-item.status-visto .targa-col-targa.clickable-targa { color: var(--success-color); }
+
+        .targa-list-item.urgent-item {
+            background-color: rgba(var(--danger-rgb, 240, 71, 71), 0.1) !important;
+            border-left: 4px solid var(--danger-color); /* Bordo sinistro più evidente */
+            margin-left: -4px; /* Compensa il bordo */
+        }
+        .targa-list-item.urgent-item:hover { background-color: rgba(var(--danger-rgb, 240, 71, 71), 0.18) !important; }
+        .targa-list-item.urgent-item .targa-col { color: #f5b5b5 !important; }
+        .targa-list-item.urgent-item .targa-col-targa.clickable-targa { color: var(--danger-color) !important; }
+
+        .targa-list-item.completed .targa-col { color: var(--text-muted-color) !important; }
+        .targa-list-item.status-visto.completed .targa-col { color: #8bbd9f !important; } /* Verde più desaturato per completati */
+        .targa-list-item.status-visto.completed .targa-col-targa.clickable-targa { color: #6aa886 !important; }
+        .targa-list-item.urgent-item.completed .targa-col { color: #b18888 !important; } /* Rosso più desaturato */
+        .targa-list-item.urgent-item.completed .targa-col-targa.clickable-targa { color: #d87070 !important; }
+
+        .targa-list-item.status-parziale { background-color: rgba(var(--warning-rgb, 250, 166, 26), 0.1); }
+        .targa-list-item.status-parziale:hover { background-color: rgba(var(--warning-rgb, 250, 166, 26), 0.18); }
+        .targa-list-item.status-parziale .targa-col { color: #f8d99b !important; }
+        .targa-list-item.status-parziale .targa-col-targa.clickable-targa { color: var(--warning-color) !important; }
+
+
+        #targheLoadingStatus { text-align: center; padding: 15px; color: var(--text-muted-color); font-size: 1.05em; }
+        #savedTargasListContainer {
+            display: flex; flex-direction: column; gap: 10px; max-height: 450px; overflow-y: auto;
+            padding: 15px; border: 1px solid var(--border-color); border-radius: var(--border-radius-medium); margin-bottom: 20px;
+        }
+        .saved-targa-button {
+            display: block; width: 100%; padding: 12px 15px;
+            background-color: var(--input-bg-color); color: var(--text-color);
+            border: 1px solid var(--border-color); border-radius: var(--border-radius-medium);
+            text-align: left; cursor: pointer; font-size: 0.95em;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .saved-targa-button:hover { background-color: #3e4247; border-color: var(--primary-accent-color); }
+
+        #historyPageSection .action-button { margin-right: 10px; }
+        #sheetFilterContainer { margin-bottom: 20px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        #sheetFilterContainer label { margin-right: 0; color: var(--text-muted-color); font-size: 0.9em; }
+        #sheetFilterDropdown {
+            padding: 10px 12px; background-color: var(--input-bg-color); color: var(--text-color);
+            border: 1px solid var(--border-color); border-radius: var(--border-radius-medium);
+            min-width: 280px; vertical-align: middle; font-size: 0.95em;
         }
 
-        .delete-progress-btn { background-color: #dc3545; border-color: #c82333; color: white; padding: 3px 7px; font-size: 0.8em; line-height: 1; flex-shrink: 0; border-radius: 3px; }
-        .delete-progress-btn:hover { background-color: #c82333; border-color: #bd2130; }
-
-        .targa-list-item.status-da-vedere { background-color: #383838 !important; }
-        .targa-list-item.status-da-vedere:hover { background-color: #454545 !important; }
-        .targa-list-item.status-da-vedere .targa-col { color: #f0f0f0 !important; }
-        .targa-list-item.status-da-vedere .targa-col-targa.clickable-targa { color: #8ab4f8 !important; }
-        .targa-list-item.status-da-vedere:hover .targa-col-targa.clickable-targa { color: #a1c5ff !important; }
-        .targa-list-item.status-da-vedere .targa-col-posizione input.posizione-input { background-color: #4f4f4f; color: #f0f0f0; border-color: #5a5a5a; }
-
-        .targa-list-item.status-visto { background-color: #2E4B35 !important; }
-        .targa-list-item.status-visto:hover { background-color: #395c40 !important; }
-        .targa-list-item.status-visto .targa-col-targa,
-        .targa-list-item.status-visto .targa-col-marca,
-        .targa-list-item.status-visto .targa-col-modello,
-        .targa-list-item.status-visto .targa-col-piazzale { color: #a3cca3 !important; }
-        .targa-list-item.status-visto .targa-col-targa.clickable-targa { color: #81c784 !important; }
-        .targa-list-item.status-visto:hover .targa-col-targa.clickable-targa { color: #9ccc65 !important; }
-        .targa-list-item.status-visto .targa-col-posizione input.posizione-input { background-color: #384c3d; color: #d0e0d0; }
-
-        .targa-list-item.urgent-item { background-color: #4d3232 !important; border-left: 3px solid #ff6b6b; }
-        .targa-list-item.urgent-item:hover { background-color: #5e3f3f !important; }
-        .targa-list-item.urgent-item:not(.completed) .targa-col { color: #ffc0c0 !important; }
-        .targa-list-item.urgent-item:not(.completed) .targa-col-targa.clickable-targa { color: #ff8a80 !important; }
-        .targa-list-item.urgent-item:not(.completed):hover .targa-col-targa.clickable-targa { color: #ff5252 !important; }
-        .targa-list-item.urgent-item:not(.completed) .targa-col-posizione input.posizione-input { background-color: #5a3e3e; color: #ffc0c0; }
-        .targa-list-item.urgent-item:not(.completed) .targa-col-urgente input[type="checkbox"] { accent-color: #ff8a80; }
-
-
-        .targa-list-item.completed .targa-col-targa,
-        .targa-list-item.completed .targa-col-marca,
-        .targa-list-item.completed .targa-col-modello,
-        .targa-list-item.completed .targa-col-piazzale { color: #888 !important; }
-        .targa-list-item.status-visto.completed .targa-col-targa,
-        .targa-list-item.status-visto.completed .targa-col-marca,
-        .targa-list-item.status-visto.completed .targa-col-modello,
-        .targa-list-item.status-visto.completed .targa-col-piazzale { color: #a3cca3 !important; }
-        .targa-list-item.status-visto.completed .targa-col-targa.clickable-targa { color: #81c784 !important; }
-        .targa-list-item.urgent-item.completed .targa-col-targa,
-        .targa-list-item.urgent-item.completed .targa-col-marca,
-        .targa-list-item.urgent-item.completed .targa-col-modello,
-        .targa-list-item.urgent-item.completed .targa-col-piazzale { color: #a07c7c !important; }
-        .targa-list-item.urgent-item.completed .targa-col-targa.clickable-targa { color: #ff8a80 !important; }
-        .targa-list-item.urgent-item.completed .targa-col-posizione input.posizione-input { background-color: #4a2e2e; color: #a07c7c; }
-        .targa-list-item.urgent-item.completed .targa-col-urgente input[type="checkbox"] { accent-color: #ff8a80; }
-
-
-        .targa-list-item.status-parziale { background-color: #ffc107 !important; }
-        .targa-list-item.status-parziale:hover { background-color: #e0a800 !important; }
-        .targa-list-item.status-parziale .targa-col { color: #212529 !important; }
-        .targa-list-item.status-parziale .targa-col-targa.clickable-targa { color: #b8860b !important; }
-        .targa-list-item.status-parziale:hover .targa-col-targa.clickable-targa { color: #8B4513 !important; }
-        .targa-list-item.status-parziale .targa-col-posizione input.posizione-input { background-color: #ffe082; color: #212529; border-color: #ffc107; }
-        .targa-list-item.status-parziale .targa-col-urgente input[type="checkbox"] { accent-color: #b8860b; }
-
-
-        #targheLoadingStatus { text-align: center; padding: 10px; color: #00aeff; }
-        #savedTargasListContainer { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #333; border-radius: 4px; margin-bottom: 20px; }
-        .saved-targa-button { display: block; width: 100%; padding: 10px; background-color: #383838; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; text-align: left; cursor: pointer; font-size: 0.95em; }
-        .saved-targa-button:hover { background-color: #454545; }
-        #historyPageSection .action-button { margin-right: 10px; }
-        #sheetFilterContainer { margin-bottom: 15px; text-align: center; }
-        #sheetFilterContainer label { margin-right: 10px; color: #ccc; display: inline-block; }
-        #sheetFilterDropdown { padding: 8px; background-color: #333; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; min-width: 250px; vertical-align: middle; }
-
-        .animate-me {
+        .animate-me { /* Animazione campo da compilare */
             animation: pulseHighlight 1.5s infinite alternate;
-            outline: 2px solid rgba(0, 123, 255, 0.0);
+            outline: 2px solid rgba(var(--primary-accent-rgb, 97, 218, 255), 0);
             transition: outline 0.3s ease, box-shadow 0.3s ease;
         }
         @keyframes pulseHighlight {
-            from { outline: 2px solid rgba(0, 123, 255, 0.7); box-shadow: 0 0 5px rgba(0, 123, 255, 0.5), 0 0 8px rgba(0, 123, 255, 0.3) inset; }
-            to   { outline: 3px solid rgba(0, 150, 255, 1); box-shadow: 0 0 10px rgba(0, 150, 255, 0.8), 0 0 12px rgba(0, 150, 255, 0.5) inset; }
+            from { outline-color: rgba(var(--primary-accent-rgb, 97, 218, 255), 0.8); box-shadow: 0 0 8px rgba(var(--primary-accent-rgb, 97, 218, 255), 0.6), 0 0 10px rgba(var(--primary-accent-rgb, 97, 218, 255), 0.4) inset; }
+            to   { outline-color: rgba(var(--primary-accent-rgb, 97, 218, 255), 0.4); box-shadow: 0 0 15px rgba(var(--primary-accent-rgb, 97, 218, 255), 0.9), 0 0 15px rgba(var(--primary-accent-rgb, 97, 218, 255), 0.6) inset; }
         }
         input[type="checkbox"].animate-me, select.animate-me { position: relative; z-index: 1; }
 
+        /* Responsive adjustments */
         @media (max-width: 768px) {
-            .content-wrapper { margin-top: 0; }
-            .circle { width: 1.2cm; height: 1.2cm; }
-            #navButtons button, .action-button { padding: 8px 10px; font-size: 0.85em; }
-            #mainPageNavButtons { width: 100%; padding: 5px; box-sizing: border-box; }
-            #mainPageNavButtons button { font-size: 0.8em; padding: 6px 8px; }
-            #utilityNavButtons button { font-size: 0.85em; padding: 8px 10px; }
-            input[type="text"], input[type="url"], select, textarea { width: 100%; box-sizing: border-box; }
+            .content-wrapper { padding: 15px; }
+            h1#mainTitleGlobal { font-size: 1.8em; }
+            h2.section-title { font-size: 1.3em; margin-top: 25px; }
+            #navButtons button, .action-button { padding: 9px 12px; font-size: 0.85em; }
+            #mainPageNavButtons { width: calc(100% - 10px); padding: 5px; }
+            #mainPageNavButtons button { font-size: 0.8em; padding: 8px 10px; margin: 0 3px; }
+            input[type="text"], input[type="url"], select, textarea { width: 100%; box-sizing: border-box; font-size: 0.9em; }
             .table-scroll-wrapper { overflow-x: auto; }
-            .targa-list-table-content { min-width: 600px; /* Adattare per mobile se necessario */ }
-            .targa-list-header { display: flex !important; }
-            .targa-list-header .targa-col, .targa-list-item .targa-col { padding: 6px 5px; font-size:0.9em; }
-             .targa-list-header .targa-col-urgente,
-            .targa-list-item .targa-col-urgente {
-                min-width: 60px;
-                font-size: 0.8em;
-            }
-            .targa-col-urgente input[type="checkbox"] {
-                transform: scale(1.1);
-            }
+            .targa-list-table-content { min-width: 680px; } /* Potrebbe necessitare aggiustamenti */
+            .targa-list-header .targa-col, .targa-list-item .targa-col { padding: 8px 6px; font-size:0.85em; }
             .delete-progress-btn { padding: 5px 8px; }
-            .targa-col-targa    { min-width: 65px;}
-            .targa-col-posizione{ min-width: 55px;}
-            .targa-col-marca    { min-width: 70px;}
-            .targa-col-modello  { min-width: 80px;}
-            .targa-col-piazzale { min-width: 60px;}
+            .targa-col-urgente { min-width: 50px; }
+            .targa-col-targa    { min-width: 70px;}
+            .targa-col-posizione{ min-width: 60px;}
+            .targa-col-marca    { min-width: 80px;}
+            .targa-col-modello  { min-width: 90px;}
+            .targa-col-piazzale { min-width: 70px;}
             .targa-col-actions  { min-width: 45px; }
-            #sheetFilterContainer { display: flex; flex-direction: column; align-items: stretch; }
-            #sheetFilterContainer label { margin-bottom: 5px; margin-right: 0; text-align: left;}
-            #sheetFilterDropdown { width: 100%; }
-            .fill-defaults-btn { top: 15px; right: 15px; width: 30px; height: 30px; font-size: 1.2em; }
+            #sheetFilterContainer { flex-direction: column; align-items: stretch; gap: 8px;}
+            #sheetFilterDropdown { width: 100%; min-width: auto; }
+            .fill-defaults-btn { top: 20px; right: 15px; width: 32px; height: 32px; font-size: 1.3em; }
         }
     </style>
 </head>
@@ -540,9 +484,6 @@
     </div>
 
     <div id="pageHeaderContainer">
-        <div class="header-circles">
-            <div class="circle"></div> <div class="circle"></div> <div class="circle"></div> <div class="circle"></div>
-        </div>
         <h1 id="mainTitleGlobal">Checklist Perizia Veicolo</h1>
         <div id="navButtons">
             <div id="mainPageNavButtons">
@@ -552,33 +493,33 @@
                 <button data-target="riepilogo">Riepilogo</button>
             </div>
             <div id="utilityNavButtons">
-                <button id="backToListBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe</button>
-                <button id="historyBtn" class="action-button" style="background-color: #17a2b8; border-color: #117a8b;">Salvataggi</button>
-                <button id="exitAppBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Esci</button>
+                <button id="backToListBtn" class="action-button">Elenco Targhe</button>
+                <button id="historyBtn" class="action-button">Salvataggi</button>
+                <button id="exitAppBtn" class="action-button">Esci</button>
             </div>
         </div>
     </div>
 
     <div class="content-wrapper" id="mainContentWrapper">
         <div id="landingPageSection" style="display: block;">
-            <h2 style="margin-top: 10px;">Seleziona Veicolo da Periziare</h2>
+            <h2 style="margin-top: 10px; text-align:left; border-bottom: none;">Seleziona Veicolo</h2>
             <div id="sheetFilterContainer">
-                <label for="sheetFilterDropdown">Filtra per Elenco:</label>
+                <label for="sheetFilterDropdown">Filtra per Piazzale:</label>
                 <select id="sheetFilterDropdown">
-                    <option value="all">Tutti gli Elenchi</option>
+                    <option value="all">Tutti i Piazzali</option>
                 </select>
             </div>
             <div id="targheLoadingStatus">Caricamento targhe in corso...</div>
             <div class="table-scroll-wrapper">
                 <div class="targa-list-table-content">
                     <div class="targa-list-header">
-                        <span class="targa-col targa-col-urgente">Urgente</span>
+                        <span class="targa-col targa-col-urgente">Urg.</span>
                         <span class="targa-col targa-col-targa">Targa</span>
-                        <span class="targa-col targa-col-posizione">Posizione</span>
+                        <span class="targa-col targa-col-posizione">Pos.</span>
                         <span class="targa-col targa-col-marca">Marca</span>
                         <span class="targa-col targa-col-modello">Modello</span>
                         <span class="targa-col targa-col-piazzale">Piazzale</span>
-                        <span class="targa-col targa-col-actions">Azioni</span>
+                        <span class="targa-col targa-col-actions">Az.</span>
                     </div>
                     <div id="targaListContainer"></div>
                 </div>
@@ -655,7 +596,7 @@
                         </select>
                     </li>
                 </ul>
-                <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
+                <div style="text-align: right; margin-top: 25px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
             </div>
             <div id="pneumaticiSection" class="category-section">
                  <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="pneumaticiSection">&#x2713;</button>
@@ -666,7 +607,7 @@
                     <li><label for="pneumatico_pd">Post. destro:</label><select id="pneumatico_pd"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
                     <li><label for="pneumatico_ps">Post. sinistro:</label><select id="pneumatico_ps"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
                 </ul>
-                <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
+                <div style="text-align: right; margin-top: 25px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
             </div>
             <div id="danniVerificheSection" class="category-section">
                 <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="danniVerificheSection">&#x2713;</button>
@@ -680,12 +621,12 @@
                         <textarea id="note_danni_verifiche" rows="4"></textarea>
                     </li>
                 </ul>
-                <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Vai al Riepilogo</button></div>
+                <div style="text-align: right; margin-top: 25px;"><button class="action-button save-and-next-btn">Salva e Vai al Riepilogo</button></div>
             </div>
             <div id="riepilogoSection" class="category-section">
                 <h2 class="section-title">Riepilogo Perizia</h2>
                 <div id="summaryContent"><p><em>Compila le sezioni precedenti...</em></p></div>
-                <button id="saveAndReturnBtn" class="action-button" style="background-color: #28a745; border-color: #1e7e34; margin-top: 15px;">Salva Perizia</button>
+                <button id="saveAndReturnBtn" class="action-button" style="margin-top: 20px;">Salva Perizia</button>
             </div>
         </div>
 
@@ -693,8 +634,8 @@
             <h2 class="section-title" style="text-align: center;">Cronistoria Salvataggi</h2>
             <div id="savedTargasListContainer"><p>Nessun salvataggio trovato.</p></div>
             <div style="margin-top: 20px; text-align: center;">
-                <button id="clearAllProgressBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Cancella Tutti i Salvataggi</button>
-                <button id="backToLandingFromHistoryBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe Principale</button>
+                <button id="clearAllProgressBtn" class="action-button">Cancella Tutti i Salvataggi</button>
+                <button id="backToLandingFromHistoryBtn" class="action-button" style="background-color: var(--secondary-color);">Elenco Targhe Principale</button>
             </div>
         </div>
     </div>
@@ -707,7 +648,7 @@
     const savedTargasListContainer = document.getElementById('savedTargasListContainer');
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
-    const headerCircles = pageHeaderContainer.querySelector('.header-circles');
+    // const headerCircles = pageHeaderContainer.querySelector('.header-circles'); // Rimosso
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons');
     const navButtons = navButtonsContainer.querySelectorAll('#mainPageNavButtons button[data-target]');
@@ -730,6 +671,36 @@
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
 
+    // Helper per convertire colori HEX in RGB per box-shadow con trasparenza
+    function hexToRgb(hex) {
+        let r = 0, g = 0, b = 0;
+        if (hex.length == 4) { // #RGB
+            r = "0x" + hex[1] + hex[1];
+            g = "0x" + hex[2] + hex[2];
+            b = "0x" + hex[3] + hex[3];
+        } else if (hex.length == 7) { // #RRGGBB
+            r = "0x" + hex[1] + hex[2];
+            g = "0x" + hex[3] + hex[4];
+            b = "0x" + hex[5] + hex[6];
+        }
+        return [+r, +g, +b];
+    }
+
+    // Inizializza variabili CSS con componenti RGB
+    function setCssRgbVariables() {
+        const rootStyle = document.documentElement.style;
+        const primaryAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-accent-color').trim();
+        const dangerColor = getComputedStyle(document.documentElement).getPropertyValue('--danger-color').trim();
+        const successColor = getComputedStyle(document.documentElement).getPropertyValue('--success-color').trim();
+        const warningColor = getComputedStyle(document.documentElement).getPropertyValue('--warning-color').trim();
+
+        if (primaryAccentColor) rootStyle.setProperty('--primary-accent-color-rgb', hexToRgb(primaryAccentColor).join(', '));
+        if (dangerColor) rootStyle.setProperty('--danger-rgb', hexToRgb(dangerColor).join(', '));
+        if (successColor) rootStyle.setProperty('--success-rgb', hexToRgb(successColor).join(', '));
+        if (warningColor) rootStyle.setProperty('--warning-rgb', hexToRgb(warningColor).join(', '));
+    }
+
+
     function fillSectionPositiveOrDefaults(sectionId) {
         const section = document.getElementById(sectionId);
         if (!section) return;
@@ -750,8 +721,8 @@
             document.getElementById('seconda_chiave').value = 'presente';
             handleTrazioneChange();
             if (tipoTrazioneSelect && tipoTrazioneSelect.value === 'elettrico') {
-                if (cavoRapidaSelect) cavoRapidaSelect.value = 'presente';
-                if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'presente';
+                if (cavoRapidaSelect && (cavoRapidaSelect.value === "" || cavoRapidaSelect.value === "non_applicabile")) cavoRapidaSelect.value = 'presente';
+                if (cavoDomesticaSelect && (cavoDomesticaSelect.value === "" || cavoDomesticaSelect.value === "non_applicabile")) cavoDomesticaSelect.value = 'presente';
             }
         }
         else if (sectionId === 'pneumaticiSection') {
@@ -774,6 +745,9 @@
         section.querySelectorAll('input, select, textarea').forEach(el => {
             const event = new Event('change', { bubbles: true });
             el.dispatchEvent(event);
+             // Trigger input event as well for some frameworks or listeners
+            const inputEvent = new Event('input', { bubbles: true });
+            el.dispatchEvent(inputEvent);
         });
     }
 
@@ -787,8 +761,8 @@
             cavoRapidaSelect.value = "non_applicabile";
             cavoDomesticaSelect.value = "non_applicabile";
         } else {
-            if (cavoRapidaSelect.value === "" || cavoRapidaSelect.value === "non_applicabile") cavoRapidaSelect.value = "";
-            if (cavoDomesticaSelect.value === "" || cavoDomesticaSelect.value === "non_applicabile") cavoDomesticaSelect.value = "";
+            if (cavoRapidaSelect.value === "non_applicabile") cavoRapidaSelect.value = ""; // Resetta a Seleziona se era non_applicabile
+            if (cavoDomesticaSelect.value === "non_applicabile") cavoDomesticaSelect.value = "";
         }
         updateNavButtonColors();
     }
@@ -820,7 +794,7 @@
             else el.value = '';
         });
         if (tipoTrazioneSelect) {
-            handleTrazioneChange();
+            handleTrazioneChange(); // Assicura che i campi dipendenti siano aggiornati
         }
         console.log("Modulo resettato.");
     }
@@ -848,7 +822,7 @@
 
     function loadProgress(targa) {
         if(!targa) return;
-        resetChecklistForm();
+        resetChecklistForm(); // Resetta prima di caricare i nuovi dati
         try {
             const json = localStorage.getItem(`${APP_PREFIX}data_${targa}`);
             if (json) {
@@ -863,13 +837,13 @@
             } else {
                 console.log(`Nessun dato salvato trovato per la targa ${targa}.`);
             }
-            if (tipoTrazioneSelect) {
+            if (tipoTrazioneSelect) { // Chiamata dopo aver caricato i valori
                  handleTrazioneChange();
             }
             updateNavButtonColors();
         } catch(e) {
             console.error("Errore durante il caricamento da localStorage:", e);
-            updateNavButtonColors();
+            updateNavButtonColors(); // Assicura che i colori dei bottoni siano aggiornati anche in caso di errore
         }
     }
     function getCompletedTarghe() { try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){return{};}}
@@ -881,7 +855,7 @@
         try {
             localStorage.removeItem(`${APP_PREFIX}data_${targa}`);
             localStorage.removeItem(`${APP_PREFIX}posizione_${targa}`);
-            localStorage.removeItem(`${APP_PREFIX}urgent_${targa}`); // Rimuove lo stato di urgenza
+            localStorage.removeItem(`${APP_PREFIX}urgent_${targa}`);
             console.log(`Dati modulo, posizione e urgenza rimossi per ${targa}.`);
 
             const completed = getCompletedTarghe();
@@ -895,7 +869,7 @@
             alert(`Errore cancellazione dati per ${targa}.`);
         }
         if (typeof popolaTargheFiltrate === 'function') {
-             popolaTargheFiltrate(); // Ricarica la lista per riflettere le modifiche
+             popolaTargheFiltrate();
         }
         if (targaSelezionataGlobalmente === targa) {
              targaSelezionataGlobalmente = null;
@@ -916,8 +890,13 @@
 
             setTimeout(() => {
                 console.log("Inizio generazione screenshot...");
-                riepilogoSection.scrollTop = 0;
-                html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false })
+                riepilogoSection.scrollTop = 0; // Assicura che lo screenshot parta dall'alto
+                html2canvas(riepilogoSection, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg-color').trim() || '#2c2f33' // Usa lo sfondo della card
+                 })
                     .then(canvas => {
                         const link = document.createElement('a');
                         let targaSanitized = 'sconosciuta';
@@ -945,61 +924,63 @@
                         alert("Si è verificato un errore durante la generazione dello screenshot.");
                         reject(error);
                     });
-            }, 100);
+            }, 100); // Piccolo delay per assicurare che il DOM sia aggiornato
         });
     }
-    async function handleSavePeriziaAndReturn() { if(!targaSelezionataGlobalmente){alert("No targa attiva.");return;} if(!saveProgress(targaSelezionataGlobalmente)){alert("Salvataggio dati fallito.");return;} if(document.getElementById('riepilogoSection').classList.contains('active')){generateSummary();} try{await generateAndDownloadScreenshot();}catch(e){console.warn("Screenshot fallito, ma dati salvati.");} markTargaAsCompleted(targaSelezionataGlobalmente); updateNavButtonColors(); alert(`Perizia per ${targaSelezionataGlobalmente} salvata, screenshot tentato, completata. Torno all'elenco.`); targaSelezionataGlobalmente=null;showView('landing');}
-    function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
+    async function handleSavePeriziaAndReturn() { if(!targaSelezionataGlobalmente){alert("Nessuna targa attiva per il salvataggio.");return;} if(!saveProgress(targaSelezionataGlobalmente)){alert("Salvataggio dati fallito.");return;} if(document.getElementById('riepilogoSection').classList.contains('active')){generateSummary();} try{await generateAndDownloadScreenshot();}catch(e){console.warn("Screenshot fallito, ma dati salvati.");} markTargaAsCompleted(targaSelezionataGlobalmente); updateNavButtonColors(); alert(`Perizia per ${targaSelezionataGlobalmente} salvata, screenshot generato. La targa è marcata come completata. Torno all'elenco.`); targaSelezionataGlobalmente=null;showView('landing');}
+    function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("Nessuna targa selezionata.");return;} if(saveProgress(targaSelezionataGlobalmente)){const originalText=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=originalText;this.disabled=false;},1500);}else{return;} let currentIndex=-1; navButtons.forEach((navBtn,index)=>{if(navBtn.classList.contains('active'))currentIndex=index;}); if(currentIndex!==-1&&currentIndex<navButtons.length-1){const nextNavButton=navButtons[currentIndex+1];if(nextNavButton)showSection(nextNavButton.dataset.target);}}
 
     function isInputDefault(inputElement) {
         if (!inputElement) return true;
         if (inputElement.type === 'checkbox') return !inputElement.checked;
         if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0;
         if (inputElement.type === 'text' || inputElement.type === 'url' || inputElement.tagName === 'TEXTAREA') return inputElement.value.trim() === "";
-        return true;
+        return true; // Considera altri tipi non gestiti come default
     }
 
     function getSectionInputs(sectionElementId) {
         const sectionDiv = document.getElementById(sectionElementId);
         if (!sectionDiv) return [];
+        // Esclude input disabilitati
         return Array.from(sectionDiv.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)'));
     }
 
     function getSectionStatus(sectionElementId, targaData) {
         const inputs = getSectionInputs(sectionElementId);
-        if (inputs.length === 0) return 'completed';
+        if (inputs.length === 0) return 'completed'; // Se non ci sono input, la sezione è considerata completa
 
         let allDefault = true;
-        let allNonDefault = true;
+        let allNonDefault = true; // Assumiamo che tutti siano non-default finché non ne troviamo uno default
         let hasAtLeastOneNonDefault = false;
 
         inputs.forEach(input => {
-            let isDefault;
+            let isCurrentInputDefault;
             const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined;
 
-            if (savedValue !== undefined) {
+            if (savedValue !== undefined) { // Se ci sono dati salvati, usali
                 if (input.type === 'checkbox') {
-                    isDefault = !savedValue;
-                } else {
-                    isDefault = (savedValue === "" || (input.options.length > 0 && savedValue === input.options[0].value));
+                    isCurrentInputDefault = !savedValue;
+                } else { // Per i select, consideriamo "default" se il valore salvato è vuoto
+                    isCurrentInputDefault = (savedValue === ""); // O se corrisponde al placeholder
                 }
-            } else {
-                 isDefault = isInputDefault(input);
+            } else { // Altrimenti, controlla lo stato attuale dell'elemento DOM
+                 isCurrentInputDefault = isInputDefault(input);
             }
 
-            if (!isDefault) {
-                allDefault = false;
+            if (!isCurrentInputDefault) { // Se l'input corrente non è default
+                allDefault = false; // Non tutti gli input sono default
                 hasAtLeastOneNonDefault = true;
-            } else {
-                allNonDefault = false;
+            } else { // Se l'input corrente è default
+                allNonDefault = false; // Non tutti gli input sono non-default
             }
         });
 
-        if (allDefault) return 'untouched';
-        if (allNonDefault) return 'completed';
-        if (hasAtLeastOneNonDefault) return 'partial';
-        return 'untouched';
+        if (allDefault) return 'untouched'; // Tutti gli input sono default
+        if (allNonDefault) return 'completed'; // Tutti gli input sono non-default (quindi compilati)
+        if (hasAtLeastOneNonDefault) return 'partial'; // Almeno un input non-default, ma non tutti
+        return 'untouched'; // Caso di fallback, dovrebbe essere coperto sopra
     }
+
 
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
@@ -1011,9 +992,9 @@
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
-            headerCircles.style.display = 'flex';
+            // headerCircles.style.display = 'flex'; // Rimosso
             navButtonsContainer.style.display = 'none';
-            mainTitleGlobal.innerHTML = "Elenco Veicoli";
+            mainTitleGlobal.innerHTML = "Elenco Veicoli"; // Titolo semplice per la landing
             if (listaTargheCompleta.length > 0 &&
                 (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
                 typeof popolaTargheFiltrate === 'function') {
@@ -1023,7 +1004,7 @@
             updateNavButtonColors();
         } else if (viewName === 'checklist' || viewName === 'history') {
             pageHeaderContainer.classList.add('fixed-header');
-            headerCircles.style.display = 'flex';
+            // headerCircles.style.display = 'flex'; // Rimosso
             navButtonsContainer.style.display = 'flex';
             if (viewName === 'checklist') {
                 if (!targaSelezionataGlobalmente) {
@@ -1036,23 +1017,24 @@
                 let subIdentifier = (veicoloAttuale && (veicoloAttuale.marca || veicoloAttuale.modello))
                     ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
                     : "";
-                mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
+                mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<span>${subIdentifier}</span>`;
             } else {
                 historyPageSection.style.display = 'block';
                 mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
                 populateSavedTargasList();
             }
             updateNavButtonColors();
-        } else {
+        } else { // Vista non definita, nasconde l'header specifico
             pageHeaderContainer.classList.remove('fixed-header');
-            headerCircles.style.display = 'none';
+            // headerCircles.style.display = 'none'; // Rimosso
             navButtonsContainer.style.display = 'none';
-            mainTitleGlobal.innerHTML = "";
+            mainTitleGlobal.innerHTML = ""; // Titolo vuoto o generico
         }
 
+        // Calcolo padding body
         if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
-            bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
-        } else {
+            bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 15}px`; // Aggiunto un po' di spazio
+        } else { // Se l'header non è fisso (caso non previsto attualmente ma per robustezza)
             let nonFixedHeaderHeight = 0;
             if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {
                  nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
@@ -1062,21 +1044,19 @@
         document.body.style.paddingTop = bodyPaddingTopValue;
     }
 
-    function populateSavedTargasList() { savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targa = key.substring(`${APP_PREFIX}data_`.length); if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa);}}} if (tempSavedTargas.length > 0) hasSaves = true; tempSavedTargas.sort(); tempSavedTargas.forEach(targa => { const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' }; let displayText = targa; let details = []; if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`); if (details.length > 0) { displayText += ` - ${details.join(' ')}`; } const button = document.createElement('button'); button.classList.add('saved-targa-button'); button.textContent = displayText; button.dataset.targa = targa; button.addEventListener('click', function() { targaSelezionataGlobalmente = this.dataset.targa; showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstChecklistNavButton = Array.from(navButtons).find(btn => btn.dataset.target && btn.id !== 'backToListBtn' && btn.id !== 'historyBtn'); if (firstChecklistNavButton) { showSection(firstChecklistNavButton.dataset.target); } else if (navButtons.length > 0 && navButtons[0].dataset.target) { showSection(navButtons[0].dataset.target); }}); savedTargasListContainer.appendChild(button); }); if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>'; } }
+    function populateSavedTargasList() { savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targa = key.substring(`${APP_PREFIX}data_`.length); if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa);}}} if (tempSavedTargas.length > 0) hasSaves = true; tempSavedTargas.sort(); tempSavedTargas.forEach(targa => { const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' }; let displayText = targa; let details = []; if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`); if (details.length > 0) { displayText += ` - ${details.join(' ')}`; } const button = document.createElement('button'); button.classList.add('saved-targa-button'); button.textContent = displayText; button.dataset.targa = targa; button.addEventListener('click', function() { targaSelezionataGlobalmente = this.dataset.targa; showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstChecklistNavButton = Array.from(navButtons).find(btn => btn.dataset.target && btn.id !== 'backToListBtn' && btn.id !== 'historyBtn'); if (firstChecklistNavButton) { showSection(firstChecklistNavButton.dataset.target); } else if (navButtons.length > 0 && navButtons[0].dataset.target) { showSection(navButtons[0].dataset.target); }}); savedTargasListContainer.appendChild(button); }); if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">Nessun salvataggio trovato.</p>'; } }
     function clearAllSavedData() {
         if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni, urgenze e filtro piazzale)?\n\nAzione irreversibile.")) {
             let c = 0;
             for (let i=localStorage.length-1;i>=0;i--) {
                 const k=localStorage.key(i);
                 if (k.startsWith(APP_PREFIX)) {
-                    // Rimuove tutti gli elementi con il prefisso, inclusi data_, posizione_, urgent_, completedTarghe, selectedPiazzaleFilter
                     localStorage.removeItem(k);c++;
                 }
             }
             alert(`${c} elementi cancellati.`);
             if(sheetFilterDropdown) sheetFilterDropdown.value = 'all';
-            // Non serve più salvare selectedPiazzaleFilter su 'all' qui, perché viene rimosso sopra.
-            // Verrà reimpostato al prossimo caricamento se non trovato.
+            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');
             populateSavedTargasList();
             if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();
             if (typeof showView === 'function') showView('landing');
@@ -1090,7 +1070,7 @@
         sources.forEach(source => {
             const option = document.createElement('option');
             option.value = source;
-            option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source;
+            option.textContent = source === 'all' ? 'Tutti i Piazzali' : source; // Modificato testo default
             sheetFilterDropdown.appendChild(option);
         });
 
@@ -1111,7 +1091,7 @@
             localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value);
         }
         popolaTargheFiltrate();
-        targaSelezionataGlobalmente = null;
+        targaSelezionataGlobalmente = null; // Deseleziona targa quando cambia il filtro
     }
 
     function getItemRank(item) {
@@ -1119,27 +1099,27 @@
         const isCompleted = isTargaCompleted(item.targa);
         const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
 
-        if (isUrgent && !isCompleted) return 1; // Urgente e non completato
-        if (!isUrgent && !isCompleted && hasData) return 2; // Non urgente, non completato, ma con dati parziali
-        if (!isUrgent && !isCompleted && !hasData) return 3; // Non urgente, non completato, nessun dato (da vedere)
-        if (!isUrgent && isCompleted) return 4; // Non urgente e completato
-        if (isUrgent && isCompleted) return 5; // Urgente e completato
-        return 6; // Fallback
+        if (isUrgent && !isCompleted) return 1;
+        if (!isUrgent && !isCompleted && hasData) return 2;
+        if (!isUrgent && !isCompleted && !hasData) return 3;
+        if (!isUrgent && isCompleted) return 4;
+        if (isUrgent && isCompleted) return 5;
+        return 6;
     }
 
     function popolaTargheFiltrate() {
         const tEl = document.getElementById('targaListContainer');
         const headerEl = document.querySelector('.targa-list-table-content .targa-list-header');
         if (!tEl || !headerEl) return;
-        tEl.innerHTML = ''; // Pulisce la lista corrente
+        tEl.innerHTML = '';
 
-        // Assicura che l'header "Urgente" sia presente solo una volta
+        // Assicura che l'header "Urgente" sia presente una sola volta
+        // Questa logica è stata spostata fuori dal ciclo forEach per evitare duplicazioni
         if (!headerEl.querySelector('.targa-col-urgente')) {
             const urgenteHeaderCol = document.createElement('span');
             urgenteHeaderCol.classList.add('targa-col', 'targa-col-urgente');
-            urgenteHeaderCol.textContent = 'Urg.'; // Testo breve per l'header
-            // Inserisci come prima colonna dell'header
-            headerEl.insertBefore(urgenteHeaderCol, headerEl.firstChild);
+            urgenteHeaderCol.textContent = 'Urg.';
+            headerEl.insertBefore(urgenteHeaderCol, headerEl.firstChild); // Inserisce come primo figlio
         }
 
 
@@ -1152,13 +1132,13 @@
             const rankA = getItemRank(a);
             const rankB = getItemRank(b);
             if (rankA !== rankB) return rankA - rankB;
-            return a.targa.localeCompare(b.targa); // Fallback sort per targa
+            return a.targa.localeCompare(b.targa);
         });
         const filteredList = preliminaryFilteredList;
 
         if (filteredList.length === 0) {
-            tEl.innerHTML = '<p style="text-align:center; padding:10px; color: #aaa;">Nessuna targa trovata per questo filtro.</p>';
-            if(targheLoadingStatus) targheLoadingStatus.textContent = selectedSource === 'all' ? "Nessuna targa nel CSV." : `Nessuna targa per l'elenco: ${selectedSource}.`;
+            tEl.innerHTML = `<p style="text-align:center; padding:15px; color: var(--text-muted-color);">Nessuna targa trovata per "${selectedSource === 'all' ? 'Tutti i Piazzali' : selectedSource}".</p>`;
+            if(targheLoadingStatus) targheLoadingStatus.textContent = selectedSource === 'all' ? "Nessuna targa nel file CSV." : `Nessuna targa per il piazzale: ${selectedSource}.`;
             return;
         }
 
@@ -1170,7 +1150,6 @@
             const itemCompleted = isTargaCompleted(item.targa);
             const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
 
-            // Applica classi di stato in base all'urgenza e al completamento
             if (isItemUrgent) {
                 li.classList.add('urgent-item');
                 if (itemCompleted) li.classList.add('completed');
@@ -1191,14 +1170,13 @@
             urgentCheckbox.dataset.targa = item.targa;
             urgentCheckbox.title = isItemUrgent ? "Rimuovi urgenza" : "Marca come urgente";
             urgentCheckbox.addEventListener('change', function(event) {
-                event.stopPropagation(); // Impedisce la propagazione al click sulla riga
+                event.stopPropagation();
                 const targa = this.dataset.targa;
                 localStorage.setItem(APP_PREFIX + 'urgent_' + targa, this.checked);
-                popolaTargheFiltrate(); // Ricarica la lista per riflettere l'ordinamento
+                popolaTargheFiltrate();
             });
-            urgentCheckbox.addEventListener('mousedown', (e) => e.stopPropagation()); // Per browser come Firefox
-            urgentCheckbox.addEventListener('click', (e) => e.stopPropagation()); // Per maggiore sicurezza
-
+            urgentCheckbox.addEventListener('mousedown', (e) => e.stopPropagation());
+            urgentCheckbox.addEventListener('click', (e) => e.stopPropagation());
             urgenteCol.appendChild(urgentCheckbox);
             li.appendChild(urgenteCol);
 
@@ -1221,7 +1199,6 @@
             });
             li.appendChild(targaCol);
 
-            // Colonna Posizione
             const posizioneCol = document.createElement('span');
             posizioneCol.classList.add('targa-col', 'targa-col-posizione');
             const posizioneInput = document.createElement('input');
@@ -1235,16 +1212,15 @@
                 const newPosition = this.value.trim().toUpperCase();
                 if (newPosition !== loadPosizioneForTarga(this.dataset.targa)) {
                     savePosizioneForTarga(this.dataset.targa, newPosition);
-                    this.style.transition = 'background-color 0.3s ease';
-                    this.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
-                    setTimeout(() => { this.style.backgroundColor = ''; }, 1000);
+                    this.style.transition = 'background-color 0.3s ease, border-color 0.3s ease';
+                    this.style.borderColor = 'var(--success-color)';
+                    setTimeout(() => { this.style.borderColor = 'var(--border-color)'; }, 1500);
                 }
             });
             posizioneInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { event.preventDefault(); this.blur(); }});
             posizioneCol.appendChild(posizioneInput);
             li.appendChild(posizioneCol);
 
-            // Colonna Marca, Modello, Piazzale
             const marcaCol = document.createElement('span');
             marcaCol.classList.add('targa-col', 'targa-col-marca'); marcaCol.textContent = item.marca || 'N/D';
             li.appendChild(marcaCol);
@@ -1257,12 +1233,11 @@
             piazzaleCol.classList.add('targa-col', 'targa-col-piazzale'); piazzaleCol.textContent = item.piazzale || 'N/D';
             li.appendChild(piazzaleCol);
 
-            // Colonna Azioni (Delete Button)
             const actionsCol = document.createElement('span');
             actionsCol.classList.add('targa-col', 'targa-col-actions');
             const delB = document.createElement('button');
             delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = item.targa;
-            delB.title = `Cancella progressi per ${item.targa}`; delB.textContent = 'X';
+            delB.title = `Cancella progressi per ${item.targa}`; delB.innerHTML = '&#x1F5D1;'; // Icona cestino
             delB.addEventListener('click', function(event) {
                 event.stopPropagation();
                 const tDel = this.dataset.targa;
@@ -1276,7 +1251,7 @@
             tEl.appendChild(li);
         });
 
-        if(targheLoadingStatus) targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
+        if(targheLoadingStatus) targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia, o filtra per piazzale.";
     }
 
 
@@ -1285,49 +1260,50 @@
         if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server...";
 
         try {
-            const r = await fetch(GOOGLE_SHEET_CSV_URL);
-            if (!r.ok) {
-                let e = `HTTP ${r.status}.`;
-                if (r.status === 0) e = "Errore di rete o CORS.";
-                else if (r.status === 404) e = "File CSV non trovato (404).";
-                else if (r.status === 403) e = "Accesso al file CSV negato (403).";
-                throw new Error(e);
+            const response = await fetch(GOOGLE_SHEET_CSV_URL + '&_=' + new Date().getTime()); // Cache busting
+            if (!response.ok) {
+                let errorMsg = `Errore HTTP ${response.status}.`;
+                if (response.status === 0) errorMsg = "Errore di rete o blocco CORS. Verifica la connessione e le autorizzazioni del foglio.";
+                else if (response.status === 404) errorMsg = "File CSV non trovato (404). Controlla l'URL del foglio.";
+                else if (response.status === 403) errorMsg = "Accesso al file CSV negato (403). Assicurati che il foglio sia pubblicato e accessibile.";
+                throw new Error(errorMsg);
             }
-            const csv = await r.text();
-            const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== '');
+            const csvText = await response.text();
+            const lines = csvText.split(/\r\n|\n|\r/).filter(line => line.trim() !== '');
 
             if (lines.length === 0) {
                 if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV.";
                 listaTargheCompleta = [];
-                if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
+                if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti i Piazzali</option>';
                 if (targaListContainer) targaListContainer.innerHTML = '';
                 return;
             }
 
-            listaTargheCompleta = lines.map(l => {
-                const p = l.split(',');
-                return { // Rimosso isUrgent dalla lettura CSV
-                    targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(),
-                    marca: (p[1] || '').trim().replace(/^"|"$/g, ''),
-                    modello: (p[2] || '').trim().replace(/^"|"$/g, ''),
-                    piazzale: (p[3] || '').trim().replace(/^"|"$/g, '')
+            listaTargheCompleta = lines.map(line => {
+                const parts = line.split(',');
+                return {
+                    targa: (parts[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(),
+                    marca: (parts[1] || '').trim().replace(/^"|"$/g, ''),
+                    modello: (parts[2] || '').trim().replace(/^"|"$/g, ''),
+                    piazzale: (parts[3] || '').trim().replace(/^"|"$/g, '')
+                    // isUrgent rimosso, gestito da localStorage
                 };
-            }).filter(i => i.targa && i.targa.length > 3);
+            }).filter(item => item.targa && item.targa.length > 3); // Filtra targhe non valide
 
             if (listaTargheCompleta.length === 0) {
                 if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";
-                 if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
+                 if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti i Piazzali</option>';
                 if (targaListContainer) targaListContainer.innerHTML = '';
                 return;
             }
 
-            setupSheetFilterDropdown();
-            popolaTargheFiltrate();
+            setupSheetFilterDropdown(); // Popola il dropdown dei piazzali
+            popolaTargheFiltrate();    // Mostra le targhe filtrate
 
-        } catch (e) {
-            console.error("Errore caricamento/popolamento targhe:", e);
-            if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`;
-            if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
+        } catch (error) {
+            console.error("Errore caricamento/popolamento targhe:", error);
+            if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${error.message}. Verifica l'URL e la pubblicazione del foglio Google.`;
+            if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti i Piazzali</option>';
             if (targaListContainer) targaListContainer.innerHTML = '';
              listaTargheCompleta = [];
         } finally {
@@ -1335,7 +1311,7 @@
                 preloader.classList.add('hidden');
                 setTimeout(() => {
                     if (preloader) preloader.style.display = 'none';
-                }, 700);
+                }, 700); // Corrisponde alla transizione CSS
             }
         }
     }
@@ -1350,21 +1326,21 @@
 
         const allVisibleElementsInSection = Array.from(
             activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled), textarea:not(:disabled)')
-        ).filter(el => {
+        ).filter(el => { // Filtra solo elementi visibili
             let current = el;
-            while (current && current !== activeSection.parentElement) {
+            while (current && current !== activeSection.parentElement) { // Controlla visibilità parenti
                 if (getComputedStyle(current).display === 'none' || getComputedStyle(current).visibility === 'hidden') return false;
                 current = current.parentElement;
             }
-            return el.offsetParent !== null;
+            return el.offsetParent !== null; // Verifica se l'elemento è renderizzato
         });
 
         const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el));
 
-        if (startIndex === -1 && allVisibleElementsInSection.length > 0) {
+        if (startIndex === -1 && allVisibleElementsInSection.length > 0) { // Tutti i campi sono già compilati
             return;
         }
-        if (allVisibleElementsInSection.length === 0) {
+        if (allVisibleElementsInSection.length === 0) { // Nessun campo compilabile
              return;
         }
 
@@ -1373,8 +1349,9 @@
         if (elementsToAnimate.length === 0) return;
 
         let currentIndex = 0;
-        let activeListeners = [];
+        let activeListeners = []; // Array per tenere traccia dei listener attivi
 
+        // Funzione per rimuovere tutti i listener di animazione attivi
         function clearAllActiveAnimationListeners() {
             activeListeners.forEach(({element, type, handler}) => {
                 element.removeEventListener(type, handler);
@@ -1382,67 +1359,78 @@
             });
             activeListeners = [];
         }
-        clearAllActiveAnimationListeners();
+        clearAllActiveAnimationListeners(); // Pulisce listener precedenti prima di iniziare
 
         function animateNextElement() {
-            if (currentIndex >= elementsToAnimate.length) {
+            if (currentIndex >= elementsToAnimate.length) { // Fine degli elementi da animare
                 return;
             }
             const currentElement = elementsToAnimate[currentIndex];
-            if (!isInputDefault(currentElement)) {
+            if (!isInputDefault(currentElement)) { // Se l'elemento è già compilato, passa al successivo
                 currentIndex++;
                 animateNextElement();
                 return;
             }
 
             currentElement.classList.add('animate-me');
-            currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Scroll migliorato per centrare l'elemento se possibile
+            currentElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
 
             const onValueChange = (event) => {
                 let processChange = false;
-                if (event.type === 'change') {
+                if (event.type === 'change') { // Per checkbox e select
                     processChange = true;
-                } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {
+                } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') { // Per input text e textarea on blur
                     processChange = true;
-                } else if (event.type === 'blur' && currentElement.tagName === 'SELECT' && !isInputDefault(currentElement)) {
+                } else if (event.type === 'blur' && currentElement.tagName === 'SELECT' && !isInputDefault(currentElement)) { // Per select on blur solo se un valore è stato scelto
                      processChange = true;
                 }
 
                 if (processChange) {
                     currentElement.classList.remove('animate-me');
+                    // Rimuove specifici listener
                     currentElement.removeEventListener('change', onValueChange);
                     currentElement.removeEventListener('blur', onValueChange);
+                    // Filtra via il listener dall'array activeListeners
                     activeListeners = activeListeners.filter(listener => listener.element !== currentElement);
                     currentIndex++;
-                    setTimeout(animateNextElement, 50);
+                    setTimeout(animateNextElement, 50); // Breve ritardo prima di passare al successivo
                 }
             };
 
             currentElement.addEventListener('change', onValueChange);
             if (currentElement.tagName === 'SELECT' || currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') {
                 currentElement.addEventListener('blur', onValueChange);
-                 activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange});
+                 activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange}); // Aggiunge listener blur
             }
-            activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
+            activeListeners.push({element: currentElement, type: 'change', handler: onValueChange}); // Aggiunge listener change
         }
-        animateNextElement();
+        animateNextElement(); // Inizia l'animazione dal primo elemento
     }
 
 
     function showSection(targetId) {
+        // Rimuove l'animazione da tutti gli elementi prima di cambiare sezione
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
             el.classList.remove('animate-me');
         });
         sections.forEach(s => s.classList.toggle('active', s.id === targetId + 'Section'));
         navButtons.forEach(b => {
             b.classList.toggle('active', b.dataset.target === targetId);
+            // Aggiunta per far funzionare l'indicatore ::after con JS
+            if (b.dataset.target === targetId) {
+                b.classList.add('active');
+            } else {
+                b.classList.remove('active');
+            }
         });
-        updateNavButtonColors();
+        updateNavButtonColors(); // Aggiorna i colori dei bottoni di navigazione (completato, parziale, etc.)
         const targetSectionElement = document.getElementById(targetId + 'Section');
+        // Se la sezione target è una sezione di checklist (non riepilogo), avvia l'animazione
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
-             setTimeout(initSequentialAnimation, 100);
+             setTimeout(initSequentialAnimation, 100); // Ritardo per permettere il rendering della sezione
         } else if (targetId === 'riepilogo') {
-            generateSummary();
+            generateSummary(); // Genera il contenuto del riepilogo
         }
     }
 
@@ -1454,13 +1442,13 @@
             if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) {
                 return el.options[el.selectedIndex].text;
             }
-            return el.value;
+            return el.value; // Fallback al valore se il testo dell'opzione non è disponibile
         }
-        return "N/S";
+        return "N/S"; // Non Selezionato o Non Specificato
     }
 
     function generateSummary() {
-        summaryContent.innerHTML = '';
+        summaryContent.innerHTML = ''; // Pulisce il contenuto precedente
         let targa = targaSelezionataGlobalmente || "N/D";
         function createSummaryItem(label, value, isAnomaly = false) {
             const itemDiv = document.createElement('div');
@@ -1470,7 +1458,7 @@
             return itemDiv;
         }
         summaryContent.appendChild(createSummaryItem("Targa", targa));
-        if (targaSelezionataGlobalmente) {
+        if (targaSelezionataGlobalmente) { // Aggiunge dettagli veicolo se disponibili
             const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
             let marcaVeicolo = "N/D", modelloVeicolo = "N/D";
             if (veicoloAttuale) {
@@ -1493,6 +1481,7 @@
 
 
         let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza');
+        // Considera anomalia se l'equipaggiamento è specificato ma mancante
         let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante");
         summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante"));
         summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia));
@@ -1502,7 +1491,7 @@
         summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante"));
         summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente"));
         summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente"));
-        if (isEV) {
+        if (isEV) { // Mostra campi specifici EV solo se la trazione è elettrica
             summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`;
             summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", getSelectText('cavo_ricarica_rapida'), getSelectText('cavo_ricarica_rapida') === "Non Presente"));
             summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", getSelectText('cavo_ricarica_domestica'), getSelectText('cavo_ricarica_domestica') === "Non Presente"));
@@ -1514,18 +1503,22 @@
         summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK'));
         summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK'));
         const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : "";
-        if (noteDanniValue) {
+        if (noteDanniValue && noteDanniValue.toLowerCase() !== "nessuna anomalia da segnalare.") { // Mostra solo se ci sono note reali
             const noteDiv = document.createElement('div');
             noteDiv.classList.add('summary-item', 'summary-notes');
             const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: ";
-            const contentDiv = document.createElement('div');
-            contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue;
-            noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv);
+            const contentDiv = document.createElement('div'); // Div separato per il testo delle note
+            // contentDiv.style.whiteSpace = 'pre-wrap'; // Mantiene la formattazione del testo
+            // contentDiv.style.paddingLeft = '10px'; // Indentazione per il testo delle note
+            contentDiv.textContent = noteDanniValue;
+            noteDiv.appendChild(strongNode);
+            noteDiv.appendChild(contentDiv);
             summaryContent.appendChild(noteDiv);
         }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        setCssRgbVariables(); // Imposta le variabili RGB per i colori
         const preloader = document.getElementById('preloader');
 
         document.querySelectorAll('.fill-defaults-btn').forEach(button => {
@@ -1540,7 +1533,7 @@
         if (tipoTrazioneSelect) {
             tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
         }
-        handleTrazioneChange();
+        handleTrazioneChange(); // Chiamata iniziale per impostare lo stato dei campi dipendenti
 
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
@@ -1550,9 +1543,9 @@
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
 
         async function initializeApplicationViewAndLoadData() {
-            showView('landing');
+            showView('landing'); // Mostra la landing page come predefinita
 
-            if (preloader) {
+            if (preloader) { // Gestione preloader
                 preloader.style.display = 'flex';
                 preloader.classList.remove('hidden');
                 preloader.style.opacity = '1';
@@ -1560,10 +1553,10 @@
                 const loadingText = preloader.querySelector('.loading-text');
                 if (loadingText) loadingText.textContent = 'CARICAMENTO ELENCO...';
             }
-            await caricaEPopolaTarghe();
+            await caricaEPopolaTarghe(); // Carica i dati delle targhe
         }
 
-        initializeApplicationViewAndLoadData();
+        initializeApplicationViewAndLoadData(); // Avvia l'applicazione
 
         if (exitAppBtn) {
             exitAppBtn.addEventListener('click', () => {
@@ -1574,13 +1567,14 @@
                 if (exitCurtain) {
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none';
                     if (pageHeader) pageHeader.style.display = 'none';
-                    document.body.style.paddingTop = '0px';
+                    document.body.style.paddingTop = '0px'; // Resetta padding corpo
 
                     const exitLoadingText = exitCurtain.querySelector('.loading-text');
                     const barContainer = exitCurtain.querySelector('.loader-bar-container');
                     const defaultCloseText = "CHIUSURA IN CORSO...";
                     const glitchText = "ERRORE DI SISTEMA...";
 
+                    // --- Fase 1: Animazione normale (0.8 secondi) ---
                     exitCurtain.classList.remove('glitching', 'flash-out-effect');
                     if (exitLoadingText) {
                         exitLoadingText.textContent = defaultCloseText;
@@ -1591,18 +1585,20 @@
                     exitCurtain.setAttribute('data-text', defaultCloseText);
                     if (barContainer) barContainer.style.display = 'flex';
 
-                    exitCurtain.classList.add('visible-no-transition');
-                    exitCurtain.style.display = 'flex';
+                    exitCurtain.classList.add('visible-no-transition'); // Mostra senza transizione iniziale
+                    exitCurtain.style.display = 'flex'; // Assicura che sia visibile
 
                     setTimeout(() => {
+                        // --- Fase 2: Effetto glitch (0.8 secondi) ---
                         exitCurtain.classList.add('glitching');
                         if (exitLoadingText) {
                            exitLoadingText.textContent = glitchText;
-                           exitLoadingText.style.animation = '';
+                           exitLoadingText.style.animation = ''; // Lascia che CSS per .glitching .loading-text prenda il controllo
                         }
                         exitCurtain.setAttribute('data-text', glitchText);
 
                         setTimeout(() => {
+                            // --- Fase 3: Visualizzazione testo "Applicazione terminata." (0.7 secondi) ---
                             exitCurtain.classList.remove('glitching');
                             if (exitLoadingText) {
                                 exitLoadingText.textContent = 'Applicazione terminata.';
@@ -1610,22 +1606,26 @@
                                 exitLoadingText.style.color = '#FFFFFF';
                                 exitLoadingText.style.textShadow = 'none';
                             }
-                            if (barContainer) barContainer.style.display = 'none';
+                            if (barContainer) barContainer.style.display = 'none'; // Nasconde le barre di caricamento
 
                             setTimeout(() => {
+                                // --- Fase 4: Effetto Flash Out sul testo (0.5 secondi) ---
                                 exitCurtain.classList.add('flash-out-effect');
+                                // L'animazione textFlashOut è applicata da CSS
+
                                 setTimeout(() => {
+                                    // --- Fase 5: Dopo l'animazione Flash Out ---
                                     const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
-                                    fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
+                                    fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' }) // no-cors per triggerare webhook senza attendere risposta completa
                                         .then(response => console.log('Macrodroid trigger request sent.'))
                                         .catch(error => console.error('Error sending Macrodroid trigger:', error));
-                                }, 500);
+                                }, 500); // Durata di textFlashOut
 
-                            }, 700);
+                            }, 700); // Durata visualizzazione "Applicazione terminata."
 
-                        }, 800);
+                        }, 800); // Durata effetto glitch
 
-                    }, 800);
+                    }, 800); // Durata animazione normale
                 }
             });
         }
