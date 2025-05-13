@@ -701,27 +701,25 @@
     const backToListBtn = utilityNavButtons.querySelector('#backToListBtn');
     const historyBtn = utilityNavButtons.querySelector('#historyBtn');
     const exitAppBtn = utilityNavButtons.querySelector('#exitAppBtn');
-    // RIFERIMENTO AL NUOVO PULSANTE (verrà creato e aggiunto in DOMContentLoaded)
-    let syncToSheetsBtn; 
+    let syncToSheetsBtn; // Verrà creato e aggiunto in DOMContentLoaded
     
     const sections = document.querySelectorAll('#checklistContainer .category-section');
     const summaryContent = document.getElementById('summaryContent');
     const clearAllProgressBtn = document.getElementById('clearAllProgressBtn');
     const backToLandingFromHistoryBtn = document.getElementById('backToLandingFromHistoryBtn');
-    const saveAndReturnBtn = document.getElementById('saveAndReturnBtn'); // Pulsante "Salva Perizia"
+    const saveAndReturnBtn = document.getElementById('saveAndReturnBtn');
     const saveAndNextButtons = document.querySelectorAll('.save-and-next-btn');
     const sheetFilterDropdown = document.getElementById('sheetFilterDropdown');
     const tipoTrazioneSelect = document.getElementById('tipo_trazione');
     const cavoRapidaSelect = document.getElementById('cavo_ricarica_rapida');
     const cavoDomesticaSelect = document.getElementById('cavo_ricarica_domestica');
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
-    const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwlk-5AnK3sLgfX0TKqbff0FchFX6Qx-WGN-xVjDnAW84z4mgehV-RKwylm50gEiUQU/exec'; 
+    const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzyg8Anx1x16_lnfKdGkYTW5jnV3L0rUXnfcbglaGJoAJaAiC0Grv3kIFDa5TDzRTXNZw/exec'; 
     
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
 
-    // Funzione per inviare una singola perizia a Google Sheets (INVARIATA)
     async function inviaPeriziaSingolaASheets(periziaDaInviare) {
         if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') {
             console.error("URL della Web App Google Sheets non configurato.");
@@ -733,7 +731,7 @@
                 method: 'POST',
                 mode: 'cors', 
                 cache: 'no-cache',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Google Apps Script spesso preferisce text/plain per JSON nel corpo
                 body: JSON.stringify(periziaDaInviare) 
             });
             let responseData;
@@ -746,9 +744,10 @@
                 try { responseData = JSON.parse(textResponse); } 
                 catch (e) { responseData = { status: "error", message: "Risposta non JSON dal server: " + textResponse.substring(0,100) + "..."}; }
             }
+
             if (response.ok && responseData.status === "success") {
-                console.log("Perizia inviata con successo a Google Sheets:", responseData.message);
-                return { success: true, message: responseData.message, data: responseData.data }; // Ritorna anche i dati per eventuale uso futuro
+                console.log("Perizia inviata con successo a Google Sheets:", responseData.message, "Dati ritornati:", responseData.data);
+                return { success: true, message: responseData.message, data: responseData.data };
             } else {
                 console.error("Errore dall'API di Google Sheets o risposta non OK:", responseData.message || `HTTP Status ${response.status}`);
                 return { success: false, message: responseData.message || `Errore server (HTTP ${response.status})` };
@@ -759,50 +758,44 @@
         }
     }
     
-    // Funzione per fetchare l'ultima perizia da Google Sheets (INVARIATA)
     async function fetchLatestPeriziaFromSheets(targa) {
         if (!GOOGLE_SHEET_WEB_APP_URL) {
             console.error("URL della Web App Google Sheets non configurato per il fetch.");
-            // targheLoadingStatus.textContent = "URL Web App non configurato."; // Evitiamo di sovrascrivere se non siamo nella landing
             return null;
         }
-        const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=getPerizia&targa=${encodeURIComponent(targa)}&nocache=${new Date().getTime()}`;
+        const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=getPerizia&targa=${encodeURIComponent(targa.toUpperCase())}&nocache=${new Date().getTime()}`;
         console.log("Fetching latest perizia from Sheets for targa:", targa, "URL:", fetchUrl);
         try {
             const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' });
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error(`Errore HTTP ${response.status} nel fetch da Sheets: ${errorText}`);
-                // if (targheLoadingStatus && landingPageSection.style.display === 'block') targheLoadingStatus.textContent = `Errore Sheets (${response.status}).`;
                 return null;
             }
             const contentType = response.headers.get("content-type");
             if (contentType && contentType.indexOf("application/json") !== -1) {
                 const result = await response.json();
                 if (result.status === "success" && result.data) {
-                    console.log("Dati ricevuti da Sheets:", result.data);
-                    return result.data; 
+                    console.log("Dati perizia singola ricevuti da Sheets:", result.data);
+                    return result.data; // Questo è l'oggetto perizia completo {targa, posizione, datiPerizia:{...}, timestamp,...}
                 } else if (result.status === "notfound") {
                     console.log("Perizia non trovata in Sheets per targa:", targa);
                     return null;
                 } else {
-                    console.warn("Risposta da Sheets non conteneva dati validi o status non era 'success'/'notfound':", result.message || result);
+                    console.warn("Risposta da Sheets (singola) non conteneva dati validi o status non era 'success'/'notfound':", result.message || result);
                     return null;
                 }
             } else {
                 const textResponse = await response.text();
-                console.error("Risposta da Sheets non era JSON:", textResponse);
-                // if (targheLoadingStatus && landingPageSection.style.display === 'block') targheLoadingStatus.textContent = "Errore formato risposta Sheets.";
+                console.error("Risposta da Sheets (singola) non era JSON:", textResponse);
                 return null;
             }
         } catch (error) {
-            console.error("Errore di rete o fetch generico durante il recupero da Sheets:", error);
-            // if (targheLoadingStatus && landingPageSection.style.display === 'block') targheLoadingStatus.textContent = "Errore di rete.";
+            console.error("Errore di rete o fetch generico durante il recupero (singolo) da Sheets:", error);
             return null;
         }
     }
 
-    // Funzioni fillSectionPositiveOrDefaults, handleTrazioneChange, ecc. (INVARIATE)
     function fillSectionPositiveOrDefaults(sectionId) {
         const section = document.getElementById(sectionId);
         if (!section) return;
@@ -825,6 +818,9 @@
             if (tipoTrazioneSelect && tipoTrazioneSelect.value === 'elettrico') {
                 if (cavoRapidaSelect) cavoRapidaSelect.value = 'presente';
                 if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'presente';
+            } else { // Assicurati che i campi EV siano NA se non è elettrico
+                 if (cavoRapidaSelect) cavoRapidaSelect.value = 'non_applicabile';
+                 if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'non_applicabile';
             }
         }
         else if (sectionId === 'pneumaticiSection') {
@@ -852,7 +848,6 @@
         });
     }
 
-
     function handleTrazioneChange() {
         if (!tipoTrazioneSelect || !cavoRapidaSelect || !cavoDomesticaSelect) return;
         const selectedTrazione = tipoTrazioneSelect.value;
@@ -863,16 +858,17 @@
             cavoRapidaSelect.value = "non_applicabile"; 
             cavoDomesticaSelect.value = "non_applicabile";
         } else {
+            // Se è elettrico e i valori sono vuoti o NA, impostali a vuoto per richiedere una selezione
             if (cavoRapidaSelect.value === "" || cavoRapidaSelect.value === "non_applicabile") cavoRapidaSelect.value = "";
             if (cavoDomesticaSelect.value === "" || cavoDomesticaSelect.value === "non_applicabile") cavoDomesticaSelect.value = "";
         }
-        updateNavButtonColors();
+        updateNavButtonColors(); // Aggiorna i colori dopo il cambio
     }
 
     function savePosizioneForTarga(targa, posizione) {
         if (!targa) return;
         try {
-            localStorage.setItem(`${APP_PREFIX}posizione_${targa}`, posizione);
+            localStorage.setItem(`${APP_PREFIX}posizione_${targa.toUpperCase()}`, posizione);
         } catch (e) {
             console.error("Errore salvataggio posizione LS:", e);
         }
@@ -881,7 +877,7 @@
     function loadPosizioneForTarga(targa) {
         if (!targa) return "";
         try {
-            return localStorage.getItem(`${APP_PREFIX}posizione_${targa}`) || "";
+            return localStorage.getItem(`${APP_PREFIX}posizione_${targa.toUpperCase()}`) || "";
         } catch (e) {
             console.error("Errore caricamento posizione LS:", e);
             return "";
@@ -891,7 +887,7 @@
     function saveUrgentStatusForTarga(targa, isUrgent) {
         if (!targa) return;
         try {
-            localStorage.setItem(`${APP_PREFIX}urgent_${targa}`, JSON.stringify(isUrgent));
+            localStorage.setItem(`${APP_PREFIX}urgent_${targa.toUpperCase()}`, JSON.stringify(isUrgent));
         } catch (e) {
             console.error("Errore salvataggio stato urgenza LS:", e);
         }
@@ -900,14 +896,13 @@
     function loadUrgentStatusForTarga(targa) {
         if (!targa) return false;
         try {
-            const status = localStorage.getItem(`${APP_PREFIX}urgent_${targa}`);
+            const status = localStorage.getItem(`${APP_PREFIX}urgent_${targa.toUpperCase()}`);
             return status ? JSON.parse(status) : false;
         } catch (e) {
             console.error("Errore caricamento stato urgenza LS:", e);
             return false;
         }
     }
-
 
     function resetChecklistForm() {
         const els = document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea');
@@ -916,13 +911,12 @@
             else if (el.tagName === 'SELECT') el.selectedIndex = 0;
             else el.value = '';
         });
-        if (tipoTrazioneSelect) {
+        if (tipoTrazioneSelect) { // Assicura che i campi EV siano gestiti correttamente
             handleTrazioneChange();
         }
         console.log("Modulo resettato.");
     }
 
-    // MODIFICA: saveProgress ora aggiunge sempre timestamp, cruciale per la sinc. manuale
     function saveProgress(targa) {
         if(!targa){console.warn("Nessuna targa attiva per il salvataggio.");return false;}
         const data = {};
@@ -934,8 +928,8 @@
         });
         data.timestamp = new Date().toISOString(); // Aggiunge/Aggiorna SEMPRE il timestamp
         try {
-            localStorage.setItem(`${APP_PREFIX}data_${targa}`, JSON.stringify(data));
-            console.log(`Progresso salvato localmente per la targa ${targa} con timestamp ${data.timestamp}.`);
+            localStorage.setItem(`${APP_PREFIX}data_${targa.toUpperCase()}`, JSON.stringify(data));
+            console.log(`Progresso salvato localmente per la targa ${targa.toUpperCase()} con timestamp ${data.timestamp}.`);
             updateNavButtonColors();
             return true;
         } catch(e) {
@@ -945,28 +939,32 @@
         }
     }
 
-    // loadProgress INVARIATA (carica dati da localStorage, inclusi timestamp se presenti)
     function loadProgress(targa) {
         if(!targa) return;
+        const targaUpper = targa.toUpperCase();
         try {
-            const json = localStorage.getItem(`${APP_PREFIX}data_${targa}`);
+            const json = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`);
             if (json) {
                 const data = JSON.parse(json);
                 document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => {
                     if (el.id && data.hasOwnProperty(el.id)) {
                         if (el.type === 'checkbox') el.checked = data[el.id];
                         else el.value = data[el.id];
+                    } else if (el.id) { // Se il campo non è in data, resettalo al default
+                        if (el.type === 'checkbox') el.checked = false;
+                        else if (el.tagName === 'SELECT') el.selectedIndex = 0;
+                        //else el.value = ''; // Non resettare textarea o text, potrebbero essere intenzionalmente vuoti
                     }
                 });
-                console.log(`Progresso caricato da localStorage per la targa ${targa}. Timestamp: ${data.timestamp || 'N/A'}`);
+                console.log(`Progresso caricato da localStorage per la targa ${targaUpper}. Timestamp: ${data.timestamp || 'N/A'}`);
             } else {
-                console.log(`Nessun dato salvato in localStorage trovato per la targa ${targa}. Reset form.`);
+                console.log(`Nessun dato salvato in localStorage trovato per la targa ${targaUpper}. Reset form.`);
                 resetChecklistForm(); 
             }
-            if (tipoTrazioneSelect) {
+            if (tipoTrazioneSelect) { // Chiamata cruciale dopo aver caricato i dati per abilitare/disabilitare e impostare i campi EV
                  handleTrazioneChange();
             }
-            updateNavButtonColors();
+            updateNavButtonColors(); // Aggiorna colori dopo aver caricato e gestito la trazione
         } catch(e) {
             console.error("Errore durante il caricamento da localStorage:", e);
             resetChecklistForm(); 
@@ -974,36 +972,34 @@
         }
     }
     
-    // Funzioni gestione completamento INVARIATE (getCompletedTarghe, isTargaCompleted, markTargaAsCompleted, unmarkTargaAsCompleted)
     function getCompletedTarghe() { try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){console.error("Errore LS getCompletedTarghe:", e); return{};}}
-    function isTargaCompleted(targa) { if(!targa) return false; const completed = getCompletedTarghe(); return !!(completed[targa]); }
-    function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa} marked complete locally.`);}catch(e){console.error("Errore LS Mark Err:",e);}}
-    function unmarkTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe(); if(completed[targa]){ delete completed[targa]; localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed)); console.log(`${targa} unmarked as complete locally.`);}}catch(e){console.error("Errore LS Unmark Err:",e);}}
+    function isTargaCompleted(targa) { if(!targa) return false; const completed = getCompletedTarghe(); return !!(completed[targa.toUpperCase()]); }
+    function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa.toUpperCase()]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa.toUpperCase()} marked complete locally.`);}catch(e){console.error("Errore LS Mark Err:",e);}}
+    function unmarkTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe(); if(completed[targa.toUpperCase()]){ delete completed[targa.toUpperCase()]; localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed)); console.log(`${targa.toUpperCase()} unmarked as complete locally.`);}}catch(e){console.error("Errore LS Unmark Err:",e);}}
 
-    // deleteProgressForTarga INVARIATA
     function deleteProgressForTarga(targa) {
         if(!targa){return;}
+        const targaUpper = targa.toUpperCase();
         try {
-            localStorage.removeItem(`${APP_PREFIX}data_${targa}`);
-            console.log(`Dati modulo rimossi per ${targa}.`);
-            unmarkTargaAsCompleted(targa); 
-            localStorage.removeItem(`${APP_PREFIX}posizione_${targa}`);
-            console.log(`Dati posizione rimossi per ${targa}.`);
-            localStorage.removeItem(`${APP_PREFIX}urgent_${targa}`); 
-            console.log(`Dati urgenza rimossi per ${targa}.`);
+            localStorage.removeItem(`${APP_PREFIX}data_${targaUpper}`);
+            console.log(`Dati modulo rimossi per ${targaUpper}.`);
+            unmarkTargaAsCompleted(targaUpper); 
+            localStorage.removeItem(`${APP_PREFIX}posizione_${targaUpper}`);
+            console.log(`Dati posizione rimossi per ${targaUpper}.`);
+            localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`); 
+            console.log(`Dati urgenza rimossi per ${targaUpper}.`);
         } catch(e) {
-            console.error(`Errore cancellazione dati per ${targa}:`,e);
-            alert(`Errore cancellazione dati per ${targa}.`);
+            console.error(`Errore cancellazione dati per ${targaUpper}:`,e);
+            alert(`Errore cancellazione dati per ${targaUpper}.`);
         }
         if (typeof popolaTargheFiltrate === 'function') {
              popolaTargheFiltrate();
         }
-        if (targaSelezionataGlobalmente === targa) {
+        if (targaSelezionataGlobalmente && targaSelezionataGlobalmente.toUpperCase() === targaUpper) {
              targaSelezionataGlobalmente = null;
         }
     }
 
-    // generateAndDownloadScreenshot INVARIATA
     function generateAndDownloadScreenshot() {
         return new Promise((resolve, reject) => {
             const riepilogoSection = document.getElementById('riepilogoSection');
@@ -1018,8 +1014,8 @@
 
             setTimeout(() => {
                 console.log("Inizio generazione screenshot...");
-                riepilogoSection.scrollTop = 0;
-                html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false })
+                riepilogoSection.scrollTop = 0; 
+                html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY, windowHeight: riepilogoSection.scrollHeight })
                     .then(canvas => {
                         const link = document.createElement('a');
                         let targaSanitized = 'sconosciuta';
@@ -1047,52 +1043,43 @@
                         alert("Si è verificato un errore durante la generazione dello screenshot.");
                         reject(error);
                     });
-            }, 100);
+            }, 100); 
         });
     }
     
-    // MODIFICA: handleSavePeriziaAndReturn (pulsante "Salva Perizia")
     async function handleSavePeriziaAndReturn() {
         if (!targaSelezionataGlobalmente) {
             alert("Nessuna targa attiva selezionata per il salvataggio.");
             return;
         }
-
         const originalButtonText = saveAndReturnBtn.textContent;
         saveAndReturnBtn.textContent = 'Salvataggio locale...';
         saveAndReturnBtn.disabled = true;
 
-        if (!saveProgress(targaSelezionataGlobalmente)) { // Salva localmente (ora include timestamp)
+        if (!saveProgress(targaSelezionataGlobalmente)) { 
             alert("Salvataggio dati nel browser fallito.");
             saveAndReturnBtn.textContent = originalButtonText;
             saveAndReturnBtn.disabled = false;
             return;
         }
-
         if (document.getElementById('riepilogoSection').classList.contains('active')) {
             generateSummary(); 
         }
-
         try {
             await generateAndDownloadScreenshot();
         } catch (e) {
             console.warn("Generazione screenshot fallita, ma i dati sono stati salvati localmente.", e);
         }
-
-        markTargaAsCompleted(targaSelezionataGlobalmente); // Marchia completata localmente
+        markTargaAsCompleted(targaSelezionataGlobalmente); 
         updateNavButtonColors(); 
-
         saveAndReturnBtn.textContent = originalButtonText;
         saveAndReturnBtn.disabled = false;
-
         alert(`Perizia per ${targaSelezionataGlobalmente} salvata localmente e screenshot tentato.`);
         showView('landing'); 
     }
 
-    // handleSaveAndNext INVARIATA (continua a salvare solo localmente tramite saveProgress)
     function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
 
-    // Funzioni isInputDefault, getSectionInputs, getSectionStatus, updateNavButtonColors, showView, ecc. (INVARIATE)
     function isInputDefault(inputElement) {
         if (!inputElement) return true;
         if (inputElement.type === 'checkbox') return !inputElement.checked;
@@ -1109,42 +1096,50 @@
 
     function getSectionStatus(sectionElementId, targaData) {
         const inputs = getSectionInputs(sectionElementId);
-        if (inputs.length === 0) return 'completed';
+        if (inputs.length === 0) return 'completed'; 
 
-        let allDefault = true;
-        let allNonDefault = true;
-        let hasAtLeastOneNonDefault = false;
+        let allDefaultOrNA = true; // Modificato per considerare anche 'non_applicabile' come default per i campi EV
+        let allNonDefaultAndApplicable = true; // Tutti compilati e non 'non_applicabile' (se EV)
+        let hasAtLeastOneNonDefaultAndApplicable = false;
 
         inputs.forEach(input => {
-            let isDefault;
+            let isEffectivelyDefault = false;
             const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined;
+            let currentValue = savedValue;
 
-            if (savedValue !== undefined) {
-                if (input.type === 'checkbox') {
-                    isDefault = !savedValue;
-                } else { 
-                    isDefault = (savedValue === "" || (input.options.length > 0 && savedValue === input.options[0].value));
+            if (savedValue === undefined) { // Se non ci sono dati salvati, usa il valore attuale del form
+                if (input.type === 'checkbox') currentValue = input.checked;
+                else currentValue = input.value;
+            }
+            
+            if (input.type === 'checkbox') {
+                isEffectivelyDefault = !currentValue;
+            } else if (input.tagName === 'SELECT') {
+                isEffectivelyDefault = (currentValue === "" || (input.options.length > 0 && currentValue === input.options[0].value));
+                 // Considera 'non_applicabile' come "default" per i campi EV quando non sono attivi
+                if ((input.id === 'cavo_ricarica_rapida' || input.id === 'cavo_ricarica_domestica') && currentValue === 'non_applicabile') {
+                    isEffectivelyDefault = true;
                 }
-            } else {
-                 isDefault = isInputDefault(input); 
+            } else { // text, textarea
+                 isEffectivelyDefault = (currentValue === "");
             }
 
-            if (!isDefault) {
-                allDefault = false;
-                hasAtLeastOneNonDefault = true;
-            } else {
-                allNonDefault = false;
+            if (!isEffectivelyDefault) {
+                allDefaultOrNA = false;
+                hasAtLeastOneNonDefaultAndApplicable = true;
+            } else { // è default o NA
+                allNonDefaultAndApplicable = false;
             }
         });
 
-        if (allDefault) return 'untouched';
-        if (allNonDefault) return 'completed';
-        if (hasAtLeastOneNonDefault) return 'partial'; 
-        return 'untouched';
+        if (allDefaultOrNA) return 'untouched';
+        if (allNonDefaultAndApplicable) return 'completed';
+        if (hasAtLeastOneNonDefaultAndApplicable) return 'partial'; 
+        return 'untouched'; // Fallback se nessuna condizione sopra è vera (es. tutti i campi disabilitati)
     }
 
 
-    function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
+    function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente.toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
     function showView(viewName) {
         landingPageSection.style.display = 'none';
@@ -1165,7 +1160,7 @@
                 typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
             }
-            // targaSelezionataGlobalmente = null; // Non deselezionare qui, potrebbe servire per la sincronizzazione da landing page
+            // targaSelezionataGlobalmente = null; // Non deselezionare qui
             updateNavButtonColors(); 
         } else if (viewName === 'checklist' || viewName === 'history') {
             pageHeaderContainer.classList.add('fixed-header');
@@ -1184,6 +1179,8 @@
                     ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
                     : "";
                 mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
+                 // Chiamata a handleTrazioneChange quando si visualizza la checklist per assicurare stato corretto campi EV
+                 if (tipoTrazioneSelect) handleTrazioneChange();
             } else { 
                 historyPageSection.style.display = 'block';
                 mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
@@ -1207,62 +1204,58 @@
             bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
         }
         document.body.style.paddingTop = bodyPaddingTopValue;
+         // Scroll to top when view changes
+        window.scrollTo(0, 0);
     }
 
-    // handleTargaSelectionAndSync INVARIATA (gestisce il caricamento/sincronizzazione all'apertura di una perizia)
     async function handleTargaSelectionAndSync(selectedTarga) {
-        targaSelezionataGlobalmente = selectedTarga;
+        targaSelezionataGlobalmente = selectedTarga.toUpperCase();
         console.log(`Targa ${targaSelezionataGlobalmente} selezionata per perizia. Avvio sincronizzazione al caricamento.`);
-        if (targheLoadingStatus && landingPageSection.style.display === 'block') targheLoadingStatus.textContent = `Caricamento dati per ${selectedTarga}...`;
+        if (targheLoadingStatus && landingPageSection.style.display === 'block') targheLoadingStatus.textContent = `Caricamento dati per ${targaSelezionataGlobalmente}...`;
 
         let localData = null;
-        let localTimestamp = null;
-        const localJson = localStorage.getItem(`${APP_PREFIX}data_${selectedTarga}`);
+        let localDatiPeriziaTimestamp = null; // Timestamp interno all'oggetto datiPerizia
+        const localJson = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`);
         if (localJson) {
             try {
-                localData = JSON.parse(localJson);
-                localTimestamp = localData.timestamp ? new Date(localData.timestamp) : null;
+                localData = JSON.parse(localJson); // Questo è l'oggetto datiPerizia
+                localDatiPeriziaTimestamp = localData.timestamp ? new Date(localData.timestamp) : null;
             } catch (e) { console.error("Errore parsing dati locali:", e); localData = null; }
         }
 
-        const sheetsPeriziaDataContainer = await fetchLatestPeriziaFromSheets(selectedTarga);
-        let sheetsFullDataObject = null;
-        let sheetsTimestamp = null;
+        // sheetsPeriziaData è l'oggetto completo: {targa, posizione, datiPerizia:{...}, timestamp (generale)}
+        const sheetsPeriziaData = await fetchLatestPeriziaFromSheets(targaSelezionataGlobalmente); 
+        let sheetsRecordTimestamp = null; // Timestamp generale del record da Sheets
+        let sheetsDatiPerizia = null;
         let isSheetsDataCompleted = false;
 
-        if (sheetsPeriziaDataContainer && sheetsPeriziaDataContainer.datiPerizia) {
-            sheetsFullDataObject = sheetsPeriziaDataContainer.datiPerizia;
-            sheetsTimestamp = sheetsPeriziaDataContainer.timestamp ? new Date(sheetsPeriziaDataContainer.timestamp) : (sheetsFullDataObject.timestamp ? new Date(sheetsFullDataObject.timestamp) : null);
-            isSheetsDataCompleted = sheetsPeriziaDataContainer.completata || false;
+        if (sheetsPeriziaData && sheetsPeriziaData.timestamp && sheetsPeriziaData.datiPerizia) {
+            sheetsRecordTimestamp = new Date(sheetsPeriziaData.timestamp);
+            sheetsDatiPerizia = sheetsPeriziaData.datiPerizia;
+            isSheetsDataCompleted = sheetsPeriziaData.completata || false;
         }
         
-        let dataToLoadIntoForm = null;
-
-        if (sheetsTimestamp && (!localTimestamp || sheetsTimestamp > localTimestamp)) {
-            console.log("Dati da Google Sheets sono più recenti per il caricamento. Uso quelli.");
-            dataToLoadIntoForm = sheetsFullDataObject; 
+        if (sheetsRecordTimestamp && (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp)) {
+            console.log(`Dati da Google Sheets per ${targaSelezionataGlobalmente} sono più recenti (o locali non esistono). Uso quelli. Sheets TS: ${sheetsRecordTimestamp}, Local TS: ${localDatiPeriziaTimestamp}`);
             try {
-                localStorage.setItem(`${APP_PREFIX}data_${selectedTarga}`, JSON.stringify(sheetsFullDataObject));
+                localStorage.setItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`, JSON.stringify(sheetsDatiPerizia));
+                savePosizioneForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.posizione || "");
+                saveUrgentStatusForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.urgente || false);
                 if (isSheetsDataCompleted) {
-                    markTargaAsCompleted(selectedTarga);
+                    markTargaAsCompleted(targaSelezionataGlobalmente);
                 } else {
-                    unmarkTargaAsCompleted(selectedTarga);
+                    unmarkTargaAsCompleted(targaSelezionataGlobalmente);
                 }
-                console.log("Dati locali aggiornati con la versione da Sheets durante il caricamento.");
+                console.log(`Dati locali per ${targaSelezionataGlobalmente} aggiornati con la versione da Sheets.`);
             } catch (e) { console.error("Errore nel salvare i dati da Sheets in localStorage (caricamento):", e); }
         } else if (localData) {
-            console.log("Dati locali sono più recenti o uguali, o Sheets non ha dati (caricamento). Uso i dati locali.");
-            dataToLoadIntoForm = localData;
+            console.log(`Dati locali per ${targaSelezionataGlobalmente} sono più recenti o uguali, o Sheets non ha dati. Uso i dati locali. Sheets TS: ${sheetsRecordTimestamp}, Local TS: ${localDatiPeriziaTimestamp}`);
         } else {
-            console.log("Nessun dato locale o da Sheets (o Sheets non più recente) per il caricamento. Inizio perizia da zero.");
+            console.log(`Nessun dato locale o da Sheets (o Sheets non più recente) per ${targaSelezionataGlobalmente}. Inizio perizia da zero.`);
             resetChecklistForm(); 
         }
 
-        if (dataToLoadIntoForm) {
-            loadProgress(selectedTarga); 
-        } else {
-            loadProgress(selectedTarga); 
-        }
+        loadProgress(targaSelezionataGlobalmente); // Carica (o ricarica) i dati nel form, che siano da sheets o locali
         
         if (targheLoadingStatus && landingPageSection.style.display === 'block') targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
         showView('checklist');
@@ -1274,7 +1267,6 @@
         }
     }
 
-    // populateSavedTargasList INVARIATA (usa handleTargaSelectionAndSync per caricare)
     function populateSavedTargasList() {
         savedTargasListContainer.innerHTML = ''; let hasSaves = false;
         const tempSavedTargas = [];
@@ -1307,29 +1299,33 @@
         if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>';}
     }
     
-    // clearAllSavedData INVARIATA
     function clearAllSavedData() {
         if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni, urgenze e filtro piazzale)?\n\nAzione irreversibile.")) {
             let c = 0;
+            const keysToRemove = [];
             for (let i=localStorage.length-1;i>=0;i--) {
                 const k=localStorage.key(i);
                 if (k.startsWith(APP_PREFIX)) {
-                    localStorage.removeItem(k);c++;
+                    keysToRemove.push(k);
                 }
             }
+            keysToRemove.forEach(k => {
+                localStorage.removeItem(k);
+                c++;
+            });
             alert(`${c} elementi cancellati.`);
             if(sheetFilterDropdown) sheetFilterDropdown.value = 'all';
-            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); 
+            // Non è necessario rimuovere esplicitamente 'selectedPiazzaleFilter' se si vuole mantenere il filtro
+            // localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); 
             populateSavedTargasList();
             if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); 
             if (typeof showView === 'function') showView('landing');
         }
     }
 
-    // setupSheetFilterDropdown, handleSheetFilterChange, popolaTargheFiltrate, caricaEPopolaTarghe (INVARIATE)
     function setupSheetFilterDropdown() {
         if (!sheetFilterDropdown) return;
-        const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== ''))];
+        const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== '').sort())];
         sheetFilterDropdown.innerHTML = '';
         sources.forEach(source => {
             const option = document.createElement('option');
@@ -1369,9 +1365,10 @@
             : listaTargheCompleta.filter(item => item.piazzale === selectedSource);
 
         function getItemRank(item) {
-            const isUrgent = loadUrgentStatusForTarga(item.targa); 
-            const isCompleted = isTargaCompleted(item.targa);
-            const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
+            const targaUpper = item.targa.toUpperCase();
+            const isUrgent = loadUrgentStatusForTarga(targaUpper); 
+            const isCompleted = isTargaCompleted(targaUpper);
+            const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`);
             let hasData = false;
             if (localDataJson) {
                 try {
@@ -1380,18 +1377,18 @@
                 } catch (e) { /* ignore parsing error for ranking */ }
             }
 
-            if (isUrgent && !isCompleted) return 1;
-            if (!isUrgent && !isCompleted && hasData) return 2; 
-            if (!isUrgent && !isCompleted && !hasData) return 3; 
-            if (!isUrgent && isCompleted) return 4; 
-            if (isUrgent && isCompleted) return 5; 
-            return 6;
+            if (isUrgent && !isCompleted) return 1; // Urgente e non completato
+            if (!isUrgent && !isCompleted && hasData) return 2; // Non urgente, non completato, ma con dati parziali
+            if (!isUrgent && !isCompleted && !hasData) return 3; // Non urgente, non completato, nessun dato (da vedere)
+            if (!isUrgent && isCompleted) return 4; // Non urgente e completato
+            if (isUrgent && isCompleted) return 5;  // Urgente ma completato
+            return 6; // Default, non dovrebbe accadere
         }
         preliminaryFilteredList.sort((a, b) => {
             const rankA = getItemRank(a);
             const rankB = getItemRank(b);
             if (rankA !== rankB) return rankA - rankB;
-            return a.targa.localeCompare(b.targa);
+            return a.targa.localeCompare(b.targa); // Ordinamento secondario per targa
         });
         const filteredList = preliminaryFilteredList;
 
@@ -1401,34 +1398,35 @@
             return;
         }
         filteredList.forEach((item, idx) => {
+            const targaUpper = item.targa.toUpperCase();
             const li = document.createElement('div');
             li.classList.add('targa-list-item');
 
-            const itemCompleted = isTargaCompleted(item.targa);
-            const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
+            const itemCompleted = isTargaCompleted(targaUpper);
+            const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`);
             let hasData = false;
             if (localDataJson) {
-                try { const parsed = JSON.parse(localDataJson); hasData = Object.keys(parsed).some(k => k !== 'timestamp'); } catch (e) {}
+                try { const parsed = JSON.parse(localDataJson); hasData = Object.keys(parsed).some(k => k !== 'timestamp' && parsed[k] !== "" && parsed[k] !== false ); } catch (e) {}
             }
-            const isItemUrgent = loadUrgentStatusForTarga(item.targa); 
+            const isItemUrgent = loadUrgentStatusForTarga(targaUpper); 
 
             if (isItemUrgent) { 
                 li.classList.add('urgent-item');
                 if (itemCompleted) {
-                    li.classList.add('completed');
+                    li.classList.add('completed'); // Urgente ma completato
                 }
             } else if (itemCompleted) {
-                li.classList.add('status-visto', 'completed');
+                li.classList.add('status-visto', 'completed'); // Completato (non urgente)
             } else if (hasData) {
-                li.classList.add('status-parziale');
+                li.classList.add('status-parziale'); // Parzialmente compilato
             } else {
-                li.classList.add('status-da-vedere');
+                li.classList.add('status-da-vedere'); // Da vedere
             }
 
             const targaCol = document.createElement('span');
             targaCol.classList.add('targa-col', 'targa-col-targa', 'clickable-targa');
-            targaCol.textContent = item.targa || 'N/D';
-            targaCol.dataset.targaValue = item.targa;
+            targaCol.textContent = item.targa || 'N/D'; // Mostra targa originale dal CSV
+            targaCol.dataset.targaValue = targaUpper; // Usa targaUpper per coerenza
 
             targaCol.addEventListener('click', async function() { 
                 const selectedTargaFromClick = this.dataset.targaValue;
@@ -1442,8 +1440,8 @@
             posizioneCol.classList.add('targa-col', 'targa-col-posizione');
             const posizioneInput = document.createElement('input');
             posizioneInput.type = 'text'; posizioneInput.classList.add('posizione-input');
-            posizioneInput.dataset.targa = item.targa; posizioneInput.placeholder = 'Pos.';
-            posizioneInput.maxLength = 5; posizioneInput.value = loadPosizioneForTarga(item.targa);
+            posizioneInput.dataset.targa = targaUpper; posizioneInput.placeholder = 'Pos.';
+            posizioneInput.maxLength = 5; posizioneInput.value = loadPosizioneForTarga(targaUpper);
             posizioneInput.addEventListener('mousedown', (e) => e.stopPropagation());
             posizioneInput.addEventListener('click', (e) => e.stopPropagation());
             posizioneInput.addEventListener('focus', (e) => e.stopPropagation());
@@ -1469,7 +1467,7 @@
             urgenzaCheckbox.addEventListener('mousedown', (e) => e.stopPropagation());
             urgenzaCheckbox.addEventListener('click', (e) => e.stopPropagation());
             urgenzaCheckbox.addEventListener('change', function() {
-                saveUrgentStatusForTarga(item.targa, this.checked);
+                saveUrgentStatusForTarga(targaUpper, this.checked); // Usa targaUpper
                 this.title = this.checked ? "Togli urgenza" : "Marca come urgente";
                 popolaTargheFiltrate(); 
             });
@@ -1492,11 +1490,11 @@
             const actionsCol = document.createElement('span');
             actionsCol.classList.add('targa-col', 'targa-col-actions');
             const delB = document.createElement('button');
-            delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = item.targa;
+            delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = targaUpper; // Usa targaUpper
             delB.title = `Cancella progressi per ${item.targa}`; delB.textContent = 'X';
             delB.addEventListener('click', function(event) {
                 event.stopPropagation();
-                const tDel = this.dataset.targa;
+                const tDel = this.dataset.targa; // Sarà già targaUpper
                 if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (inclusa posizione e urgenza)?\n\nAzione irreversibile.`)) {
                     deleteProgressForTarga(tDel);
                 }
@@ -1511,7 +1509,7 @@
     }
 
     async function caricaEPopolaTarghe() {
-        const preloader = document.getElementById('preloader');
+        const preloaderInstance = document.getElementById('preloader'); // Rinominato per evitare conflitto con variabile globale
         if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server...";
 
         try {
@@ -1536,13 +1534,13 @@
 
             listaTargheCompleta = lines.map(l => {
                 const p = l.split(',');
-                return {
+                return { // I campi vengono già normalizzati qui (es. targa in maiuscolo)
                     targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(),
                     marca: (p[1] || '').trim().replace(/^"|"$/g, ''),
                     modello: (p[2] || '').trim().replace(/^"|"$/g, ''),
                     piazzale: (p[3] || '').trim().replace(/^"|"$/g, '')
                 };
-            }).filter(i => i.targa && i.targa.length > 3);
+            }).filter(i => i.targa && i.targa.length > 3); // Filtra targhe non valide o troppo corte
 
             if (listaTargheCompleta.length === 0) {
                 if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";
@@ -1561,16 +1559,15 @@
             if (targaListContainer) targaListContainer.innerHTML = '';
              listaTargheCompleta = [];
         } finally {
-            if (preloader) {
-                preloader.classList.add('hidden');
+            if (preloaderInstance) {
+                preloaderInstance.classList.add('hidden');
                 setTimeout(() => {
-                    if (preloader) preloader.style.display = 'none';
+                    if (preloaderInstance) preloaderInstance.style.display = 'none';
                 }, 700);
             }
         }
     }
 
-    // initSequentialAnimation, showSection, getSelectText, generateSummary (INVARIATE)
     function initSequentialAnimation() {
         const checklistContainerDiv = document.getElementById('checklistContainer');
         if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return;
@@ -1583,19 +1580,19 @@
             activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled), textarea:not(:disabled)')
         ).filter(el => {
             let current = el;
-            while (current && current !== activeSection.parentElement) {
+            while (current && current !== activeSection.parentElement) { // Controlla fino al contenitore della sezione
                 if (getComputedStyle(current).display === 'none' || getComputedStyle(current).visibility === 'hidden') return false;
                 current = current.parentElement;
             }
-            return el.offsetParent !== null;
+            return el.offsetParent !== null; // Verifica finale se è renderizzato
         });
 
         const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el));
 
-        if (startIndex === -1 && allVisibleElementsInSection.length > 0) {
+        if (startIndex === -1 && allVisibleElementsInSection.length > 0) { // Tutti compilati
             return;
         }
-        if (allVisibleElementsInSection.length === 0) {
+        if (allVisibleElementsInSection.length === 0) { // Nessun elemento
              return;
         }
 
@@ -1604,23 +1601,27 @@
         if (elementsToAnimate.length === 0) return;
 
         let currentIndex = 0;
-        let activeListeners = [];
+        let activeListeners = []; // Array per tenere traccia degli listener attivi
 
         function clearAllActiveAnimationListeners() {
             activeListeners.forEach(({element, type, handler}) => {
                 element.removeEventListener(type, handler);
-                element.classList.remove('animate-me');
+                element.classList.remove('animate-me'); // Rimuovi classe se l'animazione viene interrotta
             });
             activeListeners = [];
         }
+        // Pulisci listener precedenti prima di iniziare una nuova sequenza (es. cambio sezione)
         clearAllActiveAnimationListeners();
+
 
         function animateNextElement() {
             if (currentIndex >= elementsToAnimate.length) {
+                // Fine animazione, pulisci per sicurezza se non già fatto
+                clearAllActiveAnimationListeners();
                 return;
             }
             const currentElement = elementsToAnimate[currentIndex];
-            if (!isInputDefault(currentElement)) {
+            if (!isInputDefault(currentElement)) { // Se per caso è già compilato, salta
                 currentIndex++;
                 animateNextElement();
                 return;
@@ -1631,39 +1632,53 @@
 
             const onValueChange = (event) => {
                 let processChange = false;
+                // Per i select, consideriamo il cambio effettivo e non solo il blur
                 if (event.type === 'change') {
                     processChange = true;
-                } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {
+                } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') { // Per input text/textarea
                     processChange = true;
-                } else if (event.type === 'blur' && currentElement.tagName === 'SELECT' && !isInputDefault(currentElement)) {
-                     processChange = true;
-                }
+                } // Per i select, il 'change' è sufficiente
+                // Per le checkbox, 'change' è l'evento principale
 
-                if (processChange) {
+                if (processChange && !isInputDefault(currentElement)) { // Solo se effettivamente non è più default
                     currentElement.classList.remove('animate-me');
-                    currentElement.removeEventListener('change', onValueChange);
-                    currentElement.removeEventListener('blur', onValueChange);
-                    activeListeners = activeListeners.filter(listener => listener.element !== currentElement);
+                    // Rimuovi specifici listener per questo elemento
+                    activeListeners = activeListeners.filter(listener => {
+                        if (listener.element === currentElement) {
+                            listener.element.removeEventListener(listener.type, listener.handler);
+                            return false; // Rimuovi dalla lista
+                        }
+                        return true; // Mantieni gli altri
+                    });
                     currentIndex++;
-                    setTimeout(animateNextElement, 50);
+                    setTimeout(animateNextElement, 50); // Ritardo per fluidità
                 }
             };
 
             currentElement.addEventListener('change', onValueChange);
-            if (currentElement.tagName === 'SELECT' || currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') {
+            activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
+
+            // Aggiungi blur listener per text, textarea (i select sono gestiti da change)
+            if (currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') {
                 currentElement.addEventListener('blur', onValueChange);
                  activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange});
             }
-            activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
         }
         animateNextElement();
     }
 
 
     function showSection(targetId) {
+        // Prima di cambiare sezione, rimuovi l'animazione da tutti gli elementi
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
             el.classList.remove('animate-me');
         });
+        // Interrompi eventuali listener di animazione attivi dalla sezione precedente
+        if (typeof clearAllActiveAnimationListeners === 'function') { // Assicurati che la funzione esista (se definita globalmente o accessibile)
+             // clearAllActiveAnimationListeners(); // Questa chiamata va fatta dentro initSequentialAnimation per pulire i suoi listener specifici
+        }
+
+
         sections.forEach(s => s.classList.toggle('active', s.id === targetId + 'Section'));
         navButtons.forEach(b => { 
             b.classList.toggle('active', b.dataset.target === targetId);
@@ -1671,10 +1686,11 @@
         updateNavButtonColors(); 
         const targetSectionElement = document.getElementById(targetId + 'Section');
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
-             setTimeout(initSequentialAnimation, 100);
+             setTimeout(initSequentialAnimation, 100); // Inizia la nuova animazione
         } else if (targetId === 'riepilogo') {
             generateSummary();
         }
+         window.scrollTo(0, 0); // Scrolla in cima quando si cambia sezione
     }
 
     navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
@@ -1685,9 +1701,9 @@
             if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) {
                 return el.options[el.selectedIndex].text;
             }
-            return el.value;
+            return el.value; // Fallback se opzione non trovata
         }
-        return "N/S";
+        return "N/S"; // Non Selezionato / Non Specificato
     }
 
     function generateSummary() {
@@ -1700,7 +1716,7 @@
             itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`;
             return itemDiv;
         }
-        summaryContent.appendChild(createSummaryItem("Targa", targa));
+        summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase()));
         if (targaSelezionataGlobalmente) {
             const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
             let marcaVeicolo = "N/D", modelloVeicolo = "N/D";
@@ -1714,7 +1730,7 @@
             const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente);
             summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary));
 
-        } else {
+        } else { // Dovrebbe esserci sempre una targa selezionata qui
             summaryContent.appendChild(createSummaryItem("Marca", "N/D"));
             summaryContent.appendChild(createSummaryItem("Modello", "N/D"));
             summaryContent.appendChild(createSummaryItem("Posizione", "N/D"));
@@ -1739,8 +1755,10 @@
         summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente"));
         if (isEV) {
             summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`;
-            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", getSelectText('cavo_ricarica_rapida'), getSelectText('cavo_ricarica_rapida') === "Non Presente"));
-            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", getSelectText('cavo_ricarica_domestica'), getSelectText('cavo_ricarica_domestica') === "Non Presente"));
+            let cavoRapidaText = getSelectText('cavo_ricarica_rapida');
+            let cavoDomesticaText = getSelectText('cavo_ricarica_domestica');
+            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente"));
+            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente"));
         }
         summaryContent.innerHTML += `<h3>Pneumatici:</h3>`;
         const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }];
@@ -1760,12 +1778,134 @@
         }
     }
 
-    // NUOVA FUNZIONE: syncAllLocalDataToSheets
+    // --- NUOVA FUNZIONE fetchAllDataFromSheets ---
+    async function fetchAllDataFromSheets() {
+        if (!GOOGLE_SHEET_WEB_APP_URL) {
+            console.error("URL della Web App Google Sheets non configurato per il fetch di tutti i dati.");
+            return { success: false, message: "URL Web App non configurato.", data: [] };
+        }
+        const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?nocache=${new Date().getTime()}`; // doGet senza parametri specifici
+        console.log("Fetching all perizie from Sheets. URL:", fetchUrl);
+
+        try {
+            const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' });
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Errore HTTP ${response.status} nel fetch di tutti i dati da Sheets: ${errorText}`);
+                return { success: false, message: `Errore Sheets (${response.status}) nel recupero globale.`, data: [] };
+            }
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const result = await response.json();
+                if (Array.isArray(result)) { // Se il GAS restituisce un array diretto
+                    console.log("Dati globali ricevuti da Sheets (array diretto):", result.length, "perizie.");
+                    return { success: true, data: result, message: "Dati recuperati con successo." };
+                } else if (result && result.status === "success" && Array.isArray(result.data)) { // Se GAS restituisce {status, data:[...]}
+                    console.log("Dati globali ricevuti da Sheets (oggetto con .data):", result.data.length, "perizie.");
+                    return { success: true, data: result.data, message: result.message || "Dati recuperati con successo."};
+                } else if (result && result.status === "notfound") { 
+                     console.log("Nessuna perizia trovata in Sheets (notfound).");
+                     return { success: true, data: [], message: result.message || "Nessuna perizia trovata."};
+                } else {
+                    console.warn("Risposta da Sheets (globale) non era un array o oggetto atteso:", result);
+                    return { success: false, message: "Formato risposta globale non valido.", data: [] };
+                }
+            } else {
+                const textResponse = await response.text();
+                console.error("Risposta da Sheets (globale) non era JSON:", textResponse);
+                return { success: false, message: "Errore formato risposta globale Sheets (non JSON).", data: [] };
+            }
+        } catch (error) {
+            console.error("Errore di rete o fetch generico durante il recupero globale da Sheets:", error);
+            return { success: false, message: "Errore di rete recupero globale: " + error.message, data: [] };
+        }
+    }
+
+    // --- MODIFICATA FUNZIONE syncAllLocalDataToSheets ---
     async function syncAllLocalDataToSheets() {
         const originalSyncButtonText = syncToSheetsBtn.textContent;
-        syncToSheetsBtn.textContent = "Sincronizzazione...";
         syncToSheetsBtn.disabled = true;
 
+        let updatedFromSheetsCount = 0;
+        let localUpdatesFailedCount = 0;
+
+        // Fase 1: Recupero Dati da Google Sheets
+        syncToSheetsBtn.textContent = "Sinc (1/3 RecSheets)...";
+        console.log("SYNC - Fase 1: Recupero di tutti i dati da Google Sheets.");
+        const sheetsResponse = await fetchAllDataFromSheets();
+
+        if (!sheetsResponse.success) {
+            alert(`Errore nel recupero dei dati da Sheets:\n${sheetsResponse.message}\nLa sincronizzazione non può procedere.`);
+            syncToSheetsBtn.textContent = originalSyncButtonText; // Ripristina testo originale
+            syncToSheetsBtn.disabled = false;
+            return;
+        }
+        const allSheetsData = sheetsResponse.data; // Array di oggetti perizia da Sheets
+        console.log(`SYNC - Fase 1 completata. Ricevute ${allSheetsData.length} perizie da Sheets.`);
+
+        // Fase 2: Confronto e Aggiornamento Locale
+        syncToSheetsBtn.textContent = "Sinc (2/3 AggLoc)...";
+        console.log("SYNC - Fase 2: Confronto dati Sheets con localStorage e aggiornamento locale.");
+        if (allSheetsData.length > 0) {
+            for (const sheetPerizia of allSheetsData) {
+                // sheetPerizia = {targa, posizione, urgente, completata, timestamp (generale), datiPerizia:{... con suo timestamp}}
+                if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) {
+                    console.warn("SYNC - Saltata perizia da Sheets per dati/timestamp mancanti:", sheetPerizia);
+                    continue;
+                }
+
+                const targa = sheetPerizia.targa.toUpperCase();
+                const localDataKey = `${APP_PREFIX}data_${targa}`;
+                const localDataJSON = localStorage.getItem(localDataKey);
+                let localDatiPeriziaTimestamp = null;
+
+                if (localDataJSON) {
+                    try {
+                        const localDatiPeriziaObject = JSON.parse(localDataJSON);
+                        localDatiPeriziaTimestamp = localDatiPeriziaObject.timestamp ? new Date(localDatiPeriziaObject.timestamp) : null;
+                    } catch (e) {
+                        console.error(`SYNC - Errore parsing dati locali per targa ${targa}:`, e);
+                    }
+                }
+                
+                // Confrontiamo il timestamp generale del record di Sheets con il timestamp dei datiPerizia locali
+                const sheetsRecordTimestamp = new Date(sheetPerizia.timestamp);
+
+                if (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp) {
+                    console.log(`SYNC - Targa ${targa}: Dati Sheets più recenti (Sheets Record TS: ${sheetsRecordTimestamp}, Locale datiPerizia TS: ${localDatiPeriziaTimestamp || 'N/A'}). Aggiorno localStorage.`);
+                    try {
+                        // Salva l'intero oggetto datiPerizia da Sheets, che include il suo timestamp interno.
+                        localStorage.setItem(localDataKey, JSON.stringify(sheetPerizia.datiPerizia));
+                        
+                        if (sheetPerizia.hasOwnProperty('posizione')) {
+                            savePosizioneForTarga(targa, sheetPerizia.posizione);
+                        }
+                        if (sheetPerizia.hasOwnProperty('urgente')) {
+                            saveUrgentStatusForTarga(targa, sheetPerizia.urgente);
+                        }
+                        if (sheetPerizia.hasOwnProperty('completata')) {
+                            if (sheetPerizia.completata) {
+                                markTargaAsCompleted(targa);
+                            } else {
+                                unmarkTargaAsCompleted(targa);
+                            }
+                        }
+                        updatedFromSheetsCount++;
+                    } catch (e) {
+                        console.error(`SYNC - Errore aggiornamento localStorage per targa ${targa} da Sheets:`, e);
+                        localUpdatesFailedCount++;
+                    }
+                } else {
+                    console.log(`SYNC - Targa ${targa}: Dati locali più recenti o uguali. Nessun aggiornamento da Sheets.`);
+                }
+            }
+        }
+        console.log(`SYNC - Fase 2 completata. Aggiornate/Create localmente ${updatedFromSheetsCount} perizie da Sheets. Errori locali: ${localUpdatesFailedCount}`);
+
+
+        // Fase 3: Invio dei Dati Locali (Aggiornati) a Google Sheets
+        syncToSheetsBtn.textContent = "Sinc (3/3 InvioSheets)...";
+        console.log("SYNC - Fase 3: Invio di tutte le perizie locali a Google Sheets.");
         let perizieLocaliKeys = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
@@ -1774,9 +1914,9 @@
             }
         }
 
-        if (perizieLocaliKeys.length === 0) {
-            alert("Nessuna perizia salvata localmente da sincronizzare.");
-            syncToSheetsBtn.textContent = originalSyncButtonText;
+        if (perizieLocaliKeys.length === 0 && updatedFromSheetsCount === 0 && localUpdatesFailedCount === 0) {
+            alert("Nessuna perizia salvata localmente e nessuna novità da Sheets da sincronizzare.");
+            syncToSheetsBtn.textContent = originalSyncButtonText; // Ripristina testo originale
             syncToSheetsBtn.disabled = false;
             return;
         }
@@ -1786,24 +1926,21 @@
         let errorMessages = [];
 
         for (const key of perizieLocaliKeys) {
-            const targa = key.substring(`${APP_PREFIX}data_`.length);
-            let datiPeriziaSalvati;
+            const targa = key.substring(`${APP_PREFIX}data_`.length); // Già in UPPERCASE se salvata correttamente
+            let datiPeriziaSalvatiLocalmente; // Questo è l'oggetto {campo1, campo2, timestamp}
             try {
-                datiPeriziaSalvati = JSON.parse(localStorage.getItem(key));
+                datiPeriziaSalvatiLocalmente = JSON.parse(localStorage.getItem(key));
             } catch (e) {
-                console.error(`Errore parsing dati per targa ${targa} da localStorage:`, e);
+                console.error(`SYNC - Errore parsing dati per targa ${targa} da localStorage per invio:`, e);
                 errorCount++;
-                errorMessages.push(`Targa ${targa}: Errore lettura dati locali.`);
-                continue; 
+                errorMessages.push(`Targa ${targa}: Errore lettura dati locali per invio.`);
+                continue;
             }
 
-            if (!datiPeriziaSalvati || !datiPeriziaSalvati.timestamp) {
-                 console.warn(`Dati per targa ${targa} incompleti o senza timestamp, skip sincronizzazione.`);
-                 // Opzionale: si potrebbe aggiungere un timestamp qui se manca, ma è meglio che sia già presente
-                 // datiPeriziaSalvati.timestamp = new Date().toISOString();
-                 // localStorage.setItem(key, JSON.stringify(datiPeriziaSalvati)); // Salva di nuovo con timestamp se aggiunto
+            if (!datiPeriziaSalvatiLocalmente || !datiPeriziaSalvatiLocalmente.timestamp) {
+                 console.warn(`SYNC - Dati per targa ${targa} incompleti o senza timestamp (locale), skip invio a Sheets.`);
                  errorCount++;
-                 errorMessages.push(`Targa ${targa}: Dati incompleti o timestamp mancante.`);
+                 errorMessages.push(`Targa ${targa}: Dati locali incompleti o timestamp mancante.`);
                  continue;
             }
 
@@ -1811,57 +1948,74 @@
                 targa: targa,
                 posizione: loadPosizioneForTarga(targa) || "",
                 urgente: loadUrgentStatusForTarga(targa) || false,
-                completata: isTargaCompleted(targa), // Stato di completamento locale
-                datiPerizia: datiPeriziaSalvati, // Include il timestamp salvato da saveProgress
-                timestamp: datiPeriziaSalvati.timestamp // Esplicita il timestamp per il server Gas
+                completata: isTargaCompleted(targa),
+                datiPerizia: datiPeriziaSalvatiLocalmente, 
+                timestamp: datiPeriziaSalvatiLocalmente.timestamp // Questo è il timestamp dei datiPerizia, usato per il record generale su Sheets
             };
 
-            console.log(`Sincronizzazione targa ${targa}...`, periziaDaInviare);
+            console.log(`SYNC - Invio targa ${targa} a Sheets...`);
             const result = await inviaPeriziaSingolaASheets(periziaDaInviare);
             if (result.success) {
                 successCount++;
-                // Se il server ritorna un timestamp più nuovo (dovrebbe essere lo stesso o più nuovo),
-                // aggiorna il timestamp locale per coerenza.
-                if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvati.timestamp)) {
-                    datiPeriziaSalvati.timestamp = result.data.timestamp;
-                    localStorage.setItem(key, JSON.stringify(datiPeriziaSalvati));
-                    console.log(`Timestamp locale per ${targa} aggiornato da server a ${result.data.timestamp}`);
+                // Se il server GAS restituisce un timestamp (result.data.timestamp) che è quello del record generale appena scritto/aggiornato,
+                // e questo è più recente di datiPeriziaSalvatiLocalmente.timestamp,
+                // aggiorniamo il timestamp nei datiPerizia locali per riflettere l'ultimo stato sincronizzato.
+                if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) {
+                    console.log(`SYNC - Timestamp per ${targa} su Sheets (${result.data.timestamp}) è più recente del timestamp dei datiPerizia locali (${datiPeriziaSalvatiLocalmente.timestamp}). Aggiorno timestamp locale.`);
+                    datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp; 
+                    try {
+                        localStorage.setItem(key, JSON.stringify(datiPeriziaSalvatiLocalmente));
+                    } catch (e) {
+                        console.error(`SYNC - Errore salvataggio timestamp aggiornato da server per ${targa}:`,e);
+                    }
                 }
             } else {
                 errorCount++;
-                errorMessages.push(`Targa ${targa}: ${result.message}`);
+                errorMessages.push(`Targa ${targa}: ${result.message || 'Errore sconosciuto durante invio.'}`);
             }
         }
+        console.log("SYNC - Fase 3 completata.");
 
-        let finalMessage = `Sincronizzazione completata.\nPerizie inviate con successo: ${successCount}\nPerizie con errori: ${errorCount}`;
-        if (errorCount > 0) {
-            finalMessage += "\n\nDettaglio errori:\n" + errorMessages.join("\n");
+        let finalMessage = `Sincronizzazione completata.\n\n`;
+        finalMessage += `FASE 1&2 (Sheets -> Locale):\n`;
+        finalMessage += `- ${updatedFromSheetsCount} perizie locali aggiornate/create da Sheets.\n`;
+        if (localUpdatesFailedCount > 0) finalMessage += `- Errori durante aggiornamento locale: ${localUpdatesFailedCount}.\n`;
+        
+        finalMessage += `\nFASE 3 (Locale -> Sheets):\n`;
+        finalMessage += `- ${successCount} perizie inviate con successo a Sheets.\n`;
+        if (errorCount > 0) finalMessage += `- ${errorCount} perizie con errori durante l'invio.\n`;
+
+
+        if (errorCount > 0 || localUpdatesFailedCount > 0) {
+            finalMessage += "\n\nDETTAGLIO ERRORI (controllare console per info complete):\n" + errorMessages.join("\n");
         }
         alert(finalMessage);
 
-        syncToSheetsBtn.textContent = originalSyncButtonText;
+        syncToSheetsBtn.textContent = originalSyncButtonText; // Ripristina testo originale
         syncToSheetsBtn.disabled = false;
-        popolaTargheFiltrate(); // Aggiorna la vista targhe in caso di cambi di stato post-sincronizzazione (es. se il server aggiorna lo stato "completata")
+        if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') {
+             popolaTargheFiltrate(); 
+        }
     }
 
 
     document.addEventListener('DOMContentLoaded', () => {
-        const preloader = document.getElementById('preloader');
+        const preloader = document.getElementById('preloader'); // Uso di preloader invece di preloaderInstance qui
 
-        // Creazione e inserimento del pulsante "Sincronizza"
+        // Creazione e inserimento del pulsante "Sincronizza" (ex "Sincronizza Dati")
         syncToSheetsBtn = document.createElement('button');
         syncToSheetsBtn.id = 'syncToSheetsBtn';
         syncToSheetsBtn.classList.add('action-button');
-        syncToSheetsBtn.textContent = 'Sincronizza';
+        syncToSheetsBtn.textContent = 'Sincronizza'; // Testo modificato come da richiesta precedente
         syncToSheetsBtn.style.backgroundColor = '#ffc107'; // Giallo
         syncToSheetsBtn.style.borderColor = '#e0a800';
         syncToSheetsBtn.style.color = '#212529';
 
-        const historyButton = document.getElementById('historyBtn');
+        const historyButton = document.getElementById('historyBtn'); // Riferimento corretto a historyBtn
         if (historyButton && historyButton.parentNode === utilityNavButtons) {
             utilityNavButtons.insertBefore(syncToSheetsBtn, historyButton.nextSibling);
-        } else { // Fallback se historyBtn non è trovato o non è figlio diretto
-             utilityNavButtons.insertBefore(syncToSheetsBtn, exitAppBtn); // Inserisce prima di "Esci"
+        } else { 
+             utilityNavButtons.insertBefore(syncToSheetsBtn, exitAppBtn); 
         }
         syncToSheetsBtn.addEventListener('click', syncAllLocalDataToSheets);
 
@@ -1887,23 +2041,24 @@
         });
 
         if (tipoTrazioneSelect) tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
-        handleTrazioneChange();
+        // handleTrazioneChange(); // Chiamata iniziale spostata in loadProgress e showView per contesto
 
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
         if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData);
         if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
-        if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn); // Funzione modificata
+        if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
 
         async function initializeApplicationViewAndLoadData() {
             showView('landing'); 
-            if (preloader) {
-                preloader.style.display = 'flex';
-                preloader.classList.remove('hidden');
-                preloader.style.opacity = '1';
-                preloader.style.visibility = 'visible';
-                const loadingText = preloader.querySelector('.loading-text');
+            const preloaderElement = document.getElementById('preloader'); // Usa variabile locale per preloader
+            if (preloaderElement) {
+                preloaderElement.style.display = 'flex';
+                preloaderElement.classList.remove('hidden');
+                preloaderElement.style.opacity = '1';
+                preloaderElement.style.visibility = 'visible';
+                const loadingText = preloaderElement.querySelector('.loading-text');
                 if (loadingText) loadingText.textContent = 'CARICAMENTO ELENCO...';
             }
             await caricaEPopolaTarghe();
@@ -1934,7 +2089,7 @@
                     exitCurtain.setAttribute('data-text', defaultCloseText);
                     if (barContainer) barContainer.style.display = 'flex';
                     exitCurtain.classList.add('visible-no-transition');
-                    exitCurtain.style.display = 'flex';
+                    exitCurtain.style.display = 'flex'; // Assicura che sia visibile
                     setTimeout(() => {
                         exitCurtain.classList.add('glitching');
                         if (exitLoadingText) {
@@ -1946,22 +2101,23 @@
                             exitCurtain.classList.remove('glitching');
                             if (exitLoadingText) {
                                 exitLoadingText.textContent = 'Applicazione terminata.';
-                                exitLoadingText.style.animation = 'none';
-                                exitLoadingText.style.color = '#FFFFFF';
+                                exitLoadingText.style.animation = 'none'; // Rimuovi animazioni di testo
+                                exitLoadingText.style.color = '#FFFFFF'; // Testo bianco finale
                                 exitLoadingText.style.textShadow = 'none';
                             }
-                            if (barContainer) barContainer.style.display = 'none';
+                            if (barContainer) barContainer.style.display = 'none'; // Nascondi barre
                             setTimeout(() => {
-                                exitCurtain.classList.add('flash-out-effect');
+                                exitCurtain.classList.add('flash-out-effect'); // Effetto flash out
                                 setTimeout(() => {
                                     const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
-                                    fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
+                                    fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' }) // no-cors per triggerare e non aspettare risposta
                                         .then(response => console.log('Macrodroid trigger request sent.'))
                                         .catch(error => console.error('Error sending Macrodroid trigger:', error));
-                                }, 500); 
-                            }, 700); 
-                        }, 800); 
-                    }, 800); 
+                                    // Opzionale: window.close(); ma potrebbe non funzionare sempre
+                                }, 500); // Attendi fine animazione flash
+                            }, 700); // Durata dell'effetto "Applicazione terminata" prima del flash
+                        }, 800); // Durata del glitch
+                    }, 800); // Durata del "CHIUSURA IN CORSO..." normale
                 }
             });
         }
