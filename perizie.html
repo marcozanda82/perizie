@@ -528,8 +528,8 @@
                 <button data-target="danniVerifiche">3. Danni/Verifiche</button>
                 <button data-target="riepilogo">Riepilogo</button>
             </div>
-            </div>
         </div>
+    </div>
 
     <div class="content-wrapper" id="mainContentWrapper">
         <div id="landingPageSection" style="display: block;">
@@ -985,11 +985,9 @@
         });
 
         if (allDefault) return 'untouched';
-        // Se tutti i campi hanno un valore diverso da quello di default (vuoto/placeholder per select) E non tutti i campi sono vuoti/placeholder
-        // allora è completata. Altrimenti è parziale.
         if (allNonDefault) return 'completed';
-        if (hasAtLeastOneNonDefault) return 'partial'; // Se c'è almeno un campo non default, ma non tutti lo sono.
-        return 'untouched'; // Se tutto è ancora default o non è stato toccato.
+        if (hasAtLeastOneNonDefault) return 'partial'; 
+        return 'untouched';
     }
 
 
@@ -1001,16 +999,13 @@
         historyPageSection.style.display = 'none';
         let bodyPaddingTopValue = '20px';
 
-        // Gestione visibilità pulsanti di utilità e pulsanti di navigazione sezione
-        if (utilityNavButtons) utilityNavButtons.style.display = 'flex'; // Sempre visibili se l'header è visibile
-        if (navButtonsContainer) navButtonsContainer.style.display = 'none'; // Default a nascosto per i pulsanti di sezione
+        if (utilityNavButtons) utilityNavButtons.style.display = 'flex'; 
+        if (navButtonsContainer) navButtonsContainer.style.display = 'none';
 
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
-            // navButtonsContainer (per i pulsanti di sezione) rimane 'none'
-            // utilityNavButtons è già 'flex'
             mainTitleGlobal.innerHTML = "Elenco Veicoli";
             if (listaTargheCompleta.length > 0 &&
                 (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
@@ -1022,10 +1017,9 @@
         } else if (viewName === 'checklist' || viewName === 'history') {
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
-             // utilityNavButtons è già 'flex'
 
             if (viewName === 'checklist') {
-                 if (navButtonsContainer) navButtonsContainer.style.display = 'flex'; // Mostra i pulsanti di sezione
+                 if (navButtonsContainer) navButtonsContainer.style.display = 'flex';
                 if (!targaSelezionataGlobalmente) {
                     alert("Nessuna targa selezionata.");
                     showView('landing');
@@ -1037,18 +1031,16 @@
                     ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
                     : "";
                 mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
-            } else { // history view
+            } else { 
                 historyPageSection.style.display = 'block';
-                // navButtonsContainer (per i pulsanti di sezione) rimane 'none'
                 mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
                 populateSavedTargasList();
             }
             updateNavButtonColors();
-        } else { // Caso non previsto o vista senza header fisso
+        } else { 
             pageHeaderContainer.classList.remove('fixed-header');
             headerCircles.style.display = 'none';
             if (utilityNavButtons) utilityNavButtons.style.display = 'none';
-            // navButtonsContainer (per i pulsanti di sezione) rimane 'none'
             mainTitleGlobal.innerHTML = "";
         }
 
@@ -1401,10 +1393,10 @@
             el.classList.remove('animate-me');
         });
         sections.forEach(s => s.classList.toggle('active', s.id === targetId + 'Section'));
-        navButtons.forEach(b => { // Si riferisce ai pulsanti di navigazione delle sezioni
+        navButtons.forEach(b => { 
             b.classList.toggle('active', b.dataset.target === targetId);
         });
-        updateNavButtonColors(); // Aggiorna i colori solo per i pulsanti di navigazione delle sezioni
+        updateNavButtonColors(); 
         const targetSectionElement = document.getElementById(targetId + 'Section');
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
              setTimeout(initSequentialAnimation, 100);
@@ -1413,7 +1405,7 @@
         }
     }
 
-    navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); })); // Solo per i pulsanti di navigazione delle sezioni
+    navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
 
     function getSelectText(selectElementOrId) {
         const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId;
@@ -1495,15 +1487,44 @@
     document.addEventListener('DOMContentLoaded', () => {
         const preloader = document.getElementById('preloader');
 
-        // Aggiungi event listener ai bottoni "Compila Default"
+        // --- INIZIO MODIFICA PER BOTTONE COMPILA DEFAULT ---
         document.querySelectorAll('.fill-defaults-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const sectionId = this.dataset.sectionid;
+            button.addEventListener('click', function() { // 'this' qui è il .fill-defaults-btn cliccato
+                const sectionId = this.dataset.sectionid; // Es. "remarketingSection"
+                const sectionTarget = sectionId.replace('Section', ''); // Es. "remarketing"
+
                 if (sectionId) {
-                    fillSectionPositiveOrDefaults(sectionId);
+                    fillSectionPositiveOrDefaults(sectionId); // Compila i campi
+
+                    // Logica "Salva e Prosegui"
+                    if (saveProgress(targaSelezionataGlobalmente)) {
+                        // Il salvataggio è andato a buon fine (saveProgress gestisce gli alert in caso di fallimento)
+                        
+                        // Naviga alla sezione successiva
+                        let currentSectionIndex = -1;
+                        navButtons.forEach((nb, index) => { // navButtons sono i pulsanti principali (1. Remarketing, etc.)
+                            if (nb.dataset.target === sectionTarget) {
+                                currentSectionIndex = index;
+                            }
+                        });
+
+                        if (currentSectionIndex !== -1) { // Se la sezione corrente è stata trovata
+                            if (currentSectionIndex < navButtons.length - 1) { // Se non è l'ultimo pulsante (es. Riepilogo)
+                                const nextNavButton = navButtons[currentSectionIndex + 1];
+                                if (nextNavButton && nextNavButton.dataset.target) {
+                                    showSection(nextNavButton.dataset.target);
+                                }
+                            }
+                            // Se la sezione corrente è l'ultima prima del riepilogo (es. "danniVerifiche"),
+                            // la logica sopra la manderà correttamente a "riepilogo".
+                            // Non c'è un pulsante "fill-defaults" nella sezione riepilogo.
+                        }
+                    }
+                    // Se saveProgress fallisce, avrà mostrato un alert e non si prosegue.
                 }
             });
         });
+        // --- FINE MODIFICA PER BOTTONE COMPILA DEFAULT ---
 
 
         if (tipoTrazioneSelect) {
@@ -1519,7 +1540,7 @@
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
 
         async function initializeApplicationViewAndLoadData() {
-            showView('landing'); // Chiama showView per impostare lo stato iniziale corretto dei pulsanti
+            showView('landing'); 
 
             if (preloader) {
                 preloader.style.display = 'flex';
@@ -1550,8 +1571,7 @@
                     const defaultCloseText = "CHIUSURA IN CORSO...";
                     const glitchText = "ERRORE DI SISTEMA...";
 
-                    // --- Fase 1: Animazione normale (0.8 secondi) ---
-                    exitCurtain.classList.remove('glitching', 'flash-out-effect'); // Rimuove anche la vecchia classe tv-off-effect se presente
+                    exitCurtain.classList.remove('glitching', 'flash-out-effect'); 
                     if (exitLoadingText) {
                         exitLoadingText.textContent = defaultCloseText;
                         exitLoadingText.style.animation = 'textGlow 1.8s infinite alternate ease-in-out';
@@ -1565,16 +1585,14 @@
                     exitCurtain.style.display = 'flex';
 
                     setTimeout(() => {
-                        // --- Fase 2: Effetto glitch (0.8 secondi) ---
                         exitCurtain.classList.add('glitching');
                         if (exitLoadingText) {
                            exitLoadingText.textContent = glitchText;
-                           exitLoadingText.style.animation = ''; // Lascia che CSS per .glitching .loading-text prenda il controllo
+                           exitLoadingText.style.animation = ''; 
                         }
                         exitCurtain.setAttribute('data-text', glitchText);
 
                         setTimeout(() => {
-                            // --- Fase 3: Visualizzazione testo "Applicazione terminata." (0.7 secondi) ---
                             exitCurtain.classList.remove('glitching');
                             if (exitLoadingText) {
                                 exitLoadingText.textContent = 'Applicazione terminata.';
@@ -1585,24 +1603,19 @@
                             if (barContainer) barContainer.style.display = 'none';
 
                             setTimeout(() => {
-                                // --- Fase 4: Effetto Flash Out sul testo (0.5 secondi) ---
                                 exitCurtain.classList.add('flash-out-effect');
-                                // L'animazione textFlashOut è applicata da CSS
-
                                 setTimeout(() => {
-                                    // --- Fase 5: Dopo l'animazione Flash Out ---
-                                    // Il testo è ora invisibile
                                     const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
                                     fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
                                         .then(response => console.log('Macrodroid trigger request sent.'))
                                         .catch(error => console.error('Error sending Macrodroid trigger:', error));
-                                }, 500); // Corrisponde alla durata di textFlashOut (0.5s)
+                                }, 500); 
 
-                            }, 700); // Tempo di visualizzazione del testo "Applicazione terminata."
+                            }, 700); 
 
-                        }, 800); // Durata dell'effetto glitch
+                        }, 800); 
 
-                    }, 800); // Durata dell'animazione normale
+                    }, 800); 
                 }
             });
         }
