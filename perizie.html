@@ -717,7 +717,7 @@
     const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons'); 
     const mainPageNavButtons = navButtonsContainer.querySelector('#mainPageNavButtons'); 
     const utilityNavButtons = pageHeaderContainer.querySelector('#utilityNavButtons'); 
-    const serverActivityIndicator = document.getElementById('server-activity-indicator'); // NUOVO
+    const serverActivityIndicator = document.getElementById('server-activity-indicator'); 
 
     const navButtons = mainPageNavButtons.querySelectorAll('button[data-target]');
     
@@ -736,15 +736,14 @@
     const cavoRapidaSelect = document.getElementById('cavo_ricarica_rapida');
     const cavoDomesticaSelect = document.getElementById('cavo_ricarica_domestica');
     
-    // MODIFICATO: URL del CSV originale e URL dello script Google Apps
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDE4_oBBvcTHZARXZDPV1saP1ca6tfKbs6G08Vp_nKnDJwpPYBh1KsRk4D5fs8eAOu/exec'; // MODIFICATO: Inserisci il tuo URL corretto
+    // *** URL SCRIPT AGGIORNATO ***
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8uCR8CjMrP9tYmAsYyvojxKG9_keNepAwzS6oqIpFvlap5f5BF-mmdr7Al7orPUk/exec'; 
 
-    let listaTargheCompleta = []; // Conterrà i dati base dal CSV
+    let listaTargheCompleta = []; 
     let targaSelezionataGlobalmente = null;
-    const APP_PREFIX = 'periziaApp_'; // Prefisso per localStorage (usato come cache/fallback)
+    const APP_PREFIX = 'periziaApp_'; 
 
-    // NUOVO: Helper per mostrare/nascondere indicatore attività server
     function showServerActivity(message = "Operazione in corso con il server...") {
         if (serverActivityIndicator) {
             serverActivityIndicator.querySelector('.loading-text').textContent = message;
@@ -757,13 +756,12 @@
         }
     }
 
-    // NUOVO: Helper per chiamate allo script Google Apps
     async function callGoogleScript(action, payload, method = 'POST') {
         showServerActivity(`Invio dati: ${action}...`);
         try {
             const options = {
                 method: method,
-                mode: 'cors', // Assicurati che lo script sia configurato per CORS se necessario
+                mode: 'cors', 
                 cache: 'no-cache',
             };
             let url = GOOGLE_SCRIPT_URL;
@@ -773,19 +771,29 @@
                 options.body = JSON.stringify({ action: action, payload: payload });
             } else { // GET
                 url += `?action=${encodeURIComponent(action)}`;
-                if (payload) { // Per GET, payload sono i parametri URL
+                if (payload) { 
                     for (const key in payload) {
                         url += `&${encodeURIComponent(key)}=${encodeURIComponent(payload[key])}`;
                     }
                 }
             }
             
-            const response = await fetch(url, options);
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Errore HTTP ${response.status}: ${errorText}`);
+            console.log(`[callGoogleScript] Calling URL: ${url} with method: ${method}`);
+            if (method === 'POST') {
+                console.log(`[callGoogleScript] POST body: ${options.body}`);
             }
-            const result = await response.json();
+
+            const response = await fetch(url, options);
+            
+            console.log(`[callGoogleScript] Response status: ${response.status}`);
+            const responseText = await response.text(); // Leggi sempre il testo per debug
+            console.log(`[callGoogleScript] Response text: ${responseText}`);
+
+            if (!response.ok) {
+                throw new Error(`Errore HTTP ${response.status}: ${responseText}`);
+            }
+
+            const result = JSON.parse(responseText); // Prova a parsare come JSON
             console.log(`Risposta da Google Script per azione '${action}':`, result);
             hideServerActivity();
             return result;
@@ -793,7 +801,7 @@
             console.error(`Errore chiamata Google Script (azione: ${action}):`, error);
             alert(`Errore di comunicazione con il server per l'azione '${action}'. Dettagli in console.`);
             hideServerActivity();
-            throw error; // Rilancia l'errore per gestirlo a monte se necessario
+            throw error; 
         }
     }
 
@@ -802,7 +810,6 @@
         const section = document.getElementById(sectionId);
         if (!section) return;
 
-        // Remarketing Section
         if (sectionId === 'remarketingSection') {
             if (tipoTrazioneSelect) tipoTrazioneSelect.value = 'endotermico';
             document.getElementById('foto_angolari').checked = true;
@@ -823,14 +830,12 @@
                 if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'presente';
             }
         }
-        // Pneumatici Section
         else if (sectionId === 'pneumaticiSection') {
             document.getElementById('pneumatico_as').value = 'conforme';
             document.getElementById('pneumatico_ad').value = 'conforme';
             document.getElementById('pneumatico_pd').value = 'conforme';
             document.getElementById('pneumatico_ps').value = 'conforme';
         }
-        // Danni/Verifiche Section
         else if (sectionId === 'danniVerificheSection') {
             document.getElementById('motore_accende').value = 'ok';
             document.getElementById('batteria_stato').value = 'ok';
@@ -867,25 +872,19 @@
         updateNavButtonColors();
     }
 
-    // MODIFICATO: savePosizioneForTarga
     async function savePosizioneForTarga(targa, posizione) {
         if (!targa) return;
         try {
-            // Salvataggio su Google Sheet
             await callGoogleScript('savePosizione', { targa: targa, posizione: posizione });
             console.log(`Posizione per ${targa} salvata su Google Sheet.`);
-            // Salvataggio (cache) su localStorage
             localStorage.setItem(`${APP_PREFIX}posizione_${targa}`, posizione);
         } catch (e) {
             console.error("Errore salvataggio posizione (Google Sheet o LS):", e);
-            // Potresti voler notificare l'utente qui se il salvataggio primario fallisce
         }
     }
 
     function loadPosizioneForTarga(targa) {
         if (!targa) return "";
-        // Priorità a localStorage per velocità UI, ma idealmente dovrebbe essere caricato da server
-        // e localStorage usato solo come cache. Per ora, manteniamo la logica LS.
         try {
             return localStorage.getItem(`${APP_PREFIX}posizione_${targa}`) || "";
         } catch (e) {
@@ -894,14 +893,11 @@
         }
     }
 
-    // MODIFICATO: saveUrgentStatusForTarga
     async function saveUrgentStatusForTarga(targa, isUrgent) {
         if (!targa) return;
         try {
-            // Salvataggio su Google Sheet
             await callGoogleScript('saveUrgentStatus', { targa: targa, isUrgent: isUrgent });
             console.log(`Stato urgenza per ${targa} salvato su Google Sheet.`);
-            // Salvataggio (cache) su localStorage
             localStorage.setItem(`${APP_PREFIX}urgent_${targa}`, JSON.stringify(isUrgent));
         } catch (e) {
             console.error("Errore salvataggio stato urgenza (Google Sheet o LS):", e);
@@ -910,7 +906,6 @@
 
     function loadUrgentStatusForTarga(targa) {
         if (!targa) return false;
-        // Priorità a localStorage per ora
         try {
             const status = localStorage.getItem(`${APP_PREFIX}urgent_${targa}`);
             return status ? JSON.parse(status) : false;
@@ -934,7 +929,6 @@
         console.log("Modulo resettato.");
     }
 
-    // MODIFICATO: saveProgress
     async function saveProgress(targa) {
         if(!targa){console.warn("Nessuna targa attiva per il salvataggio.");return false;}
         const dataToSave = {};
@@ -945,9 +939,24 @@
             }
         });
 
+        console.log(`[DEBUG] Chiamata a saveProgress per targa: ${targa}`);
+        console.log("[DEBUG] Dati da salvare (dataToSave):", JSON.stringify(dataToSave, null, 2)); 
+        console.log("[DEBUG] Sto per chiamare callGoogleScript con action 'saveProgress'");
+
+
         let savedToSheet = false;
         try {
-            const scriptResponse = await callGoogleScript('saveProgress', { targa: targa, data: dataToSave });
+            // Includi marca, modello, piazzale nel payload se disponibili, per la creazione della riga
+            const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targa);
+            const payloadPerSalvataggio = {
+                targa: targa,
+                data: dataToSave,
+                marca: veicoloAttuale ? veicoloAttuale.marca : "",
+                modello: veicoloAttuale ? veicoloAttuale.modello : "",
+                piazzale: veicoloAttuale ? veicoloAttuale.piazzale : ""
+            };
+
+            const scriptResponse = await callGoogleScript('saveProgress', payloadPerSalvataggio);
             if (scriptResponse && scriptResponse.success) {
                 console.log(`Progresso salvato su Foglio Google per la targa ${targa}.`);
                 savedToSheet = true;
@@ -957,24 +966,20 @@
             }
         } catch(e) {
             console.error("Errore durante l'invio dei dati allo script per saveProgress:", e);
-            alert("Errore di comunicazione con il server di salvataggio. I dati sono salvati localmente come backup.");
         }
         
-        // Salvataggio su localStorage come cache/fallback
         try {
             localStorage.setItem(`${APP_PREFIX}data_${targa}`, JSON.stringify(dataToSave));
             console.log(`Progresso salvato (localStorage cache) per la targa ${targa}.`);
         } catch(e) {
             console.error("Errore durante il salvataggio in localStorage:", e);
-            // Non mostrare un alert se il salvataggio su Sheet è andato a buon fine
             if (!savedToSheet) alert("Salvataggio locale fallito. Spazio esaurito o errore del browser.");
         }
         
         updateNavButtonColors();
-        return savedToSheet; // Ritorna true se salvato su Sheet, altrimenti false (ma potrebbe essere in LS)
+        return savedToSheet; 
     }
 
-    // MODIFICATO: loadProgress
     async function loadProgress(targa) {
         if(!targa) return;
         resetChecklistForm();
@@ -986,38 +991,36 @@
             hideServerActivity();
 
             if (serverResponse && serverResponse.success && serverResponse.data) {
-                const data = serverResponse.data;
+                const data = serverResponse.data; // Questo 'data' ora dovrebbe contenere tutti i campi dal foglio
                 document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => {
                     if (el.id && data.hasOwnProperty(el.id)) {
                         if (el.type === 'checkbox') el.checked = data[el.id];
                         else el.value = data[el.id];
                     }
                 });
-                // Aggiorna anche posizione e urgenza se caricate dal server
+                // Aggiorna posizione, urgenza, completato da 'data' se presenti
                 if (data.posizione !== undefined) {
                      const posInput = document.querySelector(`.posizione-input[data-targa="${targa}"]`);
                      if(posInput) posInput.value = data.posizione;
-                     localStorage.setItem(`${APP_PREFIX}posizione_${targa}`, data.posizione); // Aggiorna cache LS
+                     localStorage.setItem(`${APP_PREFIX}posizione_${targa}`, data.posizione); 
                 }
                 if (data.isUrgent !== undefined) {
-                    const urgentCheckbox = document.querySelector(`#targaListContainer input[type="checkbox"][data-targa-urgent="${targa}"]`); // Dovrai aggiungere un data attribute per identificarlo
+                    const urgentCheckbox = document.querySelector(`#targaListContainer input[type="checkbox"][data-targa-urgent="${targa}"]`); 
                     if(urgentCheckbox) urgentCheckbox.checked = data.isUrgent;
-                    localStorage.setItem(`${APP_PREFIX}urgent_${targa}`, JSON.stringify(data.isUrgent)); // Aggiorna cache LS
+                    localStorage.setItem(`${APP_PREFIX}urgent_${targa}`, JSON.stringify(data.isUrgent)); 
                 }
                  if (data.isCompleted !== undefined) {
-                    // Potrebbe essere necessario un modo per memorizzare questo stato per l'UI
-                    // Per ora, se completato, lo salviamo in LS per coerenza con la vecchia logica
-                    if (data.isCompleted) {
-                        const completedLS = getCompletedTarghe();
-                        completedLS[targa] = true;
-                        localStorage.setItem(`${APP_PREFIX}completedTarghe`, JSON.stringify(completedLS));
-                    }
+                    const completedLS = getCompletedTarghe(); // Usa la funzione per ottenere l'oggetto
+                    completedLS[targa] = data.isCompleted; // Imposta lo stato
+                    localStorage.setItem(`${APP_PREFIX}completedTarghe`, JSON.stringify(completedLS)); // Salva
                 }
-                console.log(`Progresso caricato da server per la targa ${targa}.`);
-                localStorage.setItem(`${APP_PREFIX}data_${targa}`, JSON.stringify(data)); // Aggiorna cache LS
+                console.log(`Progresso caricato da server per la targa ${targa}. Dati:`, data);
+                // Salva l'intero oggetto 'data' (che contiene i campi della checklist) in localStorage
+                // per coerenza con la logica di getSectionStatus
+                localStorage.setItem(`${APP_PREFIX}data_${targa}`, JSON.stringify(data)); 
                 loadedFromServer = true;
             } else {
-                console.log(`Nessun dato da server per ${targa} o errore script. Tento fallback localStorage.`);
+                console.log(`Nessun dato da server per ${targa} o errore script (${serverResponse?.message}). Tento fallback localStorage.`);
             }
         } catch(e) {
             console.error("Errore durante il caricamento da server:", e);
@@ -1053,7 +1056,6 @@
 
     function getCompletedTarghe() { try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){return{};}}
     
-    // MODIFICATO: markTargaAsCompleted
     async function markTargaAsCompleted(targa) { 
         if(!targa)return; 
         let markedOnSheet = false;
@@ -1068,7 +1070,6 @@
         } catch(e) {
             console.error(`Errore chiamata script per markTargaAsCompleted ${targa}:`,e);
         }
-        // Aggiorna anche localStorage per coerenza UI immediata
         try{
             const completed=getCompletedTarghe();
             completed[targa]=true;
@@ -1079,13 +1080,10 @@
     }
 
     function isTargaCompleted(targa) { 
-        // Questa funzione ora dovrebbe idealmente controllare lo stato da una fonte aggiornata
-        // dal server, ma per ora si basa su localStorage che viene aggiornato da loadProgress/markTargaAsCompleted.
         const completed=getCompletedTarghe(); 
         return !!(completed[targa]); 
     }
 
-    // MODIFICATO: deleteProgressForTarga
     async function deleteProgressForTarga(targa) {
         if(!targa){return;}
         let deletedOnSheet = false;
@@ -1099,10 +1097,8 @@
             }
         } catch(e) {
             console.error(`Errore chiamata script per deleteProgress ${targa}:`,e);
-            alert(`Errore cancellazione dati per ${targa} sul server. Prova a cancellare da localStorage.`);
         }
 
-        // Rimuovi da localStorage
         try {
             localStorage.removeItem(`${APP_PREFIX}data_${targa}`);
             console.log(`Dati modulo rimossi da LS per ${targa}.`);
@@ -1122,19 +1118,16 @@
         }
 
         if (typeof popolaTargheFiltrate === 'function') {
-             popolaTargheFiltrate(); // Ricarica la lista per riflettere i cambiamenti
+             popolaTargheFiltrate(); 
         }
         if (targaSelezionataGlobalmente === targa) {
              targaSelezionataGlobalmente = null;
-             // Potrebbe essere utile tornare alla lista se la targa attiva viene cancellata
-             // showView('landing'); 
         }
-        populateSavedTargasList(); // Aggiorna la cronologia
+        populateSavedTargasList(); 
     }
 
 
     function generateAndDownloadScreenshot() {
-        // ... (codice invariato, ma assicurati che il riepilogo sia aggiornato prima di chiamare)
         return new Promise((resolve, reject) => {
             const riepilogoSection = document.getElementById('riepilogoSection');
             if (!riepilogoSection) {
@@ -1181,19 +1174,18 @@
         });
     }
     
-    // MODIFICATO: handleSavePeriziaAndReturn
     async function handleSavePeriziaAndReturn() { 
         if(!targaSelezionataGlobalmente){alert("Nessuna targa attiva selezionata.");return;} 
         
-        const savedSuccessfully = await saveProgress(targaSelezionataGlobalmente); // Salva i dati correnti
-        if(!savedSuccessfully) { // Controlla se il salvataggio su Sheet è andato a buon fine
+        const savedSuccessfully = await saveProgress(targaSelezionataGlobalmente); 
+        if(!savedSuccessfully) { 
             if (!confirm("Salvataggio sul server fallito. I dati sono salvati solo localmente. Continuare e marcare come completato localmente?")) {
                 return;
             }
         }
         
         if(document.getElementById('riepilogoSection').classList.contains('active')){
-            generateSummary(); // Assicurati che il riepilogo sia aggiornato
+            generateSummary(); 
         }
         
         try{
@@ -1202,7 +1194,7 @@
             console.warn("Generazione screenshot fallita, ma i dati potrebbero essere stati salvati.");
         } 
         
-        await markTargaAsCompleted(targaSelezionataGlobalmente); // Marca come completato (prova su Sheet, poi LS)
+        await markTargaAsCompleted(targaSelezionataGlobalmente); 
         updateNavButtonColors(); 
         
         alert(`Perizia per ${targaSelezionataGlobalmente} salvata e marcata come completata. Screenshot tentato. Torno all'elenco.`); 
@@ -1210,13 +1202,10 @@
         showView('landing');
     }
 
-    // MODIFICATO: handleSaveAndNext
     async function handleSaveAndNext() { 
         if(!targaSelezionataGlobalmente){alert("Nessuna targa selezionata.");return;} 
         
-        const savedSuccessfully = await saveProgress(targaSelezionataGlobalmente);
-        // Non bloccare la navigazione se il salvataggio su Sheet fallisce ma quello LS va a buon fine
-        // L'utente è già stato avvisato da saveProgress().
+        await saveProgress(targaSelezionataGlobalmente);
         
         const originalText=this.textContent;
         this.textContent='Salvato!';
@@ -1235,7 +1224,6 @@
     }
 
     function isInputDefault(inputElement) {
-        // ... (codice invariato)
         if (!inputElement) return true;
         if (inputElement.type === 'checkbox') return !inputElement.checked;
         if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0;
@@ -1244,14 +1232,12 @@
     }
 
     function getSectionInputs(sectionElementId) {
-        // ... (codice invariato)
         const sectionDiv = document.getElementById(sectionElementId);
         if (!sectionDiv) return [];
         return Array.from(sectionDiv.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)'));
     }
 
     function getSectionStatus(sectionElementId, targaData) {
-        // ... (codice invariato, si basa su targaData che ora può venire da LS o server)
         const inputs = getSectionInputs(sectionElementId);
         if (inputs.length === 0) return 'completed';
 
@@ -1267,7 +1253,7 @@
                 if (input.type === 'checkbox') {
                     isDefault = !savedValue;
                 } else { 
-                    isDefault = (savedValue === "" || (input.options.length > 0 && savedValue === input.options[0].value));
+                    isDefault = (savedValue === "" || (input.options && input.options.length > 0 && savedValue === input.options[0].value));
                 }
             } else {
                  isDefault = isInputDefault(input); 
@@ -1289,12 +1275,10 @@
 
 
     function updateNavButtonColors() { 
-        // ... (codice invariato, si basa su targaData che ora può venire da LS o server)
         if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); 
     }
 
     function showView(viewName) {
-        // ... (codice per mostrare/nascondere sezioni, quasi invariato)
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
@@ -1311,7 +1295,7 @@
             if (listaTargheCompleta.length > 0 &&
                 (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
                 typeof popolaTargheFiltrate === 'function') {
-                popolaTargheFiltrate(); // Questa potrebbe necessitare aggiornamenti per riflettere stati da server
+                popolaTargheFiltrate(); 
             }
             targaSelezionataGlobalmente = null;
             updateNavButtonColors();
@@ -1332,10 +1316,10 @@
                     ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
                     : "";
                 mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
-            } else { // history
+            } else { 
                 historyPageSection.style.display = 'block';
                 mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
-                populateSavedTargasList(); // MODIFICATO per caricare da server
+                populateSavedTargasList(); 
             }
             updateNavButtonColors();
         } else { 
@@ -1357,7 +1341,6 @@
         document.body.style.paddingTop = bodyPaddingTopValue;
     }
 
-    // MODIFICATO: populateSavedTargasList
     async function populateSavedTargasList() { 
         savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Caricamento cronistoria...</p>'; 
         let hasSaves = false; 
@@ -1366,16 +1349,11 @@
             const serverResponse = await callGoogleScript('loadSavedTargasList', null, 'GET');
             if (serverResponse && serverResponse.success && serverResponse.targas) {
                 const savedTargasFromServer = serverResponse.targas;
-                savedTargasListContainer.innerHTML = ''; // Pulisci il messaggio di caricamento
+                savedTargasListContainer.innerHTML = ''; 
 
                 if (savedTargasFromServer.length > 0) {
                     hasSaves = true;
-                    // Ordina le targhe, se necessario (es. per data di modifica, se disponibile)
-                    // savedTargasFromServer.sort((a,b) => a.targa.localeCompare(b.targa)); 
-
                     savedTargasFromServer.forEach(targaInfo => {
-                        // targaInfo dovrebbe contenere { targa: "...", marca: "...", modello: "...", piazzale: "...", isCompleted: true/false, ecc. }
-                        // in base a come il tuo script le restituisce
                         const targa = targaInfo.targa;
                         let displayText = targa;
                         let details = [];
@@ -1394,7 +1372,7 @@
                         button.addEventListener('click', async function() {
                             targaSelezionataGlobalmente = this.dataset.targa;
                             showView('checklist');
-                            await loadProgress(targaSelezionataGlobalmente); // Carica i dati specifici
+                            await loadProgress(targaSelezionataGlobalmente); 
                             const firstChecklistNavButton = Array.from(navButtons).find(btn => btn.dataset.target && btn.id !== 'backToListBtn' && btn.id !== 'historyBtn');
                             if (firstChecklistNavButton) {
                                 showSection(firstChecklistNavButton.dataset.target);
@@ -1413,30 +1391,26 @@
             savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #ff8888;">Errore caricamento cronistoria.</p>';
         }
 
-        if (!hasSaves && savedTargasListContainer.innerHTML.includes('Caricamento')) { // Se non ci sono stati errori ma è vuoto
+        if (!hasSaves && savedTargasListContainer.innerHTML.includes('Caricamento')) { 
              savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>';
         }
     }
     
-    // MODIFICATO: clearAllSavedData
     async function clearAllSavedData() {
         if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati dal Foglio Google e localmente (incluse posizioni, urgenze e filtro piazzale)?\n\nAzione irreversibile.")) {
             let clearedOnSheet = false;
             try {
-                const scriptResponse = await callGoogleScript('clearAllData', {}); // Invia un payload vuoto se necessario
+                const scriptResponse = await callGoogleScript('clearAllData', {}); 
                 if (scriptResponse && scriptResponse.success) {
                     console.log("Tutti i dati cancellati da Google Sheet.");
                     clearedOnSheet = true;
                 } else {
                     console.error("Errore cancellazione dati su Sheet:", scriptResponse ? scriptResponse.message : "Nessuna risposta");
-                    alert("Errore durante la cancellazione dei dati sul server. Prova a cancellare localmente.");
                 }
             } catch (e) {
                 console.error("Errore chiamata script per clearAllData:", e);
-                alert("Errore di comunicazione con il server per la cancellazione totale.");
             }
 
-            // Cancella da localStorage
             let c = 0;
             for (let i=localStorage.length-1;i>=0;i--) {
                 const k=localStorage.key(i);
@@ -1447,17 +1421,15 @@
             alert(`${c} elementi cancellati da localStorage. Risultato server: ${clearedOnSheet ? 'Successo' : 'Fallito/Sconosciuto'}.`);
             
             if(sheetFilterDropdown) sheetFilterDropdown.value = 'all';
-            // localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); // Già rimosso dal ciclo sopra se inizia con APP_PREFIX
 
-            populateSavedTargasList(); // Aggiorna la vista della cronologia (dovrebbe essere vuota)
-            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); // Ricarica la lista principale
+            populateSavedTargasList(); 
+            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); 
             if (typeof showView === 'function') showView('landing');
         }
     }
 
 
     function setupSheetFilterDropdown() {
-        // ... (codice invariato, si basa su listaTargheCompleta dal CSV)
         if (!sheetFilterDropdown) return;
         const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== ''))];
         sheetFilterDropdown.innerHTML = '';
@@ -1481,7 +1453,6 @@
     }
 
     function handleSheetFilterChange() {
-        // ... (codice invariato)
         if (sheetFilterDropdown) {
             localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value);
         }
@@ -1490,22 +1461,16 @@
     }
 
     function popolaTargheFiltrate() {
-        // Questa funzione usa ancora pesantemente localStorage per lo styling.
-        // Idealmente, gli stati (urgent, completed, partial) dovrebbero essere aggiornati
-        // da una fonte dati server-side quando la lista viene popolata o filtrata.
-        // Per ora, lasciamo la logica basata su localStorage per la UI,
-        // ma i dati caricati da `loadProgress` (dal server) aggiorneranno localStorage.
         const tEl = document.getElementById('targaListContainer');
         if (!tEl) return;
         tEl.innerHTML = '';
 
         const selectedSource = sheetFilterDropdown ? sheetFilterDropdown.value : 'all';
         let preliminaryFilteredList = selectedSource === 'all'
-            ? [...listaTargheCompleta] // Usa i dati base dal CSV
+            ? [...listaTargheCompleta] 
             : listaTargheCompleta.filter(item => item.piazzale === selectedSource);
 
         function getItemRank(item) {
-            // Usa i dati da localStorage per l'ordinamento e lo stile rapido
             const isUrgent = loadUrgentStatusForTarga(item.targa); 
             const isCompleted = isTargaCompleted(item.targa);
             const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
@@ -1521,7 +1486,6 @@
             const rankA = getItemRank(a);
             const rankB = getItemRank(b);
             if (rankA !== rankB) return rankA - rankB;
-            // Se il CSV non ha marca/modello, questo potrebbe dare errore se sono undefined
             return (a.targa || "").localeCompare(b.targa || "");
         });
         const filteredList = preliminaryFilteredList;
@@ -1535,7 +1499,6 @@
             const li = document.createElement('div');
             li.classList.add('targa-list-item');
 
-            // Stile basato su localStorage (che dovrebbe essere aggiornato da loadProgress)
             const itemCompleted = isTargaCompleted(item.targa);
             const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
             const isItemUrgent = loadUrgentStatusForTarga(item.targa);
@@ -1558,13 +1521,13 @@
             targaCol.textContent = item.targa || 'N/D';
             targaCol.dataset.targaValue = item.targa;
 
-            targaCol.addEventListener('click', async function() { // MODIFICATO: async
+            targaCol.addEventListener('click', async function() { 
                 const selectedTarga = this.dataset.targaValue;
                 if (selectedTarga) {
                     targaSelezionataGlobalmente = selectedTarga;
                     console.log(`Targa ${targaSelezionataGlobalmente} selezionata per perizia.`);
                     showView('checklist');
-                    await loadProgress(targaSelezionataGlobalmente); // MODIFICATO: await per caricamento da server
+                    await loadProgress(targaSelezionataGlobalmente); 
                     const firstNav = Array.from(navButtons).find(b => b.dataset.target && b.id !== 'backToListBtn' && b.id !== 'historyBtn' && b.id !== 'exitAppBtn');
                     if (firstNav) {
                         showSection(firstNav.dataset.target);
@@ -1580,14 +1543,14 @@
             const posizioneInput = document.createElement('input');
             posizioneInput.type = 'text'; posizioneInput.classList.add('posizione-input');
             posizioneInput.dataset.targa = item.targa; posizioneInput.placeholder = 'Pos.';
-            posizioneInput.maxLength = 5; posizioneInput.value = loadPosizioneForTarga(item.targa); // Carica da LS per UI rapida
+            posizioneInput.maxLength = 5; posizioneInput.value = loadPosizioneForTarga(item.targa); 
             posizioneInput.addEventListener('mousedown', (e) => e.stopPropagation());
             posizioneInput.addEventListener('click', (e) => e.stopPropagation());
             posizioneInput.addEventListener('focus', (e) => e.stopPropagation());
-            posizioneInput.addEventListener('blur', async function() { // MODIFICATO: async
+            posizioneInput.addEventListener('blur', async function() { 
                 const newPosition = this.value.trim().toUpperCase();
-                if (newPosition !== loadPosizioneForTarga(this.dataset.targa)) { // Confronta con LS per evitare salvataggi inutili
-                    await savePosizioneForTarga(this.dataset.targa, newPosition); // Salva su server e LS
+                if (newPosition !== loadPosizioneForTarga(this.dataset.targa)) { 
+                    await savePosizioneForTarga(this.dataset.targa, newPosition); 
                     this.style.transition = 'background-color 0.3s ease';
                     this.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
                     setTimeout(() => { this.style.backgroundColor = ''; }, 1000);
@@ -1601,13 +1564,13 @@
             urgenzaCol.classList.add('targa-col', 'targa-col-urgenza');
             const urgenzaCheckbox = document.createElement('input');
             urgenzaCheckbox.type = 'checkbox';
-            urgenzaCheckbox.checked = isItemUrgent; // Da LS per UI rapida
+            urgenzaCheckbox.checked = isItemUrgent; 
             urgenzaCheckbox.title = isItemUrgent ? "Togli urgenza" : "Marca come urgente";
-            urgenzaCheckbox.dataset.targaUrgent = item.targa; // Per identificarlo in loadProgress
+            urgenzaCheckbox.dataset.targaUrgent = item.targa; 
             urgenzaCheckbox.addEventListener('mousedown', (e) => e.stopPropagation());
             urgenzaCheckbox.addEventListener('click', (e) => e.stopPropagation());
-            urgenzaCheckbox.addEventListener('change', async function() { // MODIFICATO: async
-                await saveUrgentStatusForTarga(item.targa, this.checked); // Salva su server e LS
+            urgenzaCheckbox.addEventListener('change', async function() { 
+                await saveUrgentStatusForTarga(item.targa, this.checked); 
                 this.title = this.checked ? "Togli urgenza" : "Marca come urgente";
                 popolaTargheFiltrate(); 
             });
@@ -1632,11 +1595,11 @@
             const delB = document.createElement('button');
             delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = item.targa;
             delB.title = `Cancella progressi per ${item.targa}`; delB.textContent = 'X';
-            delB.addEventListener('click', async function(event) { // MODIFICATO: async
+            delB.addEventListener('click', async function(event) { 
                 event.stopPropagation();
                 const tDel = this.dataset.targa;
                 if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (dal server e localmente, inclusa posizione e urgenza)?\n\nAzione irreversibile.`)) {
-                    await deleteProgressForTarga(tDel); // MODIFICATO
+                    await deleteProgressForTarga(tDel); 
                 }
             });
             actionsCol.appendChild(delB);
@@ -1649,13 +1612,11 @@
     }
 
     async function caricaEPopolaTarghe() {
-        // Questa funzione carica solo l'elenco base dei veicoli dal CSV.
-        // I dati di perizia specifici verranno caricati da loadProgress() quando si seleziona una targa.
         const preloader = document.getElementById('preloader');
         if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento elenco veicoli dal server...";
 
         try {
-            const r = await fetch(GOOGLE_SHEET_CSV_URL); // Carica il CSV base
+            const r = await fetch(GOOGLE_SHEET_CSV_URL); 
             if (!r.ok) {
                 let e = `HTTP ${r.status}.`;
                 if (r.status === 0) e = "Errore di rete o CORS.";
@@ -1674,7 +1635,6 @@
                 return;
             }
             
-            // Assumo che il CSV non abbia ancora le colonne dei dati salvati, solo i dati base del veicolo
             listaTargheCompleta = lines.map(l => {
                 const p = l.split(',');
                 return {
@@ -1682,7 +1642,6 @@
                     marca: (p[1] || '').trim().replace(/^"|"$/g, ''),
                     modello: (p[2] || '').trim().replace(/^"|"$/g, ''),
                     piazzale: (p[3] || '').trim().replace(/^"|"$/g, '')
-                    // Non carichiamo 'isUrgent' o altri dati salvati da qui, verranno da loadProgress
                 };
             }).filter(i => i.targa && i.targa.length > 3);
 
@@ -1694,7 +1653,7 @@
             }
 
             setupSheetFilterDropdown();
-            popolaTargheFiltrate(); // Popola la lista UI. Gli stati verranno da LS inizialmente.
+            popolaTargheFiltrate(); 
 
         } catch (e) {
             console.error("Errore caricamento/popolamento targhe (CSV):", e);
@@ -1713,7 +1672,6 @@
     }
 
     function initSequentialAnimation() {
-        // ... (codice invariato)
         const checklistContainerDiv = document.getElementById('checklistContainer');
         if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return;
         const activeSection = checklistContainerDiv.querySelector('.category-section.active');
@@ -1803,7 +1761,6 @@
 
 
     function showSection(targetId) {
-        // ... (codice invariato)
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
             el.classList.remove('animate-me');
         });
@@ -1823,7 +1780,6 @@
     navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
 
     function getSelectText(selectElementOrId) {
-        // ... (codice invariato)
         const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId;
         if (el && el.tagName === 'SELECT' && el.value !== "") {
             if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) {
@@ -1835,9 +1791,6 @@
     }
 
     function generateSummary() {
-        // Questa funzione si basa sui valori attuali nel DOM e su localStorage per posizione/urgenza.
-        // Se `loadProgress` ha aggiornato correttamente il DOM e localStorage con i dati dal server,
-        // il riepilogo dovrebbe essere corretto.
         summaryContent.innerHTML = '';
         let targa = targaSelezionataGlobalmente || "N/D";
         function createSummaryItem(label, value, isAnomaly = false) {
@@ -1911,33 +1864,30 @@
         const preloader = document.getElementById('preloader');
 
         document.querySelectorAll('.fill-defaults-btn').forEach(button => {
-            button.addEventListener('click', async function() { // MODIFICATO: async 
+            button.addEventListener('click', async function() { 
                 const sectionId = this.dataset.sectionid; 
                 const sectionTarget = sectionId.replace('Section', ''); 
 
                 if (sectionId) {
                     fillSectionPositiveOrDefaults(sectionId); 
 
-                    const saved = await saveProgress(targaSelezionataGlobalmente); // MODIFICATO: await
-                    // Non bloccare la navigazione anche se il salvataggio su Sheet fallisce,
-                    // l'utente è già stato avvisato.
-                    // if (saved) { 
-                        let currentSectionIndex = -1;
-                        navButtons.forEach((nb, index) => { 
-                            if (nb.dataset.target === sectionTarget) {
-                                currentSectionIndex = index;
-                            }
-                        });
+                    await saveProgress(targaSelezionataGlobalmente); 
+                    
+                    let currentSectionIndex = -1;
+                    navButtons.forEach((nb, index) => { 
+                        if (nb.dataset.target === sectionTarget) {
+                            currentSectionIndex = index;
+                        }
+                    });
 
-                        if (currentSectionIndex !== -1) { 
-                            if (currentSectionIndex < navButtons.length - 1) { 
-                                const nextNavButton = navButtons[currentSectionIndex + 1];
-                                if (nextNavButton && nextNavButton.dataset.target) {
-                                    showSection(nextNavButton.dataset.target);
-                                }
+                    if (currentSectionIndex !== -1) { 
+                        if (currentSectionIndex < navButtons.length - 1) { 
+                            const nextNavButton = navButtons[currentSectionIndex + 1];
+                            if (nextNavButton && nextNavButton.dataset.target) {
+                                showSection(nextNavButton.dataset.target);
                             }
                         }
-                    // }
+                    }
                 }
             });
         });
@@ -1950,10 +1900,10 @@
 
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
-        if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData); // Già async
+        if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData); 
         if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
-        if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn); // Già async
-        saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext)); // Già async
+        if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn); 
+        saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext)); 
 
         async function initializeApplicationViewAndLoadData() {
             showView('landing'); 
@@ -1966,16 +1916,12 @@
                 const loadingText = preloader.querySelector('.loading-text');
                 if (loadingText) loadingText.textContent = 'CARICAMENTO ELENCO VEICOLI...';
             }
-            await caricaEPopolaTarghe(); // Carica CSV
-            // Potresti voler fare una chiamata iniziale qui per aggiornare gli stati (urgenza, completamento)
-            // della lista targhe da Google Sheet, se non vuoi dipendere solo da localStorage all'avvio.
-            // Esempio: await updateTargaListStatusesFromServer();
+            await caricaEPopolaTarghe(); 
         }
 
         initializeApplicationViewAndLoadData();
 
         if (exitAppBtn) {
-            // ... (codice uscita invariato)
             exitAppBtn.addEventListener('click', () => {
                 const exitCurtain = document.getElementById('exit-curtain');
                 const mainContentWrapper = document.getElementById('mainContentWrapper');
