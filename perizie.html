@@ -247,13 +247,13 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
-        #navButtons {
+        #navButtons { /* Contenitore per i pulsanti di navigazione principali delle sezioni */
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Mantenuto per mainPageNavButtons se necessario */
             align-items: center;
             width: 100%;
         }
-        #mainPageNavButtons {
+        #mainPageNavButtons { /* Pulsanti specifici per le sezioni della checklist */
             display: flex;
             justify-content: center;
             flex-wrap: nowrap;
@@ -266,17 +266,18 @@
             margin: 3px;
             flex-shrink: 0;
         }
-        #utilityNavButtons {
+        #utilityNavButtons { /* Pulsanti di utilità globali */
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 5px;
+            margin-top: 5px; /* Spazio sopra i pulsanti di utilità */
+            margin-bottom: 5px; /* Spazio sotto i pulsanti di utilità, prima del titolo */
         }
         #utilityNavButtons button {
             margin: 3px 5px;
         }
 
-        #navButtons button, .action-button {
+        #navButtons button, .action-button { /* Stile generale per tutti i pulsanti d'azione, inclusi quelli in utilityNavButtons */
              padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-size: 0.9em;
         }
         .save-and-next-btn { background-color: #0069d9 !important; border-color: #005cbf !important; }
@@ -289,7 +290,7 @@
             100% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
         }
 
-        #navButtons button.active {
+        #navButtons button.active { /* Solo per i pulsanti di navigazione delle sezioni */
             background-color: #0056b3 !important; border-color: #004085 !important; color: white !important;
             animation-name: activeButtonGlow; animation-duration: 1.8s;
             animation-iteration-count: infinite; animation-timing-function: ease-in-out;
@@ -514,6 +515,11 @@
         <div class="header-circles">
             <div class="circle"></div> <div class="circle"></div> <div class="circle"></div> <div class="circle"></div>
         </div>
+        <div id="utilityNavButtons">
+            <button id="backToListBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe</button>
+            <button id="historyBtn" class="action-button" style="background-color: #17a2b8; border-color: #117a8b;">Salvataggi</button>
+            <button id="exitAppBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Esci</button>
+        </div>
         <h1 id="mainTitleGlobal">Checklist Perizia Veicolo</h1>
         <div id="navButtons">
             <div id="mainPageNavButtons">
@@ -522,13 +528,8 @@
                 <button data-target="danniVerifiche">3. Danni/Verifiche</button>
                 <button data-target="riepilogo">Riepilogo</button>
             </div>
-            <div id="utilityNavButtons">
-                <button id="backToListBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe</button>
-                <button id="historyBtn" class="action-button" style="background-color: #17a2b8; border-color: #117a8b;">Salvataggi</button>
-                <button id="exitAppBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Esci</button>
             </div>
         </div>
-    </div>
 
     <div class="content-wrapper" id="mainContentWrapper">
         <div id="landingPageSection" style="display: block;">
@@ -679,14 +680,20 @@
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
     const headerCircles = pageHeaderContainer.querySelector('.header-circles');
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
-    const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons');
-    const navButtons = navButtonsContainer.querySelectorAll('#mainPageNavButtons button[data-target]');
-    const utilityButtons = navButtonsContainer.querySelectorAll('#utilityNavButtons button');
+    const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons'); // Questo ora si riferisce al contenitore dei pulsanti di sezione (mainPageNavButtons)
+    const mainPageNavButtons = navButtonsContainer.querySelector('#mainPageNavButtons'); // Pulsanti di navigazione delle sezioni
+    const utilityNavButtons = pageHeaderContainer.querySelector('#utilityNavButtons'); // Pulsanti di utilità (spostati)
+
+    // Aggiorniamo la variabile 'navButtons' per riferirsi solo ai pulsanti delle sezioni della checklist
+    const navButtons = mainPageNavButtons.querySelectorAll('button[data-target]');
+    
+    // I pulsanti di utilità sono già referenziati da 'utilityNavButtons', ma se servono individualmente:
+    const backToListBtn = utilityNavButtons.querySelector('#backToListBtn');
+    const historyBtn = utilityNavButtons.querySelector('#historyBtn');
+    const exitAppBtn = utilityNavButtons.querySelector('#exitAppBtn');
+    
     const sections = document.querySelectorAll('#checklistContainer .category-section');
     const summaryContent = document.getElementById('summaryContent');
-    const backToListBtn = pageHeaderContainer.querySelector('#backToListBtn');
-    const historyBtn = pageHeaderContainer.querySelector('#historyBtn');
-    const exitAppBtn = pageHeaderContainer.querySelector('#exitAppBtn');
     const clearAllProgressBtn = document.getElementById('clearAllProgressBtn');
     const backToLandingFromHistoryBtn = document.getElementById('backToLandingFromHistoryBtn');
     const saveAndReturnBtn = document.getElementById('saveAndReturnBtn');
@@ -993,11 +1000,17 @@
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
         let bodyPaddingTopValue = '20px';
+
+        // Gestione visibilità pulsanti di utilità e pulsanti di navigazione sezione
+        if (utilityNavButtons) utilityNavButtons.style.display = 'flex'; // Sempre visibili se l'header è visibile
+        if (navButtonsContainer) navButtonsContainer.style.display = 'none'; // Default a nascosto per i pulsanti di sezione
+
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
-            navButtonsContainer.style.display = 'none';
+            // navButtonsContainer (per i pulsanti di sezione) rimane 'none'
+            // utilityNavButtons è già 'flex'
             mainTitleGlobal.innerHTML = "Elenco Veicoli";
             if (listaTargheCompleta.length > 0 &&
                 (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
@@ -1009,8 +1022,10 @@
         } else if (viewName === 'checklist' || viewName === 'history') {
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
-            navButtonsContainer.style.display = 'flex';
+             // utilityNavButtons è già 'flex'
+
             if (viewName === 'checklist') {
+                 if (navButtonsContainer) navButtonsContainer.style.display = 'flex'; // Mostra i pulsanti di sezione
                 if (!targaSelezionataGlobalmente) {
                     alert("Nessuna targa selezionata.");
                     showView('landing');
@@ -1022,16 +1037,18 @@
                     ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
                     : "";
                 mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
-            } else {
+            } else { // history view
                 historyPageSection.style.display = 'block';
+                // navButtonsContainer (per i pulsanti di sezione) rimane 'none'
                 mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
                 populateSavedTargasList();
             }
             updateNavButtonColors();
-        } else {
+        } else { // Caso non previsto o vista senza header fisso
             pageHeaderContainer.classList.remove('fixed-header');
             headerCircles.style.display = 'none';
-            navButtonsContainer.style.display = 'none';
+            if (utilityNavButtons) utilityNavButtons.style.display = 'none';
+            // navButtonsContainer (per i pulsanti di sezione) rimane 'none'
             mainTitleGlobal.innerHTML = "";
         }
 
@@ -1384,10 +1401,10 @@
             el.classList.remove('animate-me');
         });
         sections.forEach(s => s.classList.toggle('active', s.id === targetId + 'Section'));
-        navButtons.forEach(b => {
+        navButtons.forEach(b => { // Si riferisce ai pulsanti di navigazione delle sezioni
             b.classList.toggle('active', b.dataset.target === targetId);
         });
-        updateNavButtonColors();
+        updateNavButtonColors(); // Aggiorna i colori solo per i pulsanti di navigazione delle sezioni
         const targetSectionElement = document.getElementById(targetId + 'Section');
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
              setTimeout(initSequentialAnimation, 100);
@@ -1396,7 +1413,7 @@
         }
     }
 
-    navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
+    navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); })); // Solo per i pulsanti di navigazione delle sezioni
 
     function getSelectText(selectElementOrId) {
         const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId;
@@ -1502,7 +1519,7 @@
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
 
         async function initializeApplicationViewAndLoadData() {
-            showView('landing');
+            showView('landing'); // Chiama showView per impostare lo stato iniziale corretto dei pulsanti
 
             if (preloader) {
                 preloader.style.display = 'flex';
