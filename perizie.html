@@ -357,7 +357,7 @@
         #landingPageSection, .category-section, #historyPageSection { padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a; max-width: 850px; margin-left: auto; margin-right: auto; }
 
         .category-section, #historyPageSection { display: none; }
-        #landingPageSection { display: block; }
+        /* #landingPageSection { display: block; } */ /* Modificato da JS */
         .category-section.active { display: block; }
 
         .category-section {
@@ -557,6 +557,25 @@
             #sheetFilterContainer label { margin-bottom: 5px; margin-right: 0; text-align: left;}
             #sheetFilterDropdown { width: 100%; }
             .fill-defaults-btn { top: 15px; right: 15px; width: 30px; height: 30px; font-size: 1.2em; }
+            /* Modifiche per il layout flessibile su schermi piccoli */
+            #landingPageSection {
+                flex-direction: column; /* Stack verticale su schermi piccoli */
+                align-items: stretch; /* Occupa tutta la larghezza */
+            }
+            #verticalButtonContainer {
+                margin-left: 0; /* Rimuovi margine sinistro */
+                margin-top: 15px; /* Aggiungi spazio sopra */
+                padding-top: 0; /* Rimuovi padding-top specifico */
+                width: 100%; /* Occupa tutta la larghezza */
+            }
+            #globalResetAllLocalDataBtn {
+                writing-mode: horizontal-tb; /* Testo orizzontale */
+                text-orientation: initial;
+                width: auto; /* Larghezza automatica o imposta una percentuale */
+                height: auto; /* Altezza automatica */
+                padding: 10px 15px; /* Padding standard per pulsanti orizzontali */
+                margin: 0 auto; /* Centra il pulsante se la larghezza non è 100% */
+            }
         }
     </style>
 </head>
@@ -604,31 +623,45 @@
     </div>
 
     <div class="content-wrapper" id="mainContentWrapper">
-        <div id="landingPageSection" style="display: block;">
-            <h2 style="margin-top: 10px;">Seleziona Veicolo da Periziare</h2>
-            <div id="sheetFilterContainer">
-                <label for="sheetFilterDropdown">Filtra per Elenco:</label>
-                <select id="sheetFilterDropdown">
-                    <option value="all">Tutti gli Elenchi</option>
-                </select>
-            </div>
-            <div id="targheLoadingStatus">Caricamento targhe in corso...</div>
-            <div class="table-scroll-wrapper">
-                <div class="targa-list-table-content">
-                    <div class="targa-list-header">
-                        <span class="targa-col targa-col-targa">Targa</span>
-                        <span class="targa-col targa-col-posizione">Posizione</span>
-                        <span class="targa-col targa-col-urgenza">Urgenza</span>
-                        <span class="targa-col targa-col-marca">Marca</span>
-                        <span class="targa-col targa-col-modello">Modello</span>
-                        <span class="targa-col targa-col-piazzale">Piazzale</span>
-                        <span class="targa-col targa-col-actions">Azioni</span>
+        <div id="landingPageSection" style="display: none; flex-direction: row; align-items: flex-start;">
+            <div style="flex-grow: 1;"> <h2 style="margin-top: 10px;">Seleziona Veicolo da Periziare</h2>
+                <div id="sheetFilterContainer">
+                    <label for="sheetFilterDropdown">Filtra per Elenco:</label>
+                    <select id="sheetFilterDropdown">
+                        <option value="all">Tutti gli Elenchi</option>
+                        </select>
+                </div>
+                <div id="targheLoadingStatus">Caricamento targhe in corso...</div>
+                <div class="table-scroll-wrapper">
+                    <div class="targa-list-table-content">
+                        <div class="targa-list-header">
+                            <span class="targa-col targa-col-targa">Targa</span>
+                            <span class="targa-col targa-col-posizione">Posizione</span>
+                            <span class="targa-col targa-col-urgenza">Urgenza</span>
+                            <span class="targa-col targa-col-marca">Marca</span>
+                            <span class="targa-col targa-col-modello">Modello</span>
+                            <span class="targa-col targa-col-piazzale">Piazzale</span>
+                            <span class="targa-col targa-col-actions">Azioni</span>
+                        </div>
+                        <div id="targaListContainer">
+                            </div>
                     </div>
-                    <div id="targaListContainer"></div>
                 </div>
             </div>
+            <div id="verticalButtonContainer" style="margin-left: 10px; padding-top: 85px; /* Regola questo valore per allineare verticalmente il pulsante come preferisci */ display: flex; flex-direction: column; align-items: center;">
+                 <button id="globalResetAllLocalDataBtn"
+                        title="Cancella TUTTI i salvataggi memorizzati sul dispositivo"
+                        class="action-button"
+                        style="writing-mode: vertical-rl; text-orientation: mixed; height: 120px; /* Altezza del pulsante */
+                               padding: 12px 6px; /* Padding per testo verticale */
+                               font-weight: bold; letter-spacing: 1px;
+                               background-color: #B22222; /* Rosso scuro, per esempio */
+                               border-color: #800000;
+                               color:white;">
+                    RESET
+                </button>
+            </div>
         </div>
-
         <div id="checklistContainer" style="display: none;">
             <div id="remarketingSection" class="category-section">
                 <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection">&#x2713;</button>
@@ -876,7 +909,6 @@
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente.toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
     function showView(viewName) {
-        // ... (Logica di gestione display sezioni e header invariata) ...
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
@@ -890,7 +922,7 @@
         if (targaDetailsDisplay) targaDetailsDisplay.textContent = ''; 
 
         if (viewName === 'landing') {
-            landingPageSection.style.display = 'block';
+            landingPageSection.style.display = 'flex'; // MODIFICATO: da 'block' a 'flex'
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
             if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
@@ -968,7 +1000,7 @@
 
         targaSelezionataGlobalmente = targaUpper;
         console.log(`Targa ${targaSelezionataGlobalmente} selezionata. Target section: ${targetSectionId}`);
-        if (targheLoadingStatus && landingPageSection.style.display === 'block') {
+        if (targheLoadingStatus && landingPageSection.style.display === 'flex') { // Modificato da block a flex
             targheLoadingStatus.textContent = `Caricamento dati per ${targaSelezionataGlobalmente}...`;
         }
 
@@ -1013,7 +1045,7 @@
 
         loadProgress(targaSelezionataGlobalmente); 
         
-        if (targheLoadingStatus && landingPageSection.style.display === 'block') {
+        if (targheLoadingStatus && landingPageSection.style.display === 'flex') { // Modificato da block a flex
             targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
         }
         
@@ -1080,7 +1112,9 @@
     function getSelectText(selectElementOrId) { const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId; if (el && el.tagName === 'SELECT' && el.value !== "") { if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) { return el.options[el.selectedIndex].text; } return el.value;  } return "N/S";  }
     function generateSummary() { summaryContent.innerHTML = ''; let targa = targaSelezionataGlobalmente || "N/D"; function createSummaryItem(label, value, isAnomaly = false) { const itemDiv = document.createElement('div'); itemDiv.classList.add('summary-item'); if (isAnomaly) itemDiv.classList.add('summary-anomaly'); itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; return itemDiv; } summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase())); if (targaSelezionataGlobalmente) { const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); let marcaVeicolo = "N/D", modelloVeicolo = "N/D"; if (veicoloAttuale) { marcaVeicolo = veicoloAttuale.marca || "N/D"; modelloVeicolo = veicoloAttuale.modello || "N/D"; } summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D")); const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente); summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary)); } else {  summaryContent.appendChild(createSummaryItem("Marca", "N/D")); summaryContent.appendChild(createSummaryItem("Modello", "N/D")); summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); } summaryContent.innerHTML += `<h3>Remarketing:</h3>`; const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; const isEV = tipoTrazioneValue === 'elettrico'; summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect))); let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza'); let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante"); summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante")); summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia)); let kmStato = getSelectText('stato_chilometri'); summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); let cdcStato = getSelectText('stato_cdc'); summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente")); summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente")); if (isEV) { summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`; let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente")); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente")); } summaryContent.innerHTML += `<h3>Pneumatici:</h3>`; const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }]; pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); }); summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`; summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK')); summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK')); const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : ""; if (noteDanniValue) { const noteDiv = document.createElement('div'); noteDiv.classList.add('summary-item', 'summary-notes'); const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: "; const contentDiv = document.createElement('div'); contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue; noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv); summaryContent.appendChild(noteDiv); } }
     async function fetchAllDataFromSheets() { if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch di tutti i dati."); return { success: false, message: "URL Web App non configurato.", data: [] }; } const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?nocache=${new Date().getTime()}`;  console.log("Fetching all perizie from Sheets. URL:", fetchUrl); try { const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); if (!response.ok) { const errorText = await response.text(); console.error(`Errore HTTP ${response.status} nel fetch di tutti i dati da Sheets: ${errorText}`); return { success: false, message: `Errore Sheets (${response.status}) nel recupero globale.`, data: [] }; } const contentType = response.headers.get("content-type"); if (contentType && contentType.indexOf("application/json") !== -1) { const result = await response.json(); if (Array.isArray(result)) {  console.log("Dati globali ricevuti da Sheets (array diretto):", result.length, "perizie."); return { success: true, data: result, message: "Dati recuperati con successo." }; } else if (result && result.status === "success" && Array.isArray(result.data)) {  console.log("Dati globali ricevuti da Sheets (oggetto con .data):", result.data.length, "perizie."); return { success: true, data: result.data, message: result.message || "Dati recuperati con successo."}; } else if (result && result.status === "notfound") {   console.log("Nessuna perizia trovata in Sheets (notfound).");  return { success: true, data: [], message: result.message || "Nessuna perizia trovata."}; } else { console.warn("Risposta da Sheets (globale) non era un array o oggetto atteso:", result); return { success: false, message: "Formato risposta globale non valido.", data: [] }; } } else { const textResponse = await response.text(); console.error("Risposta da Sheets (globale) non era JSON:", textResponse); return { success: false, message: "Errore formato risposta globale Sheets (non JSON).", data: [] }; } } catch (error) { console.error("Errore di rete o fetch generico durante il recupero globale da Sheets:", error); return { success: false, message: "Errore di rete recupero globale: " + error.message, data: [] }; } }
-    async function syncAllLocalDataToSheets() { const originalSyncButtonText = syncToSheetsBtn.textContent; syncToSheetsBtn.disabled = true; let updatedFromSheetsCount = 0; let localUpdatesFailedCount = 0; syncToSheetsBtn.textContent = "Sinc (1/3 RecSheets)..."; console.log("SYNC - Fase 1: Recupero di tutti i dati da Google Sheets."); const sheetsResponse = await fetchAllDataFromSheets(); if (!sheetsResponse.success) { alert(`Errore nel recupero dei dati da Sheets:\n${sheetsResponse.message}\nLa sincronizzazione non può procedere.`); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; return; } const allSheetsData = sheetsResponse.data;  console.log(`SYNC - Fase 1 completata. Ricevute ${allSheetsData.length} perizie da Sheets.`); syncToSheetsBtn.textContent = "Sinc (2/3 AggLoc)..."; console.log("SYNC - Fase 2: Confronto dati Sheets con localStorage e aggiornamento locale."); if (allSheetsData.length > 0) { for (const sheetPerizia of allSheetsData) { if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) { console.warn("SYNC - Saltata perizia da Sheets per dati/timestamp mancanti:", sheetPerizia); continue; } const targa = sheetPerizia.targa.toUpperCase(); const localDataKey = `${APP_PREFIX}data_${targa}`; const localDataJSON = localStorage.getItem(localDataKey); let localDatiPeriziaTimestamp = null; if (localDataJSON) { try { const localDatiPeriziaObject = JSON.parse(localDataJSON); localDatiPeriziaTimestamp = localDatiPeriziaObject.timestamp ? new Date(localDatiPeriziaObject.timestamp) : null; } catch (e) { console.error(`SYNC - Errore parsing dati locali per targa ${targa}:`, e); } }  const sheetsRecordTimestamp = new Date(sheetPerizia.timestamp); if (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp) { console.log(`SYNC - Targa ${targa}: Dati Sheets più recenti (Sheets Record TS: ${sheetsRecordTimestamp}, Locale datiPerizia TS: ${localDatiPeriziaTimestamp || 'N/A'}). Aggiorno localStorage.`); try { localStorage.setItem(localDataKey, JSON.stringify(sheetPerizia.datiPerizia));  if (sheetPerizia.hasOwnProperty('posizione')) { savePosizioneForTarga(targa, sheetPerizia.posizione); } if (sheetPerizia.hasOwnProperty('urgente')) { saveUrgentStatusForTarga(targa, sheetPerizia.urgente); } if (sheetPerizia.hasOwnProperty('completata')) { if (sheetPerizia.completata) { markTargaAsCompleted(targa); } else { unmarkTargaAsCompleted(targa); } } updatedFromSheetsCount++; } catch (e) { console.error(`SYNC - Errore aggiornamento localStorage per targa ${targa} da Sheets:`, e); localUpdatesFailedCount++; } } else { console.log(`SYNC - Targa ${targa}: Dati locali più recenti o uguali. Nessun aggiornamento da Sheets.`); } } } console.log(`SYNC - Fase 2 completata. Aggiornate/Create localmente ${updatedFromSheetsCount} perizie da Sheets. Errori locali: ${localUpdatesFailedCount}`); syncToSheetsBtn.textContent = "Sinc (3/3 InvioSheets)..."; console.log("SYNC - Fase 3: Invio di tutte le perizie locali a Google Sheets."); let perizieLocaliKeys = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { perizieLocaliKeys.push(key); } } if (perizieLocaliKeys.length === 0 && updatedFromSheetsCount === 0 && localUpdatesFailedCount === 0) { alert("Nessuna perizia salvata localmente e nessuna novità da Sheets da sincronizzare."); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; return; } let successCount = 0; let errorCount = 0; let errorMessages = []; for (const key of perizieLocaliKeys) { const targa = key.substring(`${APP_PREFIX}data_`.length);  let datiPeriziaSalvatiLocalmente;  try { datiPeriziaSalvatiLocalmente = JSON.parse(localStorage.getItem(key)); } catch (e) { console.error(`SYNC - Errore parsing dati per targa ${targa} da localStorage per invio:`, e); errorCount++; errorMessages.push(`Targa ${targa}: Errore lettura dati locali per invio.`); continue; } if (!datiPeriziaSalvatiLocalmente || !datiPeriziaSalvatiLocalmente.timestamp) {  console.warn(`SYNC - Dati per targa ${targa} incompleti o senza timestamp (locale), skip invio a Sheets.`);  errorCount++;  errorMessages.push(`Targa ${targa}: Dati locali incompleti o timestamp mancante.`);  continue; } const periziaDaInviare = { targa: targa, posizione: loadPosizioneForTarga(targa) || "", urgente: loadUrgentStatusForTarga(targa) || false, completata: isTargaCompleted(targa), datiPerizia: datiPeriziaSalvatiLocalmente,  timestamp: datiPeriziaSalvatiLocalmente.timestamp  }; console.log(`SYNC - Invio targa ${targa} a Sheets...`); const result = await inviaPeriziaSingolaASheets(periziaDaInviare); if (result.success) { successCount++; if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) { console.log(`SYNC - Timestamp per ${targa} su Sheets (${result.data.timestamp}) è più recente del timestamp dei datiPerizia locali (${datiPeriziaSalvatiLocalmente.timestamp}). Aggiorno timestamp locale.`); datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp;  try { localStorage.setItem(key, JSON.stringify(datiPeriziaSalvatiLocalmente)); } catch (e) { console.error(`SYNC - Errore salvataggio timestamp aggiornato da server per ${targa}:`,e); } } } else { errorCount++; errorMessages.push(`Targa ${targa}: ${result.message || 'Errore sconosciuto durante invio.'}`); } } console.log("SYNC - Fase 3 completata."); let finalMessage = `Sincronizzazione completata.\n\n`; finalMessage += `FASE 1&2 (Sheets -> Locale):\n`; finalMessage += `- ${updatedFromSheetsCount} perizie locali aggiornate/create da Sheets.\n`; if (localUpdatesFailedCount > 0) finalMessage += `- Errori durante aggiornamento locale: ${localUpdatesFailedCount}.\n`;  finalMessage += `\nFASE 3 (Locale -> Sheets):\n`; finalMessage += `- ${successCount} perizie inviate con successo a Sheets.\n`; if (errorCount > 0) finalMessage += `- ${errorCount} perizie con errori durante l'invio.\n`; if (errorCount > 0 || localUpdatesFailedCount > 0) { finalMessage += "\n\nDETTAGLIO ERRORI (controllare console per info complete):\n" + errorMessages.join("\n"); } alert(finalMessage); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') {  popolaTargheFiltrate();  } }
+    async function syncAllLocalDataToSheets() { const originalSyncButtonText = syncToSheetsBtn.textContent; syncToSheetsBtn.disabled = true; let updatedFromSheetsCount = 0; let localUpdatesFailedCount = 0; syncToSheetsBtn.textContent = "Sinc (1/3 RecSheets)..."; console.log("SYNC - Fase 1: Recupero di tutti i dati da Google Sheets."); const sheetsResponse = await fetchAllDataFromSheets(); if (!sheetsResponse.success) { alert(`Errore nel recupero dei dati da Sheets:\n${sheetsResponse.message}\nLa sincronizzazione non può procedere.`); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; return; } const allSheetsData = sheetsResponse.data;  console.log(`SYNC - Fase 1 completata. Ricevute ${allSheetsData.length} perizie da Sheets.`); syncToSheetsBtn.textContent = "Sinc (2/3 AggLoc)..."; console.log("SYNC - Fase 2: Confronto dati Sheets con localStorage e aggiornamento locale."); if (allSheetsData.length > 0) { for (const sheetPerizia of allSheetsData) { if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) { console.warn("SYNC - Saltata perizia da Sheets per dati/timestamp mancanti:", sheetPerizia); continue; } const targa = sheetPerizia.targa.toUpperCase(); const localDataKey = `${APP_PREFIX}data_${targa}`; const localDataJSON = localStorage.getItem(localDataKey); let localDatiPeriziaTimestamp = null; if (localDataJSON) { try { const localDatiPeriziaObject = JSON.parse(localDataJSON); localDatiPeriziaTimestamp = localDatiPeriziaObject.timestamp ? new Date(localDatiPeriziaObject.timestamp) : null; } catch (e) { console.error(`SYNC - Errore parsing dati locali per targa ${targa}:`, e); } }  const sheetsRecordTimestamp = new Date(sheetPerizia.timestamp); if (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp) { console.log(`SYNC - Targa ${targa}: Dati Sheets più recenti (Sheets Record TS: ${sheetsRecordTimestamp}, Locale datiPerizia TS: ${localDatiPeriziaTimestamp || 'N/A'}). Aggiorno localStorage.`); try { localStorage.setItem(localDataKey, JSON.stringify(sheetPerizia.datiPerizia));  if (sheetPerizia.hasOwnProperty('posizione')) { savePosizioneForTarga(targa, sheetPerizia.posizione); } if (sheetPerizia.hasOwnProperty('urgente')) { saveUrgentStatusForTarga(targa, sheetPerizia.urgente); } if (sheetPerizia.hasOwnProperty('completata')) { if (sheetPerizia.completata) { markTargaAsCompleted(targa); } else { unmarkTargaAsCompleted(targa); } } updatedFromSheetsCount++; } catch (e) { console.error(`SYNC - Errore aggiornamento localStorage per targa ${targa} da Sheets:`, e); localUpdatesFailedCount++; } } else { console.log(`SYNC - Targa ${targa}: Dati locali più recenti o uguali. Nessun aggiornamento da Sheets.`); } } } console.log(`SYNC - Fase 2 completata. Aggiornate/Create localmente ${updatedFromSheetsCount} perizie da Sheets. Errori locali: ${localUpdatesFailedCount}`); syncToSheetsBtn.textContent = "Sinc (3/3 InvioSheets)..."; console.log("SYNC - Fase 3: Invio di tutte le perizie locali a Google Sheets."); let perizieLocaliKeys = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { perizieLocaliKeys.push(key); } } if (perizieLocaliKeys.length === 0 && updatedFromSheetsCount === 0 && localUpdatesFailedCount === 0) { alert("Nessuna perizia salvata localmente e nessuna novità da Sheets da sincronizzare."); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; return; } let successCount = 0; let errorCount = 0; let errorMessages = []; for (const key of perizieLocaliKeys) { const targa = key.substring(`${APP_PREFIX}data_`.length);  let datiPeriziaSalvatiLocalmente;  try { datiPeriziaSalvatiLocalmente = JSON.parse(localStorage.getItem(key)); } catch (e) { console.error(`SYNC - Errore parsing dati per targa ${targa} da localStorage per invio:`, e); errorCount++; errorMessages.push(`Targa ${targa}: Errore lettura dati locali per invio.`); continue; } if (!datiPeriziaSalvatiLocalmente || !datiPeriziaSalvatiLocalmente.timestamp) {  console.warn(`SYNC - Dati per targa ${targa} incompleti o senza timestamp (locale), skip invio a Sheets.`);  errorCount++;  errorMessages.push(`Targa ${targa}: Dati locali incompleti o timestamp mancante.`);  continue; } const periziaDaInviare = { targa: targa, posizione: loadPosizioneForTarga(targa) || "", urgente: loadUrgentStatusForTarga(targa) || false, completata: isTargaCompleted(targa), datiPerizia: datiPeriziaSalvatiLocalmente,  timestamp: datiPeriziaSalvatiLocalmente.timestamp  }; console.log(`SYNC - Invio targa ${targa} a Sheets...`); const result = await inviaPeriziaSingolaASheets(periziaDaInviare); if (result.success) { successCount++; if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) { console.log(`SYNC - Timestamp per ${targa} su Sheets (${result.data.timestamp}) è più recente del timestamp dei datiPerizia locali (${datiPeriziaSalvatiLocalmente.timestamp}). Aggiorno timestamp locale.`); datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp;  try { localStorage.setItem(key, JSON.stringify(datiPeriziaSalvatiLocalmente)); } catch (e) { console.error(`SYNC - Errore salvataggio timestamp aggiornato da server per ${targa}:`,e); } } } else { errorCount++; errorMessages.push(`Targa ${targa}: ${result.message || 'Errore sconosciuto durante invio.'}`); } } console.log("SYNC - Fase 3 completata."); let finalMessage = `Sincronizzazione completata.\n\n`; finalMessage += `FASE 1&2 (Sheets -> Locale):\n`; finalMessage += `- ${updatedFromSheetsCount} perizie locali aggiornate/create da Sheets.\n`; if (localUpdatesFailedCount > 0) finalMessage += `- Errori durante aggiornamento locale: ${localUpdatesFailedCount}.\n`;  finalMessage += `\nFASE 3 (Locale -> Sheets):\n`; finalMessage += `- ${successCount} perizie inviate con successo a Sheets.\n`; if (errorCount > 0) finalMessage += `- ${errorCount} perizie con errori durante l'invio.\n`; if (errorCount > 0 || localUpdatesFailedCount > 0) { finalMessage += "\n\nDETTAGLIO ERRORI (controllare console per info complete):\n" + errorMessages.join("\n"); } alert(finalMessage); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'flex') {  // Modificato da block a flex
+        popolaTargheFiltrate();  
+    } }
 
     document.addEventListener('DOMContentLoaded', () => {
         // ... (Codice di creazione bottone syncToSheetsBtn e fill-defaults-btn invariato) ...
@@ -1144,13 +1178,19 @@
             });
         }
 
-        // ... (Resto degli event listener e chiamata a initializeApplicationViewAndLoadData invariati) ...
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
         if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData);
         if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
+
+        // INIZIO NUOVO CODICE: Event listener per il pulsante RESET globale
+        const globalResetAllLocalDataBtn = document.getElementById('globalResetAllLocalDataBtn');
+        if (globalResetAllLocalDataBtn) {
+            globalResetAllLocalDataBtn.addEventListener('click', clearAllSavedData);
+        }
+        // FINE NUOVO CODICE
 
         async function initializeApplicationViewAndLoadData() {
             showView('landing'); 
