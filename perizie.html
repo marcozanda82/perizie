@@ -211,6 +211,34 @@
         .content-wrapper { padding: 20px; }
         h1, h2 { text-align: center; color: #ffffff; }
         h1#mainTitleGlobal { line-height: 1.2; margin-bottom: 10px; margin-top: 5px; font-size: 1.6em;}
+        /* Stile per il contenitore del dropdown targa */
+        #targaDropdownContainer {
+            text-align: center;
+            margin-top: 5px; /* Aggiustato per essere coerente con mainTitleGlobal */
+            margin-bottom: 10px;
+        }
+        #targaSwitcherDropdown {
+            padding: 8px 12px; /* Aumentato padding per migliore leggibilità */
+            background-color: #383838; /* Sfondo leggermente più scuro */
+            color: #f0f0f0;
+            border: 1px solid #555;
+            border-radius: 4px;
+            min-width: 250px; /* Larghezza minima aumentata */
+            font-size: 1.1em; /* Dimensione font aumentata */
+            font-family: sans-serif;
+            cursor: pointer;
+        }
+        #targaSwitcherDropdown:hover {
+            background-color: #454545;
+            border-color: #666;
+        }
+        #targaSwitcherDropdown option {
+            padding: 5px; /* Padding per le opzioni */
+            background-color: #383838;
+            color: #f0f0f0;
+        }
+
+
         h2.section-title { color: #cccccc; border-bottom: 1px solid #444444; padding-bottom: 5px; margin-top: 30px; text-align: left; }
         h3, h4 { color: #bbbbbb; margin-top: 20px; margin-bottom: 10px; }
         h4 {font-size: 1.1em; color: #c0c0c0; margin-top: 15px; margin-bottom: 8px;}
@@ -219,7 +247,7 @@
         input[type="checkbox"], input[type="text"], input[type="url"], select, input[type="radio"], textarea { margin-right: 8px; vertical-align: middle; padding: 8px; background-color: #333; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; margin-bottom: 5px; font-family: sans-serif;}
         input[type="text"], input[type="url"], textarea { width: calc(100% - 20px); box-sizing: border-box; }
         input[type="radio"] { margin-left: 5px; }
-        select { min-width: 220px; }
+        select:not(#targaSwitcherDropdown) { min-width: 220px; } /* Escludi il nuovo dropdown dallo stile generico se necessario */
         label { vertical-align: middle; display: block; margin-bottom: 5px; color: #e0e0e0; }
         textarea {resize: vertical;}
 
@@ -483,7 +511,8 @@
             #mainPageNavButtons { width: 100%; padding: 5px; box-sizing: border-box; }
             #mainPageNavButtons button { font-size: 0.8em; padding: 6px 8px; }
             #utilityNavButtons button { font-size: 0.85em; padding: 8px 10px; }
-            input[type="text"], input[type="url"], select, textarea { width: 100%; box-sizing: border-box; }
+            input[type="text"], input[type="url"], select:not(#targaSwitcherDropdown), textarea { width: 100%; box-sizing: border-box; }
+            #targaSwitcherDropdown { min-width: 220px; font-size: 1em; } /* Adattamento per mobile */
             .table-scroll-wrapper { overflow-x: auto; }
             .targa-list-table-content { min-width: 600px; } /* Potrebbe necessitare aggiustamento ulteriore */
             .targa-list-header { display: flex !important; }
@@ -532,6 +561,9 @@
             <button id="exitAppBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Esci</button>
         </div>
         <h1 id="mainTitleGlobal">Checklist Perizia Veicolo</h1>
+        <div id="targaDropdownContainer" style="display: none;">
+            <select id="targaSwitcherDropdown"></select>
+        </div>
         <div id="navButtons">
             <div id="mainPageNavButtons">
                 <button data-target="remarketing">1. Remarketing</button>
@@ -692,6 +724,10 @@
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
     const headerCircles = pageHeaderContainer.querySelector('.header-circles');
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
+    // NUOVO: Riferimento al contenitore e al dropdown delle targhe
+    const targaDropdownContainer = document.getElementById('targaDropdownContainer');
+    const targaSwitcherDropdown = document.getElementById('targaSwitcherDropdown');
+
     const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons'); 
     const mainPageNavButtons = navButtonsContainer.querySelector('#mainPageNavButtons'); 
     const utilityNavButtons = pageHeaderContainer.querySelector('#utilityNavButtons'); 
@@ -701,7 +737,7 @@
     const backToListBtn = utilityNavButtons.querySelector('#backToListBtn');
     const historyBtn = utilityNavButtons.querySelector('#historyBtn');
     const exitAppBtn = utilityNavButtons.querySelector('#exitAppBtn');
-    let syncToSheetsBtn; // Verrà creato e aggiunto in DOMContentLoaded
+    let syncToSheetsBtn; 
     
     const sections = document.querySelectorAll('#checklistContainer .category-section');
     const summaryContent = document.getElementById('summaryContent');
@@ -720,6 +756,46 @@
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
 
+    // --- NUOVA FUNZIONE: populateTargaSwitcherDropdown ---
+    function populateTargaSwitcherDropdown() {
+        if (!targaSwitcherDropdown || !targaSelezionataGlobalmente || !listaTargheCompleta.length) {
+            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
+            return;
+        }
+
+        const veicoloAttuale = listaTargheCompleta.find(v => v.targa.toUpperCase() === targaSelezionataGlobalmente.toUpperCase());
+        if (!veicoloAttuale || !veicoloAttuale.piazzale) {
+            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
+            console.warn("Piazzale non trovato per la targa attuale o targa non trovata:", targaSelezionataGlobalmente);
+            return;
+        }
+
+        const piazzaleCorrente = veicoloAttuale.piazzale;
+        const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente);
+
+        targaSwitcherDropdown.innerHTML = ''; // Pulisci opzioni esistenti
+
+        if (targheDelPiazzale.length === 0) {
+            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
+            return;
+        }
+        
+        targheDelPiazzale.sort((a, b) => a.targa.localeCompare(b.targa)); 
+
+        targheDelPiazzale.forEach(v => {
+            const option = document.createElement('option');
+            option.value = v.targa.toUpperCase();
+            option.textContent = v.targa + (v.marca || v.modello ? ` (${v.marca || ''} ${v.modello || ''})`.trim() : '');
+            if (v.targa.toUpperCase() === targaSelezionataGlobalmente.toUpperCase()) {
+                option.selected = true;
+            }
+            targaSwitcherDropdown.appendChild(option);
+        });
+
+        if (targaDropdownContainer) targaDropdownContainer.style.display = 'block';
+    }
+
+
     async function inviaPeriziaSingolaASheets(periziaDaInviare) {
         if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') {
             console.error("URL della Web App Google Sheets non configurato.");
@@ -731,7 +807,7 @@
                 method: 'POST',
                 mode: 'cors', 
                 cache: 'no-cache',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Google Apps Script spesso preferisce text/plain per JSON nel corpo
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                 body: JSON.stringify(periziaDaInviare) 
             });
             let responseData;
@@ -777,7 +853,7 @@
                 const result = await response.json();
                 if (result.status === "success" && result.data) {
                     console.log("Dati perizia singola ricevuti da Sheets:", result.data);
-                    return result.data; // Questo è l'oggetto perizia completo {targa, posizione, datiPerizia:{...}, timestamp,...}
+                    return result.data; 
                 } else if (result.status === "notfound") {
                     console.log("Perizia non trovata in Sheets per targa:", targa);
                     return null;
@@ -818,7 +894,7 @@
             if (tipoTrazioneSelect && tipoTrazioneSelect.value === 'elettrico') {
                 if (cavoRapidaSelect) cavoRapidaSelect.value = 'presente';
                 if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'presente';
-            } else { // Assicurati che i campi EV siano NA se non è elettrico
+            } else { 
                  if (cavoRapidaSelect) cavoRapidaSelect.value = 'non_applicabile';
                  if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'non_applicabile';
             }
@@ -858,11 +934,10 @@
             cavoRapidaSelect.value = "non_applicabile"; 
             cavoDomesticaSelect.value = "non_applicabile";
         } else {
-            // Se è elettrico e i valori sono vuoti o NA, impostali a vuoto per richiedere una selezione
             if (cavoRapidaSelect.value === "" || cavoRapidaSelect.value === "non_applicabile") cavoRapidaSelect.value = "";
             if (cavoDomesticaSelect.value === "" || cavoDomesticaSelect.value === "non_applicabile") cavoDomesticaSelect.value = "";
         }
-        updateNavButtonColors(); // Aggiorna i colori dopo il cambio
+        updateNavButtonColors(); 
     }
 
     function savePosizioneForTarga(targa, posizione) {
@@ -911,7 +986,7 @@
             else if (el.tagName === 'SELECT') el.selectedIndex = 0;
             else el.value = '';
         });
-        if (tipoTrazioneSelect) { // Assicura che i campi EV siano gestiti correttamente
+        if (tipoTrazioneSelect) { 
             handleTrazioneChange();
         }
         console.log("Modulo resettato.");
@@ -926,7 +1001,7 @@
                 else data[el.id] = el.value;
             }
         });
-        data.timestamp = new Date().toISOString(); // Aggiunge/Aggiorna SEMPRE il timestamp
+        data.timestamp = new Date().toISOString(); 
         try {
             localStorage.setItem(`${APP_PREFIX}data_${targa.toUpperCase()}`, JSON.stringify(data));
             console.log(`Progresso salvato localmente per la targa ${targa.toUpperCase()} con timestamp ${data.timestamp}.`);
@@ -950,10 +1025,9 @@
                     if (el.id && data.hasOwnProperty(el.id)) {
                         if (el.type === 'checkbox') el.checked = data[el.id];
                         else el.value = data[el.id];
-                    } else if (el.id) { // Se il campo non è in data, resettalo al default
+                    } else if (el.id) { 
                         if (el.type === 'checkbox') el.checked = false;
                         else if (el.tagName === 'SELECT') el.selectedIndex = 0;
-                        //else el.value = ''; // Non resettare textarea o text, potrebbero essere intenzionalmente vuoti
                     }
                 });
                 console.log(`Progresso caricato da localStorage per la targa ${targaUpper}. Timestamp: ${data.timestamp || 'N/A'}`);
@@ -961,10 +1035,10 @@
                 console.log(`Nessun dato salvato in localStorage trovato per la targa ${targaUpper}. Reset form.`);
                 resetChecklistForm(); 
             }
-            if (tipoTrazioneSelect) { // Chiamata cruciale dopo aver caricato i dati per abilitare/disabilitare e impostare i campi EV
+            if (tipoTrazioneSelect) { 
                  handleTrazioneChange();
             }
-            updateNavButtonColors(); // Aggiorna colori dopo aver caricato e gestito la trazione
+            updateNavButtonColors(); 
         } catch(e) {
             console.error("Errore durante il caricamento da localStorage:", e);
             resetChecklistForm(); 
@@ -1098,8 +1172,8 @@
         const inputs = getSectionInputs(sectionElementId);
         if (inputs.length === 0) return 'completed'; 
 
-        let allDefaultOrNA = true; // Modificato per considerare anche 'non_applicabile' come default per i campi EV
-        let allNonDefaultAndApplicable = true; // Tutti compilati e non 'non_applicabile' (se EV)
+        let allDefaultOrNA = true; 
+        let allNonDefaultAndApplicable = true; 
         let hasAtLeastOneNonDefaultAndApplicable = false;
 
         inputs.forEach(input => {
@@ -1107,7 +1181,7 @@
             const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined;
             let currentValue = savedValue;
 
-            if (savedValue === undefined) { // Se non ci sono dati salvati, usa il valore attuale del form
+            if (savedValue === undefined) { 
                 if (input.type === 'checkbox') currentValue = input.checked;
                 else currentValue = input.value;
             }
@@ -1116,18 +1190,17 @@
                 isEffectivelyDefault = !currentValue;
             } else if (input.tagName === 'SELECT') {
                 isEffectivelyDefault = (currentValue === "" || (input.options.length > 0 && currentValue === input.options[0].value));
-                 // Considera 'non_applicabile' come "default" per i campi EV quando non sono attivi
                 if ((input.id === 'cavo_ricarica_rapida' || input.id === 'cavo_ricarica_domestica') && currentValue === 'non_applicabile') {
                     isEffectivelyDefault = true;
                 }
-            } else { // text, textarea
+            } else { 
                  isEffectivelyDefault = (currentValue === "");
             }
 
             if (!isEffectivelyDefault) {
                 allDefaultOrNA = false;
                 hasAtLeastOneNonDefaultAndApplicable = true;
-            } else { // è default o NA
+            } else { 
                 allNonDefaultAndApplicable = false;
             }
         });
@@ -1135,12 +1208,13 @@
         if (allDefaultOrNA) return 'untouched';
         if (allNonDefaultAndApplicable) return 'completed';
         if (hasAtLeastOneNonDefaultAndApplicable) return 'partial'; 
-        return 'untouched'; // Fallback se nessuna condizione sopra è vera (es. tutti i campi disabilitati)
+        return 'untouched'; 
     }
 
 
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente.toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
+    // --- MODIFICATA: showView ---
     function showView(viewName) {
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
@@ -1148,50 +1222,52 @@
         let bodyPaddingTopValue = '20px';
 
         if (utilityNavButtons) utilityNavButtons.style.display = 'flex'; 
-        if (navButtonsContainer) navButtonsContainer.style.display = 'none';
+        if (navButtonsContainer) navButtonsContainer.style.display = 'none'; // Default: nascondi bottoni navigazione sezioni
+
+        // Gestione visibilità titolo e dropdown
+        if (mainTitleGlobal) mainTitleGlobal.style.display = 'block'; // Default: mostra titolo testuale
+        if (targaDropdownContainer) targaDropdownContainer.style.display = 'none'; // Default: nascondi dropdown
 
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
-            mainTitleGlobal.innerHTML = "Elenco Veicoli";
+            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
             if (listaTargheCompleta.length > 0 &&
                 (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
                 typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
             }
-            // targaSelezionataGlobalmente = null; // Non deselezionare qui
             updateNavButtonColors(); 
-        } else if (viewName === 'checklist' || viewName === 'history') {
+        } else if (viewName === 'checklist') {
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
-
-            if (viewName === 'checklist') {
-                 if (navButtonsContainer) navButtonsContainer.style.display = 'flex';
-                if (!targaSelezionataGlobalmente) { 
-                    console.warn("Tentativo di mostrare checklist senza targa selezionata. Reindirizzamento a landing.");
-                    showView('landing'); 
-                    return;
-                }
-                checklistContainer.style.display = 'block';
-                const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
-                let subIdentifier = (veicoloAttuale && (veicoloAttuale.marca || veicoloAttuale.modello))
-                    ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
-                    : "";
-                mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
-                 // Chiamata a handleTrazioneChange quando si visualizza la checklist per assicurare stato corretto campi EV
-                 if (tipoTrazioneSelect) handleTrazioneChange();
-            } else { 
-                historyPageSection.style.display = 'block';
-                mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
-                populateSavedTargasList();
+            if (navButtonsContainer) navButtonsContainer.style.display = 'flex'; // Mostra bottoni navigazione sezioni
+            if (!targaSelezionataGlobalmente) { 
+                console.warn("Tentativo di mostrare checklist senza targa selezionata. Reindirizzamento a landing.");
+                showView('landing'); 
+                return;
             }
+            checklistContainer.style.display = 'block';
+            if (mainTitleGlobal) mainTitleGlobal.style.display = 'none'; // Nascondi titolo testuale
+            if (targaDropdownContainer) targaDropdownContainer.style.display = 'block'; // Mostra dropdown
+            
+            populateTargaSwitcherDropdown(); // Popola il dropdown
+            
+            if (tipoTrazioneSelect) handleTrazioneChange();
             updateNavButtonColors(); 
+        } else if (viewName === 'history') {
+            pageHeaderContainer.classList.add('fixed-header');
+            headerCircles.style.display = 'flex';
+            historyPageSection.style.display = 'block';
+            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
+            populateSavedTargasList();
+            updateNavButtonColors();
         } else { 
             pageHeaderContainer.classList.remove('fixed-header');
             headerCircles.style.display = 'none';
             if (utilityNavButtons) utilityNavButtons.style.display = 'none';
-            mainTitleGlobal.innerHTML = "";
+            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
         }
 
         if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
@@ -1204,28 +1280,27 @@
             bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
         }
         document.body.style.paddingTop = bodyPaddingTopValue;
-         // Scroll to top when view changes
         window.scrollTo(0, 0);
     }
 
+    // --- MODIFICATA: handleTargaSelectionAndSync ---
     async function handleTargaSelectionAndSync(selectedTarga) {
         targaSelezionataGlobalmente = selectedTarga.toUpperCase();
         console.log(`Targa ${targaSelezionataGlobalmente} selezionata per perizia. Avvio sincronizzazione al caricamento.`);
         if (targheLoadingStatus && landingPageSection.style.display === 'block') targheLoadingStatus.textContent = `Caricamento dati per ${targaSelezionataGlobalmente}...`;
 
         let localData = null;
-        let localDatiPeriziaTimestamp = null; // Timestamp interno all'oggetto datiPerizia
+        let localDatiPeriziaTimestamp = null; 
         const localJson = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`);
         if (localJson) {
             try {
-                localData = JSON.parse(localJson); // Questo è l'oggetto datiPerizia
+                localData = JSON.parse(localJson); 
                 localDatiPeriziaTimestamp = localData.timestamp ? new Date(localData.timestamp) : null;
             } catch (e) { console.error("Errore parsing dati locali:", e); localData = null; }
         }
 
-        // sheetsPeriziaData è l'oggetto completo: {targa, posizione, datiPerizia:{...}, timestamp (generale)}
         const sheetsPeriziaData = await fetchLatestPeriziaFromSheets(targaSelezionataGlobalmente); 
-        let sheetsRecordTimestamp = null; // Timestamp generale del record da Sheets
+        let sheetsRecordTimestamp = null; 
         let sheetsDatiPerizia = null;
         let isSheetsDataCompleted = false;
 
@@ -1255,10 +1330,14 @@
             resetChecklistForm(); 
         }
 
-        loadProgress(targaSelezionataGlobalmente); // Carica (o ricarica) i dati nel form, che siano da sheets o locali
+        loadProgress(targaSelezionataGlobalmente); 
         
         if (targheLoadingStatus && landingPageSection.style.display === 'block') targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
-        showView('checklist');
+        
+        showView('checklist'); // Questa chiamata ora gestisce la visibilità del dropdown e del titolo
+
+        // Non è più necessario chiamare populateTargaSwitcherDropdown qui perché showView('checklist') lo farà.
+
         const firstNav = Array.from(navButtons).find(b => b.dataset.target && !['backToListBtn', 'historyBtn', 'exitAppBtn'].includes(b.id));
         if (firstNav) {
             showSection(firstNav.dataset.target);
@@ -1315,8 +1394,7 @@
             });
             alert(`${c} elementi cancellati.`);
             if(sheetFilterDropdown) sheetFilterDropdown.value = 'all';
-            // Non è necessario rimuovere esplicitamente 'selectedPiazzaleFilter' se si vuole mantenere il filtro
-            // localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); 
+            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); 
             populateSavedTargasList();
             if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); 
             if (typeof showView === 'function') showView('landing');
@@ -1377,18 +1455,18 @@
                 } catch (e) { /* ignore parsing error for ranking */ }
             }
 
-            if (isUrgent && !isCompleted) return 1; // Urgente e non completato
-            if (!isUrgent && !isCompleted && hasData) return 2; // Non urgente, non completato, ma con dati parziali
-            if (!isUrgent && !isCompleted && !hasData) return 3; // Non urgente, non completato, nessun dato (da vedere)
-            if (!isUrgent && isCompleted) return 4; // Non urgente e completato
-            if (isUrgent && isCompleted) return 5;  // Urgente ma completato
-            return 6; // Default, non dovrebbe accadere
+            if (isUrgent && !isCompleted) return 1; 
+            if (!isUrgent && !isCompleted && hasData) return 2; 
+            if (!isUrgent && !isCompleted && !hasData) return 3; 
+            if (!isUrgent && isCompleted) return 4; 
+            if (isUrgent && isCompleted) return 5;  
+            return 6; 
         }
         preliminaryFilteredList.sort((a, b) => {
             const rankA = getItemRank(a);
             const rankB = getItemRank(b);
             if (rankA !== rankB) return rankA - rankB;
-            return a.targa.localeCompare(b.targa); // Ordinamento secondario per targa
+            return a.targa.localeCompare(b.targa); 
         });
         const filteredList = preliminaryFilteredList;
 
@@ -1413,20 +1491,20 @@
             if (isItemUrgent) { 
                 li.classList.add('urgent-item');
                 if (itemCompleted) {
-                    li.classList.add('completed'); // Urgente ma completato
+                    li.classList.add('completed'); 
                 }
             } else if (itemCompleted) {
-                li.classList.add('status-visto', 'completed'); // Completato (non urgente)
+                li.classList.add('status-visto', 'completed'); 
             } else if (hasData) {
-                li.classList.add('status-parziale'); // Parzialmente compilato
+                li.classList.add('status-parziale'); 
             } else {
-                li.classList.add('status-da-vedere'); // Da vedere
+                li.classList.add('status-da-vedere'); 
             }
 
             const targaCol = document.createElement('span');
             targaCol.classList.add('targa-col', 'targa-col-targa', 'clickable-targa');
-            targaCol.textContent = item.targa || 'N/D'; // Mostra targa originale dal CSV
-            targaCol.dataset.targaValue = targaUpper; // Usa targaUpper per coerenza
+            targaCol.textContent = item.targa || 'N/D'; 
+            targaCol.dataset.targaValue = targaUpper; 
 
             targaCol.addEventListener('click', async function() { 
                 const selectedTargaFromClick = this.dataset.targaValue;
@@ -1467,7 +1545,7 @@
             urgenzaCheckbox.addEventListener('mousedown', (e) => e.stopPropagation());
             urgenzaCheckbox.addEventListener('click', (e) => e.stopPropagation());
             urgenzaCheckbox.addEventListener('change', function() {
-                saveUrgentStatusForTarga(targaUpper, this.checked); // Usa targaUpper
+                saveUrgentStatusForTarga(targaUpper, this.checked); 
                 this.title = this.checked ? "Togli urgenza" : "Marca come urgente";
                 popolaTargheFiltrate(); 
             });
@@ -1490,11 +1568,11 @@
             const actionsCol = document.createElement('span');
             actionsCol.classList.add('targa-col', 'targa-col-actions');
             const delB = document.createElement('button');
-            delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = targaUpper; // Usa targaUpper
+            delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = targaUpper; 
             delB.title = `Cancella progressi per ${item.targa}`; delB.textContent = 'X';
             delB.addEventListener('click', function(event) {
                 event.stopPropagation();
-                const tDel = this.dataset.targa; // Sarà già targaUpper
+                const tDel = this.dataset.targa; 
                 if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (inclusa posizione e urgenza)?\n\nAzione irreversibile.`)) {
                     deleteProgressForTarga(tDel);
                 }
@@ -1509,7 +1587,7 @@
     }
 
     async function caricaEPopolaTarghe() {
-        const preloaderInstance = document.getElementById('preloader'); // Rinominato per evitare conflitto con variabile globale
+        const preloaderInstance = document.getElementById('preloader'); 
         if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server...";
 
         try {
@@ -1534,13 +1612,13 @@
 
             listaTargheCompleta = lines.map(l => {
                 const p = l.split(',');
-                return { // I campi vengono già normalizzati qui (es. targa in maiuscolo)
+                return { 
                     targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(),
                     marca: (p[1] || '').trim().replace(/^"|"$/g, ''),
                     modello: (p[2] || '').trim().replace(/^"|"$/g, ''),
                     piazzale: (p[3] || '').trim().replace(/^"|"$/g, '')
                 };
-            }).filter(i => i.targa && i.targa.length > 3); // Filtra targhe non valide o troppo corte
+            }).filter(i => i.targa && i.targa.length > 3); 
 
             if (listaTargheCompleta.length === 0) {
                 if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";
@@ -1580,19 +1658,19 @@
             activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled), textarea:not(:disabled)')
         ).filter(el => {
             let current = el;
-            while (current && current !== activeSection.parentElement) { // Controlla fino al contenitore della sezione
+            while (current && current !== activeSection.parentElement) { 
                 if (getComputedStyle(current).display === 'none' || getComputedStyle(current).visibility === 'hidden') return false;
                 current = current.parentElement;
             }
-            return el.offsetParent !== null; // Verifica finale se è renderizzato
+            return el.offsetParent !== null; 
         });
 
         const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el));
 
-        if (startIndex === -1 && allVisibleElementsInSection.length > 0) { // Tutti compilati
+        if (startIndex === -1 && allVisibleElementsInSection.length > 0) { 
             return;
         }
-        if (allVisibleElementsInSection.length === 0) { // Nessun elemento
+        if (allVisibleElementsInSection.length === 0) { 
              return;
         }
 
@@ -1601,27 +1679,25 @@
         if (elementsToAnimate.length === 0) return;
 
         let currentIndex = 0;
-        let activeListeners = []; // Array per tenere traccia degli listener attivi
+        let activeListeners = []; 
 
         function clearAllActiveAnimationListeners() {
             activeListeners.forEach(({element, type, handler}) => {
                 element.removeEventListener(type, handler);
-                element.classList.remove('animate-me'); // Rimuovi classe se l'animazione viene interrotta
+                element.classList.remove('animate-me'); 
             });
             activeListeners = [];
         }
-        // Pulisci listener precedenti prima di iniziare una nuova sequenza (es. cambio sezione)
         clearAllActiveAnimationListeners();
 
 
         function animateNextElement() {
             if (currentIndex >= elementsToAnimate.length) {
-                // Fine animazione, pulisci per sicurezza se non già fatto
                 clearAllActiveAnimationListeners();
                 return;
             }
             const currentElement = elementsToAnimate[currentIndex];
-            if (!isInputDefault(currentElement)) { // Se per caso è già compilato, salta
+            if (!isInputDefault(currentElement)) { 
                 currentIndex++;
                 animateNextElement();
                 return;
@@ -1632,33 +1708,28 @@
 
             const onValueChange = (event) => {
                 let processChange = false;
-                // Per i select, consideriamo il cambio effettivo e non solo il blur
                 if (event.type === 'change') {
                     processChange = true;
-                } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') { // Per input text/textarea
+                } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') { 
                     processChange = true;
-                } // Per i select, il 'change' è sufficiente
-                // Per le checkbox, 'change' è l'evento principale
-
-                if (processChange && !isInputDefault(currentElement)) { // Solo se effettivamente non è più default
+                } 
+                if (processChange && !isInputDefault(currentElement)) { 
                     currentElement.classList.remove('animate-me');
-                    // Rimuovi specifici listener per questo elemento
                     activeListeners = activeListeners.filter(listener => {
                         if (listener.element === currentElement) {
                             listener.element.removeEventListener(listener.type, listener.handler);
-                            return false; // Rimuovi dalla lista
+                            return false; 
                         }
-                        return true; // Mantieni gli altri
+                        return true; 
                     });
                     currentIndex++;
-                    setTimeout(animateNextElement, 50); // Ritardo per fluidità
+                    setTimeout(animateNextElement, 50); 
                 }
             };
 
             currentElement.addEventListener('change', onValueChange);
             activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
 
-            // Aggiungi blur listener per text, textarea (i select sono gestiti da change)
             if (currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') {
                 currentElement.addEventListener('blur', onValueChange);
                  activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange});
@@ -1667,30 +1738,35 @@
         animateNextElement();
     }
 
-
+    // --- MODIFICATA: showSection ---
     function showSection(targetId) {
-        // Prima di cambiare sezione, rimuovi l'animazione da tutti gli elementi
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
             el.classList.remove('animate-me');
         });
-        // Interrompi eventuali listener di animazione attivi dalla sezione precedente
-        if (typeof clearAllActiveAnimationListeners === 'function') { // Assicurati che la funzione esista (se definita globalmente o accessibile)
-             // clearAllActiveAnimationListeners(); // Questa chiamata va fatta dentro initSequentialAnimation per pulire i suoi listener specifici
-        }
-
-
+        
         sections.forEach(s => s.classList.toggle('active', s.id === targetId + 'Section'));
         navButtons.forEach(b => { 
             b.classList.toggle('active', b.dataset.target === targetId);
         });
         updateNavButtonColors(); 
+
+        // Gestione visibilità titolo/dropdown anche al cambio sezione
+        if (checklistContainer.style.display === 'block') { // Se siamo in modalità perizia
+            if (mainTitleGlobal) mainTitleGlobal.style.display = 'none';
+            if (targaDropdownContainer) targaDropdownContainer.style.display = 'block';
+            populateTargaSwitcherDropdown(); // Aggiorna dropdown
+        } else {
+            if (mainTitleGlobal) mainTitleGlobal.style.display = 'block';
+            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
+        }
+
         const targetSectionElement = document.getElementById(targetId + 'Section');
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
-             setTimeout(initSequentialAnimation, 100); // Inizia la nuova animazione
+             setTimeout(initSequentialAnimation, 100); 
         } else if (targetId === 'riepilogo') {
             generateSummary();
         }
-         window.scrollTo(0, 0); // Scrolla in cima quando si cambia sezione
+         window.scrollTo(0, 0); 
     }
 
     navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
@@ -1701,9 +1777,9 @@
             if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) {
                 return el.options[el.selectedIndex].text;
             }
-            return el.value; // Fallback se opzione non trovata
+            return el.value; 
         }
-        return "N/S"; // Non Selezionato / Non Specificato
+        return "N/S"; 
     }
 
     function generateSummary() {
@@ -1730,7 +1806,7 @@
             const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente);
             summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary));
 
-        } else { // Dovrebbe esserci sempre una targa selezionata qui
+        } else { 
             summaryContent.appendChild(createSummaryItem("Marca", "N/D"));
             summaryContent.appendChild(createSummaryItem("Modello", "N/D"));
             summaryContent.appendChild(createSummaryItem("Posizione", "N/D"));
@@ -1778,13 +1854,12 @@
         }
     }
 
-    // --- NUOVA FUNZIONE fetchAllDataFromSheets ---
     async function fetchAllDataFromSheets() {
         if (!GOOGLE_SHEET_WEB_APP_URL) {
             console.error("URL della Web App Google Sheets non configurato per il fetch di tutti i dati.");
             return { success: false, message: "URL Web App non configurato.", data: [] };
         }
-        const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?nocache=${new Date().getTime()}`; // doGet senza parametri specifici
+        const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?nocache=${new Date().getTime()}`; 
         console.log("Fetching all perizie from Sheets. URL:", fetchUrl);
 
         try {
@@ -1797,10 +1872,10 @@
             const contentType = response.headers.get("content-type");
             if (contentType && contentType.indexOf("application/json") !== -1) {
                 const result = await response.json();
-                if (Array.isArray(result)) { // Se il GAS restituisce un array diretto
+                if (Array.isArray(result)) { 
                     console.log("Dati globali ricevuti da Sheets (array diretto):", result.length, "perizie.");
                     return { success: true, data: result, message: "Dati recuperati con successo." };
-                } else if (result && result.status === "success" && Array.isArray(result.data)) { // Se GAS restituisce {status, data:[...]}
+                } else if (result && result.status === "success" && Array.isArray(result.data)) { 
                     console.log("Dati globali ricevuti da Sheets (oggetto con .data):", result.data.length, "perizie.");
                     return { success: true, data: result.data, message: result.message || "Dati recuperati con successo."};
                 } else if (result && result.status === "notfound") { 
@@ -1821,7 +1896,6 @@
         }
     }
 
-    // --- MODIFICATA FUNZIONE syncAllLocalDataToSheets ---
     async function syncAllLocalDataToSheets() {
         const originalSyncButtonText = syncToSheetsBtn.textContent;
         syncToSheetsBtn.disabled = true;
@@ -1829,26 +1903,23 @@
         let updatedFromSheetsCount = 0;
         let localUpdatesFailedCount = 0;
 
-        // Fase 1: Recupero Dati da Google Sheets
         syncToSheetsBtn.textContent = "Sinc (1/3 RecSheets)...";
         console.log("SYNC - Fase 1: Recupero di tutti i dati da Google Sheets.");
         const sheetsResponse = await fetchAllDataFromSheets();
 
         if (!sheetsResponse.success) {
             alert(`Errore nel recupero dei dati da Sheets:\n${sheetsResponse.message}\nLa sincronizzazione non può procedere.`);
-            syncToSheetsBtn.textContent = originalSyncButtonText; // Ripristina testo originale
+            syncToSheetsBtn.textContent = originalSyncButtonText; 
             syncToSheetsBtn.disabled = false;
             return;
         }
-        const allSheetsData = sheetsResponse.data; // Array di oggetti perizia da Sheets
+        const allSheetsData = sheetsResponse.data; 
         console.log(`SYNC - Fase 1 completata. Ricevute ${allSheetsData.length} perizie da Sheets.`);
 
-        // Fase 2: Confronto e Aggiornamento Locale
         syncToSheetsBtn.textContent = "Sinc (2/3 AggLoc)...";
         console.log("SYNC - Fase 2: Confronto dati Sheets con localStorage e aggiornamento locale.");
         if (allSheetsData.length > 0) {
             for (const sheetPerizia of allSheetsData) {
-                // sheetPerizia = {targa, posizione, urgente, completata, timestamp (generale), datiPerizia:{... con suo timestamp}}
                 if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) {
                     console.warn("SYNC - Saltata perizia da Sheets per dati/timestamp mancanti:", sheetPerizia);
                     continue;
@@ -1868,13 +1939,11 @@
                     }
                 }
                 
-                // Confrontiamo il timestamp generale del record di Sheets con il timestamp dei datiPerizia locali
                 const sheetsRecordTimestamp = new Date(sheetPerizia.timestamp);
 
                 if (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp) {
                     console.log(`SYNC - Targa ${targa}: Dati Sheets più recenti (Sheets Record TS: ${sheetsRecordTimestamp}, Locale datiPerizia TS: ${localDatiPeriziaTimestamp || 'N/A'}). Aggiorno localStorage.`);
                     try {
-                        // Salva l'intero oggetto datiPerizia da Sheets, che include il suo timestamp interno.
                         localStorage.setItem(localDataKey, JSON.stringify(sheetPerizia.datiPerizia));
                         
                         if (sheetPerizia.hasOwnProperty('posizione')) {
@@ -1903,7 +1972,6 @@
         console.log(`SYNC - Fase 2 completata. Aggiornate/Create localmente ${updatedFromSheetsCount} perizie da Sheets. Errori locali: ${localUpdatesFailedCount}`);
 
 
-        // Fase 3: Invio dei Dati Locali (Aggiornati) a Google Sheets
         syncToSheetsBtn.textContent = "Sinc (3/3 InvioSheets)...";
         console.log("SYNC - Fase 3: Invio di tutte le perizie locali a Google Sheets.");
         let perizieLocaliKeys = [];
@@ -1916,7 +1984,7 @@
 
         if (perizieLocaliKeys.length === 0 && updatedFromSheetsCount === 0 && localUpdatesFailedCount === 0) {
             alert("Nessuna perizia salvata localmente e nessuna novità da Sheets da sincronizzare.");
-            syncToSheetsBtn.textContent = originalSyncButtonText; // Ripristina testo originale
+            syncToSheetsBtn.textContent = originalSyncButtonText; 
             syncToSheetsBtn.disabled = false;
             return;
         }
@@ -1926,8 +1994,8 @@
         let errorMessages = [];
 
         for (const key of perizieLocaliKeys) {
-            const targa = key.substring(`${APP_PREFIX}data_`.length); // Già in UPPERCASE se salvata correttamente
-            let datiPeriziaSalvatiLocalmente; // Questo è l'oggetto {campo1, campo2, timestamp}
+            const targa = key.substring(`${APP_PREFIX}data_`.length); 
+            let datiPeriziaSalvatiLocalmente; 
             try {
                 datiPeriziaSalvatiLocalmente = JSON.parse(localStorage.getItem(key));
             } catch (e) {
@@ -1950,16 +2018,13 @@
                 urgente: loadUrgentStatusForTarga(targa) || false,
                 completata: isTargaCompleted(targa),
                 datiPerizia: datiPeriziaSalvatiLocalmente, 
-                timestamp: datiPeriziaSalvatiLocalmente.timestamp // Questo è il timestamp dei datiPerizia, usato per il record generale su Sheets
+                timestamp: datiPeriziaSalvatiLocalmente.timestamp 
             };
 
             console.log(`SYNC - Invio targa ${targa} a Sheets...`);
             const result = await inviaPeriziaSingolaASheets(periziaDaInviare);
             if (result.success) {
                 successCount++;
-                // Se il server GAS restituisce un timestamp (result.data.timestamp) che è quello del record generale appena scritto/aggiornato,
-                // e questo è più recente di datiPeriziaSalvatiLocalmente.timestamp,
-                // aggiorniamo il timestamp nei datiPerizia locali per riflettere l'ultimo stato sincronizzato.
                 if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) {
                     console.log(`SYNC - Timestamp per ${targa} su Sheets (${result.data.timestamp}) è più recente del timestamp dei datiPerizia locali (${datiPeriziaSalvatiLocalmente.timestamp}). Aggiorno timestamp locale.`);
                     datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp; 
@@ -1991,7 +2056,7 @@
         }
         alert(finalMessage);
 
-        syncToSheetsBtn.textContent = originalSyncButtonText; // Ripristina testo originale
+        syncToSheetsBtn.textContent = originalSyncButtonText; 
         syncToSheetsBtn.disabled = false;
         if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') {
              popolaTargheFiltrate(); 
@@ -2000,18 +2065,17 @@
 
 
     document.addEventListener('DOMContentLoaded', () => {
-        const preloader = document.getElementById('preloader'); // Uso di preloader invece di preloaderInstance qui
+        const preloader = document.getElementById('preloader'); 
 
-        // Creazione e inserimento del pulsante "Sincronizza" (ex "Sincronizza Dati")
         syncToSheetsBtn = document.createElement('button');
         syncToSheetsBtn.id = 'syncToSheetsBtn';
         syncToSheetsBtn.classList.add('action-button');
-        syncToSheetsBtn.textContent = 'Sincronizza'; // Testo modificato come da richiesta precedente
-        syncToSheetsBtn.style.backgroundColor = '#ffc107'; // Giallo
+        syncToSheetsBtn.textContent = 'Sincronizza'; 
+        syncToSheetsBtn.style.backgroundColor = '#ffc107'; 
         syncToSheetsBtn.style.borderColor = '#e0a800';
         syncToSheetsBtn.style.color = '#212529';
 
-        const historyButton = document.getElementById('historyBtn'); // Riferimento corretto a historyBtn
+        const historyButton = document.getElementById('historyBtn'); 
         if (historyButton && historyButton.parentNode === utilityNavButtons) {
             utilityNavButtons.insertBefore(syncToSheetsBtn, historyButton.nextSibling);
         } else { 
@@ -2041,7 +2105,26 @@
         });
 
         if (tipoTrazioneSelect) tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
-        // handleTrazioneChange(); // Chiamata iniziale spostata in loadProgress e showView per contesto
+        
+        // --- NUOVO: Event Listener per il dropdown targaSwitcherDropdown ---
+        if (targaSwitcherDropdown) {
+            targaSwitcherDropdown.addEventListener('change', async function() {
+                const nuovaTargaSelezionata = this.value;
+                if (nuovaTargaSelezionata && nuovaTargaSelezionata.toUpperCase() !== (targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase() : null)) {
+                    // Opzionale: feedback visivo durante il caricamento
+                    this.disabled = true; 
+                    // mainTitleGlobal.textContent = "Caricamento dati per " + nuovaTargaSelezionata + "..."; // Se usi ancora mainTitleGlobal per feedback
+                    
+                    await handleTargaSelectionAndSync(nuovaTargaSelezionata);
+                    
+                    // Riabilita il dropdown
+                    this.disabled = false; 
+                    // La chiamata a handleTargaSelectionAndSync -> showView -> populateTargaSwitcherDropdown
+                    // dovrebbe già aggiornare la selezione e il contenuto del dropdown.
+                }
+            });
+        }
+
 
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
@@ -2052,7 +2135,7 @@
 
         async function initializeApplicationViewAndLoadData() {
             showView('landing'); 
-            const preloaderElement = document.getElementById('preloader'); // Usa variabile locale per preloader
+            const preloaderElement = document.getElementById('preloader'); 
             if (preloaderElement) {
                 preloaderElement.style.display = 'flex';
                 preloaderElement.classList.remove('hidden');
@@ -2089,7 +2172,7 @@
                     exitCurtain.setAttribute('data-text', defaultCloseText);
                     if (barContainer) barContainer.style.display = 'flex';
                     exitCurtain.classList.add('visible-no-transition');
-                    exitCurtain.style.display = 'flex'; // Assicura che sia visibile
+                    exitCurtain.style.display = 'flex'; 
                     setTimeout(() => {
                         exitCurtain.classList.add('glitching');
                         if (exitLoadingText) {
@@ -2101,23 +2184,22 @@
                             exitCurtain.classList.remove('glitching');
                             if (exitLoadingText) {
                                 exitLoadingText.textContent = 'Applicazione terminata.';
-                                exitLoadingText.style.animation = 'none'; // Rimuovi animazioni di testo
-                                exitLoadingText.style.color = '#FFFFFF'; // Testo bianco finale
+                                exitLoadingText.style.animation = 'none'; 
+                                exitLoadingText.style.color = '#FFFFFF'; 
                                 exitLoadingText.style.textShadow = 'none';
                             }
-                            if (barContainer) barContainer.style.display = 'none'; // Nascondi barre
+                            if (barContainer) barContainer.style.display = 'none'; 
                             setTimeout(() => {
-                                exitCurtain.classList.add('flash-out-effect'); // Effetto flash out
+                                exitCurtain.classList.add('flash-out-effect'); 
                                 setTimeout(() => {
                                     const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
-                                    fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' }) // no-cors per triggerare e non aspettare risposta
+                                    fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' }) 
                                         .then(response => console.log('Macrodroid trigger request sent.'))
                                         .catch(error => console.error('Error sending Macrodroid trigger:', error));
-                                    // Opzionale: window.close(); ma potrebbe non funzionare sempre
-                                }, 500); // Attendi fine animazione flash
-                            }, 700); // Durata dell'effetto "Applicazione terminata" prima del flash
-                        }, 800); // Durata del glitch
-                    }, 800); // Durata del "CHIUSURA IN CORSO..." normale
+                                }, 500); 
+                            }, 700); 
+                        }, 800); 
+                    }, 800); 
                 }
             });
         }
