@@ -510,7 +510,7 @@
         .targa-list-item.status-parziale .targa-col-posizione input.posizione-input { background-color: #ffe082; color: #212529; border-color: #ffc107; }
         .targa-list-item.status-parziale .targa-col-urgenza input[type="checkbox"] { accent-color: #b8860b; }
 
-        /* NUOVO CSS PER TARGE CANCELLATE LOCALMENTE (Marcate per cancellazione da Sheets) */
+        /* NUOVO CSS PER TARGE CANCELLATE LOCALMENTE */
         .targa-list-item.locally-deleted {
             opacity: 0.5;
             background-color: #404040 !important; 
@@ -943,60 +943,25 @@
     function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa.toUpperCase()]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa.toUpperCase()} marked complete locally.`);}catch(e){console.error("Errore LS Mark Err:",e);}}
     function unmarkTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe(); if(completed[targa.toUpperCase()]){ delete completed[targa.toUpperCase()]; localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed)); console.log(`${targa.toUpperCase()} unmarked as complete locally.`);}}catch(e){console.error("Errore LS Unmark Err:",e);}}
     
-    // Funzione per cancellare i dati locali e ANNULLARE la marcatura per la cancellazione da Sheets
-    // Chiamata dalla pagina "Salvataggi"
-    function clearLocalDataAndUnmarkForDeletion(targa) {
-        if (!targa) { return; }
-        const targaUpper = targa.toUpperCase();
+    // --- NUOVA FUNZIONE PER CANCELLARE I DATI LOCALI ---
+    function clearLocalDataForTarga(targaUpper) {
+        if (!targaUpper) return;
         try {
-            // 1. Rimuovi i dati locali della perizia dal localStorage
             localStorage.removeItem(`${APP_PREFIX}data_${targaUpper}`);
-            console.log(`Dati modulo (locali) rimossi per ${targaUpper}.`);
-
-            // 2. Rimuovi lo stato di completamento locale
-            unmarkTargaAsCompleted(targaUpper); // Questa funzione gestisce la rimozione da 'completedTarghe'
-
-            // 3. Rimuovi la posizione locale
+            console.log(`Dati modulo rimossi per ${targaUpper}.`);
+            unmarkTargaAsCompleted(targaUpper); // Rimuove il flag di completamento locale
             localStorage.removeItem(`${APP_PREFIX}posizione_${targaUpper}`);
-            console.log(`Dati posizione (locali) rimossi per ${targaUpper}.`);
-
-            // 4. Rimuovi lo stato di urgenza locale
+            console.log(`Dati posizione rimossi per ${targaUpper}.`);
             localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`);
-            console.log(`Dati urgenza (locali) rimossi per ${targaUpper}.`);
-
-            // 5. Rimuovi il flag "marcata per cancellazione da Sheets" se presente
-            if (localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`)) {
-                localStorage.removeItem(`${APP_PREFIX}deleted_${targaUpper}`);
-                console.log(`Flag 'deleted_' rimosso per ${targaUpper}. La targa non è più marcata per la cancellazione da Sheets.`);
-                alert(`I dati locali per la targa ${targaUpper} sono stati cancellati e la marcatura per l'eliminazione da Sheets è stata ANNULLATA. La targa può essere nuovamente lavorata.`);
-            } else {
-                // Se non c'era un flag "deleted_", informa solo della cancellazione dei dati locali
-                alert(`I dati locali per la targa ${targaUpper} sono stati cancellati. Non era presente una marcatura per l'eliminazione da Sheets.`);
-            }
-
+            console.log(`Dati urgenza rimossi per ${targaUpper}.`);
         } catch (e) {
-            console.error(`Errore durante la pulizia dei dati locali e unmark per ${targaUpper}:`, e);
-            alert(`Errore durante la pulizia dei dati locali per ${targaUpper}.`);
-        }
-
-        // Aggiorna la lista principale delle targhe (landing page)
-        // Questo è importante perché lo stato visuale della targa (es. se era grigia) potrebbe cambiare.
-        if (typeof popolaTargheFiltrate === 'function') {
-            popolaTargheFiltrate();
-        }
-
-        // Se la targa i cui dati locali sono stati cancellati era quella globalmente selezionata
-        // e la checklist era attiva, torna alla landing page.
-        if (targaSelezionataGlobalmente && targaSelezionataGlobalmente.toUpperCase() === targaUpper) {
-            const checklistWasActive = checklistContainer.style.display === 'block';
-            targaSelezionataGlobalmente = null; // Deseleziona globalmente
-            if (checklistWasActive) {
-                showView('landing');
-            }
+            console.error(`Errore durante la cancellazione dei dati locali per ${targaUpper}:`, e);
+            alert(`Errore cancellazione dati locali per ${targaUpper}.`);
         }
     }
 
-    // Funzione per MARCARE una targa per la cancellazione da Sheets (usata dal pulsante "X" nella lista principale)
+    // --- FUNZIONE OBSOLETA: deleteProgressForTarga ---
+    /*
     function deleteProgressForTarga(targa) {
         if (!targa) { return; }
         const targaUpper = targa.toUpperCase();
@@ -1009,7 +974,7 @@
             localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`);
             console.log(`Dati urgenza rimossi per ${targaUpper}.`);
             
-            // Contrassegna per la cancellazione da Sheet
+            // NUOVA AGGIUNTA: Contrassegna per la cancellazione da Sheet
             localStorage.setItem(`${APP_PREFIX}deleted_${targaUpper}`, new Date().toISOString());
             console.log(`Targa ${targaUpper} contrassegnata per la cancellazione da Sheets.`);
 
@@ -1018,13 +983,14 @@
             alert(`Errore cancellazione dati per ${targaUpper}.`);
         }
         if (typeof popolaTargheFiltrate === 'function') { 
-            popolaTargheFiltrate(); // Aggiorna la lista principale
+            popolaTargheFiltrate(); // Aggiorna la lista
         }
         if (targaSelezionataGlobalmente && targaSelezionataGlobalmente.toUpperCase() === targaUpper) { 
             targaSelezionataGlobalmente = null;
             showView('landing'); 
         }
     }
+    */
 
     function generateAndDownloadScreenshot() { return new Promise((resolve, reject) => { const riepilogoSection = document.getElementById('riepilogoSection'); if (!riepilogoSection) { alert("Errore: Sezione Riepilogo non trovata per lo screenshot."); return reject("Sezione riepilogo non trovata"); } if (typeof html2canvas === 'undefined') { alert("Errore: Libreria html2canvas non caricata."); return reject("html2canvas non caricata"); } setTimeout(() => { console.log("Inizio generazione screenshot..."); riepilogoSection.scrollTop = 0;  html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY, windowHeight: riepilogoSection.scrollHeight }) .then(canvas => { const link = document.createElement('a'); let targaSanitized = 'sconosciuta'; let piazzaleSanitized = 'piazzale_sconosciuto'; if (targaSelezionataGlobalmente) { targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_'); const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") { piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_'); if (!piazzaleSanitized) piazzaleSanitized = 'N_D'; } else { piazzaleSanitized = 'N_D'; } } link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`; link.href = canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); console.log(`Screenshot generato e download avviato: ${link.download}`); resolve(); }) .catch(error => { console.error("Errore durante la generazione dello screenshot:", error); alert("Si è verificato un errore durante la generazione dello screenshot."); reject(error); }); }, 100);  }); }
     async function handleSavePeriziaAndReturn() {  if (!targaSelezionataGlobalmente) { alert("Nessuna targa attiva selezionata per il salvataggio."); return; } const originalButtonText = saveAndReturnBtn.textContent; saveAndReturnBtn.textContent = 'Salvataggio locale...'; saveAndReturnBtn.disabled = true; if (!saveProgress(targaSelezionataGlobalmente)) {  alert("Salvataggio dati nel browser fallito."); saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; return; } if (document.getElementById('riepilogoSection').classList.contains('active')) { generateSummary();  } try { await generateAndDownloadScreenshot(); } catch (e) { console.warn("Generazione screenshot fallita, ma i dati sono stati salvati localmente.", e); } markTargaAsCompleted(targaSelezionataGlobalmente);  updateNavButtonColors();  saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; alert(`Perizia per ${targaSelezionataGlobalmente} salvata localmente e screenshot tentato.`); showView('landing');  }
@@ -1066,11 +1032,10 @@
                 showView('landing'); 
                 return;
             }
-            // Controllo: Se la targa è marcata come cancellata, non mostrare la checklist
             if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente.toUpperCase()}`)) {
                 console.warn(`Tentativo di mostrare checklist per targa ${targaSelezionataGlobalmente} cancellata. Reindirizzamento a landing.`);
                 showView('landing');
-                alert(`La perizia per ${targaSelezionataGlobalmente} è stata marcata per la cancellazione e non può essere modificata finché la marcatura non viene rimossa (dalla pagina Salvataggi, se aveva dati locali, o tramite altre logiche future).`);
+                alert(`La perizia per ${targaSelezionataGlobalmente} è stata cancellata e non può essere modificata.`);
                 return;
             }
 
@@ -1111,11 +1076,10 @@
     async function handleTargaSelectionAndSync(selectedTarga, targetSectionId = null) {
         const targaUpper = selectedTarga.toUpperCase();
 
-        // Controllo per perizie cancellate localmente all'inizio
         if (localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`)) {
-            console.log(`handleTargaSelectionAndSync: Targa ${targaUpper} è stata cancellata localmente. Non verrà caricata per la checklist.`);
+            console.log(`handleTargaSelectionAndSync: Targa ${targaUpper} è stata cancellata localmente. Non verrà caricata.`);
             if (targheLoadingStatus && landingPageSection.style.display === 'block') {
-                targheLoadingStatus.textContent = `Targa ${targaUpper} è marcata per la cancellazione. Selezionane un'altra o rimuovi la marcatura dalla pagina Salvataggi (se applicabile).`;
+                targheLoadingStatus.textContent = `Targa ${targaUpper} cancellata. Selezionane un'altra.`;
             }
             if (targaSelezionataGlobalmente === targaUpper && checklistContainer.style.display === 'block') {
                 showView('landing'); 
@@ -1212,7 +1176,6 @@
         }
     }
     
-    // --- MODIFICATA: populateSavedTargasList (per cancellazione SOLO locale e UNMARK da Sheets) ---
     function populateSavedTargasList() {
         savedTargasListContainer.innerHTML = '';
         let hasSaves = false;
@@ -1221,11 +1184,6 @@
             const key = localStorage.key(i);
             if (key.startsWith(`${APP_PREFIX}data_`)) {
                 const targa = key.substring(`${APP_PREFIX}data_`.length);
-                // Mostra solo i salvataggi che hanno dati locali e NON sono correntemente marcati per la cancellazione da Sheets.
-                // L'operazione di UNMARK (rimozione del flag 'deleted_') avverrà se si clicca
-                // su un elemento che soddisfa queste condizioni, sebbene il flag 'deleted_'
-                // sia gestito principalmente dalla lista principale e dalla sincronizzazione.
-                // L'intento qui è pulire i dati locali di un "salvataggio attivo".
                 if (targa && !localStorage.getItem(`${APP_PREFIX}deleted_${targa}`) && !tempSavedTargas.includes(targa)) {
                     tempSavedTargas.push(targa);
                 }
@@ -1247,19 +1205,13 @@
             button.classList.add('saved-targa-button');
             button.textContent = displayText;
             button.dataset.targa = targa;
-
-            // NUOVA LOGICA PER IL CLICK: CONFERMA E CANCELLAZIONE SOLO LOCALE + UNMARK DA SHEETS
-            button.addEventListener('click', function() {
-                const targaToClear = this.dataset.targa;
-                if (confirm(`Sei sicuro di voler RIMUOVERE i dati di perizia salvati su QUESTO DISPOSITIVO per la targa ${targaToClear}?\n\nQuesta operazione NON la eliminerà da Google Sheets. Se la targa era stata precedentemente marcata per l'eliminazione da Sheets, tale marcatura verrà ANNULLATA, permettendo di rimetterla in lavorazione.`)) {
-                    clearLocalDataAndUnmarkForDeletion(targaToClear); // Chiama la nuova funzione
-                    populateSavedTargasList(); // Ricarica la lista dei salvataggi (l'elemento sparirà perché i suoi 'data_' sono stati rimossi)
-                }
+            button.addEventListener('click', async function() { 
+                await handleTargaSelectionAndSync(this.dataset.targa);
             });
             savedTargasListContainer.appendChild(button);
         });
         if (!hasSaves) {
-            savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio (non marcato per eliminazione da Sheets) trovato.</p>';
+            savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio valido trovato.</p>';
         }
     }
 
@@ -1267,6 +1219,7 @@
     function setupSheetFilterDropdown() { if (!sheetFilterDropdown) return; const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== '').sort())]; sheetFilterDropdown.innerHTML = ''; sources.forEach(source => { const option = document.createElement('option'); option.value = source; option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source; sheetFilterDropdown.appendChild(option); }); const savedPiazzaleFilter = localStorage.getItem(`${APP_PREFIX}selectedPiazzaleFilter`); if (savedPiazzaleFilter && sources.includes(savedPiazzaleFilter)) { sheetFilterDropdown.value = savedPiazzaleFilter; } else { sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); } sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange); sheetFilterDropdown.addEventListener('change', handleSheetFilterChange); }
     function handleSheetFilterChange() { if (sheetFilterDropdown) { localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value); } popolaTargheFiltrate(); targaSelezionataGlobalmente = null; }
     
+    // --- MODIFICATA: popolaTargheFiltrate ---
     function popolaTargheFiltrate() {
         const tEl = document.getElementById('targaListContainer');
         if (!tEl) return;
@@ -1280,9 +1233,6 @@
         function getItemRank(item) {
             const targaUpper = item.targa.toUpperCase();
             const isLocallyDeleted = !!localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`);
-             // Le targhe marcate per cancellazione (isLocallyDeleted) avranno il rank più basso (mostrate per prime o ultime a seconda del sort)
-             // Modifichiamo il rank per farle apparire in cima se si desidera evidenziarle, o in fondo.
-             // Per ora, facciamole apparire in cima se non urgenti/completate, per attirare l'attenzione.
             if (isLocallyDeleted) return 0; 
             
             const isUrgent = loadUrgentStatusForTarga(targaUpper); 
@@ -1389,25 +1339,49 @@
             const modelloCol = document.createElement('span'); modelloCol.classList.add('targa-col', 'targa-col-modello'); modelloCol.textContent = item.modello || 'N/D'; li.appendChild(modelloCol); 
             const piazzaleCol = document.createElement('span'); piazzaleCol.classList.add('targa-col', 'targa-col-piazzale'); piazzaleCol.textContent = item.piazzale || 'N/D'; li.appendChild(piazzaleCol); 
             
+            // --- MODIFICA LISTENER PULSANTE CANCELLAZIONE ---
             const actionsCol = document.createElement('span'); 
             actionsCol.classList.add('targa-col', 'targa-col-actions'); 
             if (!isLocallyDeletedFlag) { 
                 const delB = document.createElement('button'); 
                 delB.classList.add('action-button', 'delete-progress-btn'); 
                 delB.dataset.targa = targaUpper;  
-                delB.title = `Cancella progressi per ${item.targa} e MARCA per eliminazione da Sheets`; 
+                delB.title = `Cancella progressi locali per ${item.targa} e gestisci marcatura per cancellazione da Sheets`; 
                 delB.textContent = 'X'; 
+
                 delB.addEventListener('click', function(event) { 
                     event.stopPropagation(); 
-                    const tDel = this.dataset.targa;  
-                    if (confirm(`ATTENZIONE:\n\nCancellare i dati locali per ${tDel} e marcarla per la cancellazione da Google Sheets alla prossima sincronizzazione?\n\n(Questa azione è pensata per rimuovere definitivamente la perizia. Per rimuovere solo i dati locali e poter rilavorare la targa, usa l'opzione dalla pagina 'Salvataggi').`)) { 
-                        deleteProgressForTarga(tDel); // Questa funzione MARCA per cancellazione da Sheets
-                    } 
+                    const tDelUpper = this.dataset.targa; 
+
+                    // 1. Sicuramente cancellare i dati di salvataggio in locale
+                    clearLocalDataForTarga(tDelUpper);
+
+                    // 2. Chiedere tramite finestra di dialogo per marchiare la targa come eliminata da Sheets
+                    if (confirm(`I dati locali per la targa ${item.targa} sono stati cancellati.\n\nVuoi anche marcarla per la cancellazione da Google Sheets alla prossima sincronizzazione?`)) {
+                        try {
+                            localStorage.setItem(`${APP_PREFIX}deleted_${tDelUpper}`, new Date().toISOString());
+                            console.log(`Targa ${tDelUpper} contrassegnata per la cancellazione da Sheets.`);
+                        } catch (e) {
+                            console.error(`Errore nel marcare ${tDelUpper} come cancellata per Sheets:`, e);
+                            alert(`Errore nel marcare ${tDelUpper} per la cancellazione da Sheets.`);
+                        }
+                    } else {
+                        console.log(`L'utente ha scelto di non marcare ${tDelUpper} per la cancellazione da Sheets.`);
+                    }
+
+                    // Aggiorna la lista e la vista in ogni caso
+                    if (typeof popolaTargheFiltrate === 'function') {
+                        popolaTargheFiltrate();
+                    }
+                    if (targaSelezionataGlobalmente && targaSelezionataGlobalmente.toUpperCase() === tDelUpper) {
+                        targaSelezionataGlobalmente = null;
+                        showView('landing');
+                    }
                 }); 
                 actionsCol.appendChild(delB); 
             } else {
                 actionsCol.textContent = 'DEL'; 
-                actionsCol.title = 'Marcata per cancellazione da Sheets. Rimuovi questa marcatura dalla pagina "Salvataggi" se vuoi rilavorare la targa.';
+                actionsCol.title = 'Marcata per cancellazione da Sheets';
             }
             li.appendChild(actionsCol); 
             tEl.appendChild(li); 
@@ -1499,7 +1473,6 @@
         let localToSheetsErrorCount = 0;
         let errorMessages = [];
 
-        // FASE 0: Processa le cancellazioni locali da inviare a Sheets
         syncToSheetsBtn.textContent = "Sinc (0/4 DelSheets)...";
         console.log("SYNC - Fase 0: Processo cancellazioni per Google Sheets.");
         let deletionRequests = [];
@@ -1535,7 +1508,6 @@
         }
         console.log(`SYNC - Fase 0 completata. Cancellazioni Sheets: ${sheetsDeletionsSuccessCount} successi, ${sheetsDeletionsFailedCount} fallimenti.`);
 
-        // FASE 1: Recupero di tutti i dati da Google Sheets.
         syncToSheetsBtn.textContent = "Sinc (1/4 RecSheets)...";
         console.log("SYNC - Fase 1: Recupero di tutti i dati da Google Sheets.");
         const sheetsResponse = await fetchAllDataFromSheets();
@@ -1545,7 +1517,6 @@
         const allSheetsData = sheetsResponse.data || []; 
         console.log(`SYNC - Fase 1 completata. Ricevute ${allSheetsData.length} perizie da Sheets.`);
 
-        // FASE 2: Confronto dati Sheets con localStorage e aggiornamento locale.
         syncToSheetsBtn.textContent = "Sinc (2/4 AggLoc)...";
         console.log("SYNC - Fase 2: Confronto dati Sheets con localStorage e aggiornamento locale.");
         if (allSheetsData.length > 0) {
@@ -1593,7 +1564,6 @@
         }
         console.log(`SYNC - Fase 2 completata. Aggiornate/Create localmente ${updatedFromSheetsCount} perizie da Sheets. Errori locali: ${localUpdatesFailedCount}`);
 
-        // FASE 3: Invio di tutte le perizie locali (NON CANCELLATE) a Google Sheets.
         syncToSheetsBtn.textContent = "Sinc (3/4 InvioSheets)...";
         console.log("SYNC - Fase 3: Invio delle perizie locali a Google Sheets.");
         let perizieLocaliKeys = [];
@@ -1613,8 +1583,6 @@
             alert("Nessuna operazione di sincronizzazione da eseguire (nessuna perizia locale, nessuna novità da Sheets, nessuna cancellazione in sospeso).");
             syncToSheetsBtn.textContent = originalSyncButtonText; 
             syncToSheetsBtn.disabled = false;
-            if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') { popolaTargheFiltrate(); }
-            if (typeof populateSavedTargasList === 'function' && historyPageSection.style.display === 'block') { populateSavedTargasList(); }
             return;
         }
 
