@@ -85,12 +85,14 @@
         }
 
         #preloader .loading-text,
-        #exit-curtain .loading-text {
+        #exit-curtain .loading-text,
+        #targaDataLoader .loading-text { /* Aggiunto #targaDataLoader */
             font-size: 1.6em;
             letter-spacing: 1px;
         }
 
-        #preloader .loading-text {
+        #preloader .loading-text,
+        #targaDataLoader .loading-text { /* Aggiunto #targaDataLoader */
             color: #00aeff;
             animation: textGlow 1.8s infinite alternate ease-in-out;
         }
@@ -208,64 +210,10 @@
             opacity: 0.8;
         }
         body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; transition: padding-top 0.3s ease; }
+        /* ... (resto degli stili CSS come da versione precedente) ... */
         .content-wrapper { padding: 20px; }
         h1, h2 { text-align: center; color: #ffffff; }
         h1#mainTitleGlobal { line-height: 1.2; margin-bottom: 10px; margin-top: 5px; font-size: 1.6em;}
-        
-        #targaDropdownContainer {
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 5px; 
-            margin-top: 5px;
-            margin-bottom: 10px;
-        }
-        #targaSwitcherDropdown {
-            padding: 8px 12px; 
-            background-color: #383838; 
-            color: #f0f0f0;
-            border: 1px solid #555;
-            border-radius: 4px;
-            min-width: 180px; 
-            max-width: 220px;
-            font-size: 1.1em; 
-            font-family: sans-serif;
-            cursor: pointer;
-            text-align: center; 
-        }
-        #targaSwitcherDropdown:hover {
-            background-color: #454545;
-            border-color: #666;
-        }
-        #targaSwitcherDropdown option {
-            padding: 5px; 
-            background-color: #383838;
-            color: #f0f0f0;
-            text-align: left; 
-        }
-        #targaDetailsDisplay {
-            font-size: 0.8em;
-            color: #cccccc;
-            margin-top: 3px; 
-            text-align: center;
-            min-height: 1.2em; 
-            line-height: 1.3; /* Aggiunto per migliore leggibilità */
-        }
-        
-        @media (min-width: 480px) { 
-            #targaDropdownContainer {
-                flex-direction: row; 
-                align-items: center; 
-            }
-            #targaDetailsDisplay {
-                margin-top: 0;
-                margin-left: 10px;
-                text-align: left;
-            }
-        }
-        
-
         h2.section-title { color: #cccccc; border-bottom: 1px solid #444444; padding-bottom: 5px; margin-top: 30px; text-align: left; }
         h3, h4 { color: #bbbbbb; margin-top: 20px; margin-bottom: 10px; }
         h4 {font-size: 1.1em; color: #c0c0c0; margin-top: 15px; margin-bottom: 8px;}
@@ -274,7 +222,7 @@
         input[type="checkbox"], input[type="text"], input[type="url"], select, input[type="radio"], textarea { margin-right: 8px; vertical-align: middle; padding: 8px; background-color: #333; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; margin-bottom: 5px; font-family: sans-serif;}
         input[type="text"], input[type="url"], textarea { width: calc(100% - 20px); box-sizing: border-box; }
         input[type="radio"] { margin-left: 5px; }
-        select:not(#targaSwitcherDropdown) { min-width: 220px; } 
+        select { min-width: 220px; }
         label { vertical-align: middle; display: block; margin-bottom: 5px; color: #e0e0e0; }
         textarea {resize: vertical;}
 
@@ -301,13 +249,13 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
-        #navButtons { 
+        #navButtons { /* Contenitore per i pulsanti di navigazione principali delle sezioni */
             display: flex;
-            flex-direction: column; 
+            flex-direction: column; /* Mantenuto per mainPageNavButtons se necessario */
             align-items: center;
             width: 100%;
         }
-        #mainPageNavButtons { 
+        #mainPageNavButtons { /* Pulsanti specifici per le sezioni della checklist */
             display: flex;
             justify-content: center;
             flex-wrap: nowrap;
@@ -320,18 +268,18 @@
             margin: 3px;
             flex-shrink: 0;
         }
-        #utilityNavButtons { 
+        #utilityNavButtons { /* Pulsanti di utilità globali */
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 5px; 
-            margin-bottom: 5px; 
+            margin-top: 5px; /* Spazio sopra i pulsanti di utilità */
+            margin-bottom: 5px; /* Spazio sotto i pulsanti di utilità, prima del titolo */
         }
         #utilityNavButtons button {
             margin: 3px 5px;
         }
 
-        #navButtons button, .action-button { 
+        #navButtons button, .action-button { /* Stile generale per tutti i pulsanti d'azione, inclusi quelli in utilityNavButtons */
              padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-size: 0.9em;
         }
         .save-and-next-btn { background-color: #0069d9 !important; border-color: #005cbf !important; }
@@ -344,7 +292,7 @@
             100% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
         }
 
-        #navButtons button.active { 
+        #navButtons button.active { /* Solo per i pulsanti di navigazione delle sezioni */
             background-color: #0056b3 !important; border-color: #004085 !important; color: white !important;
             animation-name: activeButtonGlow; animation-duration: 1.8s;
             animation-iteration-count: infinite; animation-timing-function: ease-in-out;
@@ -360,23 +308,24 @@
         #landingPageSection { display: block; }
         .category-section.active { display: block; }
 
+        /* Stili per il bottone "Compila Default" */
         .category-section {
-            position: relative; 
+            position: relative; /* Necessario per il posizionamento assoluto del bottone */
         }
         .fill-defaults-btn {
             position: absolute;
-            top: 20px; 
+            top: 20px; /* Aggiustato per allineamento con il titolo */
             right: 20px;
             width: 35px;
             height: 35px;
-            background-color: #007bff; 
+            background-color: #007bff; /* Blu per coerenza, o altro colore distintivo */
             color: white;
             border: 1px solid #0056b3;
             border-radius: 4px;
-            font-size: 1.5em; 
-            line-height: 1; 
+            font-size: 1.5em; /* Aumentata dimensione icona */
+            line-height: 1; /* Per centrare meglio il testo/simbolo */
             cursor: pointer;
-            z-index: 10; 
+            z-index: 10; /* Per assicurare che sia sopra altri elementi */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -407,12 +356,12 @@
         .summary-notes strong { color: #c0c0ff !important; }
 
         .table-scroll-wrapper { overflow-x: auto; width: 100%; margin-bottom: 10px; border: 1px solid #444; border-radius: 4px; }
-        .targa-list-table-content { min-width: 650px; } 
+        .targa-list-table-content { min-width: 650px; } /* Aumentato per nuova colonna Urgenza */
         .targa-list-header { display: flex; font-weight: bold; padding: 0 10px 0 10px; border-bottom: 2px solid #777; color: #ddd; background-color: #3a3a3a; }
         .targa-list-header .targa-col { padding: 6px 8px; border-right: 1px solid #555; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1;}
         .targa-list-header .targa-col:last-child { border-right: none; }
         .targa-list-header .targa-col-actions { flex-basis: 60px; text-align: center; flex-grow: 0; }
-        .targa-list-header .targa-col-urgenza { flex-basis: 70px; text-align: center; flex-grow: 0; } 
+        .targa-list-header .targa-col-urgenza { flex-basis: 70px; text-align: center; flex-grow: 0; } /* Stile per header colonna Urgenza */
 
 
         #targaListContainer { margin-top: 0; max-height: 350px; overflow-y: auto; overflow-x: visible; padding: 0; }
@@ -424,7 +373,7 @@
         }
         .targa-list-item .targa-col:last-child { border-right: none; }
 
-        .targa-col-targa    { flex-basis: 13%; min-width: 75px;} 
+        .targa-col-targa    { flex-basis: 13%; min-width: 75px;} /* Ridotto leggermente */
         .targa-col-targa.clickable-targa {
             cursor: pointer;
             color: #8ab4f8;
@@ -436,13 +385,13 @@
             text-decoration: underline;
         }
 
-        .targa-col-posizione{ flex-basis: 12%; min-width: 60px; padding: 4px !important; } 
-        .targa-col-urgenza  { flex-basis: 10%; min-width: 50px; text-align: center; justify-content: center;} 
-        .targa-col-urgenza input[type="checkbox"] { margin: 0 auto; } 
-        .targa-col-marca    { flex-basis: 18%; min-width: 90px;} 
-        .targa-col-modello  { flex-basis: 22%; min-width: 100px;}
-        .targa-col-piazzale { flex-basis: 18%; min-width: 70px;} 
-        .targa-col-actions  { flex-basis: 7%; min-width: 50px; flex-grow: 0; text-align: center; } 
+        .targa-col-posizione{ flex-basis: 12%; min-width: 60px; padding: 4px !important; } /* Ridotto leggermente */
+        .targa-col-urgenza  { flex-basis: 10%; min-width: 50px; text-align: center; justify-content: center;} /* Nuova colonna Urgenza */
+        .targa-col-urgenza input[type="checkbox"] { margin: 0 auto; } /* Centra checkbox */
+        .targa-col-marca    { flex-basis: 18%; min-width: 90px;} /* Ridotto leggermente */
+        .targa-col-modello  { flex-basis: 22%; min-width: 100px;}/* Ridotto leggermente */
+        .targa-col-piazzale { flex-basis: 18%; min-width: 70px;} /* Ridotto leggermente */
+        .targa-col-actions  { flex-basis: 7%; min-width: 50px; flex-grow: 0; text-align: center; } /* Ridotto leggermente */
 
 
         .targa-col-posizione input.posizione-input {
@@ -538,11 +487,9 @@
             #mainPageNavButtons { width: 100%; padding: 5px; box-sizing: border-box; }
             #mainPageNavButtons button { font-size: 0.8em; padding: 6px 8px; }
             #utilityNavButtons button { font-size: 0.85em; padding: 8px 10px; }
-            input[type="text"], input[type="url"], select:not(#targaSwitcherDropdown), textarea { width: 100%; box-sizing: border-box; }
-            #targaSwitcherDropdown { min-width: 160px; font-size: 1em; } 
-            #targaDetailsDisplay { font-size: 0.75em; }
+            input[type="text"], input[type="url"], select, textarea { width: 100%; box-sizing: border-box; }
             .table-scroll-wrapper { overflow-x: auto; }
-            .targa-list-table-content { min-width: 600px; } 
+            .targa-list-table-content { min-width: 600px; } /* Potrebbe necessitare aggiustamento ulteriore */
             .targa-list-header { display: flex !important; }
             .targa-list-header .targa-col, .targa-list-item .targa-col { padding: 6px 5px; }
             .delete-progress-btn { padding: 5px 8px; }
@@ -589,10 +536,6 @@
             <button id="exitAppBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Esci</button>
         </div>
         <h1 id="mainTitleGlobal">Checklist Perizia Veicolo</h1>
-        <div id="targaDropdownContainer" style="display: none;">
-            <select id="targaSwitcherDropdown"></select>
-            <span id="targaDetailsDisplay"></span>
-        </div>
         <div id="navButtons">
             <div id="mainPageNavButtons">
                 <button data-target="remarketing">1. Remarketing</button>
@@ -604,8 +547,16 @@
     </div>
 
     <div class="content-wrapper" id="mainContentWrapper">
+        <div id="targaDataLoader" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 10000; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+            <div class="loader-bar-container">
+                <div class="loader-bar"></div>
+                <div class="loader-bar"></div>
+                <div class="loader-bar"></div>
+            </div>
+            <div class="loading-text" style="font-size: 1.4em;">Caricamento dati targa...</div>
+        </div>
+
         <div id="landingPageSection" style="display: block;">
-             {/* ... (Contenuto landingPageSection invariato) ... */}
             <h2 style="margin-top: 10px;">Seleziona Veicolo da Periziare</h2>
             <div id="sheetFilterContainer">
                 <label for="sheetFilterDropdown">Filtra per Elenco:</label>
@@ -631,7 +582,6 @@
         </div>
 
         <div id="checklistContainer" style="display: none;">
-            {/* ... (Contenuto remarketingSection, pneumaticiSection, danniVerificheSection, riepilogoSection invariato) ... */}
             <div id="remarketingSection" class="category-section">
                 <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection">&#x2713;</button>
                 <h2 class="section-title">1. Foto Remarketing</h2>
@@ -736,7 +686,6 @@
         </div>
 
         <div id="historyPageSection" style="display: none;">
-             {/* ... (Contenuto historyPageSection invariato) ... */}
             <h2 class="section-title" style="text-align: center;">Cronistoria Salvataggi</h2>
             <div id="savedTargasListContainer"><p>Nessun salvataggio trovato.</p></div>
             <div style="margin-top: 20px; text-align: center;">
@@ -746,20 +695,17 @@
         </div>
     </div>
 <script>
-    // Variabili globali (invariate)
+    // Variabili globali
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
     const targaListContainer = document.getElementById('targaListContainer');
+    const targaDataLoader = document.getElementById('targaDataLoader'); // NUOVA VARIABILE PER IL LOADER TARGA
     const savedTargasListContainer = document.getElementById('savedTargasListContainer');
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
     const headerCircles = pageHeaderContainer.querySelector('.header-circles');
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
-    const targaDropdownContainer = document.getElementById('targaDropdownContainer');
-    const targaSwitcherDropdown = document.getElementById('targaSwitcherDropdown');
-    const targaDetailsDisplay = document.getElementById('targaDetailsDisplay'); 
-
     const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons'); 
     const mainPageNavButtons = navButtonsContainer.querySelector('#mainPageNavButtons'); 
     const utilityNavButtons = pageHeaderContainer.querySelector('#utilityNavButtons'); 
@@ -769,7 +715,6 @@
     const backToListBtn = utilityNavButtons.querySelector('#backToListBtn');
     const historyBtn = utilityNavButtons.querySelector('#historyBtn');
     const exitAppBtn = utilityNavButtons.querySelector('#exitAppBtn');
-    let syncToSheetsBtn; 
     
     const sections = document.querySelectorAll('#checklistContainer .category-section');
     const summaryContent = document.getElementById('summaryContent');
@@ -782,157 +727,364 @@
     const cavoRapidaSelect = document.getElementById('cavo_ricarica_rapida');
     const cavoDomesticaSelect = document.getElementById('cavo_ricarica_domestica');
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
-    const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbym7LjGgbF-ErSiThpyfNHAPsWx_w18Q3eEkzVZpkgQlYGN_Ips0ASZ3LYveo5QdKNTuA/exec'; 
-    
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
 
-    // --- MODIFICATA: updateTargaDetailsDisplay ---
-    function updateTargaDetailsDisplay(selectedTarga) {
-        if (!targaDetailsDisplay || !selectedTarga || !listaTargheCompleta.length) {
-            if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
-            return;
+    function fillSectionPositiveOrDefaults(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+
+        // Remarketing Section
+        if (sectionId === 'remarketingSection') {
+            if (tipoTrazioneSelect) tipoTrazioneSelect.value = 'endotermico';
+            document.getElementById('foto_angolari').checked = true;
+            document.getElementById('foto_vano_carico').checked = true;
+            document.getElementById('tipo_equipaggiamento').value = 'kit_gonfia_ripara';
+            document.getElementById('equipaggiamento_presenza').value = 'presente';
+            document.getElementById('foto_interni_pannelli').checked = true;
+            document.getElementById('foto_cruscotto').checked = true;
+            document.getElementById('stato_chilometri').value = 'rilevabili';
+            document.getElementById('stato_cdc').value = 'originale';
+            document.getElementById('foto_vano_motore').checked = true;
+            document.getElementById('foto_cofano_tetto').checked = true;
+            document.getElementById('chiave_telecomando').value = 'presente';
+            document.getElementById('seconda_chiave').value = 'presente';
+            handleTrazioneChange(); 
+            if (tipoTrazioneSelect && tipoTrazioneSelect.value === 'elettrico') {
+                if (cavoRapidaSelect) cavoRapidaSelect.value = 'presente';
+                if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'presente';
+            }
         }
-        const veicolo = listaTargheCompleta.find(v => v.targa.toUpperCase() === selectedTarga.toUpperCase());
-        if (veicolo) {
-            let detailsText = '';
-            // Assicurati che marca e modello siano stringhe e non undefined/null prima di concatenare
-            const marca = veicolo.marca ? String(veicolo.marca).trim() : '';
-            const modello = veicolo.modello ? String(veicolo.modello).trim() : '';
-
-            if (marca) detailsText += marca;
-            if (modello) detailsText += (detailsText ? ' ' : '') + modello;
-            
-            targaDetailsDisplay.textContent = detailsText || ''; // Mostra stringa vuota se non ci sono dettagli
-        } else {
-            targaDetailsDisplay.textContent = ''; // Pulisci se il veicolo non è trovato
+        // Pneumatici Section
+        else if (sectionId === 'pneumaticiSection') {
+            document.getElementById('pneumatico_as').value = 'conforme';
+            document.getElementById('pneumatico_ad').value = 'conforme';
+            document.getElementById('pneumatico_pd').value = 'conforme';
+            document.getElementById('pneumatico_ps').value = 'conforme';
         }
-    }
-
-    function populateTargaSwitcherDropdown() {
-        // ... (Logica per ottenere veicoloAttuale e targheDelPiazzale invariata) ...
-        if (!targaSwitcherDropdown || !targaSelezionataGlobalmente || !listaTargheCompleta.length) {
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-            if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
-            return;
+        // Danni/Verifiche Section
+        else if (sectionId === 'danniVerificheSection') {
+            document.getElementById('motore_accende').value = 'ok';
+            document.getElementById('batteria_stato').value = 'ok';
+            document.getElementById('foto_danni_generiche').checked = true; 
+            document.getElementById('note_danni_verifiche').value = 'Nessuna anomalia da segnalare.';
         }
 
-        const veicoloAttuale = listaTargheCompleta.find(v => v.targa.toUpperCase() === targaSelezionataGlobalmente.toUpperCase());
-        if (!veicoloAttuale || !veicoloAttuale.piazzale) {
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-            if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
-            console.warn("Piazzale non trovato per la targa attuale o targa non trovata:", targaSelezionataGlobalmente);
-            return;
-        }
-
-        const piazzaleCorrente = veicoloAttuale.piazzale;
-        const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente);
-
-        targaSwitcherDropdown.innerHTML = ''; 
-
-        if (targheDelPiazzale.length === 0) {
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-            if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
-            return;
+        updateNavButtonColors();
+        if (typeof initSequentialAnimation === 'function') {
+            section.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me'));
+            initSequentialAnimation();
         }
         
-        targheDelPiazzale.sort((a, b) => a.targa.localeCompare(b.targa)); 
-
-        targheDelPiazzale.forEach(v => {
-            const option = document.createElement('option');
-            option.value = v.targa.toUpperCase();
-            option.textContent = v.targa; 
-            if (v.targa.toUpperCase() === targaSelezionataGlobalmente.toUpperCase()) {
-                option.selected = true;
-            }
-            targaSwitcherDropdown.appendChild(option);
+        section.querySelectorAll('input, select, textarea').forEach(el => {
+            const event = new Event('change', { bubbles: true });
+            el.dispatchEvent(event);
         });
-
-        if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
-        updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
     }
 
-    // ... (Funzioni inviaPeriziaSingolaASheets, fetchLatestPeriziaFromSheets, fillSectionPositiveOrDefaults, ecc. invariate fino a handleTargaSelectionAndSync)
-    async function inviaPeriziaSingolaASheets(periziaDaInviare) { if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') { console.error("URL della Web App Google Sheets non configurato."); return { success: false, message: "URL Web App non configurato." }; } console.log("Tentativo di invio perizia a Google Sheets:", periziaDaInviare); try { const response = await fetch(GOOGLE_SHEET_WEB_APP_URL, { method: 'POST', mode: 'cors',  cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' },  body: JSON.stringify(periziaDaInviare)  }); let responseData; const contentType = response.headers.get("content-type"); if (contentType && contentType.indexOf("application/json") !== -1) { responseData = await response.json(); } else { const textResponse = await response.text(); console.warn("Risposta dal server non è JSON, ricevuta come testo:", textResponse); try { responseData = JSON.parse(textResponse); }  catch (e) { responseData = { status: "error", message: "Risposta non JSON dal server: " + textResponse.substring(0,100) + "..."}; } } if (response.ok && responseData.status === "success") { console.log("Perizia inviata con successo a Google Sheets:", responseData.message, "Dati ritornati:", responseData.data); return { success: true, message: responseData.message, data: responseData.data }; } else { console.error("Errore dall'API di Google Sheets o risposta non OK:", responseData.message || `HTTP Status ${response.status}`); return { success: false, message: responseData.message || `Errore server (HTTP ${response.status})` }; } } catch (error) { console.error("Errore di rete o fetch durante l'invio a Google Sheets:", error); return { success: false, message: "Errore di rete: " + error.message }; } }
-    async function fetchLatestPeriziaFromSheets(targa) { if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch."); return null; } const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=getPerizia&targa=${encodeURIComponent(targa.toUpperCase())}&nocache=${new Date().getTime()}`; console.log("Fetching latest perizia from Sheets for targa:", targa, "URL:", fetchUrl); try { const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); if (!response.ok) { const errorText = await response.text(); console.error(`Errore HTTP ${response.status} nel fetch da Sheets: ${errorText}`); return null; } const contentType = response.headers.get("content-type"); if (contentType && contentType.indexOf("application/json") !== -1) { const result = await response.json(); if (result.status === "success" && result.data) { console.log("Dati perizia singola ricevuti da Sheets:", result.data); return result.data;  } else if (result.status === "notfound") { console.log("Perizia non trovata in Sheets per targa:", targa); return null; } else { console.warn("Risposta da Sheets (singola) non conteneva dati validi o status non era 'success'/'notfound':", result.message || result); return null; } } else { const textResponse = await response.text(); console.error("Risposta da Sheets (singola) non era JSON:", textResponse); return null; } } catch (error) { console.error("Errore di rete o fetch generico durante il recupero (singolo) da Sheets:", error); return null; } }
-    function fillSectionPositiveOrDefaults(sectionId) { const section = document.getElementById(sectionId); if (!section) return; if (sectionId === 'remarketingSection') { if (tipoTrazioneSelect) tipoTrazioneSelect.value = 'endotermico'; document.getElementById('foto_angolari').checked = true; document.getElementById('foto_vano_carico').checked = true; document.getElementById('tipo_equipaggiamento').value = 'kit_gonfia_ripara'; document.getElementById('equipaggiamento_presenza').value = 'presente'; document.getElementById('foto_interni_pannelli').checked = true; document.getElementById('foto_cruscotto').checked = true; document.getElementById('stato_chilometri').value = 'rilevabili'; document.getElementById('stato_cdc').value = 'originale'; document.getElementById('foto_vano_motore').checked = true; document.getElementById('foto_cofano_tetto').checked = true; document.getElementById('chiave_telecomando').value = 'presente'; document.getElementById('seconda_chiave').value = 'presente'; handleTrazioneChange();  if (tipoTrazioneSelect && tipoTrazioneSelect.value === 'elettrico') { if (cavoRapidaSelect) cavoRapidaSelect.value = 'presente'; if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'presente'; } else {  if (cavoRapidaSelect) cavoRapidaSelect.value = 'non_applicabile';  if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'non_applicabile'; } } else if (sectionId === 'pneumaticiSection') { document.getElementById('pneumatico_as').value = 'conforme'; document.getElementById('pneumatico_ad').value = 'conforme'; document.getElementById('pneumatico_pd').value = 'conforme'; document.getElementById('pneumatico_ps').value = 'conforme'; } else if (sectionId === 'danniVerificheSection') { document.getElementById('motore_accende').value = 'ok'; document.getElementById('batteria_stato').value = 'ok'; document.getElementById('foto_danni_generiche').checked = true;  document.getElementById('note_danni_verifiche').value = 'Nessuna anomalia da segnalare.'; } updateNavButtonColors(); if (typeof initSequentialAnimation === 'function') { section.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me')); initSequentialAnimation(); }  section.querySelectorAll('input, select, textarea').forEach(el => { const event = new Event('change', { bubbles: true }); el.dispatchEvent(event); }); }
-    function handleTrazioneChange() { if (!tipoTrazioneSelect || !cavoRapidaSelect || !cavoDomesticaSelect) return; const selectedTrazione = tipoTrazioneSelect.value; const isElectric = selectedTrazione === 'elettrico'; cavoRapidaSelect.disabled = !isElectric; cavoDomesticaSelect.disabled = !isElectric; if (!isElectric) { cavoRapidaSelect.value = "non_applicabile";  cavoDomesticaSelect.value = "non_applicabile"; } else { if (cavoRapidaSelect.value === "" || cavoRapidaSelect.value === "non_applicabile") cavoRapidaSelect.value = ""; if (cavoDomesticaSelect.value === "" || cavoDomesticaSelect.value === "non_applicabile") cavoDomesticaSelect.value = ""; } updateNavButtonColors();  }
-    function savePosizioneForTarga(targa, posizione) { if (!targa) return; try { localStorage.setItem(`${APP_PREFIX}posizione_${targa.toUpperCase()}`, posizione); } catch (e) { console.error("Errore salvataggio posizione LS:", e); } }
-    function loadPosizioneForTarga(targa) { if (!targa) return ""; try { return localStorage.getItem(`${APP_PREFIX}posizione_${targa.toUpperCase()}`) || ""; } catch (e) { console.error("Errore caricamento posizione LS:", e); return ""; } }
-    function saveUrgentStatusForTarga(targa, isUrgent) {  if (!targa) return; try { localStorage.setItem(`${APP_PREFIX}urgent_${targa.toUpperCase()}`, JSON.stringify(isUrgent)); } catch (e) { console.error("Errore salvataggio stato urgenza LS:", e); } }
-    function loadUrgentStatusForTarga(targa) { if (!targa) return false; try { const status = localStorage.getItem(`${APP_PREFIX}urgent_${targa.toUpperCase()}`); return status ? JSON.parse(status) : false; } catch (e) { console.error("Errore caricamento stato urgenza LS:", e); return false; } }
-    function resetChecklistForm() { const els = document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea'); els.forEach(el => { if (el.type === 'checkbox') el.checked = false; else if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = ''; }); if (tipoTrazioneSelect) {  handleTrazioneChange(); } console.log("Modulo resettato."); }
-    function saveProgress(targa) { if(!targa){console.warn("Nessuna targa attiva per il salvataggio.");return false;} const data = {}; document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => { if (el.id) { if (el.type === 'checkbox') data[el.id] = el.checked; else data[el.id] = el.value; } }); data.timestamp = new Date().toISOString();  try { localStorage.setItem(`${APP_PREFIX}data_${targa.toUpperCase()}`, JSON.stringify(data)); console.log(`Progresso salvato localmente per la targa ${targa.toUpperCase()} con timestamp ${data.timestamp}.`); updateNavButtonColors(); return true; } catch(e) { console.error("Errore durante il salvataggio in localStorage:", e); alert("Salvataggio locale fallito. Spazio esaurito o errore del browser."); return false; } }
-    function loadProgress(targa) { if(!targa) return; const targaUpper = targa.toUpperCase(); try { const json = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`); if (json) { const data = JSON.parse(json); document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => { if (el.id && data.hasOwnProperty(el.id)) { if (el.type === 'checkbox') el.checked = data[el.id]; else el.value = data[el.id]; } else if (el.id) {  if (el.type === 'checkbox') el.checked = false; else if (el.tagName === 'SELECT') el.selectedIndex = 0; } }); console.log(`Progresso caricato da localStorage per la targa ${targaUpper}. Timestamp: ${data.timestamp || 'N/A'}`); } else { console.log(`Nessun dato salvato in localStorage trovato per la targa ${targaUpper}. Reset form.`); resetChecklistForm();  } if (tipoTrazioneSelect) {   handleTrazioneChange(); } updateNavButtonColors();  } catch(e) { console.error("Errore durante il caricamento da localStorage:", e); resetChecklistForm();  updateNavButtonColors(); } }
-    function getCompletedTarghe() { try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){console.error("Errore LS getCompletedTarghe:", e); return{};}}
-    function isTargaCompleted(targa) { if(!targa) return false; const completed = getCompletedTarghe(); return !!(completed[targa.toUpperCase()]); }
-    function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa.toUpperCase()]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa.toUpperCase()} marked complete locally.`);}catch(e){console.error("Errore LS Mark Err:",e);}}
-    function unmarkTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe(); if(completed[targa.toUpperCase()]){ delete completed[targa.toUpperCase()]; localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed)); console.log(`${targa.toUpperCase()} unmarked as complete locally.`);}}catch(e){console.error("Errore LS Unmark Err:",e);}}
-    function deleteProgressForTarga(targa) { if(!targa){return;} const targaUpper = targa.toUpperCase(); try { localStorage.removeItem(`${APP_PREFIX}data_${targaUpper}`); console.log(`Dati modulo rimossi per ${targaUpper}.`); unmarkTargaAsCompleted(targaUpper);  localStorage.removeItem(`${APP_PREFIX}posizione_${targaUpper}`); console.log(`Dati posizione rimossi per ${targaUpper}.`); localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`);  console.log(`Dati urgenza rimossi per ${targaUpper}.`); } catch(e) { console.error(`Errore cancellazione dati per ${targaUpper}:`,e); alert(`Errore cancellazione dati per ${targaUpper}.`); } if (typeof popolaTargheFiltrate === 'function') {  popolaTargheFiltrate(); } if (targaSelezionataGlobalmente && targaSelezionataGlobalmente.toUpperCase() === targaUpper) {  targaSelezionataGlobalmente = null; } }
-    function generateAndDownloadScreenshot() { return new Promise((resolve, reject) => { const riepilogoSection = document.getElementById('riepilogoSection'); if (!riepilogoSection) { alert("Errore: Sezione Riepilogo non trovata per lo screenshot."); return reject("Sezione riepilogo non trovata"); } if (typeof html2canvas === 'undefined') { alert("Errore: Libreria html2canvas non caricata."); return reject("html2canvas non caricata"); } setTimeout(() => { console.log("Inizio generazione screenshot..."); riepilogoSection.scrollTop = 0;  html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY, windowHeight: riepilogoSection.scrollHeight }) .then(canvas => { const link = document.createElement('a'); let targaSanitized = 'sconosciuta'; let piazzaleSanitized = 'piazzale_sconosciuto'; if (targaSelezionataGlobalmente) { targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_'); const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") { piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_'); if (!piazzaleSanitized) piazzaleSanitized = 'N_D'; } else { piazzaleSanitized = 'N_D'; } } link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`; link.href = canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); console.log(`Screenshot generato e download avviato: ${link.download}`); resolve(); }) .catch(error => { console.error("Errore durante la generazione dello screenshot:", error); alert("Si è verificato un errore durante la generazione dello screenshot."); reject(error); }); }, 100);  }); }
-    async function handleSavePeriziaAndReturn() {  if (!targaSelezionataGlobalmente) { alert("Nessuna targa attiva selezionata per il salvataggio."); return; } const originalButtonText = saveAndReturnBtn.textContent; saveAndReturnBtn.textContent = 'Salvataggio locale...'; saveAndReturnBtn.disabled = true; if (!saveProgress(targaSelezionataGlobalmente)) {  alert("Salvataggio dati nel browser fallito."); saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; return; } if (document.getElementById('riepilogoSection').classList.contains('active')) { generateSummary();  } try { await generateAndDownloadScreenshot(); } catch (e) { console.warn("Generazione screenshot fallita, ma i dati sono stati salvati localmente.", e); } markTargaAsCompleted(targaSelezionataGlobalmente);  updateNavButtonColors();  saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; alert(`Perizia per ${targaSelezionataGlobalmente} salvata localmente e screenshot tentato.`); showView('landing');  }
+
+    function handleTrazioneChange() {
+        if (!tipoTrazioneSelect || !cavoRapidaSelect || !cavoDomesticaSelect) return;
+        const selectedTrazione = tipoTrazioneSelect.value;
+        const isElectric = selectedTrazione === 'elettrico';
+        cavoRapidaSelect.disabled = !isElectric;
+        cavoDomesticaSelect.disabled = !isElectric;
+        if (!isElectric) {
+            cavoRapidaSelect.value = "non_applicabile"; 
+            cavoDomesticaSelect.value = "non_applicabile";
+        } else {
+            if (cavoRapidaSelect.value === "" || cavoRapidaSelect.value === "non_applicabile") cavoRapidaSelect.value = "";
+            if (cavoDomesticaSelect.value === "" || cavoDomesticaSelect.value === "non_applicabile") cavoDomesticaSelect.value = "";
+        }
+        updateNavButtonColors();
+    }
+
+    function savePosizioneForTarga(targa, posizione) {
+        if (!targa) return;
+        try {
+            localStorage.setItem(`${APP_PREFIX}posizione_${targa}`, posizione);
+        } catch (e) {
+            console.error("Errore salvataggio posizione LS:", e);
+        }
+    }
+
+    function loadPosizioneForTarga(targa) {
+        if (!targa) return "";
+        try {
+            return localStorage.getItem(`${APP_PREFIX}posizione_${targa}`) || "";
+        } catch (e) {
+            console.error("Errore caricamento posizione LS:", e);
+            return "";
+        }
+    }
+
+    // NUOVE FUNZIONI PER URGENZA
+    function saveUrgentStatusForTarga(targa, isUrgent) {
+        if (!targa) return;
+        try {
+            localStorage.setItem(`${APP_PREFIX}urgent_${targa}`, JSON.stringify(isUrgent));
+        } catch (e) {
+            console.error("Errore salvataggio stato urgenza LS:", e);
+        }
+    }
+
+    function loadUrgentStatusForTarga(targa) {
+        if (!targa) return false;
+        try {
+            const status = localStorage.getItem(`${APP_PREFIX}urgent_${targa}`);
+            return status ? JSON.parse(status) : false;
+        } catch (e) {
+            console.error("Errore caricamento stato urgenza LS:", e);
+            return false;
+        }
+    }
+
+
+    function resetChecklistForm() {
+        const els = document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea');
+        els.forEach(el => {
+            if (el.type === 'checkbox') el.checked = false;
+            else if (el.tagName === 'SELECT') el.selectedIndex = 0;
+            else el.value = '';
+        });
+        if (tipoTrazioneSelect) {
+            handleTrazioneChange();
+        }
+        console.log("Modulo resettato.");
+    }
+
+    function saveProgress(targa) {
+        if(!targa){console.warn("Nessuna targa attiva per il salvataggio.");return false;}
+        const data = {};
+        document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => {
+            if (el.id) {
+                if (el.type === 'checkbox') data[el.id] = el.checked;
+                else data[el.id] = el.value;
+            }
+        });
+        try {
+            localStorage.setItem(`${APP_PREFIX}data_${targa}`, JSON.stringify(data));
+            console.log(`Progresso salvato per la targa ${targa}.`);
+            updateNavButtonColors();
+            return true;
+        } catch(e) {
+            console.error("Errore durante il salvataggio in localStorage:", e);
+            alert("Salvataggio fallito. Spazio esaurito o errore del browser.");
+            return false;
+        }
+    }
+
+    function loadProgress(targa) {
+        if(!targa) return;
+        resetChecklistForm();
+        try {
+            const json = localStorage.getItem(`${APP_PREFIX}data_${targa}`);
+            if (json) {
+                const data = JSON.parse(json);
+                document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => {
+                    if (el.id && data.hasOwnProperty(el.id)) {
+                        if (el.type === 'checkbox') el.checked = data[el.id];
+                        else el.value = data[el.id];
+                    }
+                });
+                console.log(`Progresso caricato per la targa ${targa}.`);
+            } else {
+                console.log(`Nessun dato salvato trovato per la targa ${targa}.`);
+            }
+            if (tipoTrazioneSelect) {
+                 handleTrazioneChange();
+            }
+            updateNavButtonColors();
+        } catch(e) {
+            console.error("Errore durante il caricamento da localStorage:", e);
+            updateNavButtonColors();
+        }
+    }
+    function getCompletedTarghe() { try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){return{};}}
+    function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa} marked complete.`);}catch(e){console.error("LS Mark Err:",e);}}
+    function isTargaCompleted(targa) { const completed=getCompletedTarghe(); return !!(completed[targa]); }
+
+    function deleteProgressForTarga(targa) {
+        if(!targa){return;}
+        try {
+            localStorage.removeItem(`${APP_PREFIX}data_${targa}`);
+            console.log(`Dati modulo rimossi per ${targa}.`);
+            const completed = getCompletedTarghe();
+            if(completed.hasOwnProperty(targa)){
+                delete completed[targa];
+                localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));
+                console.log(`Stato completamento rimosso per ${targa}.`);
+            }
+            localStorage.removeItem(`${APP_PREFIX}posizione_${targa}`);
+            console.log(`Dati posizione rimossi per ${targa}.`);
+            localStorage.removeItem(`${APP_PREFIX}urgent_${targa}`); // Rimuovi anche lo stato di urgenza
+            console.log(`Dati urgenza rimossi per ${targa}.`);
+
+
+        } catch(e) {
+            console.error(`Errore cancellazione dati per ${targa}:`,e);
+            alert(`Errore cancellazione dati per ${targa}.`);
+        }
+        if (typeof popolaTargheFiltrate === 'function') {
+             popolaTargheFiltrate();
+        }
+        if (targaSelezionataGlobalmente === targa) {
+             targaSelezionataGlobalmente = null;
+        }
+    }
+
+    function generateAndDownloadScreenshot() {
+        return new Promise((resolve, reject) => {
+            const riepilogoSection = document.getElementById('riepilogoSection');
+            if (!riepilogoSection) {
+                alert("Errore: Sezione Riepilogo non trovata per lo screenshot.");
+                return reject("Sezione riepilogo non trovata");
+            }
+            if (typeof html2canvas === 'undefined') {
+                alert("Errore: Libreria html2canvas non caricata.");
+                return reject("html2canvas non caricata");
+            }
+
+            setTimeout(() => {
+                console.log("Inizio generazione screenshot...");
+                riepilogoSection.scrollTop = 0;
+                html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false })
+                    .then(canvas => {
+                        const link = document.createElement('a');
+                        let targaSanitized = 'sconosciuta';
+                        let piazzaleSanitized = 'piazzale_sconosciuto';
+                        if (targaSelezionataGlobalmente) {
+                            targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_');
+                            const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
+                            if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") {
+                                piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_');
+                                if (!piazzaleSanitized) piazzaleSanitized = 'N_D';
+                            } else {
+                                piazzaleSanitized = 'N_D';
+                            }
+                        }
+                        link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        console.log(`Screenshot generato e download avviato: ${link.download}`);
+                        resolve();
+                    })
+                    .catch(error => {
+                        console.error("Errore durante la generazione dello screenshot:", error);
+                        alert("Si è verificato un errore durante la generazione dello screenshot.");
+                        reject(error);
+                    });
+            }, 100);
+        });
+    }
+    async function handleSavePeriziaAndReturn() { if(!targaSelezionataGlobalmente){alert("No targa attiva.");return;} if(!saveProgress(targaSelezionataGlobalmente)){alert("Salvataggio dati fallito.");return;} if(document.getElementById('riepilogoSection').classList.contains('active')){generateSummary();} try{await generateAndDownloadScreenshot();}catch(e){console.warn("Screenshot fallito, ma dati salvati.");} markTargaAsCompleted(targaSelezionataGlobalmente); updateNavButtonColors(); alert(`Perizia per ${targaSelezionataGlobalmente} salvata, screenshot tentato, completata. Torno all'elenco.`); targaSelezionataGlobalmente=null;showView('landing');}
     function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
-    function isInputDefault(inputElement) { if (!inputElement) return true; if (inputElement.type === 'checkbox') return !inputElement.checked; if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0; if (inputElement.type === 'text' || inputElement.type === 'url' || inputElement.tagName === 'TEXTAREA') return inputElement.value.trim() === ""; return true; }
-    function getSectionInputs(sectionElementId) { const sectionDiv = document.getElementById(sectionElementId); if (!sectionDiv) return []; return Array.from(sectionDiv.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)')); }
-    function getSectionStatus(sectionElementId, targaData) { const inputs = getSectionInputs(sectionElementId); if (inputs.length === 0) return 'completed';  let allDefaultOrNA = true;  let allNonDefaultAndApplicable = true;  let hasAtLeastOneNonDefaultAndApplicable = false; inputs.forEach(input => { let isEffectivelyDefault = false; const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined; let currentValue = savedValue; if (savedValue === undefined) {  if (input.type === 'checkbox') currentValue = input.checked; else currentValue = input.value; } if (input.type === 'checkbox') { isEffectivelyDefault = !currentValue; } else if (input.tagName === 'SELECT') { isEffectivelyDefault = (currentValue === "" || (input.options.length > 0 && currentValue === input.options[0].value)); if ((input.id === 'cavo_ricarica_rapida' || input.id === 'cavo_ricarica_domestica') && currentValue === 'non_applicabile') { isEffectivelyDefault = true; } } else {  isEffectivelyDefault = (currentValue === ""); } if (!isEffectivelyDefault) { allDefaultOrNA = false; hasAtLeastOneNonDefaultAndApplicable = true; } else {  allNonDefaultAndApplicable = false; } }); if (allDefaultOrNA) return 'untouched'; if (allNonDefaultAndApplicable) return 'completed'; if (hasAtLeastOneNonDefaultAndApplicable) return 'partial';  return 'untouched';  }
-    function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente.toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
+
+    function isInputDefault(inputElement) {
+        if (!inputElement) return true;
+        if (inputElement.type === 'checkbox') return !inputElement.checked;
+        if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0;
+        if (inputElement.type === 'text' || inputElement.type === 'url' || inputElement.tagName === 'TEXTAREA') return inputElement.value.trim() === "";
+        return true;
+    }
+
+    function getSectionInputs(sectionElementId) {
+        const sectionDiv = document.getElementById(sectionElementId);
+        if (!sectionDiv) return [];
+        return Array.from(sectionDiv.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)'));
+    }
+
+    function getSectionStatus(sectionElementId, targaData) {
+        const inputs = getSectionInputs(sectionElementId);
+        if (inputs.length === 0) return 'completed';
+
+        let allDefault = true;
+        let allNonDefault = true;
+        let hasAtLeastOneNonDefault = false;
+
+        inputs.forEach(input => {
+            let isDefault;
+            const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined;
+
+            if (savedValue !== undefined) {
+                if (input.type === 'checkbox') {
+                    isDefault = !savedValue;
+                } else { 
+                    isDefault = (savedValue === "" || (input.options.length > 0 && savedValue === input.options[0].value));
+                }
+            } else {
+                 isDefault = isInputDefault(input); 
+            }
+
+            if (!isDefault) {
+                allDefault = false;
+                hasAtLeastOneNonDefault = true;
+            } else {
+                allNonDefault = false;
+            }
+        });
+
+        if (allDefault) return 'untouched';
+        if (allNonDefault) return 'completed';
+        if (hasAtLeastOneNonDefault) return 'partial'; 
+        return 'untouched';
+    }
+
+
+    function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
     function showView(viewName) {
-        // ... (Logica di gestione display sezioni e header invariata) ...
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
         let bodyPaddingTopValue = '20px';
 
         if (utilityNavButtons) utilityNavButtons.style.display = 'flex'; 
-        if (navButtonsContainer) navButtonsContainer.style.display = 'none'; 
-
-        if (mainTitleGlobal) mainTitleGlobal.style.display = 'block'; 
-        if (targaDropdownContainer) targaDropdownContainer.style.display = 'none'; 
-        if (targaDetailsDisplay) targaDetailsDisplay.textContent = ''; 
+        if (navButtonsContainer) navButtonsContainer.style.display = 'none';
 
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
-            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
+            mainTitleGlobal.innerHTML = "Elenco Veicoli";
             if (listaTargheCompleta.length > 0 &&
                 (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
                 typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
             }
-            updateNavButtonColors(); 
-        } else if (viewName === 'checklist') {
+            targaSelezionataGlobalmente = null;
+            updateNavButtonColors();
+        } else if (viewName === 'checklist' || viewName === 'history') {
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
-            if (navButtonsContainer) navButtonsContainer.style.display = 'flex'; 
-            if (!targaSelezionataGlobalmente) { 
-                console.warn("Tentativo di mostrare checklist senza targa selezionata. Reindirizzamento a landing.");
-                showView('landing'); 
-                return;
+
+            if (viewName === 'checklist') {
+                 if (navButtonsContainer) navButtonsContainer.style.display = 'flex';
+                if (!targaSelezionataGlobalmente) {
+                    alert("Nessuna targa selezionata.");
+                    showView('landing');
+                    return;
+                }
+                checklistContainer.style.display = 'block';
+                const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
+                let subIdentifier = (veicoloAttuale && (veicoloAttuale.marca || veicoloAttuale.modello))
+                    ? `${veicoloAttuale.marca || ''} ${veicoloAttuale.modello || ''}`.trim()
+                    : "";
+                mainTitleGlobal.innerHTML = `${targaSelezionataGlobalmente}<br><span style="font-size: 0.5em; color: #ccc; font-weight: normal; line-height: 1.2;">${subIdentifier}</span>`;
+            } else { 
+                historyPageSection.style.display = 'block';
+                mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
+                populateSavedTargasList();
             }
-            checklistContainer.style.display = 'block';
-            if (mainTitleGlobal) mainTitleGlobal.style.display = 'none'; 
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex'; 
-            
-            populateTargaSwitcherDropdown(); 
-            updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
-            
-            if (tipoTrazioneSelect) handleTrazioneChange();
-            updateNavButtonColors(); 
-        } else if (viewName === 'history') {
-            pageHeaderContainer.classList.add('fixed-header');
-            headerCircles.style.display = 'flex';
-            historyPageSection.style.display = 'block';
-            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
-            populateSavedTargasList();
             updateNavButtonColors();
         } else { 
             pageHeaderContainer.classList.remove('fixed-header');
             headerCircles.style.display = 'none';
             if (utilityNavButtons) utilityNavButtons.style.display = 'none';
-            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
+            mainTitleGlobal.innerHTML = "";
         }
 
         if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
@@ -942,234 +1094,592 @@
             if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {
                  nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
             }
-             bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
+            bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
         }
         document.body.style.paddingTop = bodyPaddingTopValue;
-        window.scrollTo(0, 0);
     }
 
-    // --- MODIFICATA: handleTargaSelectionAndSync ---
-    async function handleTargaSelectionAndSync(selectedTarga, targetSectionId = null) { // Aggiunto targetSectionId
-        const targaUpper = selectedTarga.toUpperCase();
-        
-        // Se la targa è la stessa e siamo già in checklist, aggiorniamo solo i dettagli e il dropdown, poi usciamo.
-        if (targaSelezionataGlobalmente === targaUpper && checklistContainer.style.display === 'block') {
-            if (targaSwitcherDropdown.value !== targaUpper) {
-                targaSwitcherDropdown.value = targaUpper; // Sincronizza il dropdown se necessario
+    function populateSavedTargasList() { savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targa = key.substring(`${APP_PREFIX}data_`.length); if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa);}}} if (tempSavedTargas.length > 0) hasSaves = true; tempSavedTargas.sort(); tempSavedTargas.forEach(targa => { const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' }; let displayText = targa; let details = []; if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`); if (details.length > 0) { displayText += ` - ${details.join(' ')}`; } const button = document.createElement('button'); button.classList.add('saved-targa-button'); button.textContent = displayText; button.dataset.targa = targa; button.addEventListener('click', function() { targaSelezionataGlobalmente = this.dataset.targa; showView('checklist'); loadProgress(targaSelezionataGlobalmente); const firstChecklistNavButton = Array.from(navButtons).find(btn => btn.dataset.target && btn.id !== 'backToListBtn' && btn.id !== 'historyBtn'); if (firstChecklistNavButton) { showSection(firstChecklistNavButton.dataset.target); } else if (navButtons.length > 0 && navButtons[0].dataset.target) { showSection(navButtons[0].dataset.target); }}); savedTargasListContainer.appendChild(button); }); if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>'; } }
+    function clearAllSavedData() {
+        if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni, urgenze e filtro piazzale)?\n\nAzione irreversibile.")) {
+            let c = 0;
+            for (let i=localStorage.length-1;i>=0;i--) {
+                const k=localStorage.key(i);
+                if (k.startsWith(APP_PREFIX)) {
+                    localStorage.removeItem(k);c++;
+                }
             }
-            updateTargaDetailsDisplay(targaUpper);
-            // Se targetSectionId è fornito (dall'evento change del dropdown), assicurati che la sezione sia quella corretta
-            if (targetSectionId) {
-                 const currentActiveSectionEl = document.querySelector('#checklistContainer .category-section.active');
-                 const currentActiveSectionId = currentActiveSectionEl ? currentActiveSectionEl.id.replace('Section', '') : null;
-                 if (currentActiveSectionId !== targetSectionId) {
-                    showSection(targetSectionId);
-                 }
-            }
-            return; 
-        }
-
-        targaSelezionataGlobalmente = targaUpper;
-        console.log(`Targa ${targaSelezionataGlobalmente} selezionata. Target section: ${targetSectionId}`);
-        if (targheLoadingStatus && landingPageSection.style.display === 'block') {
-            targheLoadingStatus.textContent = `Caricamento dati per ${targaSelezionataGlobalmente}...`;
-        }
-
-        // ... (Logica di fetch e merge dati locali/Sheets invariata) ...
-        let localData = null;
-        let localDatiPeriziaTimestamp = null; 
-        const localJson = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`);
-        if (localJson) {
-            try {
-                localData = JSON.parse(localJson); 
-                localDatiPeriziaTimestamp = localData.timestamp ? new Date(localData.timestamp) : null;
-            } catch (e) { console.error("Errore parsing dati locali:", e); localData = null; }
-        }
-
-        const sheetsPeriziaData = await fetchLatestPeriziaFromSheets(targaSelezionataGlobalmente); 
-        let sheetsRecordTimestamp = null; 
-        let sheetsDatiPerizia = null;
-        let isSheetsDataCompleted = false;
-
-        if (sheetsPeriziaData && sheetsPeriziaData.timestamp && sheetsPeriziaData.datiPerizia) {
-            sheetsRecordTimestamp = new Date(sheetsPeriziaData.timestamp);
-            sheetsDatiPerizia = sheetsPeriziaData.datiPerizia;
-            isSheetsDataCompleted = sheetsPeriziaData.completata || false;
-        }
-        
-        if (sheetsRecordTimestamp && (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp)) {
-            console.log(`Dati da Google Sheets per ${targaSelezionataGlobalmente} sono più recenti. Uso quelli.`);
-            try {
-                localStorage.setItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`, JSON.stringify(sheetsDatiPerizia));
-                savePosizioneForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.posizione || "");
-                saveUrgentStatusForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.urgente || false);
-                if (isSheetsDataCompleted) markTargaAsCompleted(targaSelezionataGlobalmente);
-                else unmarkTargaAsCompleted(targaSelezionataGlobalmente);
-            } catch (e) { console.error("Errore salvataggio dati da Sheets in LS:", e); }
-        } else if (localData) {
-            console.log(`Dati locali per ${targaSelezionataGlobalmente} sono più recenti o uguali, o Sheets non ha dati.`);
-        } else {
-            console.log(`Nessun dato per ${targaSelezionataGlobalmente}. Inizio perizia da zero.`);
-            resetChecklistForm(); 
-        }
-        // Fine logica fetch/merge
-
-        loadProgress(targaSelezionataGlobalmente); 
-        
-        if (targheLoadingStatus && landingPageSection.style.display === 'block') {
-            targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
-        }
-        
-        showView('checklist'); // Questo popola anche il dropdown e i dettagli base
-
-        // Gestione della sezione da visualizzare
-        if (targetSectionId && document.getElementById(targetSectionId + 'Section')) {
-            showSection(targetSectionId);
-        } else {
-            // Default alla prima sezione se targetSectionId non è valido o non fornito
-            const firstNav = Array.from(navButtons).find(b => b.dataset.target && !['backToListBtn', 'historyBtn', 'exitAppBtn'].includes(b.id));
-            if (firstNav && firstNav.dataset.target) {
-                showSection(firstNav.dataset.target);
-            } else if (navButtons.length > 0 && navButtons[0].dataset.target) { // Fallback meno specifico
-                showSection(navButtons[0].dataset.target);
-            } else { // Estremo fallback
-                showSection('remarketing'); 
-            }
+            alert(`${c} elementi cancellati.`);
+            if(sheetFilterDropdown) sheetFilterDropdown.value = 'all';
+            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); // Resetta anche il filtro piazzale
+            populateSavedTargasList();
+            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); // Ricarica la lista per riflettere le urgenze resettate
+            if (typeof showView === 'function') showView('landing');
         }
     }
 
-    // ... (Funzioni popolaTargheFiltrate, caricaEPopolaTarghe, initSequentialAnimation, ecc. invariate)
-    function populateSavedTargasList() { savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targa = key.substring(`${APP_PREFIX}data_`.length); if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa); } } } if (tempSavedTargas.length > 0) hasSaves = true; tempSavedTargas.sort(); tempSavedTargas.forEach(targa => { const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' }; let displayText = targa; let details = []; if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`); if (details.length > 0) { displayText += ` - ${details.join(' ')}`; } const button = document.createElement('button'); button.classList.add('saved-targa-button'); button.textContent = displayText; button.dataset.targa = targa; button.addEventListener('click', async function() {  await handleTargaSelectionAndSync(this.dataset.targa); }); savedTargasListContainer.appendChild(button); }); if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>';} }
-    function clearAllSavedData() { if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni, urgenze e filtro piazzale)?\n\nAzione irreversibile.")) { let c = 0; const keysToRemove = []; for (let i=localStorage.length-1;i>=0;i--) { const k=localStorage.key(i); if (k.startsWith(APP_PREFIX)) { keysToRemove.push(k); } } keysToRemove.forEach(k => { localStorage.removeItem(k); c++; }); alert(`${c} elementi cancellati.`); if(sheetFilterDropdown) sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');  populateSavedTargasList(); if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();  if (typeof showView === 'function') showView('landing'); } }
-    function setupSheetFilterDropdown() { if (!sheetFilterDropdown) return; const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== '').sort())]; sheetFilterDropdown.innerHTML = ''; sources.forEach(source => { const option = document.createElement('option'); option.value = source; option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source; sheetFilterDropdown.appendChild(option); }); const savedPiazzaleFilter = localStorage.getItem(`${APP_PREFIX}selectedPiazzaleFilter`); if (savedPiazzaleFilter && sources.includes(savedPiazzaleFilter)) { sheetFilterDropdown.value = savedPiazzaleFilter; } else { sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); } sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange); sheetFilterDropdown.addEventListener('change', handleSheetFilterChange); }
-    function handleSheetFilterChange() { if (sheetFilterDropdown) { localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value); } popolaTargheFiltrate(); targaSelezionataGlobalmente = null; }
-    function popolaTargheFiltrate() { const tEl = document.getElementById('targaListContainer'); if (!tEl) return; tEl.innerHTML = ''; const selectedSource = sheetFilterDropdown ? sheetFilterDropdown.value : 'all'; let preliminaryFilteredList = selectedSource === 'all' ? [...listaTargheCompleta] : listaTargheCompleta.filter(item => item.piazzale === selectedSource); function getItemRank(item) { const targaUpper = item.targa.toUpperCase(); const isUrgent = loadUrgentStatusForTarga(targaUpper);  const isCompleted = isTargaCompleted(targaUpper); const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`); let hasData = false; if (localDataJson) { try { const parsedData = JSON.parse(localDataJson); hasData = Object.keys(parsedData).some(key => key !== 'timestamp' && parsedData[key] !== "" && parsedData[key] !== false && (!Array.isArray(parsedData[key]) || parsedData[key].length > 0) ); } catch (e) { /* ignore parsing error for ranking */ } } if (isUrgent && !isCompleted) return 1;  if (!isUrgent && !isCompleted && hasData) return 2;  if (!isUrgent && !isCompleted && !hasData) return 3;  if (!isUrgent && isCompleted) return 4;  if (isUrgent && isCompleted) return 5;   return 6;  } preliminaryFilteredList.sort((a, b) => { const rankA = getItemRank(a); const rankB = getItemRank(b); if (rankA !== rankB) return rankA - rankB; return a.targa.localeCompare(b.targa);  }); const filteredList = preliminaryFilteredList; if (filteredList.length === 0) { tEl.innerHTML = '<p style="text-align:center; padding:10px; color: #aaa;">Nessuna targa trovata per questo filtro.</p>'; if(targheLoadingStatus) targheLoadingStatus.textContent = selectedSource === 'all' ? "Nessuna targa nel CSV." : `Nessuna targa per l'elenco: ${selectedSource}.`; return; } filteredList.forEach((item, idx) => { const targaUpper = item.targa.toUpperCase(); const li = document.createElement('div'); li.classList.add('targa-list-item'); const itemCompleted = isTargaCompleted(targaUpper); const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`); let hasData = false; if (localDataJson) { try { const parsed = JSON.parse(localDataJson); hasData = Object.keys(parsed).some(k => k !== 'timestamp' && parsed[k] !== "" && parsed[k] !== false ); } catch (e) {} } const isItemUrgent = loadUrgentStatusForTarga(targaUpper);  if (isItemUrgent) {  li.classList.add('urgent-item'); if (itemCompleted) { li.classList.add('completed');  } } else if (itemCompleted) { li.classList.add('status-visto', 'completed');  } else if (hasData) { li.classList.add('status-parziale');  } else { li.classList.add('status-da-vedere');  } const targaCol = document.createElement('span'); targaCol.classList.add('targa-col', 'targa-col-targa', 'clickable-targa'); targaCol.textContent = item.targa || 'N/D';  targaCol.dataset.targaValue = targaUpper;  targaCol.addEventListener('click', async function() {  const selectedTargaFromClick = this.dataset.targaValue; if (selectedTargaFromClick) { await handleTargaSelectionAndSync(selectedTargaFromClick); } }); li.appendChild(targaCol); const posizioneCol = document.createElement('span'); posizioneCol.classList.add('targa-col', 'targa-col-posizione'); const posizioneInput = document.createElement('input'); posizioneInput.type = 'text'; posizioneInput.classList.add('posizione-input'); posizioneInput.dataset.targa = targaUpper; posizioneInput.placeholder = 'Pos.'; posizioneInput.maxLength = 5; posizioneInput.value = loadPosizioneForTarga(targaUpper); posizioneInput.addEventListener('mousedown', (e) => e.stopPropagation()); posizioneInput.addEventListener('click', (e) => e.stopPropagation()); posizioneInput.addEventListener('focus', (e) => e.stopPropagation()); posizioneInput.addEventListener('blur', function() { const newPosition = this.value.trim().toUpperCase(); if (newPosition !== loadPosizioneForTarga(this.dataset.targa)) { savePosizioneForTarga(this.dataset.targa, newPosition); this.style.transition = 'background-color 0.3s ease'; this.style.backgroundColor = 'rgba(76, 175, 80, 0.2)'; setTimeout(() => { this.style.backgroundColor = ''; }, 1000); } }); posizioneInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { event.preventDefault(); this.blur(); }}); posizioneCol.appendChild(posizioneInput); li.appendChild(posizioneCol); const urgenzaCol = document.createElement('span'); urgenzaCol.classList.add('targa-col', 'targa-col-urgenza'); const urgenzaCheckbox = document.createElement('input'); urgenzaCheckbox.type = 'checkbox'; urgenzaCheckbox.checked = isItemUrgent; urgenzaCheckbox.title = isItemUrgent ? "Togli urgenza" : "Marca come urgente"; urgenzaCheckbox.addEventListener('mousedown', (e) => e.stopPropagation()); urgenzaCheckbox.addEventListener('click', (e) => e.stopPropagation()); urgenzaCheckbox.addEventListener('change', function() { saveUrgentStatusForTarga(targaUpper, this.checked);  this.title = this.checked ? "Togli urgenza" : "Marca come urgente"; popolaTargheFiltrate();  }); urgenzaCol.appendChild(urgenzaCheckbox); li.appendChild(urgenzaCol); const marcaCol = document.createElement('span'); marcaCol.classList.add('targa-col', 'targa-col-marca'); marcaCol.textContent = item.marca || 'N/D'; li.appendChild(marcaCol); const modelloCol = document.createElement('span'); modelloCol.classList.add('targa-col', 'targa-col-modello'); modelloCol.textContent = item.modello || 'N/D'; li.appendChild(modelloCol); const piazzaleCol = document.createElement('span'); piazzaleCol.classList.add('targa-col', 'targa-col-piazzale'); piazzaleCol.textContent = item.piazzale || 'N/D'; li.appendChild(piazzaleCol); const actionsCol = document.createElement('span'); actionsCol.classList.add('targa-col', 'targa-col-actions'); const delB = document.createElement('button'); delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = targaUpper;  delB.title = `Cancella progressi per ${item.targa}`; delB.textContent = 'X'; delB.addEventListener('click', function(event) { event.stopPropagation(); const tDel = this.dataset.targa;  if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (inclusa posizione e urgenza)?\n\nAzione irreversibile.`)) { deleteProgressForTarga(tDel); } }); actionsCol.appendChild(delB); li.appendChild(actionsCol); tEl.appendChild(li); }); if(targheLoadingStatus) targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:"; }
-    async function caricaEPopolaTarghe() { const preloaderInstance = document.getElementById('preloader');  if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server..."; try { const r = await fetch(GOOGLE_SHEET_CSV_URL + `&nocache=${new Date().getTime()}`); if (!r.ok) { let e = `HTTP ${r.status}.`; if (r.status === 0) e = "Errore di rete o CORS."; else if (r.status === 404) e = "File CSV non trovato (404)."; else if (r.status === 403) e = "Accesso al file CSV negato (403)."; throw new Error(e); } const csv = await r.text(); const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== ''); if (lines.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV."; listaTargheCompleta = []; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } listaTargheCompleta = lines.map(l => { const p = l.split(','); return {  targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(), marca: (p[1] || '').trim().replace(/^"|"$/g, ''), modello: (p[2] || '').trim().replace(/^"|"$/g, ''), piazzale: (p[3] || '').trim().replace(/^"|"$/g, '') }; }).filter(i => i.targa && i.targa.length > 3);  if (listaTargheCompleta.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";  if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } setupSheetFilterDropdown(); popolaTargheFiltrate(); } catch (e) { console.error("Errore caricamento/popolamento targhe:", e); if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = '';  listaTargheCompleta = []; } finally { if (preloaderInstance) { preloaderInstance.classList.add('hidden'); setTimeout(() => { if (preloaderInstance) preloaderInstance.style.display = 'none'; }, 700); } } }
-    function initSequentialAnimation() { const checklistContainerDiv = document.getElementById('checklistContainer'); if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return; const activeSection = checklistContainerDiv.querySelector('.category-section.active'); if (!activeSection) return; activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me')); const allVisibleElementsInSection = Array.from( activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled), textarea:not(:disabled)') ).filter(el => { let current = el; while (current && current !== activeSection.parentElement) {  if (getComputedStyle(current).display === 'none' || getComputedStyle(current).visibility === 'hidden') return false; current = current.parentElement; } return el.offsetParent !== null;  }); const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el)); if (startIndex === -1 && allVisibleElementsInSection.length > 0) {  return; } if (allVisibleElementsInSection.length === 0) {   return; } const elementsToAnimate = allVisibleElementsInSection.slice(startIndex >= 0 ? startIndex : 0); if (elementsToAnimate.length === 0) return; let currentIndex = 0; let activeListeners = [];  function clearAllActiveAnimationListeners() { activeListeners.forEach(({element, type, handler}) => { element.removeEventListener(type, handler); element.classList.remove('animate-me');  }); activeListeners = []; } clearAllActiveAnimationListeners(); function animateNextElement() { if (currentIndex >= elementsToAnimate.length) { clearAllActiveAnimationListeners(); return; } const currentElement = elementsToAnimate[currentIndex]; if (!isInputDefault(currentElement)) {  currentIndex++; animateNextElement(); return; } currentElement.classList.add('animate-me'); currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); const onValueChange = (event) => { let processChange = false; if (event.type === 'change') { processChange = true; } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {  processChange = true; }  if (processChange && !isInputDefault(currentElement)) {  currentElement.classList.remove('animate-me'); activeListeners = activeListeners.filter(listener => { if (listener.element === currentElement) { listener.element.removeEventListener(listener.type, listener.handler); return false;  } return true;  }); currentIndex++; setTimeout(animateNextElement, 50);  } }; currentElement.addEventListener('change', onValueChange); activeListeners.push({element: currentElement, type: 'change', handler: onValueChange}); if (currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') { currentElement.addEventListener('blur', onValueChange);  activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange}); } } animateNextElement(); }
+    function setupSheetFilterDropdown() {
+        if (!sheetFilterDropdown) return;
+        const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== ''))];
+        sheetFilterDropdown.innerHTML = '';
+        sources.forEach(source => {
+            const option = document.createElement('option');
+            option.value = source;
+            option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source;
+            sheetFilterDropdown.appendChild(option);
+        });
 
-    // --- MODIFICATA: showSection ---
+        const savedPiazzaleFilter = localStorage.getItem(`${APP_PREFIX}selectedPiazzaleFilter`);
+        if (savedPiazzaleFilter && sources.includes(savedPiazzaleFilter)) {
+            sheetFilterDropdown.value = savedPiazzaleFilter;
+        } else {
+            sheetFilterDropdown.value = 'all';
+            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');
+        }
+
+        sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange);
+        sheetFilterDropdown.addEventListener('change', handleSheetFilterChange);
+    }
+
+    function handleSheetFilterChange() {
+        if (sheetFilterDropdown) {
+            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value);
+        }
+        popolaTargheFiltrate();
+        targaSelezionataGlobalmente = null;
+    }
+
+    function popolaTargheFiltrate() {
+        const tEl = document.getElementById('targaListContainer');
+        if (!tEl) return;
+        tEl.innerHTML = '';
+
+        const selectedSource = sheetFilterDropdown ? sheetFilterDropdown.value : 'all';
+        let preliminaryFilteredList = selectedSource === 'all'
+            ? [...listaTargheCompleta]
+            : listaTargheCompleta.filter(item => item.piazzale === selectedSource);
+
+        function getItemRank(item) {
+            const isUrgent = loadUrgentStatusForTarga(item.targa); 
+            const isCompleted = isTargaCompleted(item.targa);
+            const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
+
+            if (isUrgent && !isCompleted) return 1;
+            if (!isUrgent && !isCompleted && hasData) return 2;
+            if (!isUrgent && !isCompleted && !hasData) return 3;
+            if (!isUrgent && isCompleted) return 4;
+            if (isUrgent && isCompleted) return 5;
+            return 6;
+        }
+        preliminaryFilteredList.sort((a, b) => {
+            const rankA = getItemRank(a);
+            const rankB = getItemRank(b);
+            if (rankA !== rankB) return rankA - rankB;
+            return a.targa.localeCompare(b.targa);
+        });
+        const filteredList = preliminaryFilteredList;
+
+        if (filteredList.length === 0) {
+            tEl.innerHTML = '<p style="text-align:center; padding:10px; color: #aaa;">Nessuna targa trovata per questo filtro.</p>';
+            if(targheLoadingStatus) targheLoadingStatus.textContent = selectedSource === 'all' ? "Nessuna targa nel CSV." : `Nessuna targa per l'elenco: ${selectedSource}.`;
+            return;
+        }
+        filteredList.forEach((item, idx) => {
+            const li = document.createElement('div');
+            li.classList.add('targa-list-item');
+
+            const itemCompleted = isTargaCompleted(item.targa);
+            const hasData = !!localStorage.getItem(`${APP_PREFIX}data_${item.targa}`);
+            const isItemUrgent = loadUrgentStatusForTarga(item.targa); 
+
+            if (isItemUrgent) { 
+                li.classList.add('urgent-item');
+                if (itemCompleted) {
+                    li.classList.add('completed');
+                }
+            } else if (itemCompleted) {
+                li.classList.add('status-visto', 'completed');
+            } else if (hasData) {
+                li.classList.add('status-parziale');
+            } else {
+                li.classList.add('status-da-vedere');
+            }
+
+            const targaCol = document.createElement('span');
+            targaCol.classList.add('targa-col', 'targa-col-targa', 'clickable-targa');
+            targaCol.textContent = item.targa || 'N/D';
+            targaCol.dataset.targaValue = item.targa;
+
+            // MODIFICA PER LOADER SU CAMBIO TARGA
+            targaCol.addEventListener('click', function() {
+                const selectedTarga = this.dataset.targaValue;
+                if (selectedTarga) {
+                    if (targaDataLoader) targaDataLoader.style.display = 'flex'; // MOSTRA LOADER
+
+                    setTimeout(() => { // Permette al loader di essere renderizzato
+                        targaSelezionataGlobalmente = selectedTarga;
+                        console.log(`Targa ${targaSelezionataGlobalmente} selezionata per perizia.`);
+                        showView('checklist');
+                        loadProgress(targaSelezionataGlobalmente);
+                        const firstNav = Array.from(navButtons).find(b => b.dataset.target && b.id !== 'backToListBtn' && b.id !== 'historyBtn' && b.id !== 'exitAppBtn');
+                        if (firstNav) {
+                            showSection(firstNav.dataset.target);
+                        } else if (navButtons.length > 0 && navButtons[0].dataset.target) {
+                            showSection(navButtons[0].dataset.target);
+                        }
+                        if (targaDataLoader) targaDataLoader.style.display = 'none'; // NASCONDI LOADER
+                    }, 50); 
+                }
+            });
+            li.appendChild(targaCol);
+
+            const posizioneCol = document.createElement('span');
+            posizioneCol.classList.add('targa-col', 'targa-col-posizione');
+            const posizioneInput = document.createElement('input');
+            posizioneInput.type = 'text'; posizioneInput.classList.add('posizione-input');
+            posizioneInput.dataset.targa = item.targa; posizioneInput.placeholder = 'Pos.';
+            posizioneInput.maxLength = 5; posizioneInput.value = loadPosizioneForTarga(item.targa);
+            posizioneInput.addEventListener('mousedown', (e) => e.stopPropagation());
+            posizioneInput.addEventListener('click', (e) => e.stopPropagation());
+            posizioneInput.addEventListener('focus', (e) => e.stopPropagation());
+            posizioneInput.addEventListener('blur', function() {
+                const newPosition = this.value.trim().toUpperCase();
+                if (newPosition !== loadPosizioneForTarga(this.dataset.targa)) {
+                    savePosizioneForTarga(this.dataset.targa, newPosition);
+                    this.style.transition = 'background-color 0.3s ease';
+                    this.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
+                    setTimeout(() => { this.style.backgroundColor = ''; }, 1000);
+                }
+            });
+            posizioneInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { event.preventDefault(); this.blur(); }});
+            posizioneCol.appendChild(posizioneInput);
+            li.appendChild(posizioneCol);
+
+            const urgenzaCol = document.createElement('span');
+            urgenzaCol.classList.add('targa-col', 'targa-col-urgenza');
+            const urgenzaCheckbox = document.createElement('input');
+            urgenzaCheckbox.type = 'checkbox';
+            urgenzaCheckbox.checked = isItemUrgent;
+            urgenzaCheckbox.title = isItemUrgent ? "Togli urgenza" : "Marca come urgente";
+            urgenzaCheckbox.addEventListener('mousedown', (e) => e.stopPropagation());
+            urgenzaCheckbox.addEventListener('click', (e) => e.stopPropagation());
+            urgenzaCheckbox.addEventListener('change', function() {
+                saveUrgentStatusForTarga(item.targa, this.checked);
+                this.title = this.checked ? "Togli urgenza" : "Marca come urgente";
+                popolaTargheFiltrate(); 
+            });
+            urgenzaCol.appendChild(urgenzaCheckbox);
+            li.appendChild(urgenzaCol);
+
+
+            const marcaCol = document.createElement('span');
+            marcaCol.classList.add('targa-col', 'targa-col-marca'); marcaCol.textContent = item.marca || 'N/D';
+            li.appendChild(marcaCol);
+
+            const modelloCol = document.createElement('span');
+            modelloCol.classList.add('targa-col', 'targa-col-modello'); modelloCol.textContent = item.modello || 'N/D';
+            li.appendChild(modelloCol);
+
+            const piazzaleCol = document.createElement('span');
+            piazzaleCol.classList.add('targa-col', 'targa-col-piazzale'); piazzaleCol.textContent = item.piazzale || 'N/D';
+            li.appendChild(piazzaleCol);
+
+            const actionsCol = document.createElement('span');
+            actionsCol.classList.add('targa-col', 'targa-col-actions');
+            const delB = document.createElement('button');
+            delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = item.targa;
+            delB.title = `Cancella progressi per ${item.targa}`; delB.textContent = 'X';
+            delB.addEventListener('click', function(event) {
+                event.stopPropagation();
+                const tDel = this.dataset.targa;
+                if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (inclusa posizione e urgenza)?\n\nAzione irreversibile.`)) {
+                    deleteProgressForTarga(tDel);
+                }
+            });
+            actionsCol.appendChild(delB);
+            li.appendChild(actionsCol);
+
+            tEl.appendChild(li);
+        });
+
+        if(targheLoadingStatus) targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
+    }
+
+    async function caricaEPopolaTarghe() {
+        const preloader = document.getElementById('preloader');
+        if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server...";
+
+        try {
+            const r = await fetch(GOOGLE_SHEET_CSV_URL);
+            if (!r.ok) {
+                let e = `HTTP ${r.status}.`;
+                if (r.status === 0) e = "Errore di rete o CORS.";
+                else if (r.status === 404) e = "File CSV non trovato (404).";
+                else if (r.status === 403) e = "Accesso al file CSV negato (403).";
+                throw new Error(e);
+            }
+            const csv = await r.text();
+            const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== '');
+
+            if (lines.length === 0) {
+                if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV.";
+                listaTargheCompleta = [];
+                if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
+                if (targaListContainer) targaListContainer.innerHTML = '';
+                return;
+            }
+
+            listaTargheCompleta = lines.map(l => {
+                const p = l.split(',');
+                return {
+                    targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(),
+                    marca: (p[1] || '').trim().replace(/^"|"$/g, ''),
+                    modello: (p[2] || '').trim().replace(/^"|"$/g, ''),
+                    piazzale: (p[3] || '').trim().replace(/^"|"$/g, '')
+                };
+            }).filter(i => i.targa && i.targa.length > 3);
+
+            if (listaTargheCompleta.length === 0) {
+                if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";
+                 if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
+                if (targaListContainer) targaListContainer.innerHTML = '';
+                return;
+            }
+
+            setupSheetFilterDropdown();
+            popolaTargheFiltrate();
+
+        } catch (e) {
+            console.error("Errore caricamento/popolamento targhe:", e);
+            if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`;
+            if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>';
+            if (targaListContainer) targaListContainer.innerHTML = '';
+             listaTargheCompleta = [];
+        } finally {
+            if (preloader) {
+                preloader.classList.add('hidden');
+                setTimeout(() => {
+                    if (preloader) preloader.style.display = 'none';
+                }, 700);
+            }
+        }
+    }
+
+    function initSequentialAnimation() {
+        const checklistContainerDiv = document.getElementById('checklistContainer');
+        if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return;
+        const activeSection = checklistContainerDiv.querySelector('.category-section.active');
+        if (!activeSection) return;
+
+        activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me'));
+
+        const allVisibleElementsInSection = Array.from(
+            activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled), textarea:not(:disabled)')
+        ).filter(el => {
+            let current = el;
+            while (current && current !== activeSection.parentElement) {
+                if (getComputedStyle(current).display === 'none' || getComputedStyle(current).visibility === 'hidden') return false;
+                current = current.parentElement;
+            }
+            return el.offsetParent !== null;
+        });
+
+        const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el));
+
+        if (startIndex === -1 && allVisibleElementsInSection.length > 0) {
+            return;
+        }
+        if (allVisibleElementsInSection.length === 0) {
+             return;
+        }
+
+        const elementsToAnimate = allVisibleElementsInSection.slice(startIndex >= 0 ? startIndex : 0);
+
+        if (elementsToAnimate.length === 0) return;
+
+        let currentIndex = 0;
+        let activeListeners = [];
+
+        function clearAllActiveAnimationListeners() {
+            activeListeners.forEach(({element, type, handler}) => {
+                element.removeEventListener(type, handler);
+                element.classList.remove('animate-me');
+            });
+            activeListeners = [];
+        }
+        clearAllActiveAnimationListeners();
+
+        function animateNextElement() {
+            if (currentIndex >= elementsToAnimate.length) {
+                return;
+            }
+            const currentElement = elementsToAnimate[currentIndex];
+            if (!isInputDefault(currentElement)) {
+                currentIndex++;
+                animateNextElement();
+                return;
+            }
+
+            currentElement.classList.add('animate-me');
+            currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            const onValueChange = (event) => {
+                let processChange = false;
+                if (event.type === 'change') {
+                    processChange = true;
+                } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {
+                    processChange = true;
+                } else if (event.type === 'blur' && currentElement.tagName === 'SELECT' && !isInputDefault(currentElement)) {
+                     processChange = true;
+                }
+
+                if (processChange) {
+                    currentElement.classList.remove('animate-me');
+                    currentElement.removeEventListener('change', onValueChange);
+                    currentElement.removeEventListener('blur', onValueChange);
+                    activeListeners = activeListeners.filter(listener => listener.element !== currentElement);
+                    currentIndex++;
+                    setTimeout(animateNextElement, 50);
+                }
+            };
+
+            currentElement.addEventListener('change', onValueChange);
+            if (currentElement.tagName === 'SELECT' || currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') {
+                currentElement.addEventListener('blur', onValueChange);
+                 activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange});
+            }
+            activeListeners.push({element: currentElement, type: 'change', handler: onValueChange});
+        }
+        animateNextElement();
+    }
+
+
     function showSection(targetId) {
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
             el.classList.remove('animate-me');
         });
-        
         sections.forEach(s => s.classList.toggle('active', s.id === targetId + 'Section'));
         navButtons.forEach(b => { 
             b.classList.toggle('active', b.dataset.target === targetId);
         });
         updateNavButtonColors(); 
-
-        if (checklistContainer.style.display === 'block') { 
-            if (mainTitleGlobal) mainTitleGlobal.style.display = 'none';
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
-            populateTargaSwitcherDropdown(); 
-            updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
-        } else {
-            if (mainTitleGlobal) mainTitleGlobal.style.display = 'block';
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-            if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
-        }
-
         const targetSectionElement = document.getElementById(targetId + 'Section');
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
-             setTimeout(initSequentialAnimation, 100); 
+             setTimeout(initSequentialAnimation, 100);
         } else if (targetId === 'riepilogo') {
             generateSummary();
         }
-         window.scrollTo(0, 0); 
     }
 
     navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
-    function getSelectText(selectElementOrId) { const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId; if (el && el.tagName === 'SELECT' && el.value !== "") { if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) { return el.options[el.selectedIndex].text; } return el.value;  } return "N/S";  }
-    function generateSummary() { summaryContent.innerHTML = ''; let targa = targaSelezionataGlobalmente || "N/D"; function createSummaryItem(label, value, isAnomaly = false) { const itemDiv = document.createElement('div'); itemDiv.classList.add('summary-item'); if (isAnomaly) itemDiv.classList.add('summary-anomaly'); itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; return itemDiv; } summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase())); if (targaSelezionataGlobalmente) { const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); let marcaVeicolo = "N/D", modelloVeicolo = "N/D"; if (veicoloAttuale) { marcaVeicolo = veicoloAttuale.marca || "N/D"; modelloVeicolo = veicoloAttuale.modello || "N/D"; } summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D")); const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente); summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary)); } else {  summaryContent.appendChild(createSummaryItem("Marca", "N/D")); summaryContent.appendChild(createSummaryItem("Modello", "N/D")); summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); } summaryContent.innerHTML += `<h3>Remarketing:</h3>`; const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; const isEV = tipoTrazioneValue === 'elettrico'; summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect))); let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza'); let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante"); summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante")); summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia)); let kmStato = getSelectText('stato_chilometri'); summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); let cdcStato = getSelectText('stato_cdc'); summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente")); summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente")); if (isEV) { summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`; let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente")); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente")); } summaryContent.innerHTML += `<h3>Pneumatici:</h3>`; const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }]; pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); }); summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`; summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK')); summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK')); const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : ""; if (noteDanniValue) { const noteDiv = document.createElement('div'); noteDiv.classList.add('summary-item', 'summary-notes'); const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: "; const contentDiv = document.createElement('div'); contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue; noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv); summaryContent.appendChild(noteDiv); } }
-    async function fetchAllDataFromSheets() { if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch di tutti i dati."); return { success: false, message: "URL Web App non configurato.", data: [] }; } const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?nocache=${new Date().getTime()}`;  console.log("Fetching all perizie from Sheets. URL:", fetchUrl); try { const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); if (!response.ok) { const errorText = await response.text(); console.error(`Errore HTTP ${response.status} nel fetch di tutti i dati da Sheets: ${errorText}`); return { success: false, message: `Errore Sheets (${response.status}) nel recupero globale.`, data: [] }; } const contentType = response.headers.get("content-type"); if (contentType && contentType.indexOf("application/json") !== -1) { const result = await response.json(); if (Array.isArray(result)) {  console.log("Dati globali ricevuti da Sheets (array diretto):", result.length, "perizie."); return { success: true, data: result, message: "Dati recuperati con successo." }; } else if (result && result.status === "success" && Array.isArray(result.data)) {  console.log("Dati globali ricevuti da Sheets (oggetto con .data):", result.data.length, "perizie."); return { success: true, data: result.data, message: result.message || "Dati recuperati con successo."}; } else if (result && result.status === "notfound") {   console.log("Nessuna perizia trovata in Sheets (notfound).");  return { success: true, data: [], message: result.message || "Nessuna perizia trovata."}; } else { console.warn("Risposta da Sheets (globale) non era un array o oggetto atteso:", result); return { success: false, message: "Formato risposta globale non valido.", data: [] }; } } else { const textResponse = await response.text(); console.error("Risposta da Sheets (globale) non era JSON:", textResponse); return { success: false, message: "Errore formato risposta globale Sheets (non JSON).", data: [] }; } } catch (error) { console.error("Errore di rete o fetch generico durante il recupero globale da Sheets:", error); return { success: false, message: "Errore di rete recupero globale: " + error.message, data: [] }; } }
-    async function syncAllLocalDataToSheets() { const originalSyncButtonText = syncToSheetsBtn.textContent; syncToSheetsBtn.disabled = true; let updatedFromSheetsCount = 0; let localUpdatesFailedCount = 0; syncToSheetsBtn.textContent = "Sinc (1/3 RecSheets)..."; console.log("SYNC - Fase 1: Recupero di tutti i dati da Google Sheets."); const sheetsResponse = await fetchAllDataFromSheets(); if (!sheetsResponse.success) { alert(`Errore nel recupero dei dati da Sheets:\n${sheetsResponse.message}\nLa sincronizzazione non può procedere.`); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; return; } const allSheetsData = sheetsResponse.data;  console.log(`SYNC - Fase 1 completata. Ricevute ${allSheetsData.length} perizie da Sheets.`); syncToSheetsBtn.textContent = "Sinc (2/3 AggLoc)..."; console.log("SYNC - Fase 2: Confronto dati Sheets con localStorage e aggiornamento locale."); if (allSheetsData.length > 0) { for (const sheetPerizia of allSheetsData) { if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) { console.warn("SYNC - Saltata perizia da Sheets per dati/timestamp mancanti:", sheetPerizia); continue; } const targa = sheetPerizia.targa.toUpperCase(); const localDataKey = `${APP_PREFIX}data_${targa}`; const localDataJSON = localStorage.getItem(localDataKey); let localDatiPeriziaTimestamp = null; if (localDataJSON) { try { const localDatiPeriziaObject = JSON.parse(localDataJSON); localDatiPeriziaTimestamp = localDatiPeriziaObject.timestamp ? new Date(localDatiPeriziaObject.timestamp) : null; } catch (e) { console.error(`SYNC - Errore parsing dati locali per targa ${targa}:`, e); } }  const sheetsRecordTimestamp = new Date(sheetPerizia.timestamp); if (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp) { console.log(`SYNC - Targa ${targa}: Dati Sheets più recenti (Sheets Record TS: ${sheetsRecordTimestamp}, Locale datiPerizia TS: ${localDatiPeriziaTimestamp || 'N/A'}). Aggiorno localStorage.`); try { localStorage.setItem(localDataKey, JSON.stringify(sheetPerizia.datiPerizia));  if (sheetPerizia.hasOwnProperty('posizione')) { savePosizioneForTarga(targa, sheetPerizia.posizione); } if (sheetPerizia.hasOwnProperty('urgente')) { saveUrgentStatusForTarga(targa, sheetPerizia.urgente); } if (sheetPerizia.hasOwnProperty('completata')) { if (sheetPerizia.completata) { markTargaAsCompleted(targa); } else { unmarkTargaAsCompleted(targa); } } updatedFromSheetsCount++; } catch (e) { console.error(`SYNC - Errore aggiornamento localStorage per targa ${targa} da Sheets:`, e); localUpdatesFailedCount++; } } else { console.log(`SYNC - Targa ${targa}: Dati locali più recenti o uguali. Nessun aggiornamento da Sheets.`); } } } console.log(`SYNC - Fase 2 completata. Aggiornate/Create localmente ${updatedFromSheetsCount} perizie da Sheets. Errori locali: ${localUpdatesFailedCount}`); syncToSheetsBtn.textContent = "Sinc (3/3 InvioSheets)..."; console.log("SYNC - Fase 3: Invio di tutte le perizie locali a Google Sheets."); let perizieLocaliKeys = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { perizieLocaliKeys.push(key); } } if (perizieLocaliKeys.length === 0 && updatedFromSheetsCount === 0 && localUpdatesFailedCount === 0) { alert("Nessuna perizia salvata localmente e nessuna novità da Sheets da sincronizzare."); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; return; } let successCount = 0; let errorCount = 0; let errorMessages = []; for (const key of perizieLocaliKeys) { const targa = key.substring(`${APP_PREFIX}data_`.length);  let datiPeriziaSalvatiLocalmente;  try { datiPeriziaSalvatiLocalmente = JSON.parse(localStorage.getItem(key)); } catch (e) { console.error(`SYNC - Errore parsing dati per targa ${targa} da localStorage per invio:`, e); errorCount++; errorMessages.push(`Targa ${targa}: Errore lettura dati locali per invio.`); continue; } if (!datiPeriziaSalvatiLocalmente || !datiPeriziaSalvatiLocalmente.timestamp) {  console.warn(`SYNC - Dati per targa ${targa} incompleti o senza timestamp (locale), skip invio a Sheets.`);  errorCount++;  errorMessages.push(`Targa ${targa}: Dati locali incompleti o timestamp mancante.`);  continue; } const periziaDaInviare = { targa: targa, posizione: loadPosizioneForTarga(targa) || "", urgente: loadUrgentStatusForTarga(targa) || false, completata: isTargaCompleted(targa), datiPerizia: datiPeriziaSalvatiLocalmente,  timestamp: datiPeriziaSalvatiLocalmente.timestamp  }; console.log(`SYNC - Invio targa ${targa} a Sheets...`); const result = await inviaPeriziaSingolaASheets(periziaDaInviare); if (result.success) { successCount++; if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) { console.log(`SYNC - Timestamp per ${targa} su Sheets (${result.data.timestamp}) è più recente del timestamp dei datiPerizia locali (${datiPeriziaSalvatiLocalmente.timestamp}). Aggiorno timestamp locale.`); datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp;  try { localStorage.setItem(key, JSON.stringify(datiPeriziaSalvatiLocalmente)); } catch (e) { console.error(`SYNC - Errore salvataggio timestamp aggiornato da server per ${targa}:`,e); } } } else { errorCount++; errorMessages.push(`Targa ${targa}: ${result.message || 'Errore sconosciuto durante invio.'}`); } } console.log("SYNC - Fase 3 completata."); let finalMessage = `Sincronizzazione completata.\n\n`; finalMessage += `FASE 1&2 (Sheets -> Locale):\n`; finalMessage += `- ${updatedFromSheetsCount} perizie locali aggiornate/create da Sheets.\n`; if (localUpdatesFailedCount > 0) finalMessage += `- Errori durante aggiornamento locale: ${localUpdatesFailedCount}.\n`;  finalMessage += `\nFASE 3 (Locale -> Sheets):\n`; finalMessage += `- ${successCount} perizie inviate con successo a Sheets.\n`; if (errorCount > 0) finalMessage += `- ${errorCount} perizie con errori durante l'invio.\n`; if (errorCount > 0 || localUpdatesFailedCount > 0) { finalMessage += "\n\nDETTAGLIO ERRORI (controllare console per info complete):\n" + errorMessages.join("\n"); } alert(finalMessage); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') {  popolaTargheFiltrate();  } }
+
+    function getSelectText(selectElementOrId) {
+        const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId;
+        if (el && el.tagName === 'SELECT' && el.value !== "") {
+            if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) {
+                return el.options[el.selectedIndex].text;
+            }
+            return el.value;
+        }
+        return "N/S";
+    }
+
+    function generateSummary() {
+        summaryContent.innerHTML = '';
+        let targa = targaSelezionataGlobalmente || "N/D";
+        function createSummaryItem(label, value, isAnomaly = false) {
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('summary-item');
+            if (isAnomaly) itemDiv.classList.add('summary-anomaly');
+            itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`;
+            return itemDiv;
+        }
+        summaryContent.appendChild(createSummaryItem("Targa", targa));
+        if (targaSelezionataGlobalmente) {
+            const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
+            let marcaVeicolo = "N/D", modelloVeicolo = "N/D";
+            if (veicoloAttuale) {
+                marcaVeicolo = veicoloAttuale.marca || "N/D";
+                modelloVeicolo = veicoloAttuale.modello || "N/D";
+            }
+            summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo));
+            summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo));
+            summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D"));
+            const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente);
+            summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary));
+
+        } else {
+            summaryContent.appendChild(createSummaryItem("Marca", "N/D"));
+            summaryContent.appendChild(createSummaryItem("Modello", "N/D"));
+            summaryContent.appendChild(createSummaryItem("Posizione", "N/D"));
+            summaryContent.appendChild(createSummaryItem("Urgente", "N/D"));
+        }
+        summaryContent.innerHTML += `<h3>Remarketing:</h3>`;
+
+        const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : "";
+        const isEV = tipoTrazioneValue === 'elettrico';
+        summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect)));
+
+
+        let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza');
+        let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante");
+        summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante"));
+        summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia));
+        let kmStato = getSelectText('stato_chilometri');
+        summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili"));
+        let cdcStato = getSelectText('stato_cdc');
+        summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante"));
+        summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente"));
+        summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente"));
+        if (isEV) {
+            summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`;
+            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", getSelectText('cavo_ricarica_rapida'), getSelectText('cavo_ricarica_rapida') === "Non Presente"));
+            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", getSelectText('cavo_ricarica_domestica'), getSelectText('cavo_ricarica_domestica') === "Non Presente"));
+        }
+        summaryContent.innerHTML += `<h3>Pneumatici:</h3>`;
+        const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }];
+        pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); });
+        summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`;
+        summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK'));
+        summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK'));
+        const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : "";
+        if (noteDanniValue) {
+            const noteDiv = document.createElement('div');
+            noteDiv.classList.add('summary-item', 'summary-notes');
+            const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: ";
+            const contentDiv = document.createElement('div');
+            contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue;
+            noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv);
+            summaryContent.appendChild(noteDiv);
+        }
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
-        // ... (Codice di creazione bottone syncToSheetsBtn e fill-defaults-btn invariato) ...
-        const preloader = document.getElementById('preloader'); 
-        syncToSheetsBtn = document.createElement('button');
-        syncToSheetsBtn.id = 'syncToSheetsBtn';
-        syncToSheetsBtn.classList.add('action-button');
-        syncToSheetsBtn.textContent = 'Sincronizza'; 
-        syncToSheetsBtn.style.backgroundColor = '#ffc107'; 
-        syncToSheetsBtn.style.borderColor = '#e0a800';
-        syncToSheetsBtn.style.color = '#212529';
-        const historyButton = document.getElementById('historyBtn'); 
-        if (historyButton && historyButton.parentNode === utilityNavButtons) {
-            utilityNavButtons.insertBefore(syncToSheetsBtn, historyButton.nextSibling);
-        } else { 
-             utilityNavButtons.insertBefore(syncToSheetsBtn, exitAppBtn); 
-        }
-        syncToSheetsBtn.addEventListener('click', syncAllLocalDataToSheets);
+        const preloader = document.getElementById('preloader');
+
         document.querySelectorAll('.fill-defaults-btn').forEach(button => {
             button.addEventListener('click', function() { 
                 const sectionId = this.dataset.sectionid; 
                 const sectionTarget = sectionId.replace('Section', ''); 
+
                 if (sectionId) {
                     fillSectionPositiveOrDefaults(sectionId); 
+
                     if (saveProgress(targaSelezionataGlobalmente)) {
+                        
                         let currentSectionIndex = -1;
                         navButtons.forEach((nb, index) => { 
-                            if (nb.dataset.target === sectionTarget) currentSectionIndex = index;
+                            if (nb.dataset.target === sectionTarget) {
+                                currentSectionIndex = index;
+                            }
                         });
-                        if (currentSectionIndex !== -1 && currentSectionIndex < navButtons.length - 1) { 
-                            const nextNavButton = navButtons[currentSectionIndex + 1];
-                            if (nextNavButton && nextNavButton.dataset.target) showSection(nextNavButton.dataset.target);
+
+                        if (currentSectionIndex !== -1) { 
+                            if (currentSectionIndex < navButtons.length - 1) { 
+                                const nextNavButton = navButtons[currentSectionIndex + 1];
+                                if (nextNavButton && nextNavButton.dataset.target) {
+                                    showSection(nextNavButton.dataset.target);
+                                }
+                            }
                         }
                     }
                 }
             });
         });
-        if (tipoTrazioneSelect) tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
-        
-        // --- MODIFICATO: Event Listener per targaSwitcherDropdown ---
-        if (targaSwitcherDropdown) {
-            targaSwitcherDropdown.addEventListener('change', async function() {
-                const nuovaTargaSelezionata = this.value;
-                if (nuovaTargaSelezionata && nuovaTargaSelezionata.toUpperCase() !== (targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase() : null)) {
-                    
-                    // Memorizza la sezione attiva PRIMA di cambiare targa
-                    let currentActiveSectionId = 'remarketing'; // Default
-                    const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
-                    if (activeSectionElement && activeSectionElement.id) {
-                        currentActiveSectionId = activeSectionElement.id.replace('Section', '');
-                    }
-                    
-                    this.disabled = true;                     
-                    // Passa la sezione corrente a handleTargaSelectionAndSync
-                    await handleTargaSelectionAndSync(nuovaTargaSelezionata, currentActiveSectionId); 
-                    // updateTargaDetailsDisplay è già chiamato da handleTargaSelectionAndSync -> showView/showSection
-                    this.disabled = false; 
-                } else if (nuovaTargaSelezionata) {
-                    updateTargaDetailsDisplay(nuovaTargaSelezionata);
-                }
-            });
-        }
 
-        // ... (Resto degli event listener e chiamata a initializeApplicationViewAndLoadData invariati) ...
+
+        if (tipoTrazioneSelect) {
+            tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
+        }
+        handleTrazioneChange();
+
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
         if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData);
         if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
-        if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn);
+        if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click',handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
 
         async function initializeApplicationViewAndLoadData() {
             showView('landing'); 
-            const preloaderElement = document.getElementById('preloader'); 
-            if (preloaderElement) {
-                preloaderElement.style.display = 'flex';
-                preloaderElement.classList.remove('hidden');
-                preloaderElement.style.opacity = '1';
-                preloaderElement.style.visibility = 'visible';
-                const loadingText = preloaderElement.querySelector('.loading-text');
+
+            if (preloader) {
+                preloader.style.display = 'flex';
+                preloader.classList.remove('hidden');
+                preloader.style.opacity = '1';
+                preloader.style.visibility = 'visible';
+                const loadingText = preloader.querySelector('.loading-text');
                 if (loadingText) loadingText.textContent = 'CARICAMENTO ELENCO...';
             }
             await caricaEPopolaTarghe();
         }
+
         initializeApplicationViewAndLoadData();
-        if (exitAppBtn) { exitAppBtn.addEventListener('click', () => { const exitCurtain = document.getElementById('exit-curtain'); const mainContentWrapper = document.getElementById('mainContentWrapper'); const pageHeader = document.getElementById('pageHeaderContainer'); if (exitCurtain) { if (mainContentWrapper) mainContentWrapper.style.display = 'none'; if (pageHeader) pageHeader.style.display = 'none'; document.body.style.paddingTop = '0px'; const exitLoadingText = exitCurtain.querySelector('.loading-text'); const barContainer = exitCurtain.querySelector('.loader-bar-container'); const defaultCloseText = "CHIUSURA IN CORSO..."; const glitchText = "ERRORE DI SISTEMA..."; exitCurtain.classList.remove('glitching', 'flash-out-effect');  if (exitLoadingText) { exitLoadingText.textContent = defaultCloseText; exitLoadingText.style.animation = 'textGlow 1.8s infinite alternate ease-in-out'; exitLoadingText.style.color = '#ff8787'; exitLoadingText.style.textShadow = ''; } exitCurtain.setAttribute('data-text', defaultCloseText); if (barContainer) barContainer.style.display = 'flex'; exitCurtain.classList.add('visible-no-transition'); exitCurtain.style.display = 'flex';  setTimeout(() => { exitCurtain.classList.add('glitching'); if (exitLoadingText) { exitLoadingText.textContent = glitchText; exitLoadingText.style.animation = '';  } exitCurtain.setAttribute('data-text', glitchText); setTimeout(() => { exitCurtain.classList.remove('glitching'); if (exitLoadingText) { exitLoadingText.textContent = 'Applicazione terminata.'; exitLoadingText.style.animation = 'none';  exitLoadingText.style.color = '#FFFFFF';  exitLoadingText.style.textShadow = 'none'; } if (barContainer) barContainer.style.display = 'none';  setTimeout(() => { exitCurtain.classList.add('flash-out-effect');  setTimeout(() => { const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi'; fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })  .then(response => console.log('Macrodroid trigger request sent.')) .catch(error => console.error('Error sending Macrodroid trigger:', error)); }, 500);  }, 700);  }, 800);  }, 800);  } }); }
+
+        if (exitAppBtn) {
+            exitAppBtn.addEventListener('click', () => {
+                const exitCurtain = document.getElementById('exit-curtain');
+                const mainContentWrapper = document.getElementById('mainContentWrapper');
+                const pageHeader = document.getElementById('pageHeaderContainer');
+
+                if (exitCurtain) {
+                    if (mainContentWrapper) mainContentWrapper.style.display = 'none';
+                    if (pageHeader) pageHeader.style.display = 'none';
+                    document.body.style.paddingTop = '0px';
+
+                    const exitLoadingText = exitCurtain.querySelector('.loading-text');
+                    const barContainer = exitCurtain.querySelector('.loader-bar-container');
+                    const defaultCloseText = "CHIUSURA IN CORSO...";
+                    const glitchText = "ERRORE DI SISTEMA...";
+
+                    exitCurtain.classList.remove('glitching', 'flash-out-effect'); 
+                    if (exitLoadingText) {
+                        exitLoadingText.textContent = defaultCloseText;
+                        exitLoadingText.style.animation = 'textGlow 1.8s infinite alternate ease-in-out';
+                        exitLoadingText.style.color = '#ff8787';
+                        exitLoadingText.style.textShadow = '';
+                    }
+                    exitCurtain.setAttribute('data-text', defaultCloseText);
+                    if (barContainer) barContainer.style.display = 'flex';
+
+                    exitCurtain.classList.add('visible-no-transition');
+                    exitCurtain.style.display = 'flex';
+
+                    setTimeout(() => {
+                        exitCurtain.classList.add('glitching');
+                        if (exitLoadingText) {
+                           exitLoadingText.textContent = glitchText;
+                           exitLoadingText.style.animation = ''; 
+                        }
+                        exitCurtain.setAttribute('data-text', glitchText);
+
+                        setTimeout(() => {
+                            exitCurtain.classList.remove('glitching');
+                            if (exitLoadingText) {
+                                exitLoadingText.textContent = 'Applicazione terminata.';
+                                exitLoadingText.style.animation = 'none';
+                                exitLoadingText.style.color = '#FFFFFF';
+                                exitLoadingText.style.textShadow = 'none';
+                            }
+                            if (barContainer) barContainer.style.display = 'none';
+
+                            setTimeout(() => {
+                                exitCurtain.classList.add('flash-out-effect');
+                                setTimeout(() => {
+                                    const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi';
+                                    fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })
+                                        .then(response => console.log('Macrodroid trigger request sent.'))
+                                        .catch(error => console.error('Error sending Macrodroid trigger:', error));
+                                }, 500); 
+
+                            }, 700); 
+
+                        }, 800); 
+
+                    }, 800); 
+                }
+            });
+        }
     });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
