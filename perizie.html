@@ -946,7 +946,7 @@
     }
 
     // --- MODIFICATA: handleTargaSelectionAndSync ---
-    async function handleTargaSelectionAndSync(selectedTarga, targetSectionId = null) { // Aggiunto targetSectionId
+    async function handleTargaSelectionAndSync(selectedTarga, targetSectionId = null) {
         const targaUpper = selectedTarga.toUpperCase();
         
         // Se la targa è la stessa e siamo già in checklist, aggiorniamo solo i dettagli e il dropdown, poi usciamo.
@@ -972,46 +972,18 @@
             targheLoadingStatus.textContent = `Caricamento dati per ${targaSelezionataGlobalmente}...`;
         }
 
-        // ... (Logica di fetch e merge dati locali/Sheets invariata) ...
-        let localData = null;
-        let localDatiPeriziaTimestamp = null; 
-        const localJson = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`);
-        if (localJson) {
-            try {
-                localData = JSON.parse(localJson); 
-                localDatiPeriziaTimestamp = localData.timestamp ? new Date(localData.timestamp) : null;
-            } catch (e) { console.error("Errore parsing dati locali:", e); localData = null; }
-        }
-
-        const sheetsPeriziaData = await fetchLatestPeriziaFromSheets(targaSelezionataGlobalmente); 
-        let sheetsRecordTimestamp = null; 
-        let sheetsDatiPerizia = null;
-        let isSheetsDataCompleted = false;
-
-        if (sheetsPeriziaData && sheetsPeriziaData.timestamp && sheetsPeriziaData.datiPerizia) {
-            sheetsRecordTimestamp = new Date(sheetsPeriziaData.timestamp);
-            sheetsDatiPerizia = sheetsPeriziaData.datiPerizia;
-            isSheetsDataCompleted = sheetsPeriziaData.completata || false;
-        }
+        // --- INIZIO SEZIONE MODIFICATA ---
+        // Ora carichiamo i dati solo ed esclusivamente da localStorage.
+        // La funzione loadProgress si occupa già di chiamare resetChecklistForm se non trova dati locali.
         
-        if (sheetsRecordTimestamp && (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp)) {
-            console.log(`Dati da Google Sheets per ${targaSelezionataGlobalmente} sono più recenti. Uso quelli.`);
-            try {
-                localStorage.setItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`, JSON.stringify(sheetsDatiPerizia));
-                savePosizioneForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.posizione || "");
-                saveUrgentStatusForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.urgente || false);
-                if (isSheetsDataCompleted) markTargaAsCompleted(targaSelezionataGlobalmente);
-                else unmarkTargaAsCompleted(targaSelezionataGlobalmente);
-            } catch (e) { console.error("Errore salvataggio dati da Sheets in LS:", e); }
-        } else if (localData) {
-            console.log(`Dati locali per ${targaSelezionataGlobalmente} sono più recenti o uguali, o Sheets non ha dati.`);
-        } else {
-            console.log(`Nessun dato per ${targaSelezionataGlobalmente}. Inizio perizia da zero.`);
-            resetChecklistForm(); 
-        }
-        // Fine logica fetch/merge
+        console.log(`Caricamento dati per ${targaSelezionataGlobalmente} esclusivamente da localStorage.`);
+        // Non è più necessario recuperare o confrontare con i dati di Google Sheets qui.
+        // La funzione loadProgress(targaSelezionataGlobalmente) farà tutto il necessario:
+        // 1. Se trova dati locali, li carica.
+        // 2. Se NON trova dati locali (es. targa resettata o nuova), chiama resetChecklistForm().
+        // --- FINE SEZIONE MODIFICATA ---
 
-        loadProgress(targaSelezionataGlobalmente); 
+        loadProgress(targaSelezionataGlobalmente); // Questa funzione ora caricherà solo i dati locali o resetterà il form.
         
         if (targheLoadingStatus && landingPageSection.style.display === 'block') {
             targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
