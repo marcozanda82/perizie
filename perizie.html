@@ -357,7 +357,7 @@
         #landingPageSection, .category-section, #historyPageSection { padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a; max-width: 850px; margin-left: auto; margin-right: auto; }
 
         .category-section, #historyPageSection { display: none; }
-        #landingPageSection { display: block; } 
+        #landingPageSection { display: block; }
         .category-section.active { display: block; }
 
         .category-section {
@@ -604,7 +604,7 @@
     </div>
 
     <div class="content-wrapper" id="mainContentWrapper">
-        <div id="landingPageSection" style="display: block;"> 
+        <div id="landingPageSection" style="display: block;">
             <h2 style="margin-top: 10px;">Seleziona Veicolo da Periziare</h2>
             <div id="sheetFilterContainer">
                 <label for="sheetFilterDropdown">Filtra per Elenco:</label>
@@ -626,11 +626,6 @@
                     </div>
                     <div id="targaListContainer"></div>
                 </div>
-            </div>
-            <div style="text-align: center; margin-top: 20px; margin-bottom: 10px;">
-                <button id="resetAllLocalDataBelowListBtn" class="action-button" style="background-color: #B22222; border-color: #800000; color:white;">
-                    Reset Salvataggi Dispositivo
-                </button>
             </div>
         </div>
 
@@ -748,7 +743,7 @@
         </div>
     </div>
 <script>
-    // Variabili globali
+    // Variabili globali (invariate)
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
@@ -761,14 +756,18 @@
     const targaDropdownContainer = document.getElementById('targaDropdownContainer');
     const targaSwitcherDropdown = document.getElementById('targaSwitcherDropdown');
     const targaDetailsDisplay = document.getElementById('targaDetailsDisplay'); 
+
     const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons'); 
     const mainPageNavButtons = navButtonsContainer.querySelector('#mainPageNavButtons'); 
     const utilityNavButtons = pageHeaderContainer.querySelector('#utilityNavButtons'); 
+
     const navButtons = mainPageNavButtons.querySelectorAll('button[data-target]');
+    
     const backToListBtn = utilityNavButtons.querySelector('#backToListBtn');
     const historyBtn = utilityNavButtons.querySelector('#historyBtn');
     const exitAppBtn = utilityNavButtons.querySelector('#exitAppBtn');
     let syncToSheetsBtn; 
+    
     const sections = document.querySelectorAll('#checklistContainer .category-section');
     const summaryContent = document.getElementById('summaryContent');
     const clearAllProgressBtn = document.getElementById('clearAllProgressBtn');
@@ -781,10 +780,12 @@
     const cavoDomesticaSelect = document.getElementById('cavo_ricarica_domestica');
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
     const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbym7LjGgbF-ErSiThpyfNHAPsWx_w18Q3eEkzVZpkgQlYGN_Ips0ASZ3LYveo5QdKNTuA/exec'; 
+    
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
 
+    // --- MODIFICATA: updateTargaDetailsDisplay ---
     function updateTargaDetailsDisplay(selectedTarga) {
         if (!targaDetailsDisplay || !selectedTarga || !listaTargheCompleta.length) {
             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
@@ -793,22 +794,27 @@
         const veicolo = listaTargheCompleta.find(v => v.targa.toUpperCase() === selectedTarga.toUpperCase());
         if (veicolo) {
             let detailsText = '';
+            // Assicurati che marca e modello siano stringhe e non undefined/null prima di concatenare
             const marca = veicolo.marca ? String(veicolo.marca).trim() : '';
             const modello = veicolo.modello ? String(veicolo.modello).trim() : '';
+
             if (marca) detailsText += marca;
             if (modello) detailsText += (detailsText ? ' ' : '') + modello;
-            targaDetailsDisplay.textContent = detailsText || '';
+            
+            targaDetailsDisplay.textContent = detailsText || ''; // Mostra stringa vuota se non ci sono dettagli
         } else {
-            targaDetailsDisplay.textContent = '';
+            targaDetailsDisplay.textContent = ''; // Pulisci se il veicolo non è trovato
         }
     }
 
     function populateTargaSwitcherDropdown() {
+        // ... (Logica per ottenere veicoloAttuale e targheDelPiazzale invariata) ...
         if (!targaSwitcherDropdown || !targaSelezionataGlobalmente || !listaTargheCompleta.length) {
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
             return;
         }
+
         const veicoloAttuale = listaTargheCompleta.find(v => v.targa.toUpperCase() === targaSelezionataGlobalmente.toUpperCase());
         if (!veicoloAttuale || !veicoloAttuale.piazzale) {
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
@@ -816,15 +822,20 @@
             console.warn("Piazzale non trovato per la targa attuale o targa non trovata:", targaSelezionataGlobalmente);
             return;
         }
+
         const piazzaleCorrente = veicoloAttuale.piazzale;
         const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente);
+
         targaSwitcherDropdown.innerHTML = ''; 
+
         if (targheDelPiazzale.length === 0) {
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
             return;
         }
+        
         targheDelPiazzale.sort((a, b) => a.targa.localeCompare(b.targa)); 
+
         targheDelPiazzale.forEach(v => {
             const option = document.createElement('option');
             option.value = v.targa.toUpperCase();
@@ -834,12 +845,13 @@
             }
             targaSwitcherDropdown.appendChild(option);
         });
+
         if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
         updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
     }
 
+    // ... (Funzioni inviaPeriziaSingolaASheets, fetchLatestPeriziaFromSheets, fillSectionPositiveOrDefaults, ecc. invariate fino a handleTargaSelectionAndSync)
     async function inviaPeriziaSingolaASheets(periziaDaInviare) { if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') { console.error("URL della Web App Google Sheets non configurato."); return { success: false, message: "URL Web App non configurato." }; } console.log("Tentativo di invio perizia a Google Sheets:", periziaDaInviare); try { const response = await fetch(GOOGLE_SHEET_WEB_APP_URL, { method: 'POST', mode: 'cors',  cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' },  body: JSON.stringify(periziaDaInviare)  }); let responseData; const contentType = response.headers.get("content-type"); if (contentType && contentType.indexOf("application/json") !== -1) { responseData = await response.json(); } else { const textResponse = await response.text(); console.warn("Risposta dal server non è JSON, ricevuta come testo:", textResponse); try { responseData = JSON.parse(textResponse); }  catch (e) { responseData = { status: "error", message: "Risposta non JSON dal server: " + textResponse.substring(0,100) + "..."}; } } if (response.ok && responseData.status === "success") { console.log("Perizia inviata con successo a Google Sheets:", responseData.message, "Dati ritornati:", responseData.data); return { success: true, message: responseData.message, data: responseData.data }; } else { console.error("Errore dall'API di Google Sheets o risposta non OK:", responseData.message || `HTTP Status ${response.status}`); return { success: false, message: responseData.message || `Errore server (HTTP ${response.status})` }; } } catch (error) { console.error("Errore di rete o fetch durante l'invio a Google Sheets:", error); return { success: false, message: "Errore di rete: " + error.message }; } }
-    // La funzione fetchLatestPeriziaFromSheets rimane invariata, ma non verrà chiamata da handleTargaSelectionAndSync
     async function fetchLatestPeriziaFromSheets(targa) { if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch."); return null; } const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=getPerizia&targa=${encodeURIComponent(targa.toUpperCase())}&nocache=${new Date().getTime()}`; console.log("Fetching latest perizia from Sheets for targa:", targa, "URL:", fetchUrl); try { const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); if (!response.ok) { const errorText = await response.text(); console.error(`Errore HTTP ${response.status} nel fetch da Sheets: ${errorText}`); return null; } const contentType = response.headers.get("content-type"); if (contentType && contentType.indexOf("application/json") !== -1) { const result = await response.json(); if (result.status === "success" && result.data) { console.log("Dati perizia singola ricevuti da Sheets:", result.data); return result.data;  } else if (result.status === "notfound") { console.log("Perizia non trovata in Sheets per targa:", targa); return null; } else { console.warn("Risposta da Sheets (singola) non conteneva dati validi o status non era 'success'/'notfound':", result.message || result); return null; } } else { const textResponse = await response.text(); console.error("Risposta da Sheets (singola) non era JSON:", textResponse); return null; } } catch (error) { console.error("Errore di rete o fetch generico durante il recupero (singolo) da Sheets:", error); return null; } }
     function fillSectionPositiveOrDefaults(sectionId) { const section = document.getElementById(sectionId); if (!section) return; if (sectionId === 'remarketingSection') { if (tipoTrazioneSelect) tipoTrazioneSelect.value = 'endotermico'; document.getElementById('foto_angolari').checked = true; document.getElementById('foto_vano_carico').checked = true; document.getElementById('tipo_equipaggiamento').value = 'kit_gonfia_ripara'; document.getElementById('equipaggiamento_presenza').value = 'presente'; document.getElementById('foto_interni_pannelli').checked = true; document.getElementById('foto_cruscotto').checked = true; document.getElementById('stato_chilometri').value = 'rilevabili'; document.getElementById('stato_cdc').value = 'originale'; document.getElementById('foto_vano_motore').checked = true; document.getElementById('foto_cofano_tetto').checked = true; document.getElementById('chiave_telecomando').value = 'presente'; document.getElementById('seconda_chiave').value = 'presente'; handleTrazioneChange();  if (tipoTrazioneSelect && tipoTrazioneSelect.value === 'elettrico') { if (cavoRapidaSelect) cavoRapidaSelect.value = 'presente'; if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'presente'; } else {  if (cavoRapidaSelect) cavoRapidaSelect.value = 'non_applicabile';  if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'non_applicabile'; } } else if (sectionId === 'pneumaticiSection') { document.getElementById('pneumatico_as').value = 'conforme'; document.getElementById('pneumatico_ad').value = 'conforme'; document.getElementById('pneumatico_pd').value = 'conforme'; document.getElementById('pneumatico_ps').value = 'conforme'; } else if (sectionId === 'danniVerificheSection') { document.getElementById('motore_accende').value = 'ok'; document.getElementById('batteria_stato').value = 'ok'; document.getElementById('foto_danni_generiche').checked = true;  document.getElementById('note_danni_verifiche').value = 'Nessuna anomalia da segnalare.'; } updateNavButtonColors(); if (typeof initSequentialAnimation === 'function') { section.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me')); initSequentialAnimation(); }  section.querySelectorAll('input, select, textarea').forEach(el => { const event = new Event('change', { bubbles: true }); el.dispatchEvent(event); }); }
     function handleTrazioneChange() { if (!tipoTrazioneSelect || !cavoRapidaSelect || !cavoDomesticaSelect) return; const selectedTrazione = tipoTrazioneSelect.value; const isElectric = selectedTrazione === 'elettrico'; cavoRapidaSelect.disabled = !isElectric; cavoDomesticaSelect.disabled = !isElectric; if (!isElectric) { cavoRapidaSelect.value = "non_applicabile";  cavoDomesticaSelect.value = "non_applicabile"; } else { if (cavoRapidaSelect.value === "" || cavoRapidaSelect.value === "non_applicabile") cavoRapidaSelect.value = ""; if (cavoDomesticaSelect.value === "" || cavoDomesticaSelect.value === "non_applicabile") cavoDomesticaSelect.value = ""; } updateNavButtonColors();  }
@@ -864,6 +876,7 @@
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente.toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
     function showView(viewName) {
+        // ... (Logica di gestione display sezioni e header invariata) ...
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
@@ -877,7 +890,7 @@
         if (targaDetailsDisplay) targaDetailsDisplay.textContent = ''; 
 
         if (viewName === 'landing') {
-            landingPageSection.style.display = 'block'; 
+            landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
             if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
@@ -932,15 +945,17 @@
         window.scrollTo(0, 0);
     }
 
-    // MODIFICATA per caricare solo da localStorage
-    async function handleTargaSelectionAndSync(selectedTarga, targetSectionId = null) {
+    // --- MODIFICATA: handleTargaSelectionAndSync ---
+    async function handleTargaSelectionAndSync(selectedTarga, targetSectionId = null) { // Aggiunto targetSectionId
         const targaUpper = selectedTarga.toUpperCase();
         
+        // Se la targa è la stessa e siamo già in checklist, aggiorniamo solo i dettagli e il dropdown, poi usciamo.
         if (targaSelezionataGlobalmente === targaUpper && checklistContainer.style.display === 'block') {
             if (targaSwitcherDropdown.value !== targaUpper) {
-                targaSwitcherDropdown.value = targaUpper; 
+                targaSwitcherDropdown.value = targaUpper; // Sincronizza il dropdown se necessario
             }
             updateTargaDetailsDisplay(targaUpper);
+            // Se targetSectionId è fornito (dall'evento change del dropdown), assicurati che la sezione sia quella corretta
             if (targetSectionId) {
                  const currentActiveSectionEl = document.querySelector('#checklistContainer .category-section.active');
                  const currentActiveSectionId = currentActiveSectionEl ? currentActiveSectionEl.id.replace('Section', '') : null;
@@ -957,31 +972,70 @@
             targheLoadingStatus.textContent = `Caricamento dati per ${targaSelezionataGlobalmente}...`;
         }
 
-        // Carica i progressi SOLO da localStorage.
-        // La funzione loadProgress gestisce già il caso in cui non ci siano dati locali (resettando il form).
-        console.log(`Caricamento perizia per ${targaSelezionataGlobalmente} esclusivamente da localStorage.`);
-        loadProgress(targaSelezionataGlobalmente); 
+        // ... (Logica di fetch e merge dati locali/Sheets invariata) ...
+        let localData = null;
+        let localDatiPeriziaTimestamp = null; 
+        const localJson = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`);
+        if (localJson) {
+            try {
+                localData = JSON.parse(localJson); 
+                localDatiPeriziaTimestamp = localData.timestamp ? new Date(localData.timestamp) : null;
+            } catch (e) { console.error("Errore parsing dati locali:", e); localData = null; }
+        }
 
+        const sheetsPeriziaData = await fetchLatestPeriziaFromSheets(targaSelezionataGlobalmente); 
+        let sheetsRecordTimestamp = null; 
+        let sheetsDatiPerizia = null;
+        let isSheetsDataCompleted = false;
+
+        if (sheetsPeriziaData && sheetsPeriziaData.timestamp && sheetsPeriziaData.datiPerizia) {
+            sheetsRecordTimestamp = new Date(sheetsPeriziaData.timestamp);
+            sheetsDatiPerizia = sheetsPeriziaData.datiPerizia;
+            isSheetsDataCompleted = sheetsPeriziaData.completata || false;
+        }
+        
+        if (sheetsRecordTimestamp && (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp)) {
+            console.log(`Dati da Google Sheets per ${targaSelezionataGlobalmente} sono più recenti. Uso quelli.`);
+            try {
+                localStorage.setItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`, JSON.stringify(sheetsDatiPerizia));
+                savePosizioneForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.posizione || "");
+                saveUrgentStatusForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.urgente || false);
+                if (isSheetsDataCompleted) markTargaAsCompleted(targaSelezionataGlobalmente);
+                else unmarkTargaAsCompleted(targaSelezionataGlobalmente);
+            } catch (e) { console.error("Errore salvataggio dati da Sheets in LS:", e); }
+        } else if (localData) {
+            console.log(`Dati locali per ${targaSelezionataGlobalmente} sono più recenti o uguali, o Sheets non ha dati.`);
+        } else {
+            console.log(`Nessun dato per ${targaSelezionataGlobalmente}. Inizio perizia da zero.`);
+            resetChecklistForm(); 
+        }
+        // Fine logica fetch/merge
+
+        loadProgress(targaSelezionataGlobalmente); 
+        
         if (targheLoadingStatus && landingPageSection.style.display === 'block') {
             targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
         }
         
-        showView('checklist'); 
+        showView('checklist'); // Questo popola anche il dropdown e i dettagli base
 
+        // Gestione della sezione da visualizzare
         if (targetSectionId && document.getElementById(targetSectionId + 'Section')) {
             showSection(targetSectionId);
         } else {
+            // Default alla prima sezione se targetSectionId non è valido o non fornito
             const firstNav = Array.from(navButtons).find(b => b.dataset.target && !['backToListBtn', 'historyBtn', 'exitAppBtn'].includes(b.id));
             if (firstNav && firstNav.dataset.target) {
                 showSection(firstNav.dataset.target);
-            } else if (navButtons.length > 0 && navButtons[0].dataset.target) { 
+            } else if (navButtons.length > 0 && navButtons[0].dataset.target) { // Fallback meno specifico
                 showSection(navButtons[0].dataset.target);
-            } else { 
+            } else { // Estremo fallback
                 showSection('remarketing'); 
             }
         }
     }
 
+    // ... (Funzioni popolaTargheFiltrate, caricaEPopolaTarghe, initSequentialAnimation, ecc. invariate)
     function populateSavedTargasList() { savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targa = key.substring(`${APP_PREFIX}data_`.length); if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa); } } } if (tempSavedTargas.length > 0) hasSaves = true; tempSavedTargas.sort(); tempSavedTargas.forEach(targa => { const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' }; let displayText = targa; let details = []; if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`); if (details.length > 0) { displayText += ` - ${details.join(' ')}`; } const button = document.createElement('button'); button.classList.add('saved-targa-button'); button.textContent = displayText; button.dataset.targa = targa; button.addEventListener('click', async function() {  await handleTargaSelectionAndSync(this.dataset.targa); }); savedTargasListContainer.appendChild(button); }); if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>';} }
     function clearAllSavedData() { if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni, urgenze e filtro piazzale)?\n\nAzione irreversibile.")) { let c = 0; const keysToRemove = []; for (let i=localStorage.length-1;i>=0;i--) { const k=localStorage.key(i); if (k.startsWith(APP_PREFIX)) { keysToRemove.push(k); } } keysToRemove.forEach(k => { localStorage.removeItem(k); c++; }); alert(`${c} elementi cancellati.`); if(sheetFilterDropdown) sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');  populateSavedTargasList(); if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();  if (typeof showView === 'function') showView('landing'); } }
     function setupSheetFilterDropdown() { if (!sheetFilterDropdown) return; const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== '').sort())]; sheetFilterDropdown.innerHTML = ''; sources.forEach(source => { const option = document.createElement('option'); option.value = source; option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source; sheetFilterDropdown.appendChild(option); }); const savedPiazzaleFilter = localStorage.getItem(`${APP_PREFIX}selectedPiazzaleFilter`); if (savedPiazzaleFilter && sources.includes(savedPiazzaleFilter)) { sheetFilterDropdown.value = savedPiazzaleFilter; } else { sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); } sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange); sheetFilterDropdown.addEventListener('change', handleSheetFilterChange); }
@@ -990,6 +1044,7 @@
     async function caricaEPopolaTarghe() { const preloaderInstance = document.getElementById('preloader');  if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server..."; try { const r = await fetch(GOOGLE_SHEET_CSV_URL + `&nocache=${new Date().getTime()}`); if (!r.ok) { let e = `HTTP ${r.status}.`; if (r.status === 0) e = "Errore di rete o CORS."; else if (r.status === 404) e = "File CSV non trovato (404)."; else if (r.status === 403) e = "Accesso al file CSV negato (403)."; throw new Error(e); } const csv = await r.text(); const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== ''); if (lines.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV."; listaTargheCompleta = []; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } listaTargheCompleta = lines.map(l => { const p = l.split(','); return {  targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(), marca: (p[1] || '').trim().replace(/^"|"$/g, ''), modello: (p[2] || '').trim().replace(/^"|"$/g, ''), piazzale: (p[3] || '').trim().replace(/^"|"$/g, '') }; }).filter(i => i.targa && i.targa.length > 3);  if (listaTargheCompleta.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";  if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } setupSheetFilterDropdown(); popolaTargheFiltrate(); } catch (e) { console.error("Errore caricamento/popolamento targhe:", e); if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = '';  listaTargheCompleta = []; } finally { if (preloaderInstance) { preloaderInstance.classList.add('hidden'); setTimeout(() => { if (preloaderInstance) preloaderInstance.style.display = 'none'; }, 700); } } }
     function initSequentialAnimation() { const checklistContainerDiv = document.getElementById('checklistContainer'); if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return; const activeSection = checklistContainerDiv.querySelector('.category-section.active'); if (!activeSection) return; activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me')); const allVisibleElementsInSection = Array.from( activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled), textarea:not(:disabled)') ).filter(el => { let current = el; while (current && current !== activeSection.parentElement) {  if (getComputedStyle(current).display === 'none' || getComputedStyle(current).visibility === 'hidden') return false; current = current.parentElement; } return el.offsetParent !== null;  }); const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el)); if (startIndex === -1 && allVisibleElementsInSection.length > 0) {  return; } if (allVisibleElementsInSection.length === 0) {   return; } const elementsToAnimate = allVisibleElementsInSection.slice(startIndex >= 0 ? startIndex : 0); if (elementsToAnimate.length === 0) return; let currentIndex = 0; let activeListeners = [];  function clearAllActiveAnimationListeners() { activeListeners.forEach(({element, type, handler}) => { element.removeEventListener(type, handler); element.classList.remove('animate-me');  }); activeListeners = []; } clearAllActiveAnimationListeners(); function animateNextElement() { if (currentIndex >= elementsToAnimate.length) { clearAllActiveAnimationListeners(); return; } const currentElement = elementsToAnimate[currentIndex]; if (!isInputDefault(currentElement)) {  currentIndex++; animateNextElement(); return; } currentElement.classList.add('animate-me'); currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); const onValueChange = (event) => { let processChange = false; if (event.type === 'change') { processChange = true; } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {  processChange = true; }  if (processChange && !isInputDefault(currentElement)) {  currentElement.classList.remove('animate-me'); activeListeners = activeListeners.filter(listener => { if (listener.element === currentElement) { listener.element.removeEventListener(listener.type, listener.handler); return false;  } return true;  }); currentIndex++; setTimeout(animateNextElement, 50);  } }; currentElement.addEventListener('change', onValueChange); activeListeners.push({element: currentElement, type: 'change', handler: onValueChange}); if (currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') { currentElement.addEventListener('blur', onValueChange);  activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange}); } } animateNextElement(); }
 
+    // --- MODIFICATA: showSection ---
     function showSection(targetId) {
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
             el.classList.remove('animate-me');
@@ -1025,11 +1080,10 @@
     function getSelectText(selectElementOrId) { const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId; if (el && el.tagName === 'SELECT' && el.value !== "") { if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) { return el.options[el.selectedIndex].text; } return el.value;  } return "N/S";  }
     function generateSummary() { summaryContent.innerHTML = ''; let targa = targaSelezionataGlobalmente || "N/D"; function createSummaryItem(label, value, isAnomaly = false) { const itemDiv = document.createElement('div'); itemDiv.classList.add('summary-item'); if (isAnomaly) itemDiv.classList.add('summary-anomaly'); itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; return itemDiv; } summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase())); if (targaSelezionataGlobalmente) { const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); let marcaVeicolo = "N/D", modelloVeicolo = "N/D"; if (veicoloAttuale) { marcaVeicolo = veicoloAttuale.marca || "N/D"; modelloVeicolo = veicoloAttuale.modello || "N/D"; } summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D")); const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente); summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary)); } else {  summaryContent.appendChild(createSummaryItem("Marca", "N/D")); summaryContent.appendChild(createSummaryItem("Modello", "N/D")); summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); } summaryContent.innerHTML += `<h3>Remarketing:</h3>`; const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; const isEV = tipoTrazioneValue === 'elettrico'; summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect))); let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza'); let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante"); summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante")); summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia)); let kmStato = getSelectText('stato_chilometri'); summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); let cdcStato = getSelectText('stato_cdc'); summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente")); summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente")); if (isEV) { summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`; let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente")); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente")); } summaryContent.innerHTML += `<h3>Pneumatici:</h3>`; const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }]; pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); }); summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`; summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK')); summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK')); const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : ""; if (noteDanniValue) { const noteDiv = document.createElement('div'); noteDiv.classList.add('summary-item', 'summary-notes'); const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: "; const contentDiv = document.createElement('div'); contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue; noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv); summaryContent.appendChild(noteDiv); } }
     async function fetchAllDataFromSheets() { if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch di tutti i dati."); return { success: false, message: "URL Web App non configurato.", data: [] }; } const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?nocache=${new Date().getTime()}`;  console.log("Fetching all perizie from Sheets. URL:", fetchUrl); try { const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); if (!response.ok) { const errorText = await response.text(); console.error(`Errore HTTP ${response.status} nel fetch di tutti i dati da Sheets: ${errorText}`); return { success: false, message: `Errore Sheets (${response.status}) nel recupero globale.`, data: [] }; } const contentType = response.headers.get("content-type"); if (contentType && contentType.indexOf("application/json") !== -1) { const result = await response.json(); if (Array.isArray(result)) {  console.log("Dati globali ricevuti da Sheets (array diretto):", result.length, "perizie."); return { success: true, data: result, message: "Dati recuperati con successo." }; } else if (result && result.status === "success" && Array.isArray(result.data)) {  console.log("Dati globali ricevuti da Sheets (oggetto con .data):", result.data.length, "perizie."); return { success: true, data: result.data, message: result.message || "Dati recuperati con successo."}; } else if (result && result.status === "notfound") {   console.log("Nessuna perizia trovata in Sheets (notfound).");  return { success: true, data: [], message: result.message || "Nessuna perizia trovata."}; } else { console.warn("Risposta da Sheets (globale) non era un array o oggetto atteso:", result); return { success: false, message: "Formato risposta globale non valido.", data: [] }; } } else { const textResponse = await response.text(); console.error("Risposta da Sheets (globale) non era JSON:", textResponse); return { success: false, message: "Errore formato risposta globale Sheets (non JSON).", data: [] }; } } catch (error) { console.error("Errore di rete o fetch generico durante il recupero globale da Sheets:", error); return { success: false, message: "Errore di rete recupero globale: " + error.message, data: [] }; } }
-    async function syncAllLocalDataToSheets() { const originalSyncButtonText = syncToSheetsBtn.textContent; syncToSheetsBtn.disabled = true; let updatedFromSheetsCount = 0; let localUpdatesFailedCount = 0; syncToSheetsBtn.textContent = "Sinc (1/3 RecSheets)..."; console.log("SYNC - Fase 1: Recupero di tutti i dati da Google Sheets."); const sheetsResponse = await fetchAllDataFromSheets(); if (!sheetsResponse.success) { alert(`Errore nel recupero dei dati da Sheets:\n${sheetsResponse.message}\nLa sincronizzazione non può procedere.`); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; return; } const allSheetsData = sheetsResponse.data;  console.log(`SYNC - Fase 1 completata. Ricevute ${allSheetsData.length} perizie da Sheets.`); syncToSheetsBtn.textContent = "Sinc (2/3 AggLoc)..."; console.log("SYNC - Fase 2: Confronto dati Sheets con localStorage e aggiornamento locale."); if (allSheetsData.length > 0) { for (const sheetPerizia of allSheetsData) { if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) { console.warn("SYNC - Saltata perizia da Sheets per dati/timestamp mancanti:", sheetPerizia); continue; } const targa = sheetPerizia.targa.toUpperCase(); const localDataKey = `${APP_PREFIX}data_${targa}`; const localDataJSON = localStorage.getItem(localDataKey); let localDatiPeriziaTimestamp = null; if (localDataJSON) { try { const localDatiPeriziaObject = JSON.parse(localDataJSON); localDatiPeriziaTimestamp = localDatiPeriziaObject.timestamp ? new Date(localDatiPeriziaObject.timestamp) : null; } catch (e) { console.error(`SYNC - Errore parsing dati locali per targa ${targa}:`, e); } }  const sheetsRecordTimestamp = new Date(sheetPerizia.timestamp); if (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp) { console.log(`SYNC - Targa ${targa}: Dati Sheets più recenti (Sheets Record TS: ${sheetsRecordTimestamp}, Locale datiPerizia TS: ${localDatiPeriziaTimestamp || 'N/A'}). Aggiorno localStorage.`); try { localStorage.setItem(localDataKey, JSON.stringify(sheetPerizia.datiPerizia));  if (sheetPerizia.hasOwnProperty('posizione')) { savePosizioneForTarga(targa, sheetPerizia.posizione); } if (sheetPerizia.hasOwnProperty('urgente')) { saveUrgentStatusForTarga(targa, sheetPerizia.urgente); } if (sheetPerizia.hasOwnProperty('completata')) { if (sheetPerizia.completata) { markTargaAsCompleted(targa); } else { unmarkTargaAsCompleted(targa); } } updatedFromSheetsCount++; } catch (e) { console.error(`SYNC - Errore aggiornamento localStorage per targa ${targa} da Sheets:`, e); localUpdatesFailedCount++; } } else { console.log(`SYNC - Targa ${targa}: Dati locali più recenti o uguali. Nessun aggiornamento da Sheets.`); } } } console.log(`SYNC - Fase 2 completata. Aggiornate/Create localmente ${updatedFromSheetsCount} perizie da Sheets. Errori locali: ${localUpdatesFailedCount}`); syncToSheetsBtn.textContent = "Sinc (3/3 InvioSheets)..."; console.log("SYNC - Fase 3: Invio di tutte le perizie locali a Google Sheets."); let perizieLocaliKeys = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { perizieLocaliKeys.push(key); } } if (perizieLocaliKeys.length === 0 && updatedFromSheetsCount === 0 && localUpdatesFailedCount === 0) { alert("Nessuna perizia salvata localmente e nessuna novità da Sheets da sincronizzare."); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; return; } let successCount = 0; let errorCount = 0; let errorMessages = []; for (const key of perizieLocaliKeys) { const targa = key.substring(`${APP_PREFIX}data_`.length);  let datiPeriziaSalvatiLocalmente;  try { datiPeriziaSalvatiLocalmente = JSON.parse(localStorage.getItem(key)); } catch (e) { console.error(`SYNC - Errore parsing dati per targa ${targa} da localStorage per invio:`, e); errorCount++; errorMessages.push(`Targa ${targa}: Errore lettura dati locali per invio.`); continue; } if (!datiPeriziaSalvatiLocalmente || !datiPeriziaSalvatiLocalmente.timestamp) {  console.warn(`SYNC - Dati per targa ${targa} incompleti o senza timestamp (locale), skip invio a Sheets.`);  errorCount++;  errorMessages.push(`Targa ${targa}: Dati locali incompleti o timestamp mancante.`);  continue; } const periziaDaInviare = { targa: targa, posizione: loadPosizioneForTarga(targa) || "", urgente: loadUrgentStatusForTarga(targa) || false, completata: isTargaCompleted(targa), datiPerizia: datiPeriziaSalvatiLocalmente,  timestamp: datiPeriziaSalvatiLocalmente.timestamp  }; console.log(`SYNC - Invio targa ${targa} a Sheets...`); const result = await inviaPeriziaSingolaASheets(periziaDaInviare); if (result.success) { successCount++; if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) { console.log(`SYNC - Timestamp per ${targa} su Sheets (${result.data.timestamp}) è più recente del timestamp dei datiPerizia locali (${datiPeriziaSalvatiLocalmente.timestamp}). Aggiorno timestamp locale.`); datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp;  try { localStorage.setItem(key, JSON.stringify(datiPeriziaSalvatiLocalmente)); } catch (e) { console.error(`SYNC - Errore salvataggio timestamp aggiornato da server per ${targa}:`,e); } } } else { errorCount++; errorMessages.push(`Targa ${targa}: ${result.message || 'Errore sconosciuto durante invio.'}`); } } console.log("SYNC - Fase 3 completata."); let finalMessage = `Sincronizzazione completata.\n\n`; finalMessage += `FASE 1&2 (Sheets -> Locale):\n`; finalMessage += `- ${updatedFromSheetsCount} perizie locali aggiornate/create da Sheets.\n`; if (localUpdatesFailedCount > 0) finalMessage += `- Errori durante aggiornamento locale: ${localUpdatesFailedCount}.\n`;  finalMessage += `\nFASE 3 (Locale -> Sheets):\n`; finalMessage += `- ${successCount} perizie inviate con successo a Sheets.\n`; if (errorCount > 0) finalMessage += `- ${errorCount} perizie con errori durante l'invio.\n`; if (errorCount > 0 || localUpdatesFailedCount > 0) { finalMessage += "\n\nDETTAGLIO ERRORI (controllare console per info complete):\n" + errorMessages.join("\n"); } alert(finalMessage); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') { 
-        popolaTargheFiltrate();  
-    } }
+    async function syncAllLocalDataToSheets() { const originalSyncButtonText = syncToSheetsBtn.textContent; syncToSheetsBtn.disabled = true; let updatedFromSheetsCount = 0; let localUpdatesFailedCount = 0; syncToSheetsBtn.textContent = "Sinc (1/3 RecSheets)..."; console.log("SYNC - Fase 1: Recupero di tutti i dati da Google Sheets."); const sheetsResponse = await fetchAllDataFromSheets(); if (!sheetsResponse.success) { alert(`Errore nel recupero dei dati da Sheets:\n${sheetsResponse.message}\nLa sincronizzazione non può procedere.`); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; return; } const allSheetsData = sheetsResponse.data;  console.log(`SYNC - Fase 1 completata. Ricevute ${allSheetsData.length} perizie da Sheets.`); syncToSheetsBtn.textContent = "Sinc (2/3 AggLoc)..."; console.log("SYNC - Fase 2: Confronto dati Sheets con localStorage e aggiornamento locale."); if (allSheetsData.length > 0) { for (const sheetPerizia of allSheetsData) { if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) { console.warn("SYNC - Saltata perizia da Sheets per dati/timestamp mancanti:", sheetPerizia); continue; } const targa = sheetPerizia.targa.toUpperCase(); const localDataKey = `${APP_PREFIX}data_${targa}`; const localDataJSON = localStorage.getItem(localDataKey); let localDatiPeriziaTimestamp = null; if (localDataJSON) { try { const localDatiPeriziaObject = JSON.parse(localDataJSON); localDatiPeriziaTimestamp = localDatiPeriziaObject.timestamp ? new Date(localDatiPeriziaObject.timestamp) : null; } catch (e) { console.error(`SYNC - Errore parsing dati locali per targa ${targa}:`, e); } }  const sheetsRecordTimestamp = new Date(sheetPerizia.timestamp); if (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp) { console.log(`SYNC - Targa ${targa}: Dati Sheets più recenti (Sheets Record TS: ${sheetsRecordTimestamp}, Locale datiPerizia TS: ${localDatiPeriziaTimestamp || 'N/A'}). Aggiorno localStorage.`); try { localStorage.setItem(localDataKey, JSON.stringify(sheetPerizia.datiPerizia));  if (sheetPerizia.hasOwnProperty('posizione')) { savePosizioneForTarga(targa, sheetPerizia.posizione); } if (sheetPerizia.hasOwnProperty('urgente')) { saveUrgentStatusForTarga(targa, sheetPerizia.urgente); } if (sheetPerizia.hasOwnProperty('completata')) { if (sheetPerizia.completata) { markTargaAsCompleted(targa); } else { unmarkTargaAsCompleted(targa); } } updatedFromSheetsCount++; } catch (e) { console.error(`SYNC - Errore aggiornamento localStorage per targa ${targa} da Sheets:`, e); localUpdatesFailedCount++; } } else { console.log(`SYNC - Targa ${targa}: Dati locali più recenti o uguali. Nessun aggiornamento da Sheets.`); } } } console.log(`SYNC - Fase 2 completata. Aggiornate/Create localmente ${updatedFromSheetsCount} perizie da Sheets. Errori locali: ${localUpdatesFailedCount}`); syncToSheetsBtn.textContent = "Sinc (3/3 InvioSheets)..."; console.log("SYNC - Fase 3: Invio di tutte le perizie locali a Google Sheets."); let perizieLocaliKeys = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { perizieLocaliKeys.push(key); } } if (perizieLocaliKeys.length === 0 && updatedFromSheetsCount === 0 && localUpdatesFailedCount === 0) { alert("Nessuna perizia salvata localmente e nessuna novità da Sheets da sincronizzare."); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; return; } let successCount = 0; let errorCount = 0; let errorMessages = []; for (const key of perizieLocaliKeys) { const targa = key.substring(`${APP_PREFIX}data_`.length);  let datiPeriziaSalvatiLocalmente;  try { datiPeriziaSalvatiLocalmente = JSON.parse(localStorage.getItem(key)); } catch (e) { console.error(`SYNC - Errore parsing dati per targa ${targa} da localStorage per invio:`, e); errorCount++; errorMessages.push(`Targa ${targa}: Errore lettura dati locali per invio.`); continue; } if (!datiPeriziaSalvatiLocalmente || !datiPeriziaSalvatiLocalmente.timestamp) {  console.warn(`SYNC - Dati per targa ${targa} incompleti o senza timestamp (locale), skip invio a Sheets.`);  errorCount++;  errorMessages.push(`Targa ${targa}: Dati locali incompleti o timestamp mancante.`);  continue; } const periziaDaInviare = { targa: targa, posizione: loadPosizioneForTarga(targa) || "", urgente: loadUrgentStatusForTarga(targa) || false, completata: isTargaCompleted(targa), datiPerizia: datiPeriziaSalvatiLocalmente,  timestamp: datiPeriziaSalvatiLocalmente.timestamp  }; console.log(`SYNC - Invio targa ${targa} a Sheets...`); const result = await inviaPeriziaSingolaASheets(periziaDaInviare); if (result.success) { successCount++; if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) { console.log(`SYNC - Timestamp per ${targa} su Sheets (${result.data.timestamp}) è più recente del timestamp dei datiPerizia locali (${datiPeriziaSalvatiLocalmente.timestamp}). Aggiorno timestamp locale.`); datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp;  try { localStorage.setItem(key, JSON.stringify(datiPeriziaSalvatiLocalmente)); } catch (e) { console.error(`SYNC - Errore salvataggio timestamp aggiornato da server per ${targa}:`,e); } } } else { errorCount++; errorMessages.push(`Targa ${targa}: ${result.message || 'Errore sconosciuto durante invio.'}`); } } console.log("SYNC - Fase 3 completata."); let finalMessage = `Sincronizzazione completata.\n\n`; finalMessage += `FASE 1&2 (Sheets -> Locale):\n`; finalMessage += `- ${updatedFromSheetsCount} perizie locali aggiornate/create da Sheets.\n`; if (localUpdatesFailedCount > 0) finalMessage += `- Errori durante aggiornamento locale: ${localUpdatesFailedCount}.\n`;  finalMessage += `\nFASE 3 (Locale -> Sheets):\n`; finalMessage += `- ${successCount} perizie inviate con successo a Sheets.\n`; if (errorCount > 0) finalMessage += `- ${errorCount} perizie con errori durante l'invio.\n`; if (errorCount > 0 || localUpdatesFailedCount > 0) { finalMessage += "\n\nDETTAGLIO ERRORI (controllare console per info complete):\n" + errorMessages.join("\n"); } alert(finalMessage); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') {  popolaTargheFiltrate();  } }
 
     document.addEventListener('DOMContentLoaded', () => {
+        // ... (Codice di creazione bottone syncToSheetsBtn e fill-defaults-btn invariato) ...
         const preloader = document.getElementById('preloader'); 
         syncToSheetsBtn = document.createElement('button');
         syncToSheetsBtn.id = 'syncToSheetsBtn';
@@ -1066,19 +1120,23 @@
         });
         if (tipoTrazioneSelect) tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
         
+        // --- MODIFICATO: Event Listener per targaSwitcherDropdown ---
         if (targaSwitcherDropdown) {
             targaSwitcherDropdown.addEventListener('change', async function() {
                 const nuovaTargaSelezionata = this.value;
                 if (nuovaTargaSelezionata && nuovaTargaSelezionata.toUpperCase() !== (targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase() : null)) {
                     
-                    let currentActiveSectionId = 'remarketing'; 
+                    // Memorizza la sezione attiva PRIMA di cambiare targa
+                    let currentActiveSectionId = 'remarketing'; // Default
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
                     if (activeSectionElement && activeSectionElement.id) {
                         currentActiveSectionId = activeSectionElement.id.replace('Section', '');
                     }
                     
                     this.disabled = true;                     
+                    // Passa la sezione corrente a handleTargaSelectionAndSync
                     await handleTargaSelectionAndSync(nuovaTargaSelezionata, currentActiveSectionId); 
+                    // updateTargaDetailsDisplay è già chiamato da handleTargaSelectionAndSync -> showView/showSection
                     this.disabled = false; 
                 } else if (nuovaTargaSelezionata) {
                     updateTargaDetailsDisplay(nuovaTargaSelezionata);
@@ -1086,17 +1144,13 @@
             });
         }
 
+        // ... (Resto degli event listener e chiamata a initializeApplicationViewAndLoadData invariati) ...
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
         if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData);
         if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
-
-        const resetAllLocalDataBelowListBtn = document.getElementById('resetAllLocalDataBelowListBtn');
-        if (resetAllLocalDataBelowListBtn) {
-            resetAllLocalDataBelowListBtn.addEventListener('click', clearAllSavedData);
-        }
 
         async function initializeApplicationViewAndLoadData() {
             showView('landing'); 
