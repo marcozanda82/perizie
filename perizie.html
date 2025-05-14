@@ -510,6 +510,28 @@
         .targa-list-item.status-parziale .targa-col-posizione input.posizione-input { background-color: #ffe082; color: #212529; border-color: #ffc107; }
         .targa-list-item.status-parziale .targa-col-urgenza input[type="checkbox"] { accent-color: #b8860b; }
 
+        /* NUOVO CSS PER TARGE CANCELLATE LOCALMENTE */
+        .targa-list-item.locally-deleted {
+            opacity: 0.5;
+            background-color: #404040 !important; 
+        }
+        .targa-list-item.locally-deleted .targa-col-targa {
+            text-decoration: line-through;
+            color: #aaa !important;
+        }
+        .targa-list-item.locally-deleted .clickable-targa {
+            cursor: default !important; 
+            text-decoration: line-through !important;
+        }
+        .targa-list-item.locally-deleted .delete-progress-btn {
+            display: none; 
+        }
+        .targa-list-item.locally-deleted input,
+        .targa-list-item.locally-deleted select {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
 
         #targheLoadingStatus { text-align: center; padding: 10px; color: #00aeff; }
         #savedTargasListContainer { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #333; border-radius: 4px; margin-bottom: 20px; }
@@ -743,7 +765,7 @@
         </div>
     </div>
 <script>
-    // Variabili globali (invariate)
+    // Variabili globali
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
@@ -778,14 +800,15 @@
     const tipoTrazioneSelect = document.getElementById('tipo_trazione');
     const cavoRapidaSelect = document.getElementById('cavo_ricarica_rapida');
     const cavoDomesticaSelect = document.getElementById('cavo_ricarica_domestica');
+    
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
-    const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbym7LjGgbF-ErSiThpyfNHAPsWx_w18Q3eEkzVZpkgQlYGN_Ips0ASZ3LYveo5QdKNTuA/exec'; 
+    // === URL SCRIPT AGGIORNATO ===
+    const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzN4bBhPi4d8i7fSpJQqCJ2CQYOtmes1yKeGeqVe053K4QkdKYH4PuQIughn_9YLEfCkA/exec'; 
     
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
 
-    // --- MODIFICATA: updateTargaDetailsDisplay ---
     function updateTargaDetailsDisplay(selectedTarga) {
         if (!targaDetailsDisplay || !selectedTarga || !listaTargheCompleta.length) {
             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
@@ -794,48 +817,37 @@
         const veicolo = listaTargheCompleta.find(v => v.targa.toUpperCase() === selectedTarga.toUpperCase());
         if (veicolo) {
             let detailsText = '';
-            // Assicurati che marca e modello siano stringhe e non undefined/null prima di concatenare
             const marca = veicolo.marca ? String(veicolo.marca).trim() : '';
             const modello = veicolo.modello ? String(veicolo.modello).trim() : '';
-
             if (marca) detailsText += marca;
             if (modello) detailsText += (detailsText ? ' ' : '') + modello;
-            
-            targaDetailsDisplay.textContent = detailsText || ''; // Mostra stringa vuota se non ci sono dettagli
+            targaDetailsDisplay.textContent = detailsText || '';
         } else {
-            targaDetailsDisplay.textContent = ''; // Pulisci se il veicolo non è trovato
+            targaDetailsDisplay.textContent = '';
         }
     }
 
     function populateTargaSwitcherDropdown() {
-        // ... (Logica per ottenere veicoloAttuale e targheDelPiazzale invariata) ...
         if (!targaSwitcherDropdown || !targaSelezionataGlobalmente || !listaTargheCompleta.length) {
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
             return;
         }
-
         const veicoloAttuale = listaTargheCompleta.find(v => v.targa.toUpperCase() === targaSelezionataGlobalmente.toUpperCase());
         if (!veicoloAttuale || !veicoloAttuale.piazzale) {
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
-            console.warn("Piazzale non trovato per la targa attuale o targa non trovata:", targaSelezionataGlobalmente);
             return;
         }
-
         const piazzaleCorrente = veicoloAttuale.piazzale;
-        const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente);
-
+        const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente && !localStorage.getItem(`${APP_PREFIX}deleted_${v.targa.toUpperCase()}`)); // Escludi cancellate
         targaSwitcherDropdown.innerHTML = ''; 
-
         if (targheDelPiazzale.length === 0) {
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
             return;
         }
-        
         targheDelPiazzale.sort((a, b) => a.targa.localeCompare(b.targa)); 
-
         targheDelPiazzale.forEach(v => {
             const option = document.createElement('option');
             option.value = v.targa.toUpperCase();
@@ -845,14 +857,78 @@
             }
             targaSwitcherDropdown.appendChild(option);
         });
-
         if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
         updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
     }
 
-    // ... (Funzioni inviaPeriziaSingolaASheets, fetchLatestPeriziaFromSheets, fillSectionPositiveOrDefaults, ecc. invariate fino a handleTargaSelectionAndSync)
-    async function inviaPeriziaSingolaASheets(periziaDaInviare) { if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') { console.error("URL della Web App Google Sheets non configurato."); return { success: false, message: "URL Web App non configurato." }; } console.log("Tentativo di invio perizia a Google Sheets:", periziaDaInviare); try { const response = await fetch(GOOGLE_SHEET_WEB_APP_URL, { method: 'POST', mode: 'cors',  cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' },  body: JSON.stringify(periziaDaInviare)  }); let responseData; const contentType = response.headers.get("content-type"); if (contentType && contentType.indexOf("application/json") !== -1) { responseData = await response.json(); } else { const textResponse = await response.text(); console.warn("Risposta dal server non è JSON, ricevuta come testo:", textResponse); try { responseData = JSON.parse(textResponse); }  catch (e) { responseData = { status: "error", message: "Risposta non JSON dal server: " + textResponse.substring(0,100) + "..."}; } } if (response.ok && responseData.status === "success") { console.log("Perizia inviata con successo a Google Sheets:", responseData.message, "Dati ritornati:", responseData.data); return { success: true, message: responseData.message, data: responseData.data }; } else { console.error("Errore dall'API di Google Sheets o risposta non OK:", responseData.message || `HTTP Status ${response.status}`); return { success: false, message: responseData.message || `Errore server (HTTP ${response.status})` }; } } catch (error) { console.error("Errore di rete o fetch durante l'invio a Google Sheets:", error); return { success: false, message: "Errore di rete: " + error.message }; } }
-    async function fetchLatestPeriziaFromSheets(targa) { if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch."); return null; } const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=getPerizia&targa=${encodeURIComponent(targa.toUpperCase())}&nocache=${new Date().getTime()}`; console.log("Fetching latest perizia from Sheets for targa:", targa, "URL:", fetchUrl); try { const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); if (!response.ok) { const errorText = await response.text(); console.error(`Errore HTTP ${response.status} nel fetch da Sheets: ${errorText}`); return null; } const contentType = response.headers.get("content-type"); if (contentType && contentType.indexOf("application/json") !== -1) { const result = await response.json(); if (result.status === "success" && result.data) { console.log("Dati perizia singola ricevuti da Sheets:", result.data); return result.data;  } else if (result.status === "notfound") { console.log("Perizia non trovata in Sheets per targa:", targa); return null; } else { console.warn("Risposta da Sheets (singola) non conteneva dati validi o status non era 'success'/'notfound':", result.message || result); return null; } } else { const textResponse = await response.text(); console.error("Risposta da Sheets (singola) non era JSON:", textResponse); return null; } } catch (error) { console.error("Errore di rete o fetch generico durante il recupero (singolo) da Sheets:", error); return null; } }
+    async function inviaPeriziaSingolaASheets(periziaDaInviare) { 
+        if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') { console.error("URL della Web App Google Sheets non configurato."); return { success: false, message: "URL Web App non configurato." }; } 
+        console.log("Tentativo di invio perizia a Google Sheets:", periziaDaInviare); 
+        try { 
+            const response = await fetch(GOOGLE_SHEET_WEB_APP_URL, { method: 'POST', mode: 'cors',  cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' },  body: JSON.stringify(periziaDaInviare)  }); 
+            let responseData; 
+            const contentType = response.headers.get("content-type"); 
+            if (contentType && contentType.indexOf("application/json") !== -1) { 
+                responseData = await response.json(); 
+            } else { 
+                const textResponse = await response.text(); 
+                console.warn("Risposta dal server non è JSON, ricevuta come testo:", textResponse); 
+                try { responseData = JSON.parse(textResponse); }  
+                catch (e) { responseData = { status: "error", message: "Risposta non JSON dal server: " + textResponse.substring(0,100) + "..."}; } 
+            } 
+            if (response.ok && responseData.status === "success") { 
+                console.log("Perizia inviata con successo a Google Sheets:", responseData.message, "Dati ritornati:", responseData.data); 
+                return { success: true, message: responseData.message, data: responseData.data }; 
+            } else { 
+                console.error("Errore dall'API di Google Sheets o risposta non OK:", responseData.message || `HTTP Status ${response.status}`); 
+                return { success: false, message: responseData.message || `Errore server (HTTP ${response.status})` }; 
+            } 
+        } catch (error) { 
+            console.error("Errore di rete o fetch durante l'invio a Google Sheets:", error); 
+            return { success: false, message: "Errore di rete: " + error.message }; 
+        } 
+    }
+    
+    async function fetchLatestPeriziaFromSheets(targa) { 
+        if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch."); return null; } 
+        // Check if targa is marked for deletion locally
+        if (localStorage.getItem(`${APP_PREFIX}deleted_${targa.toUpperCase()}`)) {
+            console.log(`WorkspaceLatestPerizia: Targa ${targa} marcata come cancellata localmente. Non verrà recuperata da Sheets.`);
+            return null;
+        }
+        const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=getPerizia&targa=${encodeURIComponent(targa.toUpperCase())}&nocache=${new Date().getTime()}`; 
+        console.log("Fetching latest perizia from Sheets for targa:", targa, "URL:", fetchUrl); 
+        try { 
+            const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); 
+            if (!response.ok) { 
+                const errorText = await response.text(); 
+                console.error(`Errore HTTP ${response.status} nel fetch da Sheets: ${errorText}`); 
+                return null; 
+            } 
+            const contentType = response.headers.get("content-type"); 
+            if (contentType && contentType.indexOf("application/json") !== -1) { 
+                const result = await response.json(); 
+                if (result.status === "success" && result.data) { 
+                    console.log("Dati perizia singola ricevuti da Sheets:", result.data); 
+                    return result.data;  
+                } else if (result.status === "notfound") { 
+                    console.log("Perizia non trovata in Sheets per targa:", targa); 
+                    return null; 
+                } else { 
+                    console.warn("Risposta da Sheets (singola) non conteneva dati validi o status non era 'success'/'notfound':", result.message || result); 
+                    return null; 
+                } 
+            } else { 
+                const textResponse = await response.text(); 
+                console.error("Risposta da Sheets (singola) non era JSON:", textResponse); 
+                return null; 
+            } 
+        } catch (error) { 
+            console.error("Errore di rete o fetch generico durante il recupero (singolo) da Sheets:", error); 
+            return null; 
+        } 
+    }
+
     function fillSectionPositiveOrDefaults(sectionId) { const section = document.getElementById(sectionId); if (!section) return; if (sectionId === 'remarketingSection') { if (tipoTrazioneSelect) tipoTrazioneSelect.value = 'endotermico'; document.getElementById('foto_angolari').checked = true; document.getElementById('foto_vano_carico').checked = true; document.getElementById('tipo_equipaggiamento').value = 'kit_gonfia_ripara'; document.getElementById('equipaggiamento_presenza').value = 'presente'; document.getElementById('foto_interni_pannelli').checked = true; document.getElementById('foto_cruscotto').checked = true; document.getElementById('stato_chilometri').value = 'rilevabili'; document.getElementById('stato_cdc').value = 'originale'; document.getElementById('foto_vano_motore').checked = true; document.getElementById('foto_cofano_tetto').checked = true; document.getElementById('chiave_telecomando').value = 'presente'; document.getElementById('seconda_chiave').value = 'presente'; handleTrazioneChange();  if (tipoTrazioneSelect && tipoTrazioneSelect.value === 'elettrico') { if (cavoRapidaSelect) cavoRapidaSelect.value = 'presente'; if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'presente'; } else {  if (cavoRapidaSelect) cavoRapidaSelect.value = 'non_applicabile';  if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'non_applicabile'; } } else if (sectionId === 'pneumaticiSection') { document.getElementById('pneumatico_as').value = 'conforme'; document.getElementById('pneumatico_ad').value = 'conforme'; document.getElementById('pneumatico_pd').value = 'conforme'; document.getElementById('pneumatico_ps').value = 'conforme'; } else if (sectionId === 'danniVerificheSection') { document.getElementById('motore_accende').value = 'ok'; document.getElementById('batteria_stato').value = 'ok'; document.getElementById('foto_danni_generiche').checked = true;  document.getElementById('note_danni_verifiche').value = 'Nessuna anomalia da segnalare.'; } updateNavButtonColors(); if (typeof initSequentialAnimation === 'function') { section.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me')); initSequentialAnimation(); }  section.querySelectorAll('input, select, textarea').forEach(el => { const event = new Event('change', { bubbles: true }); el.dispatchEvent(event); }); }
     function handleTrazioneChange() { if (!tipoTrazioneSelect || !cavoRapidaSelect || !cavoDomesticaSelect) return; const selectedTrazione = tipoTrazioneSelect.value; const isElectric = selectedTrazione === 'elettrico'; cavoRapidaSelect.disabled = !isElectric; cavoDomesticaSelect.disabled = !isElectric; if (!isElectric) { cavoRapidaSelect.value = "non_applicabile";  cavoDomesticaSelect.value = "non_applicabile"; } else { if (cavoRapidaSelect.value === "" || cavoRapidaSelect.value === "non_applicabile") cavoRapidaSelect.value = ""; if (cavoDomesticaSelect.value === "" || cavoDomesticaSelect.value === "non_applicabile") cavoDomesticaSelect.value = ""; } updateNavButtonColors();  }
     function savePosizioneForTarga(targa, posizione) { if (!targa) return; try { localStorage.setItem(`${APP_PREFIX}posizione_${targa.toUpperCase()}`, posizione); } catch (e) { console.error("Errore salvataggio posizione LS:", e); } }
@@ -866,7 +942,38 @@
     function isTargaCompleted(targa) { if(!targa) return false; const completed = getCompletedTarghe(); return !!(completed[targa.toUpperCase()]); }
     function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa.toUpperCase()]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa.toUpperCase()} marked complete locally.`);}catch(e){console.error("Errore LS Mark Err:",e);}}
     function unmarkTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe(); if(completed[targa.toUpperCase()]){ delete completed[targa.toUpperCase()]; localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed)); console.log(`${targa.toUpperCase()} unmarked as complete locally.`);}}catch(e){console.error("Errore LS Unmark Err:",e);}}
-    function deleteProgressForTarga(targa) { if(!targa){return;} const targaUpper = targa.toUpperCase(); try { localStorage.removeItem(`${APP_PREFIX}data_${targaUpper}`); console.log(`Dati modulo rimossi per ${targaUpper}.`); unmarkTargaAsCompleted(targaUpper);  localStorage.removeItem(`${APP_PREFIX}posizione_${targaUpper}`); console.log(`Dati posizione rimossi per ${targaUpper}.`); localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`);  console.log(`Dati urgenza rimossi per ${targaUpper}.`); } catch(e) { console.error(`Errore cancellazione dati per ${targaUpper}:`,e); alert(`Errore cancellazione dati per ${targaUpper}.`); } if (typeof popolaTargheFiltrate === 'function') {  popolaTargheFiltrate(); } if (targaSelezionataGlobalmente && targaSelezionataGlobalmente.toUpperCase() === targaUpper) {  targaSelezionataGlobalmente = null; } }
+    
+    // --- MODIFICATA: deleteProgressForTarga ---
+    function deleteProgressForTarga(targa) {
+        if (!targa) { return; }
+        const targaUpper = targa.toUpperCase();
+        try {
+            localStorage.removeItem(`${APP_PREFIX}data_${targaUpper}`);
+            console.log(`Dati modulo rimossi per ${targaUpper}.`);
+            unmarkTargaAsCompleted(targaUpper); 
+            localStorage.removeItem(`${APP_PREFIX}posizione_${targaUpper}`);
+            console.log(`Dati posizione rimossi per ${targaUpper}.`);
+            localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`);
+            console.log(`Dati urgenza rimossi per ${targaUpper}.`);
+            
+            // NUOVA AGGIUNTA: Contrassegna per la cancellazione da Sheet
+            localStorage.setItem(`${APP_PREFIX}deleted_${targaUpper}`, new Date().toISOString());
+            console.log(`Targa ${targaUpper} contrassegnata per la cancellazione da Sheets.`);
+
+        } catch (e) {
+            console.error(`Errore cancellazione dati per ${targaUpper}:`, e);
+            alert(`Errore cancellazione dati per ${targaUpper}.`);
+        }
+        if (typeof popolaTargheFiltrate === 'function') { 
+            popolaTargheFiltrate(); // Aggiorna la lista
+        }
+        if (targaSelezionataGlobalmente && targaSelezionataGlobalmente.toUpperCase() === targaUpper) { 
+            targaSelezionataGlobalmente = null;
+            // Potresti voler reindirizzare o pulire la vista checklist qui
+            showView('landing'); // Ad esempio, torna alla landing page
+        }
+    }
+
     function generateAndDownloadScreenshot() { return new Promise((resolve, reject) => { const riepilogoSection = document.getElementById('riepilogoSection'); if (!riepilogoSection) { alert("Errore: Sezione Riepilogo non trovata per lo screenshot."); return reject("Sezione riepilogo non trovata"); } if (typeof html2canvas === 'undefined') { alert("Errore: Libreria html2canvas non caricata."); return reject("html2canvas non caricata"); } setTimeout(() => { console.log("Inizio generazione screenshot..."); riepilogoSection.scrollTop = 0;  html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY, windowHeight: riepilogoSection.scrollHeight }) .then(canvas => { const link = document.createElement('a'); let targaSanitized = 'sconosciuta'; let piazzaleSanitized = 'piazzale_sconosciuto'; if (targaSelezionataGlobalmente) { targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_'); const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") { piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_'); if (!piazzaleSanitized) piazzaleSanitized = 'N_D'; } else { piazzaleSanitized = 'N_D'; } } link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`; link.href = canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); console.log(`Screenshot generato e download avviato: ${link.download}`); resolve(); }) .catch(error => { console.error("Errore durante la generazione dello screenshot:", error); alert("Si è verificato un errore durante la generazione dello screenshot."); reject(error); }); }, 100);  }); }
     async function handleSavePeriziaAndReturn() {  if (!targaSelezionataGlobalmente) { alert("Nessuna targa attiva selezionata per il salvataggio."); return; } const originalButtonText = saveAndReturnBtn.textContent; saveAndReturnBtn.textContent = 'Salvataggio locale...'; saveAndReturnBtn.disabled = true; if (!saveProgress(targaSelezionataGlobalmente)) {  alert("Salvataggio dati nel browser fallito."); saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; return; } if (document.getElementById('riepilogoSection').classList.contains('active')) { generateSummary();  } try { await generateAndDownloadScreenshot(); } catch (e) { console.warn("Generazione screenshot fallita, ma i dati sono stati salvati localmente.", e); } markTargaAsCompleted(targaSelezionataGlobalmente);  updateNavButtonColors();  saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; alert(`Perizia per ${targaSelezionataGlobalmente} salvata localmente e screenshot tentato.`); showView('landing');  }
     function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
@@ -876,7 +983,6 @@
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente.toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
     function showView(viewName) {
-        // ... (Logica di gestione display sezioni e header invariata) ...
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
@@ -884,7 +990,6 @@
 
         if (utilityNavButtons) utilityNavButtons.style.display = 'flex'; 
         if (navButtonsContainer) navButtonsContainer.style.display = 'none'; 
-
         if (mainTitleGlobal) mainTitleGlobal.style.display = 'block'; 
         if (targaDropdownContainer) targaDropdownContainer.style.display = 'none'; 
         if (targaDetailsDisplay) targaDetailsDisplay.textContent = ''; 
@@ -909,13 +1014,19 @@
                 showView('landing'); 
                 return;
             }
+            // NUOVO CONTROLLO: Se la targa è marcata come cancellata, non mostrare la checklist
+            if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente.toUpperCase()}`)) {
+                console.warn(`Tentativo di mostrare checklist per targa ${targaSelezionataGlobalmente} cancellata. Reindirizzamento a landing.`);
+                showView('landing');
+                alert(`La perizia per ${targaSelezionataGlobalmente} è stata cancellata e non può essere modificata.`);
+                return;
+            }
+
             checklistContainer.style.display = 'block';
             if (mainTitleGlobal) mainTitleGlobal.style.display = 'none'; 
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex'; 
-            
             populateTargaSwitcherDropdown(); 
             updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
-            
             if (tipoTrazioneSelect) handleTrazioneChange();
             updateNavButtonColors(); 
         } else if (viewName === 'history') {
@@ -946,16 +1057,27 @@
     }
 
     // --- MODIFICATA: handleTargaSelectionAndSync ---
-    async function handleTargaSelectionAndSync(selectedTarga, targetSectionId = null) { // Aggiunto targetSectionId
+    async function handleTargaSelectionAndSync(selectedTarga, targetSectionId = null) {
         const targaUpper = selectedTarga.toUpperCase();
-        
-        // Se la targa è la stessa e siamo già in checklist, aggiorniamo solo i dettagli e il dropdown, poi usciamo.
+
+        // NUOVA AGGIUNTA: Controllo per perizie cancellate localmente all'inizio
+        if (localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`)) {
+            console.log(`handleTargaSelectionAndSync: Targa ${targaUpper} è stata cancellata localmente. Non verrà caricata.`);
+            if (targheLoadingStatus && landingPageSection.style.display === 'block') {
+                targheLoadingStatus.textContent = `Targa ${targaUpper} cancellata. Selezionane un'altra.`;
+            }
+             // Se siamo nella checklist e la targa attuale (ora cancellata) viene riselezionata (improbabile ma per sicurezza)
+            if (targaSelezionataGlobalmente === targaUpper && checklistContainer.style.display === 'block') {
+                showView('landing'); // Torna alla landing
+            }
+            return; // Interrompe l'esecuzione per questa targa
+        }
+
         if (targaSelezionataGlobalmente === targaUpper && checklistContainer.style.display === 'block') {
             if (targaSwitcherDropdown.value !== targaUpper) {
-                targaSwitcherDropdown.value = targaUpper; // Sincronizza il dropdown se necessario
+                targaSwitcherDropdown.value = targaUpper;
             }
             updateTargaDetailsDisplay(targaUpper);
-            // Se targetSectionId è fornito (dall'evento change del dropdown), assicurati che la sezione sia quella corretta
             if (targetSectionId) {
                  const currentActiveSectionEl = document.querySelector('#checklistContainer .category-section.active');
                  const currentActiveSectionId = currentActiveSectionEl ? currentActiveSectionEl.id.replace('Section', '') : null;
@@ -972,7 +1094,6 @@
             targheLoadingStatus.textContent = `Caricamento dati per ${targaSelezionataGlobalmente}...`;
         }
 
-        // ... (Logica di fetch e merge dati locali/Sheets invariata) ...
         let localData = null;
         let localDatiPeriziaTimestamp = null; 
         const localJson = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`);
@@ -983,6 +1104,7 @@
             } catch (e) { console.error("Errore parsing dati locali:", e); localData = null; }
         }
 
+        // fetchLatestPeriziaFromSheets ora non recupera se la targa è marcata 'deleted_'
         const sheetsPeriziaData = await fetchLatestPeriziaFromSheets(targaSelezionataGlobalmente); 
         let sheetsRecordTimestamp = null; 
         let sheetsDatiPerizia = null;
@@ -994,22 +1116,32 @@
             isSheetsDataCompleted = sheetsPeriziaData.completata || false;
         }
         
-        if (sheetsRecordTimestamp && (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp)) {
+        if (sheetsPeriziaData && sheetsRecordTimestamp && (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp)) {
             console.log(`Dati da Google Sheets per ${targaSelezionataGlobalmente} sono più recenti. Uso quelli.`);
             try {
-                localStorage.setItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`, JSON.stringify(sheetsDatiPerizia));
-                savePosizioneForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.posizione || "");
-                saveUrgentStatusForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.urgente || false);
-                if (isSheetsDataCompleted) markTargaAsCompleted(targaSelezionataGlobalmente);
-                else unmarkTargaAsCompleted(targaSelezionataGlobalmente);
+                // Solo se la perizia da Sheets NON è marcata come cancellata localmente
+                if (!localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente}`)) {
+                    localStorage.setItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`, JSON.stringify(sheetsDatiPerizia));
+                    savePosizioneForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.posizione || "");
+                    saveUrgentStatusForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.urgente || false);
+                    if (isSheetsDataCompleted) markTargaAsCompleted(targaSelezionataGlobalmente);
+                    else unmarkTargaAsCompleted(targaSelezionataGlobalmente);
+                } else {
+                    console.log(`Targa ${targaSelezionataGlobalmente} marcata per cancellazione, non sovrascrivo con dati da Sheets anche se più recenti.`);
+                }
             } catch (e) { console.error("Errore salvataggio dati da Sheets in LS:", e); }
         } else if (localData) {
-            console.log(`Dati locali per ${targaSelezionataGlobalmente} sono più recenti o uguali, o Sheets non ha dati.`);
-        } else {
+            console.log(`Dati locali per ${targaSelezionataGlobalmente} sono più recenti o uguali, o Sheets non ha dati, o è marcata cancellata.`);
+        } else if (!localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente}`)) { // Solo se non è marcata cancellata
             console.log(`Nessun dato per ${targaSelezionataGlobalmente}. Inizio perizia da zero.`);
             resetChecklistForm(); 
         }
-        // Fine logica fetch/merge
+        
+        if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente}`)) {
+             // Se dopo tutta la logica, la targa è ancora marcata per la cancellazione, non procedere alla checklist.
+             showView('landing');
+             return;
+        }
 
         loadProgress(targaSelezionataGlobalmente); 
         
@@ -1017,45 +1149,225 @@
             targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
         }
         
-        showView('checklist'); // Questo popola anche il dropdown e i dettagli base
+        showView('checklist'); 
 
-        // Gestione della sezione da visualizzare
         if (targetSectionId && document.getElementById(targetSectionId + 'Section')) {
             showSection(targetSectionId);
         } else {
-            // Default alla prima sezione se targetSectionId non è valido o non fornito
             const firstNav = Array.from(navButtons).find(b => b.dataset.target && !['backToListBtn', 'historyBtn', 'exitAppBtn'].includes(b.id));
             if (firstNav && firstNav.dataset.target) {
                 showSection(firstNav.dataset.target);
-            } else if (navButtons.length > 0 && navButtons[0].dataset.target) { // Fallback meno specifico
+            } else if (navButtons.length > 0 && navButtons[0].dataset.target) {
                 showSection(navButtons[0].dataset.target);
-            } else { // Estremo fallback
+            } else { 
                 showSection('remarketing'); 
             }
         }
     }
+    
+    // --- MODIFICATA: populateSavedTargasList ---
+    function populateSavedTargasList() {
+        savedTargasListContainer.innerHTML = '';
+        let hasSaves = false;
+        const tempSavedTargas = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(`${APP_PREFIX}data_`)) {
+                const targa = key.substring(`${APP_PREFIX}data_`.length);
+                // NUOVA CONDIZIONE: Non mostrare se marcata per cancellazione
+                if (targa && !localStorage.getItem(`${APP_PREFIX}deleted_${targa}`) && !tempSavedTargas.includes(targa)) {
+                    tempSavedTargas.push(targa);
+                }
+            }
+        }
+        if (tempSavedTargas.length > 0) hasSaves = true;
+        tempSavedTargas.sort();
+        tempSavedTargas.forEach(targa => {
+            const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' };
+            let displayText = targa;
+            let details = [];
+            if (vehicleDetails.marca) details.push(vehicleDetails.marca);
+            if (vehicleDetails.modello) details.push(vehicleDetails.modello);
+            if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`);
+            if (details.length > 0) {
+                displayText += ` - ${details.join(' ')}`;
+            }
+            const button = document.createElement('button');
+            button.classList.add('saved-targa-button');
+            button.textContent = displayText;
+            button.dataset.targa = targa;
+            button.addEventListener('click', async function() { 
+                await handleTargaSelectionAndSync(this.dataset.targa);
+            });
+            savedTargasListContainer.appendChild(button);
+        });
+        if (!hasSaves) {
+            savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio valido trovato.</p>';
+        }
+    }
 
-    // ... (Funzioni popolaTargheFiltrate, caricaEPopolaTarghe, initSequentialAnimation, ecc. invariate)
-    function populateSavedTargasList() { savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targa = key.substring(`${APP_PREFIX}data_`.length); if (targa && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa); } } } if (tempSavedTargas.length > 0) hasSaves = true; tempSavedTargas.sort(); tempSavedTargas.forEach(targa => { const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' }; let displayText = targa; let details = []; if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`); if (details.length > 0) { displayText += ` - ${details.join(' ')}`; } const button = document.createElement('button'); button.classList.add('saved-targa-button'); button.textContent = displayText; button.dataset.targa = targa; button.addEventListener('click', async function() {  await handleTargaSelectionAndSync(this.dataset.targa); }); savedTargasListContainer.appendChild(button); }); if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio trovato.</p>';} }
-    function clearAllSavedData() { if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni, urgenze e filtro piazzale)?\n\nAzione irreversibile.")) { let c = 0; const keysToRemove = []; for (let i=localStorage.length-1;i>=0;i--) { const k=localStorage.key(i); if (k.startsWith(APP_PREFIX)) { keysToRemove.push(k); } } keysToRemove.forEach(k => { localStorage.removeItem(k); c++; }); alert(`${c} elementi cancellati.`); if(sheetFilterDropdown) sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');  populateSavedTargasList(); if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();  if (typeof showView === 'function') showView('landing'); } }
+    function clearAllSavedData() { if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni, urgenze, flag di cancellazione e filtro piazzale)?\n\nAzione irreversibile.")) { let c = 0; const keysToRemove = []; for (let i=localStorage.length-1;i>=0;i--) { const k=localStorage.key(i); if (k.startsWith(APP_PREFIX)) { keysToRemove.push(k); } } keysToRemove.forEach(k => { localStorage.removeItem(k); c++; }); alert(`${c} elementi cancellati.`); if(sheetFilterDropdown) sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');  populateSavedTargasList(); if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();  if (typeof showView === 'function') showView('landing'); } }
     function setupSheetFilterDropdown() { if (!sheetFilterDropdown) return; const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== '').sort())]; sheetFilterDropdown.innerHTML = ''; sources.forEach(source => { const option = document.createElement('option'); option.value = source; option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source; sheetFilterDropdown.appendChild(option); }); const savedPiazzaleFilter = localStorage.getItem(`${APP_PREFIX}selectedPiazzaleFilter`); if (savedPiazzaleFilter && sources.includes(savedPiazzaleFilter)) { sheetFilterDropdown.value = savedPiazzaleFilter; } else { sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); } sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange); sheetFilterDropdown.addEventListener('change', handleSheetFilterChange); }
     function handleSheetFilterChange() { if (sheetFilterDropdown) { localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value); } popolaTargheFiltrate(); targaSelezionataGlobalmente = null; }
-    function popolaTargheFiltrate() { const tEl = document.getElementById('targaListContainer'); if (!tEl) return; tEl.innerHTML = ''; const selectedSource = sheetFilterDropdown ? sheetFilterDropdown.value : 'all'; let preliminaryFilteredList = selectedSource === 'all' ? [...listaTargheCompleta] : listaTargheCompleta.filter(item => item.piazzale === selectedSource); function getItemRank(item) { const targaUpper = item.targa.toUpperCase(); const isUrgent = loadUrgentStatusForTarga(targaUpper);  const isCompleted = isTargaCompleted(targaUpper); const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`); let hasData = false; if (localDataJson) { try { const parsedData = JSON.parse(localDataJson); hasData = Object.keys(parsedData).some(key => key !== 'timestamp' && parsedData[key] !== "" && parsedData[key] !== false && (!Array.isArray(parsedData[key]) || parsedData[key].length > 0) ); } catch (e) { /* ignore parsing error for ranking */ } } if (isUrgent && !isCompleted) return 1;  if (!isUrgent && !isCompleted && hasData) return 2;  if (!isUrgent && !isCompleted && !hasData) return 3;  if (!isUrgent && isCompleted) return 4;  if (isUrgent && isCompleted) return 5;   return 6;  } preliminaryFilteredList.sort((a, b) => { const rankA = getItemRank(a); const rankB = getItemRank(b); if (rankA !== rankB) return rankA - rankB; return a.targa.localeCompare(b.targa);  }); const filteredList = preliminaryFilteredList; if (filteredList.length === 0) { tEl.innerHTML = '<p style="text-align:center; padding:10px; color: #aaa;">Nessuna targa trovata per questo filtro.</p>'; if(targheLoadingStatus) targheLoadingStatus.textContent = selectedSource === 'all' ? "Nessuna targa nel CSV." : `Nessuna targa per l'elenco: ${selectedSource}.`; return; } filteredList.forEach((item, idx) => { const targaUpper = item.targa.toUpperCase(); const li = document.createElement('div'); li.classList.add('targa-list-item'); const itemCompleted = isTargaCompleted(targaUpper); const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`); let hasData = false; if (localDataJson) { try { const parsed = JSON.parse(localDataJson); hasData = Object.keys(parsed).some(k => k !== 'timestamp' && parsed[k] !== "" && parsed[k] !== false ); } catch (e) {} } const isItemUrgent = loadUrgentStatusForTarga(targaUpper);  if (isItemUrgent) {  li.classList.add('urgent-item'); if (itemCompleted) { li.classList.add('completed');  } } else if (itemCompleted) { li.classList.add('status-visto', 'completed');  } else if (hasData) { li.classList.add('status-parziale');  } else { li.classList.add('status-da-vedere');  } const targaCol = document.createElement('span'); targaCol.classList.add('targa-col', 'targa-col-targa', 'clickable-targa'); targaCol.textContent = item.targa || 'N/D';  targaCol.dataset.targaValue = targaUpper;  targaCol.addEventListener('click', async function() {  const selectedTargaFromClick = this.dataset.targaValue; if (selectedTargaFromClick) { await handleTargaSelectionAndSync(selectedTargaFromClick); } }); li.appendChild(targaCol); const posizioneCol = document.createElement('span'); posizioneCol.classList.add('targa-col', 'targa-col-posizione'); const posizioneInput = document.createElement('input'); posizioneInput.type = 'text'; posizioneInput.classList.add('posizione-input'); posizioneInput.dataset.targa = targaUpper; posizioneInput.placeholder = 'Pos.'; posizioneInput.maxLength = 5; posizioneInput.value = loadPosizioneForTarga(targaUpper); posizioneInput.addEventListener('mousedown', (e) => e.stopPropagation()); posizioneInput.addEventListener('click', (e) => e.stopPropagation()); posizioneInput.addEventListener('focus', (e) => e.stopPropagation()); posizioneInput.addEventListener('blur', function() { const newPosition = this.value.trim().toUpperCase(); if (newPosition !== loadPosizioneForTarga(this.dataset.targa)) { savePosizioneForTarga(this.dataset.targa, newPosition); this.style.transition = 'background-color 0.3s ease'; this.style.backgroundColor = 'rgba(76, 175, 80, 0.2)'; setTimeout(() => { this.style.backgroundColor = ''; }, 1000); } }); posizioneInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { event.preventDefault(); this.blur(); }}); posizioneCol.appendChild(posizioneInput); li.appendChild(posizioneCol); const urgenzaCol = document.createElement('span'); urgenzaCol.classList.add('targa-col', 'targa-col-urgenza'); const urgenzaCheckbox = document.createElement('input'); urgenzaCheckbox.type = 'checkbox'; urgenzaCheckbox.checked = isItemUrgent; urgenzaCheckbox.title = isItemUrgent ? "Togli urgenza" : "Marca come urgente"; urgenzaCheckbox.addEventListener('mousedown', (e) => e.stopPropagation()); urgenzaCheckbox.addEventListener('click', (e) => e.stopPropagation()); urgenzaCheckbox.addEventListener('change', function() { saveUrgentStatusForTarga(targaUpper, this.checked);  this.title = this.checked ? "Togli urgenza" : "Marca come urgente"; popolaTargheFiltrate();  }); urgenzaCol.appendChild(urgenzaCheckbox); li.appendChild(urgenzaCol); const marcaCol = document.createElement('span'); marcaCol.classList.add('targa-col', 'targa-col-marca'); marcaCol.textContent = item.marca || 'N/D'; li.appendChild(marcaCol); const modelloCol = document.createElement('span'); modelloCol.classList.add('targa-col', 'targa-col-modello'); modelloCol.textContent = item.modello || 'N/D'; li.appendChild(modelloCol); const piazzaleCol = document.createElement('span'); piazzaleCol.classList.add('targa-col', 'targa-col-piazzale'); piazzaleCol.textContent = item.piazzale || 'N/D'; li.appendChild(piazzaleCol); const actionsCol = document.createElement('span'); actionsCol.classList.add('targa-col', 'targa-col-actions'); const delB = document.createElement('button'); delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = targaUpper;  delB.title = `Cancella progressi per ${item.targa}`; delB.textContent = 'X'; delB.addEventListener('click', function(event) { event.stopPropagation(); const tDel = this.dataset.targa;  if (confirm(`ATTENZIONE:\n\nCancellare dati per ${tDel} (inclusa posizione e urgenza)?\n\nAzione irreversibile.`)) { deleteProgressForTarga(tDel); } }); actionsCol.appendChild(delB); li.appendChild(actionsCol); tEl.appendChild(li); }); if(targheLoadingStatus) targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:"; }
+    
+    // --- MODIFICATA: popolaTargheFiltrate ---
+    function popolaTargheFiltrate() {
+        const tEl = document.getElementById('targaListContainer');
+        if (!tEl) return;
+        tEl.innerHTML = '';
+        const selectedSource = sheetFilterDropdown ? sheetFilterDropdown.value : 'all';
+        
+        let preliminaryFilteredList = selectedSource === 'all' 
+            ? [...listaTargheCompleta] 
+            : listaTargheCompleta.filter(item => item.piazzale === selectedSource);
+
+        function getItemRank(item) {
+            const targaUpper = item.targa.toUpperCase();
+            const isLocallyDeleted = !!localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`);
+            if (isLocallyDeleted) return 0; // Massima priorità per le cancellate (in alto) o minima (in basso) a seconda di come vuoi ordinarle
+            
+            const isUrgent = loadUrgentStatusForTarga(targaUpper); 
+            const isCompleted = isTargaCompleted(targaUpper);
+            const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`);
+            let hasData = false;
+            if (localDataJson) {
+                try {
+                    const parsedData = JSON.parse(localDataJson);
+                    hasData = Object.keys(parsedData).some(key => key !== 'timestamp' && parsedData[key] !== "" && parsedData[key] !== false && (!Array.isArray(parsedData[key]) || parsedData[key].length > 0) );
+                } catch (e) { /* ignore */ }
+            }
+            if (isUrgent && !isCompleted) return 1; 
+            if (!isUrgent && !isCompleted && hasData) return 2; 
+            if (!isUrgent && !isCompleted && !hasData) return 3; 
+            if (!isUrgent && isCompleted) return 4; 
+            if (isUrgent && isCompleted) return 5;  
+            return 6; 
+        }
+
+        preliminaryFilteredList.sort((a, b) => {
+            const rankA = getItemRank(a);
+            const rankB = getItemRank(b);
+            if (rankA !== rankB) return rankA - rankB;
+            return a.targa.localeCompare(b.targa); 
+        });
+
+        const filteredList = preliminaryFilteredList;
+
+        if (filteredList.length === 0) {
+            tEl.innerHTML = '<p style="text-align:center; padding:10px; color: #aaa;">Nessuna targa trovata per questo filtro.</p>';
+            if(targheLoadingStatus) targheLoadingStatus.textContent = selectedSource === 'all' ? "Nessuna targa nel CSV." : `Nessuna targa per l'elenco: ${selectedSource}.`;
+            return;
+        }
+
+        filteredList.forEach((item, idx) => {
+            const targaUpper = item.targa.toUpperCase();
+            const li = document.createElement('div');
+            li.classList.add('targa-list-item');
+
+            const isLocallyDeletedFlag = !!localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`);
+            if (isLocallyDeletedFlag) {
+                li.classList.add('locally-deleted');
+            }
+
+            const itemCompleted = isTargaCompleted(targaUpper);
+            const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`);
+            let hasData = false;
+            if (localDataJson) { try { const parsed = JSON.parse(localDataJson); hasData = Object.keys(parsed).some(k => k !== 'timestamp' && parsed[k] !== "" && parsed[k] !== false ); } catch (e) {} }
+            const isItemUrgent = loadUrgentStatusForTarga(targaUpper); 
+
+            if (!isLocallyDeletedFlag) { // Applica stili normali solo se non cancellata
+                if (isItemUrgent) {  li.classList.add('urgent-item'); if (itemCompleted) li.classList.add('completed'); } 
+                else if (itemCompleted) { li.classList.add('status-visto', 'completed'); } 
+                else if (hasData) { li.classList.add('status-parziale'); } 
+                else { li.classList.add('status-da-vedere'); }
+            }
+
+            const targaCol = document.createElement('span');
+            targaCol.classList.add('targa-col', 'targa-col-targa');
+            if (!isLocallyDeletedFlag) { // Rendi cliccabile solo se non cancellata
+                 targaCol.classList.add('clickable-targa');
+                 targaCol.addEventListener('click', async function() { 
+                    const selectedTargaFromClick = this.dataset.targaValue; 
+                    if (selectedTargaFromClick) { await handleTargaSelectionAndSync(selectedTargaFromClick); } 
+                });
+            }
+            targaCol.textContent = item.targa || 'N/D'; 
+            targaCol.dataset.targaValue = targaUpper; 
+            li.appendChild(targaCol);
+
+            const posizioneCol = document.createElement('span'); 
+            posizioneCol.classList.add('targa-col', 'targa-col-posizione'); 
+            const posizioneInput = document.createElement('input'); 
+            posizioneInput.type = 'text'; 
+            posizioneInput.classList.add('posizione-input'); 
+            posizioneInput.dataset.targa = targaUpper; 
+            posizioneInput.placeholder = 'Pos.'; 
+            posizioneInput.maxLength = 5; 
+            posizioneInput.value = loadPosizioneForTarga(targaUpper); 
+            posizioneInput.disabled = isLocallyDeletedFlag; // Disabilita se cancellata
+            posizioneInput.addEventListener('mousedown', (e) => e.stopPropagation()); 
+            posizioneInput.addEventListener('click', (e) => e.stopPropagation()); 
+            posizioneInput.addEventListener('focus', (e) => e.stopPropagation()); 
+            posizioneInput.addEventListener('blur', function() { const newPosition = this.value.trim().toUpperCase(); if (newPosition !== loadPosizioneForTarga(this.dataset.targa)) { savePosizioneForTarga(this.dataset.targa, newPosition); this.style.transition = 'background-color 0.3s ease'; this.style.backgroundColor = 'rgba(76, 175, 80, 0.2)'; setTimeout(() => { this.style.backgroundColor = ''; }, 1000); } }); 
+            posizioneInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { event.preventDefault(); this.blur(); }}); 
+            posizioneCol.appendChild(posizioneInput); 
+            li.appendChild(posizioneCol); 
+
+            const urgenzaCol = document.createElement('span'); 
+            urgenzaCol.classList.add('targa-col', 'targa-col-urgenza'); 
+            const urgenzaCheckbox = document.createElement('input'); 
+            urgenzaCheckbox.type = 'checkbox'; 
+            urgenzaCheckbox.checked = isItemUrgent; 
+            urgenzaCheckbox.title = isItemUrgent ? "Togli urgenza" : "Marca come urgente"; 
+            urgenzaCheckbox.disabled = isLocallyDeletedFlag; // Disabilita se cancellata
+            urgenzaCheckbox.addEventListener('mousedown', (e) => e.stopPropagation()); 
+            urgenzaCheckbox.addEventListener('click', (e) => e.stopPropagation()); 
+            urgenzaCheckbox.addEventListener('change', function() { saveUrgentStatusForTarga(targaUpper, this.checked);  this.title = this.checked ? "Togli urgenza" : "Marca come urgente"; popolaTargheFiltrate();  }); 
+            urgenzaCol.appendChild(urgenzaCheckbox); 
+            li.appendChild(urgenzaCol); 
+
+            const marcaCol = document.createElement('span'); marcaCol.classList.add('targa-col', 'targa-col-marca'); marcaCol.textContent = item.marca || 'N/D'; li.appendChild(marcaCol); 
+            const modelloCol = document.createElement('span'); modelloCol.classList.add('targa-col', 'targa-col-modello'); modelloCol.textContent = item.modello || 'N/D'; li.appendChild(modelloCol); 
+            const piazzaleCol = document.createElement('span'); piazzaleCol.classList.add('targa-col', 'targa-col-piazzale'); piazzaleCol.textContent = item.piazzale || 'N/D'; li.appendChild(piazzaleCol); 
+            
+            const actionsCol = document.createElement('span'); 
+            actionsCol.classList.add('targa-col', 'targa-col-actions'); 
+            if (!isLocallyDeletedFlag) { // Mostra il bottone solo se non già marcata per cancellazione
+                const delB = document.createElement('button'); 
+                delB.classList.add('action-button', 'delete-progress-btn'); 
+                delB.dataset.targa = targaUpper;  
+                delB.title = `Cancella progressi per ${item.targa}`; 
+                delB.textContent = 'X'; 
+                delB.addEventListener('click', function(event) { 
+                    event.stopPropagation(); 
+                    const tDel = this.dataset.targa;  
+                    if (confirm(`ATTENZIONE:\n\nCancellare i dati locali per ${tDel} e marcarla per la cancellazione da Google Sheets alla prossima sincronizzazione?\n\n(Azione irreversibile localmente, la cancellazione da Sheet avverrà con la sincronizzazione)`)) { 
+                        deleteProgressForTarga(tDel); 
+                    } 
+                }); 
+                actionsCol.appendChild(delB); 
+            } else {
+                actionsCol.textContent = 'DEL'; // o un'icona, o vuoto
+                actionsCol.title = 'Marcata per cancellazione da Sheets';
+            }
+            li.appendChild(actionsCol); 
+            tEl.appendChild(li); 
+        });
+        if(targheLoadingStatus) targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
+    }
+
     async function caricaEPopolaTarghe() { const preloaderInstance = document.getElementById('preloader');  if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server..."; try { const r = await fetch(GOOGLE_SHEET_CSV_URL + `&nocache=${new Date().getTime()}`); if (!r.ok) { let e = `HTTP ${r.status}.`; if (r.status === 0) e = "Errore di rete o CORS."; else if (r.status === 404) e = "File CSV non trovato (404)."; else if (r.status === 403) e = "Accesso al file CSV negato (403)."; throw new Error(e); } const csv = await r.text(); const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== ''); if (lines.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV."; listaTargheCompleta = []; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } listaTargheCompleta = lines.map(l => { const p = l.split(','); return {  targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(), marca: (p[1] || '').trim().replace(/^"|"$/g, ''), modello: (p[2] || '').trim().replace(/^"|"$/g, ''), piazzale: (p[3] || '').trim().replace(/^"|"$/g, '') }; }).filter(i => i.targa && i.targa.length > 3);  if (listaTargheCompleta.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";  if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } setupSheetFilterDropdown(); popolaTargheFiltrate(); } catch (e) { console.error("Errore caricamento/popolamento targhe:", e); if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = '';  listaTargheCompleta = []; } finally { if (preloaderInstance) { preloaderInstance.classList.add('hidden'); setTimeout(() => { if (preloaderInstance) preloaderInstance.style.display = 'none'; }, 700); } } }
     function initSequentialAnimation() { const checklistContainerDiv = document.getElementById('checklistContainer'); if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return; const activeSection = checklistContainerDiv.querySelector('.category-section.active'); if (!activeSection) return; activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me')); const allVisibleElementsInSection = Array.from( activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled), textarea:not(:disabled)') ).filter(el => { let current = el; while (current && current !== activeSection.parentElement) {  if (getComputedStyle(current).display === 'none' || getComputedStyle(current).visibility === 'hidden') return false; current = current.parentElement; } return el.offsetParent !== null;  }); const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el)); if (startIndex === -1 && allVisibleElementsInSection.length > 0) {  return; } if (allVisibleElementsInSection.length === 0) {   return; } const elementsToAnimate = allVisibleElementsInSection.slice(startIndex >= 0 ? startIndex : 0); if (elementsToAnimate.length === 0) return; let currentIndex = 0; let activeListeners = [];  function clearAllActiveAnimationListeners() { activeListeners.forEach(({element, type, handler}) => { element.removeEventListener(type, handler); element.classList.remove('animate-me');  }); activeListeners = []; } clearAllActiveAnimationListeners(); function animateNextElement() { if (currentIndex >= elementsToAnimate.length) { clearAllActiveAnimationListeners(); return; } const currentElement = elementsToAnimate[currentIndex]; if (!isInputDefault(currentElement)) {  currentIndex++; animateNextElement(); return; } currentElement.classList.add('animate-me'); currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); const onValueChange = (event) => { let processChange = false; if (event.type === 'change') { processChange = true; } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {  processChange = true; }  if (processChange && !isInputDefault(currentElement)) {  currentElement.classList.remove('animate-me'); activeListeners = activeListeners.filter(listener => { if (listener.element === currentElement) { listener.element.removeEventListener(listener.type, listener.handler); return false;  } return true;  }); currentIndex++; setTimeout(animateNextElement, 50);  } }; currentElement.addEventListener('change', onValueChange); activeListeners.push({element: currentElement, type: 'change', handler: onValueChange}); if (currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') { currentElement.addEventListener('blur', onValueChange);  activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange}); } } animateNextElement(); }
 
-    // --- MODIFICATA: showSection ---
     function showSection(targetId) {
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
             el.classList.remove('animate-me');
         });
-        
         sections.forEach(s => s.classList.toggle('active', s.id === targetId + 'Section'));
         navButtons.forEach(b => { 
             b.classList.toggle('active', b.dataset.target === targetId);
         });
         updateNavButtonColors(); 
-
         if (checklistContainer.style.display === 'block') { 
             if (mainTitleGlobal) mainTitleGlobal.style.display = 'none';
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
@@ -1066,7 +1378,6 @@
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
         }
-
         const targetSectionElement = document.getElementById(targetId + 'Section');
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
              setTimeout(initSequentialAnimation, 100); 
@@ -1079,11 +1390,251 @@
     navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
     function getSelectText(selectElementOrId) { const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId; if (el && el.tagName === 'SELECT' && el.value !== "") { if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) { return el.options[el.selectedIndex].text; } return el.value;  } return "N/S";  }
     function generateSummary() { summaryContent.innerHTML = ''; let targa = targaSelezionataGlobalmente || "N/D"; function createSummaryItem(label, value, isAnomaly = false) { const itemDiv = document.createElement('div'); itemDiv.classList.add('summary-item'); if (isAnomaly) itemDiv.classList.add('summary-anomaly'); itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; return itemDiv; } summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase())); if (targaSelezionataGlobalmente) { const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); let marcaVeicolo = "N/D", modelloVeicolo = "N/D"; if (veicoloAttuale) { marcaVeicolo = veicoloAttuale.marca || "N/D"; modelloVeicolo = veicoloAttuale.modello || "N/D"; } summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D")); const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente); summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary)); } else {  summaryContent.appendChild(createSummaryItem("Marca", "N/D")); summaryContent.appendChild(createSummaryItem("Modello", "N/D")); summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); } summaryContent.innerHTML += `<h3>Remarketing:</h3>`; const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; const isEV = tipoTrazioneValue === 'elettrico'; summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect))); let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza'); let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante"); summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante")); summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia)); let kmStato = getSelectText('stato_chilometri'); summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); let cdcStato = getSelectText('stato_cdc'); summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente")); summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente")); if (isEV) { summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`; let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente")); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente")); } summaryContent.innerHTML += `<h3>Pneumatici:</h3>`; const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }]; pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); }); summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`; summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK')); summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK')); const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : ""; if (noteDanniValue) { const noteDiv = document.createElement('div'); noteDiv.classList.add('summary-item', 'summary-notes'); const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: "; const contentDiv = document.createElement('div'); contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue; noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv); summaryContent.appendChild(noteDiv); } }
-    async function fetchAllDataFromSheets() { if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch di tutti i dati."); return { success: false, message: "URL Web App non configurato.", data: [] }; } const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?nocache=${new Date().getTime()}`;  console.log("Fetching all perizie from Sheets. URL:", fetchUrl); try { const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); if (!response.ok) { const errorText = await response.text(); console.error(`Errore HTTP ${response.status} nel fetch di tutti i dati da Sheets: ${errorText}`); return { success: false, message: `Errore Sheets (${response.status}) nel recupero globale.`, data: [] }; } const contentType = response.headers.get("content-type"); if (contentType && contentType.indexOf("application/json") !== -1) { const result = await response.json(); if (Array.isArray(result)) {  console.log("Dati globali ricevuti da Sheets (array diretto):", result.length, "perizie."); return { success: true, data: result, message: "Dati recuperati con successo." }; } else if (result && result.status === "success" && Array.isArray(result.data)) {  console.log("Dati globali ricevuti da Sheets (oggetto con .data):", result.data.length, "perizie."); return { success: true, data: result.data, message: result.message || "Dati recuperati con successo."}; } else if (result && result.status === "notfound") {   console.log("Nessuna perizia trovata in Sheets (notfound).");  return { success: true, data: [], message: result.message || "Nessuna perizia trovata."}; } else { console.warn("Risposta da Sheets (globale) non era un array o oggetto atteso:", result); return { success: false, message: "Formato risposta globale non valido.", data: [] }; } } else { const textResponse = await response.text(); console.error("Risposta da Sheets (globale) non era JSON:", textResponse); return { success: false, message: "Errore formato risposta globale Sheets (non JSON).", data: [] }; } } catch (error) { console.error("Errore di rete o fetch generico durante il recupero globale da Sheets:", error); return { success: false, message: "Errore di rete recupero globale: " + error.message, data: [] }; } }
-    async function syncAllLocalDataToSheets() { const originalSyncButtonText = syncToSheetsBtn.textContent; syncToSheetsBtn.disabled = true; let updatedFromSheetsCount = 0; let localUpdatesFailedCount = 0; syncToSheetsBtn.textContent = "Sinc (1/3 RecSheets)..."; console.log("SYNC - Fase 1: Recupero di tutti i dati da Google Sheets."); const sheetsResponse = await fetchAllDataFromSheets(); if (!sheetsResponse.success) { alert(`Errore nel recupero dei dati da Sheets:\n${sheetsResponse.message}\nLa sincronizzazione non può procedere.`); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; return; } const allSheetsData = sheetsResponse.data;  console.log(`SYNC - Fase 1 completata. Ricevute ${allSheetsData.length} perizie da Sheets.`); syncToSheetsBtn.textContent = "Sinc (2/3 AggLoc)..."; console.log("SYNC - Fase 2: Confronto dati Sheets con localStorage e aggiornamento locale."); if (allSheetsData.length > 0) { for (const sheetPerizia of allSheetsData) { if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) { console.warn("SYNC - Saltata perizia da Sheets per dati/timestamp mancanti:", sheetPerizia); continue; } const targa = sheetPerizia.targa.toUpperCase(); const localDataKey = `${APP_PREFIX}data_${targa}`; const localDataJSON = localStorage.getItem(localDataKey); let localDatiPeriziaTimestamp = null; if (localDataJSON) { try { const localDatiPeriziaObject = JSON.parse(localDataJSON); localDatiPeriziaTimestamp = localDatiPeriziaObject.timestamp ? new Date(localDatiPeriziaObject.timestamp) : null; } catch (e) { console.error(`SYNC - Errore parsing dati locali per targa ${targa}:`, e); } }  const sheetsRecordTimestamp = new Date(sheetPerizia.timestamp); if (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp) { console.log(`SYNC - Targa ${targa}: Dati Sheets più recenti (Sheets Record TS: ${sheetsRecordTimestamp}, Locale datiPerizia TS: ${localDatiPeriziaTimestamp || 'N/A'}). Aggiorno localStorage.`); try { localStorage.setItem(localDataKey, JSON.stringify(sheetPerizia.datiPerizia));  if (sheetPerizia.hasOwnProperty('posizione')) { savePosizioneForTarga(targa, sheetPerizia.posizione); } if (sheetPerizia.hasOwnProperty('urgente')) { saveUrgentStatusForTarga(targa, sheetPerizia.urgente); } if (sheetPerizia.hasOwnProperty('completata')) { if (sheetPerizia.completata) { markTargaAsCompleted(targa); } else { unmarkTargaAsCompleted(targa); } } updatedFromSheetsCount++; } catch (e) { console.error(`SYNC - Errore aggiornamento localStorage per targa ${targa} da Sheets:`, e); localUpdatesFailedCount++; } } else { console.log(`SYNC - Targa ${targa}: Dati locali più recenti o uguali. Nessun aggiornamento da Sheets.`); } } } console.log(`SYNC - Fase 2 completata. Aggiornate/Create localmente ${updatedFromSheetsCount} perizie da Sheets. Errori locali: ${localUpdatesFailedCount}`); syncToSheetsBtn.textContent = "Sinc (3/3 InvioSheets)..."; console.log("SYNC - Fase 3: Invio di tutte le perizie locali a Google Sheets."); let perizieLocaliKeys = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { perizieLocaliKeys.push(key); } } if (perizieLocaliKeys.length === 0 && updatedFromSheetsCount === 0 && localUpdatesFailedCount === 0) { alert("Nessuna perizia salvata localmente e nessuna novità da Sheets da sincronizzare."); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; return; } let successCount = 0; let errorCount = 0; let errorMessages = []; for (const key of perizieLocaliKeys) { const targa = key.substring(`${APP_PREFIX}data_`.length);  let datiPeriziaSalvatiLocalmente;  try { datiPeriziaSalvatiLocalmente = JSON.parse(localStorage.getItem(key)); } catch (e) { console.error(`SYNC - Errore parsing dati per targa ${targa} da localStorage per invio:`, e); errorCount++; errorMessages.push(`Targa ${targa}: Errore lettura dati locali per invio.`); continue; } if (!datiPeriziaSalvatiLocalmente || !datiPeriziaSalvatiLocalmente.timestamp) {  console.warn(`SYNC - Dati per targa ${targa} incompleti o senza timestamp (locale), skip invio a Sheets.`);  errorCount++;  errorMessages.push(`Targa ${targa}: Dati locali incompleti o timestamp mancante.`);  continue; } const periziaDaInviare = { targa: targa, posizione: loadPosizioneForTarga(targa) || "", urgente: loadUrgentStatusForTarga(targa) || false, completata: isTargaCompleted(targa), datiPerizia: datiPeriziaSalvatiLocalmente,  timestamp: datiPeriziaSalvatiLocalmente.timestamp  }; console.log(`SYNC - Invio targa ${targa} a Sheets...`); const result = await inviaPeriziaSingolaASheets(periziaDaInviare); if (result.success) { successCount++; if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) { console.log(`SYNC - Timestamp per ${targa} su Sheets (${result.data.timestamp}) è più recente del timestamp dei datiPerizia locali (${datiPeriziaSalvatiLocalmente.timestamp}). Aggiorno timestamp locale.`); datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp;  try { localStorage.setItem(key, JSON.stringify(datiPeriziaSalvatiLocalmente)); } catch (e) { console.error(`SYNC - Errore salvataggio timestamp aggiornato da server per ${targa}:`,e); } } } else { errorCount++; errorMessages.push(`Targa ${targa}: ${result.message || 'Errore sconosciuto durante invio.'}`); } } console.log("SYNC - Fase 3 completata."); let finalMessage = `Sincronizzazione completata.\n\n`; finalMessage += `FASE 1&2 (Sheets -> Locale):\n`; finalMessage += `- ${updatedFromSheetsCount} perizie locali aggiornate/create da Sheets.\n`; if (localUpdatesFailedCount > 0) finalMessage += `- Errori durante aggiornamento locale: ${localUpdatesFailedCount}.\n`;  finalMessage += `\nFASE 3 (Locale -> Sheets):\n`; finalMessage += `- ${successCount} perizie inviate con successo a Sheets.\n`; if (errorCount > 0) finalMessage += `- ${errorCount} perizie con errori durante l'invio.\n`; if (errorCount > 0 || localUpdatesFailedCount > 0) { finalMessage += "\n\nDETTAGLIO ERRORI (controllare console per info complete):\n" + errorMessages.join("\n"); } alert(finalMessage); syncToSheetsBtn.textContent = originalSyncButtonText;  syncToSheetsBtn.disabled = false; if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') {  popolaTargheFiltrate();  } }
+    
+    // --- MODIFICATA: fetchAllDataFromSheets ---
+    async function fetchAllDataFromSheets() { 
+        if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch di tutti i dati."); return { success: false, message: "URL Web App non configurato.", data: [] }; } 
+        const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?nocache=${new Date().getTime()}`;  
+        console.log("Fetching all perizie from Sheets. URL:", fetchUrl); 
+        try { 
+            const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); 
+            if (!response.ok) { 
+                const errorText = await response.text(); 
+                console.error(`Errore HTTP ${response.status} nel fetch di tutti i dati da Sheets: ${errorText}`); 
+                return { success: false, message: `Errore Sheets (${response.status}) nel recupero globale.`, data: [] }; 
+            } 
+            const contentType = response.headers.get("content-type"); 
+            if (contentType && contentType.indexOf("application/json") !== -1) { 
+                const result = await response.json(); 
+                if (Array.isArray(result)) {  
+                    console.log("Dati globali ricevuti da Sheets (array diretto):", result.length, "perizie."); 
+                    return { success: true, data: result, message: "Dati recuperati con successo." }; 
+                } else if (result && result.status === "success" && Array.isArray(result.data)) {  
+                    console.log("Dati globali ricevuti da Sheets (oggetto con .data):", result.data.length, "perizie."); 
+                    return { success: true, data: result.data, message: result.message || "Dati recuperati con successo."}; 
+                } else if (result && result.status === "notfound") {   
+                    console.log("Nessuna perizia trovata in Sheets (notfound).");  
+                    return { success: true, data: [], message: result.message || "Nessuna perizia trovata."}; 
+                } else { 
+                    console.warn("Risposta da Sheets (globale) non era un array o oggetto atteso:", result); 
+                    return { success: false, message: "Formato risposta globale non valido.", data: [] }; 
+                } 
+            } else { 
+                const textResponse = await response.text(); 
+                console.error("Risposta da Sheets (globale) non era JSON:", textResponse); 
+                return { success: false, message: "Errore formato risposta globale Sheets (non JSON).", data: [] }; 
+            } 
+        } catch (error) { 
+            console.error("Errore di rete o fetch generico durante il recupero globale da Sheets:", error); 
+            return { success: false, message: "Errore di rete recupero globale: " + error.message, data: [] }; 
+        } 
+    }
+
+    // --- MODIFICATA: syncAllLocalDataToSheets ---
+    async function syncAllLocalDataToSheets() {
+        const originalSyncButtonText = syncToSheetsBtn.textContent;
+        syncToSheetsBtn.disabled = true;
+        let updatedFromSheetsCount = 0;
+        let localUpdatesFailedCount = 0;
+        let sheetsDeletionsSuccessCount = 0;
+        let sheetsDeletionsFailedCount = 0;
+        let localToSheetsSuccessCount = 0;
+        let localToSheetsErrorCount = 0;
+        let errorMessages = [];
+
+        // FASE 0: Processa le cancellazioni locali da inviare a Sheets
+        syncToSheetsBtn.textContent = "Sinc (0/4 DelSheets)...";
+        console.log("SYNC - Fase 0: Processo cancellazioni per Google Sheets.");
+        let deletionRequests = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(`${APP_PREFIX}deleted_`)) {
+                const targaToDelete = key.substring(`${APP_PREFIX}deleted_`.length);
+                deletionRequests.push(targaToDelete);
+            }
+        }
+        if (deletionRequests.length > 0) {
+            for (const targa of deletionRequests) {
+                console.log(`SYNC - Tentativo di cancellazione targa ${targa} da Sheets...`);
+                const deleteUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=deletePerizia&targa=${encodeURIComponent(targa)}`;
+                try {
+                    const response = await fetch(deleteUrl, { method: 'POST', mode: 'cors', body: JSON.stringify({targa: targa})}); // il body è opzionale se action e targa sono in URL
+                    const result = await response.json();
+                    if (response.ok && result.status === "success") {
+                        console.log(`SYNC - Targa ${targa} cancellata con successo da Sheets.`);
+                        localStorage.removeItem(`${APP_PREFIX}deleted_${targa}`); // Rimuovi il flag locale SOLO se la cancellazione su sheet ha successo
+                        sheetsDeletionsSuccessCount++;
+                    } else {
+                        console.error(`SYNC - Errore cancellazione targa ${targa} da Sheets:`, result.message || response.statusText);
+                        sheetsDeletionsFailedCount++;
+                        errorMessages.push(`Targa ${targa} (Cancellazione Sheets): ${result.message || 'Errore sconosciuto'}`);
+                    }
+                } catch (error) {
+                    console.error(`SYNC - Errore di rete durante cancellazione targa ${targa} da Sheets:`, error);
+                    sheetsDeletionsFailedCount++;
+                    errorMessages.push(`Targa ${targa} (Cancellazione Sheets): Errore di rete - ${error.message}`);
+                }
+            }
+        }
+        console.log(`SYNC - Fase 0 completata. Cancellazioni Sheets: ${sheetsDeletionsSuccessCount} successi, ${sheetsDeletionsFailedCount} fallimenti.`);
+
+        // FASE 1: Recupero di tutti i dati da Google Sheets.
+        syncToSheetsBtn.textContent = "Sinc (1/4 RecSheets)...";
+        console.log("SYNC - Fase 1: Recupero di tutti i dati da Google Sheets.");
+        const sheetsResponse = await fetchAllDataFromSheets();
+        if (!sheetsResponse.success) {
+            alert(`Errore nel recupero dei dati da Sheets:\n${sheetsResponse.message}\nLa sincronizzazione potrebbe essere incompleta.`);
+            // Non interrompere del tutto, magari le cancellazioni sono andate a buon fine
+        }
+        const allSheetsData = sheetsResponse.data || []; 
+        console.log(`SYNC - Fase 1 completata. Ricevute ${allSheetsData.length} perizie da Sheets.`);
+
+        // FASE 2: Confronto dati Sheets con localStorage e aggiornamento locale.
+        syncToSheetsBtn.textContent = "Sinc (2/4 AggLoc)...";
+        console.log("SYNC - Fase 2: Confronto dati Sheets con localStorage e aggiornamento locale.");
+        if (allSheetsData.length > 0) {
+            for (const sheetPerizia of allSheetsData) {
+                if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) {
+                    console.warn("SYNC - Saltata perizia da Sheets per dati/timestamp mancanti:", sheetPerizia);
+                    continue;
+                }
+                const targa = sheetPerizia.targa.toUpperCase();
+
+                // NUOVO CONTROLLO: Se la targa è marcata per la cancellazione localmente, NON aggiornarla da Sheets
+                if (localStorage.getItem(`${APP_PREFIX}deleted_${targa}`)) {
+                    console.log(`SYNC - Targa ${targa} è marcata per la cancellazione localmente. Non verrà aggiornata da Sheets.`);
+                    continue; 
+                }
+
+                const localDataKey = `${APP_PREFIX}data_${targa}`;
+                const localDataJSON = localStorage.getItem(localDataKey);
+                let localDatiPeriziaTimestamp = null;
+                if (localDataJSON) {
+                    try {
+                        const localDatiPeriziaObject = JSON.parse(localDataJSON);
+                        localDatiPeriziaTimestamp = localDatiPeriziaObject.timestamp ? new Date(localDatiPeriziaObject.timestamp) : null;
+                    } catch (e) { console.error(`SYNC - Errore parsing dati locali per targa ${targa}:`, e); }
+                } 
+                const sheetsRecordTimestamp = new Date(sheetPerizia.timestamp); // Questo è il timestamp del record generale su Sheets
+                
+                // Confrontiamo il timestamp del record generale di Sheets con quello dei datiPerizia locali.
+                if (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp) {
+                    console.log(`SYNC - Targa ${targa}: Dati Sheets più recenti (Sheets Record TS: ${sheetsRecordTimestamp}, Locale datiPerizia TS: ${localDatiPeriziaTimestamp || 'N/A'}). Aggiorno localStorage.`);
+                    try {
+                        localStorage.setItem(localDataKey, JSON.stringify(sheetPerizia.datiPerizia)); 
+                        if (sheetPerizia.hasOwnProperty('posizione')) { savePosizioneForTarga(targa, sheetPerizia.posizione); }
+                        if (sheetPerizia.hasOwnProperty('urgente')) { saveUrgentStatusForTarga(targa, sheetPerizia.urgente); }
+                        if (sheetPerizia.hasOwnProperty('completata')) {
+                            if (sheetPerizia.completata) { markTargaAsCompleted(targa); } else { unmarkTargaAsCompleted(targa); }
+                        }
+                        updatedFromSheetsCount++;
+                    } catch (e) {
+                        console.error(`SYNC - Errore aggiornamento localStorage per targa ${targa} da Sheets:`, e);
+                        localUpdatesFailedCount++;
+                    }
+                } else {
+                    console.log(`SYNC - Targa ${targa}: Dati locali più recenti o uguali. Nessun aggiornamento da Sheets.`);
+                }
+            }
+        }
+        console.log(`SYNC - Fase 2 completata. Aggiornate/Create localmente ${updatedFromSheetsCount} perizie da Sheets. Errori locali: ${localUpdatesFailedCount}`);
+
+        // FASE 3: Invio di tutte le perizie locali (NON CANCELLATE) a Google Sheets.
+        syncToSheetsBtn.textContent = "Sinc (3/4 InvioSheets)...";
+        console.log("SYNC - Fase 3: Invio delle perizie locali a Google Sheets.");
+        let perizieLocaliKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(`${APP_PREFIX}data_`)) {
+                 const targaFromKey = key.substring(`${APP_PREFIX}data_`.length);
+                 // NUOVO CONTROLLO: Non inviare se marcata per cancellazione
+                 if (!localStorage.getItem(`${APP_PREFIX}deleted_${targaFromKey}`)) {
+                    perizieLocaliKeys.push(key);
+                 } else {
+                    console.log(`SYNC - Targa ${targaFromKey} marcata per cancellazione, non verrà inviata a Sheets.`);
+                 }
+            }
+        }
+
+        if (perizieLocaliKeys.length === 0 && updatedFromSheetsCount === 0 && localUpdatesFailedCount === 0 && deletionRequests.length === 0) {
+            alert("Nessuna operazione di sincronizzazione da eseguire (nessuna perizia locale, nessuna novità da Sheets, nessuna cancellazione in sospeso).");
+            syncToSheetsBtn.textContent = originalSyncButtonText; 
+            syncToSheetsBtn.disabled = false;
+            return;
+        }
+
+        for (const key of perizieLocaliKeys) {
+            const targa = key.substring(`${APP_PREFIX}data_`.length); 
+            let datiPeriziaSalvatiLocalmente; 
+            try {
+                datiPeriziaSalvatiLocalmente = JSON.parse(localStorage.getItem(key));
+            } catch (e) {
+                console.error(`SYNC - Errore parsing dati per targa ${targa} da localStorage per invio:`, e);
+                localToSheetsErrorCount++;
+                errorMessages.push(`Targa ${targa} (Invio Sheets): Errore lettura dati locali.`);
+                continue;
+            }
+            if (!datiPeriziaSalvatiLocalmente || !datiPeriziaSalvatiLocalmente.timestamp) { 
+                console.warn(`SYNC - Dati per targa ${targa} incompleti o senza timestamp (locale), skip invio a Sheets.`); 
+                localToSheetsErrorCount++; 
+                errorMessages.push(`Targa ${targa} (Invio Sheets): Dati locali incompleti o timestamp mancante.`); 
+                continue;
+            }
+            const periziaDaInviare = {
+                targa: targa,
+                posizione: loadPosizioneForTarga(targa) || "",
+                urgente: loadUrgentStatusForTarga(targa) || false,
+                completata: isTargaCompleted(targa),
+                datiPerizia: datiPeriziaSalvatiLocalmente, 
+                timestamp: datiPeriziaSalvatiLocalmente.timestamp 
+            };
+            console.log(`SYNC - Invio targa ${targa} a Sheets...`);
+            const result = await inviaPeriziaSingolaASheets(periziaDaInviare);
+            if (result.success) {
+                localToSheetsSuccessCount++;
+                // Aggiorna il timestamp locale se quello di Sheets è più recente (dopo un salvataggio riuscito)
+                if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) {
+                    console.log(`SYNC - Timestamp per ${targa} su Sheets (${result.data.timestamp}) è più recente del timestamp dei datiPerizia locali (${datiPeriziaSalvatiLocalmente.timestamp}). Aggiorno timestamp locale.`);
+                    datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp; 
+                    try { localStorage.setItem(key, JSON.stringify(datiPeriziaSalvatiLocalmente)); } catch (e) { console.error(`SYNC - Errore salvataggio timestamp aggiornato da server per ${targa}:`,e); }
+                }
+            } else {
+                localToSheetsErrorCount++;
+                errorMessages.push(`Targa ${targa} (Invio Sheets): ${result.message || 'Errore sconosciuto'}`);
+            }
+        }
+        console.log("SYNC - Fase 3 completata.");
+
+        syncToSheetsBtn.textContent = "Sinc (4/4 Fine)";
+        let finalMessage = `Sincronizzazione completata.\n\n`;
+        finalMessage += `CANCELLAZIONI (Locale -> Sheets):\n`;
+        finalMessage += `- ${sheetsDeletionsSuccessCount} perizie cancellate da Sheets.\n`;
+        if (sheetsDeletionsFailedCount > 0) finalMessage += `- ${sheetsDeletionsFailedCount} errori durante la cancellazione da Sheets.\n`;
+
+        finalMessage += `\nAGGIORNAMENTI (Sheets -> Locale):\n`;
+        finalMessage += `- ${updatedFromSheetsCount} perizie locali aggiornate/create da Sheets.\n`;
+        if (localUpdatesFailedCount > 0) finalMessage += `- Errori durante aggiornamento locale: ${localUpdatesFailedCount}.\n`; 
+
+        finalMessage += `\nINVIO DATI (Locale -> Sheets):\n`;
+        finalMessage += `- ${localToSheetsSuccessCount} perizie inviate/aggiornate con successo su Sheets.\n`;
+        if (localToSheetsErrorCount > 0) finalMessage += `- ${localToSheetsErrorCount} perizie con errori durante l'invio.\n`;
+        
+        if (errorMessages.length > 0) {
+            finalMessage += "\n\nDETTAGLIO ERRORI (controllare console per info complete):\n" + errorMessages.join("\n");
+        }
+        alert(finalMessage);
+        syncToSheetsBtn.textContent = originalSyncButtonText; 
+        syncToSheetsBtn.disabled = false;
+        if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') { 
+            popolaTargheFiltrate(); 
+        }
+         if (typeof populateSavedTargasList === 'function' && historyPageSection.style.display === 'block') {
+            populateSavedTargasList();
+        }
+    }
+
 
     document.addEventListener('DOMContentLoaded', () => {
-        // ... (Codice di creazione bottone syncToSheetsBtn e fill-defaults-btn invariato) ...
         const preloader = document.getElementById('preloader'); 
         syncToSheetsBtn = document.createElement('button');
         syncToSheetsBtn.id = 'syncToSheetsBtn';
@@ -1099,6 +1650,7 @@
              utilityNavButtons.insertBefore(syncToSheetsBtn, exitAppBtn); 
         }
         syncToSheetsBtn.addEventListener('click', syncAllLocalDataToSheets);
+        
         document.querySelectorAll('.fill-defaults-btn').forEach(button => {
             button.addEventListener('click', function() { 
                 const sectionId = this.dataset.sectionid; 
@@ -1120,23 +1672,17 @@
         });
         if (tipoTrazioneSelect) tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
         
-        // --- MODIFICATO: Event Listener per targaSwitcherDropdown ---
         if (targaSwitcherDropdown) {
             targaSwitcherDropdown.addEventListener('change', async function() {
                 const nuovaTargaSelezionata = this.value;
                 if (nuovaTargaSelezionata && nuovaTargaSelezionata.toUpperCase() !== (targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase() : null)) {
-                    
-                    // Memorizza la sezione attiva PRIMA di cambiare targa
-                    let currentActiveSectionId = 'remarketing'; // Default
+                    let currentActiveSectionId = 'remarketing'; 
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
                     if (activeSectionElement && activeSectionElement.id) {
                         currentActiveSectionId = activeSectionElement.id.replace('Section', '');
                     }
-                    
                     this.disabled = true;                     
-                    // Passa la sezione corrente a handleTargaSelectionAndSync
                     await handleTargaSelectionAndSync(nuovaTargaSelezionata, currentActiveSectionId); 
-                    // updateTargaDetailsDisplay è già chiamato da handleTargaSelectionAndSync -> showView/showSection
                     this.disabled = false; 
                 } else if (nuovaTargaSelezionata) {
                     updateTargaDetailsDisplay(nuovaTargaSelezionata);
@@ -1144,7 +1690,6 @@
             });
         }
 
-        // ... (Resto degli event listener e chiamata a initializeApplicationViewAndLoadData invariati) ...
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
         if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData);
