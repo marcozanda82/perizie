@@ -612,7 +612,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 0; 
+            padding: 0; /* MODIFICATO: Rimosso padding per gestione dinamica */
             margin: 0; 
             border: none; 
             border-radius: 0; 
@@ -620,19 +620,19 @@
         }
         #cameraStream {
             width: 100%;
-            height: 100%;
-            object-fit: cover; 
+            height: 100%; /* Occupa l'altezza del .camera-page-section */
+            object-fit: contain; /* MODIFICATO per centrare e mostrare tutto */
         }
         #freezeFrameDisplay { 
             display: none; 
             position: absolute;
-            top: 0;
+            top: 0; /* Si allinea con .camera-page-section */
             left: 0;
             width: 100%;
-            height: 100%;
-            object-fit: cover; 
+            height: 100%; /* Occupa l'altezza del .camera-page-section */
+            object-fit: contain; /* MODIFICATO per centrare e mostrare tutto */
             z-index: 2015; 
-            border: 4px solid #00bcd4; /* Bordo Ciano */
+            border: 4px solid #00bcd4; 
             box-sizing: border-box; 
         }
 
@@ -788,7 +788,8 @@
             </div>
         </div>
 
-        <div id="checklistContainer" style="display: none;"> <div id="remarketingSection" class="category-section">
+        <div id="checklistContainer" style="display: none;"> 
+            <div id="remarketingSection" class="category-section">
                 <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection">✓</button>
                 <h2 class="section-title">1. Foto Remarketing</h2>
                 <ul>
@@ -967,11 +968,9 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    // NUOVO: Variabili per lo swipe
     let touchstartX = 0;
     let touchendX = 0;
-    const swipeThreshold = 50; // Minima distanza in pixel per considerare uno swipe
-
+    const swipeThreshold = 50; 
     const sectionOrder = ['remarketing', 'pneumatici', 'danniVerifiche', 'riepilogo'];
 
 
@@ -1134,6 +1133,7 @@
 
     // START: Funzioni per la pagina Fotocamera
     async function showCameraPage() {
+        // Memorizza la vista/sezione corrente
         if (checklistContainer.style.display === 'block') {
             lastViewBeforeCamera = 'checklist';
             const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
@@ -1147,6 +1147,7 @@
         }
         console.log(`Prima della fotocamera: vista='${lastViewBeforeCamera}', sezione='${lastSectionBeforeCamera}'`);
 
+        // Nascondi le sezioni principali e mostra la fotocamera
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
@@ -1154,8 +1155,25 @@
         freezeFrameDisplayElement.style.display = 'none'; 
         cameraPageSection.style.display = 'flex'; 
         
+        // Gestisci visibilità elementi header
+        if(utilityNavButtons) utilityNavButtons.style.display = 'none';
+        if(mainTitleGlobal) mainTitleGlobal.style.display = 'none';
+        if(targaDropdownContainer) targaDropdownContainer.style.display = 'none';
+        if(navButtonsContainer) navButtonsContainer.style.display = 'none'; // Nasconde #navButtons che contiene #mainPageNavButtons
+
         pageHeaderContainer.classList.add('fixed-header'); 
-        document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight}px`; 
+        const headerCirclesDiv = document.querySelector('.header-circles');
+        if (headerCirclesDiv) { // Assicura che la pulsantiera circolare sia visibile
+             headerCirclesDiv.style.display = 'flex';
+             document.body.style.paddingTop = `${headerCirclesDiv.offsetHeight}px`;
+             cameraPageSection.style.paddingTop = `${headerCirclesDiv.offsetHeight}px`; // Sposta il contenuto sotto la barra
+             cameraPageSection.style.height = `calc(100% - ${headerCirclesDiv.offsetHeight}px)`;
+        } else {
+            document.body.style.paddingTop = '0px'; // Fallback se .header-circles non è trovato
+            cameraPageSection.style.paddingTop = '0px';
+            cameraPageSection.style.height = '100%';
+        }
+
 
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             const constraints = { 
@@ -1224,22 +1242,25 @@
         cameraPageSection.style.display = 'none';
         cameraStreamElement.style.display = 'block'; 
         freezeFrameDisplayElement.style.display = 'none'; 
+        cameraPageSection.style.paddingTop = '0px'; // Resetta il padding aggiunto
+        cameraPageSection.style.height = '100%';    // Resetta l'altezza
+
+
+        // Ripristina la visibilità degli elementi dell'header in base alla vista di destinazione
+        // La funzione showView() si occuperà di mostrare/nascondere gli elementi corretti
+        // e di ricalcolare il paddingTop del body.
 
         console.log(`Ritorno da fotocamera a: vista='${lastViewBeforeCamera}', sezione='${lastSectionBeforeCamera}'`);
 
         if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
-            showView('checklist');
+            showView('checklist'); // showView si occuperà di mostrare gli elementi corretti dell'header
             showSection(lastSectionBeforeCamera);
         } else if (lastViewBeforeCamera === 'history') {
             showView('history');
         } else { 
             showView('landing');
         }
-        if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
-            document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight + 10}px`;
-        } else {
-             document.body.style.paddingTop = `20px`;
-        }
+        // Non è necessario reimpostare padding-top del body qui, showView lo fa.
     }
 
     function getFilenameSectionName() {
@@ -1255,7 +1276,6 @@
                 case 'danniVerifiche':
                     sectionNameForFile = 'danni';
                     break;
-                // 'riepilogo' o altri valori di lastSectionBeforeCamera useranno 'generale'
             }
         }
         return sectionNameForFile;
@@ -1320,20 +1340,23 @@
         historyPageSection.style.display = 'none';
         if(cameraPageSection) cameraPageSection.style.display = 'none';
         
-        let bodyPaddingTopValue = '20px';
-        const headerCirclesDiv = document.querySelector('.header-circles'); 
+        // Ripristina la visibilità predefinita degli elementi dell'header
+        // Questi verranno poi sovrascritti selettivamente in base a viewName
+        if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
+        if(mainTitleGlobal) mainTitleGlobal.style.display = 'block';
+        if(targaDropdownContainer) targaDropdownContainer.style.display = 'none'; // Nascosto di default
+        if(navButtonsContainer) navButtonsContainer.style.display = 'none'; // Nascosto di default
+        const headerCirclesDiv = document.querySelector('.header-circles');
+        if(headerCirclesDiv) headerCirclesDiv.style.display = 'flex';
 
-        if (utilityNavButtons) utilityNavButtons.style.display = 'flex'; 
-        if (navButtonsContainer) navButtonsContainer.style.display = 'none'; 
-        if (mainTitleGlobal) mainTitleGlobal.style.display = 'block'; 
-        if (targaDropdownContainer) targaDropdownContainer.style.display = 'none'; 
-        if (targaDetailsDisplay) targaDetailsDisplay.textContent = ''; 
+
+        let bodyPaddingTopValue = '0px'; // Inizia da zero, poi calcola
 
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
-            if (headerCirclesDiv) headerCirclesDiv.style.display = 'flex';
             if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
+             if (navButtonsContainer) navButtonsContainer.style.display = 'none'; // Assicura che sia nascosto
             if (listaTargheCompleta.length > 0 &&
                 (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
                 typeof popolaTargheFiltrate === 'function') {
@@ -1342,7 +1365,6 @@
             updateNavButtonColors(); 
         } else if (viewName === 'checklist') {
             pageHeaderContainer.classList.add('fixed-header');
-            if (headerCirclesDiv) headerCirclesDiv.style.display = 'flex';
             if (navButtonsContainer) navButtonsContainer.style.display = 'flex'; 
             if (!targaSelezionataGlobalmente) { 
                 console.warn("Tentativo di mostrare checklist senza targa selezionata. Reindirizzamento a landing.");
@@ -1365,20 +1387,19 @@
             updateNavButtonColors(); 
         } else if (viewName === 'history') {
             pageHeaderContainer.classList.add('fixed-header');
-            if (headerCirclesDiv) headerCirclesDiv.style.display = 'flex';
             historyPageSection.style.display = 'block';
             if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
+            if (navButtonsContainer) navButtonsContainer.style.display = 'none';
             populateSavedTargasList();
             updateNavButtonColors();
-        } else { 
-            if (viewName !== 'camera') { 
-                 pageHeaderContainer.classList.remove('fixed-header');
-                 if (headerCirclesDiv) headerCirclesDiv.style.display = 'none'; 
-                 if (utilityNavButtons) utilityNavButtons.style.display = 'none';
-                 if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
-            }
+        } else if (viewName !== 'camera') { // Se non è camera e non è una vista gestita sopra
+             pageHeaderContainer.classList.remove('fixed-header');
+             if (headerCirclesDiv) headerCirclesDiv.style.display = 'none'; 
+             if (utilityNavButtons) utilityNavButtons.style.display = 'none';
+             if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
         }
 
+        // Calcola il padding del body dopo aver impostato la visibilità dell'header
         if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none' && (!cameraPageSection || cameraPageSection.style.display === 'none')) {
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
         } else if (!cameraPageSection || cameraPageSection.style.display === 'none') { 
@@ -1388,6 +1409,8 @@
             }
              bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
         }
+        
+        // Applica il padding solo se la camera non è attiva
         if (!cameraPageSection || cameraPageSection.style.display === 'none') {
             document.body.style.paddingTop = bodyPaddingTopValue;
         }
@@ -1977,12 +2000,13 @@
         }
     }
 
-    // Funzioni per la navigazione swipe
     function handleTouchStart(event) {
+        if (checklistContainer.style.display !== 'block') return; // Funziona solo nelle sezioni checklist
         touchstartX = event.changedTouches[0].screenX;
     }
 
     function handleTouchEnd(event) {
+        if (checklistContainer.style.display !== 'block') return;
         touchendX = event.changedTouches[0].screenX;
         handleSwipeGesture();
     }
@@ -1990,7 +2014,7 @@
     function handleSwipeGesture() {
         const deltaX = touchendX - touchstartX;
         if (Math.abs(deltaX) < swipeThreshold) {
-            return; // Non è uno swipe abbastanza lungo
+            return; 
         }
 
         const activeSectionElement = checklistContainer.querySelector('.category-section.active');
@@ -1999,7 +2023,7 @@
         const currentSectionId = activeSectionElement.id.replace('Section', '');
         const currentIndex = sectionOrder.indexOf(currentSectionId);
 
-        if (currentIndex === -1) return; // Sezione corrente non trovata nell'ordine
+        if (currentIndex === -1) return; 
 
         if (deltaX > 0) { // Swipe verso destra (vai a precedente)
             if (currentIndex > 0) {
@@ -2089,7 +2113,7 @@
         if (headerPhotosBtn) {
             headerPhotosBtn.addEventListener('click', () => {
                 console.log("Header Photos button clicked - apre URL Google Foto.");
-                 alert("L'apertura diretta della cartella Download locale non è possibile per motivi di sicurezza del browser. Questo pulsante apre Google Foto.");
+                 alert("L'apertura diretta della cartella Download locale non è possibile per motivi di sicurezza del browser. Questo pulsante apre un link esterno (es. Google Foto).");
                 window.open('https://photos.google.com', '_blank');
             });
         }
@@ -2126,10 +2150,9 @@
         if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
         if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera); 
 
-        // Aggiungi event listener per lo swipe
         if (checklistContainer) {
-            checklistContainer.addEventListener('touchstart', handleTouchStart, false);
-            checklistContainer.addEventListener('touchend', handleTouchEnd, false);
+            checklistContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
+            checklistContainer.addEventListener('touchend', handleTouchEnd, { passive: true });
         }
 
 
