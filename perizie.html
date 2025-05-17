@@ -163,11 +163,9 @@
         @keyframes glitchText {
             0%, 100% { text-shadow: 0 0 3px red, 0 0 5px blue, 0 0 1px white; transform: translateX(0) translateY(0) skewX(0deg); opacity: 1;}
             10% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-2px) translateY(1px) skewX(5deg); opacity: 0.8;}
-            /* ... (altri keyframes del glitchText) ... */
             90% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-1px) translateY(1px) skewX(1deg); opacity: 0.9;}
         }
 
-        /* Stili per l'effetto Flash Out sul testo finale */
         #exit-curtain.flash-out-effect .loading-text {
             color: #FFFFFF !important;
             text-shadow: none !important;
@@ -202,22 +200,21 @@
             }
         }
         
-        /* MODIFIED: Header Circles with Buttons */
         .header-circles { 
             display: flex; 
             justify-content: space-around; 
             align-items: center; 
             width: 100%; 
-            padding: 10px 0; /* Increased padding */
+            padding: 10px 0; 
             box-sizing: border-box; 
-            background-color: #2a2a2a; /* Darker background for contrast */
+            background-color: #2a2a2a; 
             border-bottom: 1px solid #444;
         }
         .circle-button {
-            width: 50px; /* Adjusted size */
-            height: 50px; /* Adjusted size */
-            background-color: #383838; /* Button background */
-            color: #e0e0e0; /* Icon color */
+            width: 50px; 
+            height: 50px; 
+            background-color: #383838; 
+            color: #e0e0e0; /* Default icon color */
             border: 1px solid #555;
             border-radius: 50%; 
             flex-shrink: 0;
@@ -225,8 +222,8 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            font-size: 1.4em; /* Icon size */
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease, color 0.3s ease;
+            font-size: 1.4em; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
         .circle-button:hover {
@@ -239,8 +236,20 @@
             transform: translateY(0px);
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-        .circle-button i { /* For Font Awesome icons */
-            line-height: 1; /* Helps center icon if needed */
+        .circle-button i { 
+            line-height: 1; 
+        }
+        /* Icone Colorate */
+        #headerExitBtn i { color: #dc3545; } /* Rosso */
+        #headerPhotosBtn i { color: #007bff; } /* Blu */
+        #headerPeriziaBtn i { color: #ffc107; } /* Arancione/Giallo */
+        #headerCameraBtn i { color: #28a745; } /* Verde */
+
+        #headerExitBtn:hover i,
+        #headerPhotosBtn:hover i,
+        #headerPeriziaBtn:hover i,
+        #headerCameraBtn:hover i {
+            color: #ffffff; /* Bianco su hover per contrasto */
         }
 
 
@@ -287,7 +296,7 @@
             margin-top: 3px; 
             text-align: center;
             min-height: 1.2em; 
-            line-height: 1.3; /* Aggiunto per migliore leggibilità */
+            line-height: 1.3; 
         }
         
         @media (min-width: 480px) { 
@@ -614,7 +623,7 @@
             height: 100%;
             object-fit: cover; 
         }
-        #freezeFrameDisplay { /* Stile per il freeze frame */
+        #freezeFrameDisplay { 
             display: none; 
             position: absolute;
             top: 0;
@@ -623,6 +632,8 @@
             height: 100%;
             object-fit: cover; 
             z-index: 2015; 
+            border: 4px solid #00bcd4; /* Bordo Ciano */
+            box-sizing: border-box; 
         }
 
         #captureBtn {
@@ -777,8 +788,7 @@
             </div>
         </div>
 
-        <div id="checklistContainer" style="display: none;">
-            <div id="remarketingSection" class="category-section">
+        <div id="checklistContainer" style="display: none;"> <div id="remarketingSection" class="category-section">
                 <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection">✓</button>
                 <h2 class="section-title">1. Foto Remarketing</h2>
                 <ul>
@@ -956,6 +966,14 @@
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
+
+    // NUOVO: Variabili per lo swipe
+    let touchstartX = 0;
+    let touchendX = 0;
+    const swipeThreshold = 50; // Minima distanza in pixel per considerare uno swipe
+
+    const sectionOrder = ['remarketing', 'pneumatici', 'danniVerifiche', 'riepilogo'];
+
 
     function updateTargaDetailsDisplay(selectedTarga) {
         if (!targaDetailsDisplay || !selectedTarga || !listaTargheCompleta.length) {
@@ -1225,7 +1243,7 @@
     }
 
     function getFilenameSectionName() {
-        let sectionNameForFile = "generale"; // Default
+        let sectionNameForFile = "generale"; 
         if (lastViewBeforeCamera === 'checklist' && lastSectionBeforeCamera) {
             switch (lastSectionBeforeCamera) {
                 case 'remarketing':
@@ -1237,7 +1255,7 @@
                 case 'danniVerifiche':
                     sectionNameForFile = 'danni';
                     break;
-                // Altri casi se necessario, altrimenti rimane 'generale'
+                // 'riepilogo' o altri valori di lastSectionBeforeCamera useranno 'generale'
             }
         }
         return sectionNameForFile;
@@ -1959,6 +1977,42 @@
         }
     }
 
+    // Funzioni per la navigazione swipe
+    function handleTouchStart(event) {
+        touchstartX = event.changedTouches[0].screenX;
+    }
+
+    function handleTouchEnd(event) {
+        touchendX = event.changedTouches[0].screenX;
+        handleSwipeGesture();
+    }
+
+    function handleSwipeGesture() {
+        const deltaX = touchendX - touchstartX;
+        if (Math.abs(deltaX) < swipeThreshold) {
+            return; // Non è uno swipe abbastanza lungo
+        }
+
+        const activeSectionElement = checklistContainer.querySelector('.category-section.active');
+        if (!activeSectionElement) return;
+
+        const currentSectionId = activeSectionElement.id.replace('Section', '');
+        const currentIndex = sectionOrder.indexOf(currentSectionId);
+
+        if (currentIndex === -1) return; // Sezione corrente non trovata nell'ordine
+
+        if (deltaX > 0) { // Swipe verso destra (vai a precedente)
+            if (currentIndex > 0) {
+                showSection(sectionOrder[currentIndex - 1]);
+            }
+        } else { // Swipe verso sinistra (vai a successivo)
+            if (currentIndex < sectionOrder.length - 1) {
+                showSection(sectionOrder[currentIndex + 1]);
+            }
+        }
+    }
+
+
     document.addEventListener('DOMContentLoaded', () => {
         const preloader = document.getElementById('preloader'); 
         syncToSheetsBtn = document.createElement('button');
@@ -2034,7 +2088,8 @@
         }
         if (headerPhotosBtn) {
             headerPhotosBtn.addEventListener('click', () => {
-                console.log("Header Photos button clicked");
+                console.log("Header Photos button clicked - apre URL Google Foto.");
+                 alert("L'apertura diretta della cartella Download locale non è possibile per motivi di sicurezza del browser. Questo pulsante apre Google Foto.");
                 window.open('https://photos.google.com', '_blank');
             });
         }
@@ -2070,6 +2125,12 @@
 
         if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
         if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera); 
+
+        // Aggiungi event listener per lo swipe
+        if (checklistContainer) {
+            checklistContainer.addEventListener('touchstart', handleTouchStart, false);
+            checklistContainer.addEventListener('touchend', handleTouchEnd, false);
+        }
 
 
         async function initializeApplicationViewAndLoadData() {
