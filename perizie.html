@@ -383,9 +383,17 @@
         #navButtons button, .action-button { 
              padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-size: 0.9em;
         }
+        .action-button:disabled { /* Stile per pulsanti action disabilitati */
+            background-color: #6c757d !important;
+            border-color: #5a6268 !important;
+            color: #cccccc !important;
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
         .save-and-next-btn { background-color: #0069d9 !important; border-color: #005cbf !important; }
         .save-and-next-btn:hover { background-color: #0056b3 !important; border-color: #004085 !important; }
-        #navButtons button:hover, .action-button:hover { background-color: #0056b3; border-color: #004085; }
+        #navButtons button:hover, .action-button:hover:not(:disabled) { background-color: #0056b3; border-color: #004085; } /* Evita hover su disabilitato */
+
 
         @keyframes activeButtonGlow {
             0% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
@@ -1090,6 +1098,7 @@
             </div>
             <div id="riepilogoSection" class="category-section">
                 <h2 class="section-title">Riepilogo Perizia</h2>
+                <button id="downloadServerZipBtn" class="action-button" style="position: absolute; top: 20px; right: 20px; display: none;">Scarica Foto</button>
                 <div id="summaryContent"><p><em>Compila le sezioni precedenti...</em></p></div>
                 <button id="saveAndReturnBtn" class="action-button" style="background-color: #28a745; border-color: #1e7e34; margin-top: 15px;">Salva Perizia e Foto</button>
             </div>
@@ -1176,8 +1185,11 @@
     
     const imageLightbox = document.getElementById('imageLightbox');
     const lightboxImage = document.getElementById('lightboxImage');
-    const closeLightboxBtnElem = document.getElementById('closeLightboxBtn'); // Rinominato per evitare conflitto
+    const closeLightboxBtnElem = document.getElementById('closeLightboxBtn'); 
     let currentLightboxImageObjectUrl = null;
+
+    // Pulsante per scaricare ZIP da server
+    const downloadServerZipBtn = document.getElementById('downloadServerZipBtn');
 
 
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
@@ -2537,7 +2549,48 @@
     }
 
     function getSelectText(selectElementOrId) { const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId; if (el && el.tagName === 'SELECT' && el.value !== "") { if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) { return el.options[el.selectedIndex].text; } return el.value;  } return "N/S";  }
-    function generateSummary() { summaryContent.innerHTML = ''; let targa = targaSelezionataGlobalmente || "N/D"; function createSummaryItem(label, value, isAnomaly = false) { const itemDiv = document.createElement('div'); itemDiv.classList.add('summary-item'); if (isAnomaly) itemDiv.classList.add('summary-anomaly'); itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; return itemDiv; } summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase())); if (targaSelezionataGlobalmente) { const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); let marcaVeicolo = "N/D", modelloVeicolo = "N/D"; if (veicoloAttuale) { marcaVeicolo = veicoloAttuale.marca || "N/D"; modelloVeicolo = veicoloAttuale.modello || "N/D"; } summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D")); const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente); summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary)); } else {  summaryContent.appendChild(createSummaryItem("Marca", "N/D")); summaryContent.appendChild(createSummaryItem("Modello", "N/D")); summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); } summaryContent.innerHTML += `<h3>Remarketing:</h3>`; const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; const isEV = tipoTrazioneValue === 'elettrico'; summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect))); let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza'); let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante"); summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante")); summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia)); let kmStato = getSelectText('stato_chilometri'); summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); let cdcStato = getSelectText('stato_cdc'); summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente")); summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente")); if (isEV) { summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`; let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente")); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente")); } summaryContent.innerHTML += `<h3>Pneumatici:</h3>`; const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }]; pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); }); summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`; summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK')); summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK')); const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : ""; if (noteDanniValue) { const noteDiv = document.createElement('div'); noteDiv.classList.add('summary-item', 'summary-notes'); const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: "; const contentDiv = document.createElement('div'); contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue; noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv); summaryContent.appendChild(noteDiv); } }
+    
+    function generateSummary() { 
+        summaryContent.innerHTML = ''; 
+        let targa = targaSelezionataGlobalmente || "N/D"; 
+        function createSummaryItem(label, value, isAnomaly = false) { const itemDiv = document.createElement('div'); itemDiv.classList.add('summary-item'); if (isAnomaly) itemDiv.classList.add('summary-anomaly'); itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; return itemDiv; } 
+        summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase())); 
+        if (targaSelezionataGlobalmente) { const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); let marcaVeicolo = "N/D", modelloVeicolo = "N/D"; if (veicoloAttuale) { marcaVeicolo = veicoloAttuale.marca || "N/D"; modelloVeicolo = veicoloAttuale.modello || "N/D"; } summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D")); const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente); summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary)); } else {  summaryContent.appendChild(createSummaryItem("Marca", "N/D")); summaryContent.appendChild(createSummaryItem("Modello", "N/D")); summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); } 
+        summaryContent.innerHTML += `<h3>Remarketing:</h3>`; 
+        const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; 
+        const isEV = tipoTrazioneValue === 'elettrico'; 
+        summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect))); 
+        let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza'); 
+        let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante"); 
+        summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante")); 
+        summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia)); 
+        let kmStato = getSelectText('stato_chilometri'); 
+        summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); 
+        let cdcStato = getSelectText('stato_cdc'); 
+        summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); 
+        summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente")); 
+        summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente")); 
+        if (isEV) { summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`; let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente")); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente")); } 
+        summaryContent.innerHTML += `<h3>Pneumatici:</h3>`; 
+        const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }]; 
+        pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); }); 
+        summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`; 
+        summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK')); 
+        summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK')); 
+        const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : ""; 
+        if (noteDanniValue) { const noteDiv = document.createElement('div'); noteDiv.classList.add('summary-item', 'summary-notes'); const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: "; const contentDiv = document.createElement('div'); contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue; noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv); summaryContent.appendChild(noteDiv); }
+
+        // Gestione del pulsante Scarica Foto ZIP da server
+        if (downloadServerZipBtn) {
+            if (targaSelezionataGlobalmente && isTargaCompleted(targaSelezionataGlobalmente)) {
+                downloadServerZipBtn.disabled = false;
+                downloadServerZipBtn.style.display = 'inline-block'; 
+            } else {
+                downloadServerZipBtn.disabled = true;
+                downloadServerZipBtn.style.display = 'inline-block'; // Mostra sempre il pulsante, ma disabilitato
+            }
+        }
+    }
     
     async function fetchAllDataFromSheets() { 
         if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch di tutti i dati."); return { success: false, message: "URL Web App non configurato.", data: [] }; } 
@@ -3079,6 +3132,20 @@
             galleryPageSection.addEventListener('touchend', handleTouchEnd, { passive: true });
         }
         
+        // Event listener per il nuovo pulsante Scarica Foto ZIP da server
+        if (downloadServerZipBtn) {
+            downloadServerZipBtn.addEventListener('click', function() {
+                if (!this.disabled && targaSelezionataGlobalmente) {
+                    const targaUpper = targaSelezionataGlobalmente.toUpperCase();
+                    // L'URL fornito è http://192.168.1.154:8080/TARGA.zip
+                    // La targa non necessita di ulteriore sanitizzazione per questo specifico URL secondo l'esempio.
+                    const downloadUrl = `http://192.168.1.154:8080/${targaUpper}.zip`;
+                    console.log(`Tentativo di download ZIP da server: ${downloadUrl}`);
+                    window.open(downloadUrl, '_blank'); // Apre in una nuova scheda per avviare il download
+                }
+            });
+        }
+
         initializeApplicationViewAndLoadData(); 
         
         if (mainExitAppBtn) { 
