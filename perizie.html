@@ -214,7 +214,7 @@
             width: 50px; 
             height: 50px; 
             background-color: #383838; 
-            color: #e0e0e0; /* Default icon color */
+            color: #e0e0e0; 
             border: 1px solid #555;
             border-radius: 50%; 
             flex-shrink: 0;
@@ -239,17 +239,16 @@
         .circle-button i { 
             line-height: 1; 
         }
-        /* Icone Colorate */
-        #headerExitBtn i { color: #dc3545; } /* Rosso */
-        #headerPhotosBtn i { color: #007bff; } /* Blu */
-        #headerPeriziaBtn i { color: #ffc107; } /* Arancione/Giallo */
-        #headerCameraBtn i { color: #28a745; } /* Verde */
+        #headerExitBtn i { color: #dc3545; } 
+        #headerPhotosBtn i { color: #007bff; } 
+        #headerPeriziaBtn i { color: #ffc107; } 
+        #headerCameraBtn i { color: #28a745; } 
 
         #headerExitBtn:hover i,
         #headerPhotosBtn:hover i,
         #headerPeriziaBtn:hover i,
         #headerCameraBtn:hover i {
-            color: #ffffff; /* Bianco su hover per contrasto */
+            color: #ffffff; 
         }
 
 
@@ -556,7 +555,6 @@
         .targa-list-item.status-parziale .targa-col-posizione input.posizione-input { background-color: #ffe082; color: #212529; border-color: #ffc107; }
         .targa-list-item.status-parziale .targa-col-urgenza input[type="checkbox"] { accent-color: #b8860b; }
 
-        /* NUOVO CSS PER TARGE CANCELLATE LOCALMENTE */
         .targa-list-item.locally-deleted {
             opacity: 0.5;
             background-color: #404040 !important; 
@@ -612,27 +610,28 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 0; /* MODIFICATO: Rimosso padding per gestione dinamica */
+            padding-top: 0; /* Sarà impostato dinamicamente da JS */
             margin: 0; 
             border: none; 
             border-radius: 0; 
             max-width: none; 
+            box-sizing: border-box; /* Importante per il padding-top */
         }
         #cameraStream {
             width: 100%;
-            height: 100%; /* Occupa l'altezza del .camera-page-section */
-            object-fit: contain; /* MODIFICATO per centrare e mostrare tutto */
+            height: 100%; 
+            object-fit: contain; /* MODIFICATO */
         }
         #freezeFrameDisplay { 
             display: none; 
             position: absolute;
-            top: 0; /* Si allinea con .camera-page-section */
+            top: 0; 
             left: 0;
             width: 100%;
-            height: 100%; /* Occupa l'altezza del .camera-page-section */
-            object-fit: contain; /* MODIFICATO per centrare e mostrare tutto */
+            height: 100%; 
+            object-fit: contain; /* MODIFICATO */
             z-index: 2015; 
-            border: 4px solid #00bcd4; 
+            border: 8px solid #00bcd4; /* MODIFICATO: Bordo raddoppiato */
             box-sizing: border-box; 
         }
 
@@ -1133,7 +1132,6 @@
 
     // START: Funzioni per la pagina Fotocamera
     async function showCameraPage() {
-        // Memorizza la vista/sezione corrente
         if (checklistContainer.style.display === 'block') {
             lastViewBeforeCamera = 'checklist';
             const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
@@ -1147,7 +1145,6 @@
         }
         console.log(`Prima della fotocamera: vista='${lastViewBeforeCamera}', sezione='${lastSectionBeforeCamera}'`);
 
-        // Nascondi le sezioni principali e mostra la fotocamera
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
@@ -1155,23 +1152,25 @@
         freezeFrameDisplayElement.style.display = 'none'; 
         cameraPageSection.style.display = 'flex'; 
         
-        // Gestisci visibilità elementi header
+        // Nascondi elementi specifici dell'header, lascia .header-circles
         if(utilityNavButtons) utilityNavButtons.style.display = 'none';
         if(mainTitleGlobal) mainTitleGlobal.style.display = 'none';
         if(targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-        if(navButtonsContainer) navButtonsContainer.style.display = 'none'; // Nasconde #navButtons che contiene #mainPageNavButtons
+        if(navButtonsContainer) navButtonsContainer.style.display = 'none'; // Questo è #navButtons
 
         pageHeaderContainer.classList.add('fixed-header'); 
         const headerCirclesDiv = document.querySelector('.header-circles');
-        if (headerCirclesDiv) { // Assicura che la pulsantiera circolare sia visibile
-             headerCirclesDiv.style.display = 'flex';
+        if (headerCirclesDiv) {
+             headerCirclesDiv.style.display = 'flex'; // Assicurati che sia visibile
+             // Adatta il padding del body e il padding-top della cameraPageSection
+             // per tenere conto solo dell'altezza di header-circles
              document.body.style.paddingTop = `${headerCirclesDiv.offsetHeight}px`;
-             cameraPageSection.style.paddingTop = `${headerCirclesDiv.offsetHeight}px`; // Sposta il contenuto sotto la barra
-             cameraPageSection.style.height = `calc(100% - ${headerCirclesDiv.offsetHeight}px)`;
+             cameraPageSection.style.paddingTop = `${headerCirclesDiv.offsetHeight}px`;
+             cameraPageSection.style.height = `calc(100% - ${headerCirclesDiv.offsetHeight}px)`; // Altezza dinamica
         } else {
-            document.body.style.paddingTop = '0px'; // Fallback se .header-circles non è trovato
-            cameraPageSection.style.paddingTop = '0px';
-            cameraPageSection.style.height = '100%';
+            document.body.style.paddingTop = '0px'; 
+            cameraPageSection.style.paddingTop = `0px`; 
+            cameraPageSection.style.height = `100%`;
         }
 
 
@@ -1242,25 +1241,22 @@
         cameraPageSection.style.display = 'none';
         cameraStreamElement.style.display = 'block'; 
         freezeFrameDisplayElement.style.display = 'none'; 
-        cameraPageSection.style.paddingTop = '0px'; // Resetta il padding aggiunto
-        cameraPageSection.style.height = '100%';    // Resetta l'altezza
+        // Resetta padding e altezza della cameraPageSection ai valori di default del CSS
+        cameraPageSection.style.paddingTop = ''; 
+        cameraPageSection.style.height = '';    
 
-
-        // Ripristina la visibilità degli elementi dell'header in base alla vista di destinazione
-        // La funzione showView() si occuperà di mostrare/nascondere gli elementi corretti
-        // e di ricalcolare il paddingTop del body.
 
         console.log(`Ritorno da fotocamera a: vista='${lastViewBeforeCamera}', sezione='${lastSectionBeforeCamera}'`);
 
         if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
-            showView('checklist'); // showView si occuperà di mostrare gli elementi corretti dell'header
+            showView('checklist'); 
             showSection(lastSectionBeforeCamera);
         } else if (lastViewBeforeCamera === 'history') {
             showView('history');
         } else { 
             showView('landing');
         }
-        // Non è necessario reimpostare padding-top del body qui, showView lo fa.
+        // showView si occuperà di ripristinare il padding del body corretto
     }
 
     function getFilenameSectionName() {
@@ -1340,23 +1336,24 @@
         historyPageSection.style.display = 'none';
         if(cameraPageSection) cameraPageSection.style.display = 'none';
         
-        // Ripristina la visibilità predefinita degli elementi dell'header
-        // Questi verranno poi sovrascritti selettivamente in base a viewName
-        if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
-        if(mainTitleGlobal) mainTitleGlobal.style.display = 'block';
-        if(targaDropdownContainer) targaDropdownContainer.style.display = 'none'; // Nascosto di default
-        if(navButtonsContainer) navButtonsContainer.style.display = 'none'; // Nascosto di default
         const headerCirclesDiv = document.querySelector('.header-circles');
-        if(headerCirclesDiv) headerCirclesDiv.style.display = 'flex';
+        // Ripristina la visibilità standard degli elementi dell'header per le viste non-camera
+        if (viewName !== 'camera') {
+            if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
+            if(mainTitleGlobal) mainTitleGlobal.style.display = 'block';
+            if(targaDropdownContainer) targaDropdownContainer.style.display = 'none'; 
+            if(navButtonsContainer) navButtonsContainer.style.display = 'none'; 
+            if(headerCirclesDiv) headerCirclesDiv.style.display = 'flex';
+        }
 
 
-        let bodyPaddingTopValue = '0px'; // Inizia da zero, poi calcola
+        let bodyPaddingTopValue = '0px'; 
 
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
             if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
-             if (navButtonsContainer) navButtonsContainer.style.display = 'none'; // Assicura che sia nascosto
+             if (navButtonsContainer) navButtonsContainer.style.display = 'none'; 
             if (listaTargheCompleta.length > 0 &&
                 (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
                 typeof popolaTargheFiltrate === 'function') {
@@ -1392,26 +1389,24 @@
             if (navButtonsContainer) navButtonsContainer.style.display = 'none';
             populateSavedTargasList();
             updateNavButtonColors();
-        } else if (viewName !== 'camera') { // Se non è camera e non è una vista gestita sopra
+        } else if (viewName !== 'camera') { 
              pageHeaderContainer.classList.remove('fixed-header');
              if (headerCirclesDiv) headerCirclesDiv.style.display = 'none'; 
              if (utilityNavButtons) utilityNavButtons.style.display = 'none';
              if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
         }
 
-        // Calcola il padding del body dopo aver impostato la visibilità dell'header
-        if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none' && (!cameraPageSection || cameraPageSection.style.display === 'none')) {
-            bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
-        } else if (!cameraPageSection || cameraPageSection.style.display === 'none') { 
-            let nonFixedHeaderHeight = 0;
-            if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {
-                 nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
+        // Calcola il padding del body SOLO se non siamo in modalità camera
+        if (viewName !== 'camera') {
+            if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
+                bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
+            } else {
+                let nonFixedHeaderHeight = 0;
+                if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {
+                    nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
+                }
+                bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
             }
-             bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
-        }
-        
-        // Applica il padding solo se la camera non è attiva
-        if (!cameraPageSection || cameraPageSection.style.display === 'none') {
             document.body.style.paddingTop = bodyPaddingTopValue;
         }
         window.scrollTo(0, 0);
@@ -2001,7 +1996,7 @@
     }
 
     function handleTouchStart(event) {
-        if (checklistContainer.style.display !== 'block') return; // Funziona solo nelle sezioni checklist
+        if (checklistContainer.style.display !== 'block') return; 
         touchstartX = event.changedTouches[0].screenX;
     }
 
@@ -2025,11 +2020,11 @@
 
         if (currentIndex === -1) return; 
 
-        if (deltaX > 0) { // Swipe verso destra (vai a precedente)
+        if (deltaX > 0) { 
             if (currentIndex > 0) {
                 showSection(sectionOrder[currentIndex - 1]);
             }
-        } else { // Swipe verso sinistra (vai a successivo)
+        } else { 
             if (currentIndex < sectionOrder.length - 1) {
                 showSection(sectionOrder[currentIndex + 1]);
             }
