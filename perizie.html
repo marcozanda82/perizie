@@ -878,7 +878,7 @@
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
-    const cameraPageSection = document.getElementById('cameraPageSection'); 
+    const cameraPageSection = document.getElementById('cameraPageSection'); // Nuova sezione fotocamera
     const cameraStreamElement = document.getElementById('cameraStream');
     const captureBtn = document.getElementById('captureBtn');
     const closeCameraBtn = document.getElementById('closeCameraBtn');
@@ -891,6 +891,7 @@
     const savedTargasListContainer = document.getElementById('savedTargasListContainer');
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
+    // const headerCircles = pageHeaderContainer.querySelector('.header-circles'); // Now directly targeted by ID if needed
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const targaDropdownContainer = document.getElementById('targaDropdownContainer');
     const targaSwitcherDropdown = document.getElementById('targaSwitcherDropdown');
@@ -904,9 +905,10 @@
     
     const backToListBtn = utilityNavButtons.querySelector('#backToListBtn');
     const historyBtn = utilityNavButtons.querySelector('#historyBtn');
-    const mainExitAppBtn = utilityNavButtons.querySelector('#exitAppBtn'); 
+    const mainExitAppBtn = utilityNavButtons.querySelector('#exitAppBtn'); // Renamed to avoid conflict
     let syncToSheetsBtn; 
     
+    // NEW: Header Circle Buttons
     const headerExitBtn = document.getElementById('headerExitBtn');
     const headerPhotosBtn = document.getElementById('headerPhotosBtn');
     const headerPeriziaBtn = document.getElementById('headerPeriziaBtn');
@@ -929,7 +931,7 @@
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
-    const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
+    const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`; // For "Perizia" button
 
     function updateTargaDetailsDisplay(selectedTarga) {
         if (!targaDetailsDisplay || !selectedTarga || !listaTargheCompleta.length) {
@@ -962,7 +964,7 @@
             return;
         }
         const piazzaleCorrente = veicoloAttuale.piazzale;
-        const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente && !localStorage.getItem(`${APP_PREFIX}deleted_${v.targa.toUpperCase()}`)); 
+        const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente && !localStorage.getItem(`${APP_PREFIX}deleted_${v.targa.toUpperCase()}`)); // Escludi cancellate
         targaSwitcherDropdown.innerHTML = ''; 
         if (targheDelPiazzale.length === 0) {
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
@@ -1113,18 +1115,57 @@
         document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight}px`; 
 
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            const constraints = {
+                video: {
+                    facingMode: "environment",
+                    advanced: [{ focusMode: "continuous" }]
+                },
+                audio: false
+            };
+
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 cameraStreamElement.srcObject = stream;
                 currentCameraStream = stream;
+
+                // Prova ad applicare i vincoli dopo aver ottenuto lo stream, per alcuni browser/fotocamere
+                const videoTrack = stream.getVideoTracks()[0];
+                if (videoTrack && typeof videoTrack.applyConstraints === 'function') {
+                    try {
+                        await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+                        console.log("Vincolo focusMode 'continuous' applicato con successo (via applyConstraints).");
+                    } catch (e) {
+                        console.warn("Impossibile applicare focusMode 'continuous' via applyConstraints:", e);
+                        // Tentativo con 'auto' se 'continuous' non è supportato
+                        try {
+                            await videoTrack.applyConstraints({ advanced: [{ focusMode: 'auto' }] });
+                            console.log("Vincolo focusMode 'auto' applicato con successo (via applyConstraints).");
+                        } catch (e2) {
+                            console.warn("Impossibile applicare focusMode 'auto' via applyConstraints:", e2);
+                        }
+                    }
+                } else {
+                     console.log("Autofocus (focusMode: continuous) richiesto in initial constraints.");
+                }
+
             } catch (err) {
-                console.error("Errore accesso fotocamera:", err);
-                alert("Impossibile accedere alla fotocamera: " + err.message);
-                returnFromCamera(); // Usa la nuova funzione per tornare indietro
+                console.error("Errore accesso fotocamera con focusMode 'continuous':", err);
+                // Fallback: prova senza il vincolo advanced focusMode se il primo tentativo fallisce
+                try {
+                    console.log("Tentativo di fallback senza focusMode avanzato...");
+                    const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+                    cameraStreamElement.srcObject = fallbackStream;
+                    currentCameraStream = fallbackStream;
+                    console.log("Accesso fotocamera riuscito in fallback (senza focusMode avanzato).");
+                } catch (fallbackErr) {
+                    console.error("Errore accesso fotocamera anche in fallback:", fallbackErr);
+                    alert("Impossibile accedere alla fotocamera: " + fallbackErr.message);
+                    returnFromCamera();
+                }
             }
         } else {
             alert("Il tuo browser non supporta l'accesso alla fotocamera.");
-            returnFromCamera(); // Usa la nuova funzione per tornare indietro
+            returnFromCamera();
         }
         window.scrollTo(0, 0);
     }
@@ -1147,12 +1188,10 @@
         } else { // Default to landing
             showView('landing');
         }
-        // Ripristina il padding del body, showView dovrebbe già gestirlo correttamente
-        // ma è bene assicurarsi che l'header non causi problemi di layout
         if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
             document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight + 10}px`;
         } else {
-             document.body.style.paddingTop = `20px`; // o un valore di default
+             document.body.style.paddingTop = `20px`;
         }
     }
 
@@ -1172,8 +1211,7 @@
             if (targaSelezionataGlobalmente) {
                 filename = `foto_${targaSelezionataGlobalmente}`;
             }
-            // Aggiungi un timestamp al nome del file per renderlo unico
-            const timestamp = new Date().toISOString().replace(/[:.-]/g, '').replace('T', '_').substring(0, 15); // YYYYMMDD_HHMMSS
+            const timestamp = new Date().toISOString().replace(/[:.-]/g, '').replace('T', '_').substring(0, 15);
             filename += `_${timestamp}.png`;
             
             link.download = filename;
