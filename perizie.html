@@ -888,6 +888,28 @@
         }
         /* END: Stili per Lightbox Immagine */
 
+        /* NUOVO: Stili per il pulsante Scarica Foto nel Riepilogo */
+        #riepilogoSection {
+            position: relative; /* Necessario per posizionare il pulsante Scarica Foto */
+        }
+
+        #downloadPhotosBtnRipielogo {
+            position: absolute;
+            top: 20px; /* Allineato con .fill-defaults-btn se presente, o regolare per allineamento con titolo */
+            right: 20px;
+            background-color: #17a2b8; /* Blu info, o altro colore a scelta */
+            border-color: #117a8b;
+            /* display: none; verrà gestito da JavaScript */
+        }
+
+        #downloadPhotosBtnRipielogo:disabled {
+            background-color: #546e7a; /* Grigio quando disabilitato */
+            border-color: #455a64;
+            color: #90a4ae;
+            cursor: not-allowed;
+        }
+        /* FINE NUOVO: Stili per il pulsante Scarica Foto */
+
 
         @media (max-width: 768px) {
             .content-wrapper { margin-top: 0; }
@@ -915,6 +937,7 @@
             #sheetFilterContainer label { margin-bottom: 5px; margin-right: 0; text-align: left;}
             #sheetFilterDropdown { width: 100%; }
             .fill-defaults-btn { top: 15px; right: 15px; width: 30px; height: 30px; font-size: 1.2em; }
+            #downloadPhotosBtnRipielogo {top: 15px; right: 15px; padding: 6px 10px; font-size: 0.8em;}
             /* Modifiche #captureBtn per mobile se necessario, ma lo stile base è già responsive */
             #captureBtn { bottom: 20px; width: 60px; height: 60px; border-width: 4px;}
             #closeCameraBtn { bottom: 15px; right: 15px; width: 40px; height: 40px; font-size: 1.6em; line-height: 38px;}
@@ -932,6 +955,7 @@
             .modal-content { width: 95%; padding: 15px; }
             .modal-content h2 {font-size: 1.3em;}
             #captureBtn { width: 56px; height: 56px; border-width: 3px; bottom: 15px;}
+            #downloadPhotosBtnRipielogo {font-size: 0.75em; padding: 5px 8px;}
         }
     </style>
 </head>
@@ -1121,9 +1145,10 @@
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Vai al Riepilogo</button></div>
             </div>
             <div id="riepilogoSection" class="category-section">
+                <button id="downloadPhotosBtnRipielogo" class="action-button" style="display: none;">Scarica Foto</button>
                 <h2 class="section-title">Riepilogo Perizia</h2>
                 <div id="summaryContent"><p><em>Compila le sezioni precedenti...</em></p></div>
-                <button id="saveAndReturnBtn" class="action-button" style="background-color: #28a745; border-color: #1e7e34; margin-top: 15px;">Salva Perizia e Foto</button>
+                <button id="saveAndReturnBtn" class="action-button" style="background-color: #28a745; border-color: #1e7e34; margin-top: 15px;">Salva Perizia</button>
             </div>
         </div>
 
@@ -1506,15 +1531,41 @@
     function loadProgress(targa) { if(!targa) return; const targaUpper = targa.toUpperCase(); try { const json = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`); if (json) { const data = JSON.parse(json); document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => { if (el.id && data.hasOwnProperty(el.id)) { if (el.type === 'checkbox') el.checked = data[el.id]; else el.value = data[el.id]; } else if (el.id) {  if (el.type === 'checkbox') el.checked = false; else if (el.tagName === 'SELECT') el.selectedIndex = 0; } }); console.log(`Progresso caricato da localStorage per la targa ${targaUpper}. Timestamp: ${data.timestamp || 'N/A'}`); } else { console.log(`Nessun dato salvato in localStorage trovato per la targa ${targaUpper}. Reset form.`); resetChecklistForm();  } if (tipoTrazioneSelect) {   handleTrazioneChange(); } updateNavButtonColors();  } catch(e) { console.error("Errore durante il caricamento da localStorage:", e); resetChecklistForm();  updateNavButtonColors(); } }
     function getCompletedTarghe() { try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){console.error("Errore LS getCompletedTarghe:", e); return{};}}
     function isTargaCompleted(targa) { if(!targa) return false; const completed = getCompletedTarghe(); return !!(completed[targa.toUpperCase()]); }
-    function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa.toUpperCase()]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa.toUpperCase()} marked complete locally.`);}catch(e){console.error("Errore LS Mark Err:",e);}}
-    function unmarkTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe(); if(completed[targa.toUpperCase()]){ delete completed[targa.toUpperCase()]; localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed)); console.log(`${targa.toUpperCase()} unmarked as complete locally.`);}}catch(e){console.error("Errore LS Unmark Err:",e);}}
+    
+    function markTargaAsCompleted(targa) {
+        if(!targa)return;
+        try {
+            const completed=getCompletedTarghe();
+            completed[targa.toUpperCase()]=true;
+            localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));
+            console.log(`${targa.toUpperCase()} marked complete locally.`);
+            if (document.getElementById('riepilogoSection').classList.contains('active') && targa.toUpperCase() === (targaSelezionataGlobalmente || "").toUpperCase() ) {
+                updateDownloadPhotosButtonState();
+            }
+        } catch(e) { console.error("Errore LS Mark Err:",e); }
+    }
+
+    function unmarkTargaAsCompleted(targa) { 
+        if(!targa)return;
+        try {
+            const completed=getCompletedTarghe();
+            if(completed[targa.toUpperCase()]){
+                delete completed[targa.toUpperCase()];
+                localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));
+                console.log(`${targa.toUpperCase()} unmarked as complete locally.`);
+                if (document.getElementById('riepilogoSection').classList.contains('active') && targa.toUpperCase() === (targaSelezionataGlobalmente || "").toUpperCase() ) {
+                    updateDownloadPhotosButtonState();
+                }
+            }
+        } catch(e) { console.error("Errore LS Unmark Err:",e); }
+    }
     
     function clearLocalDataForTarga(targaUpper) {
         if (!targaUpper) return;
         try {
             localStorage.removeItem(`${APP_PREFIX}data_${targaUpper}`);
             console.log(`Dati modulo rimossi per ${targaUpper}.`);
-            unmarkTargaAsCompleted(targaUpper);
+            unmarkTargaAsCompleted(targaUpper); // This will update button if riepilogo is active
             localStorage.removeItem(`${APP_PREFIX}posizione_${targaUpper}`);
             console.log(`Dati posizione rimossi per ${targaUpper}.`);
             localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`);
@@ -1539,69 +1590,22 @@
         }
     }
 
-    function generateAndDownloadScreenshot() { return new Promise((resolve, reject) => { const riepilogoSection = document.getElementById('riepilogoSection'); if (!riepilogoSection) { alert("Errore: Sezione Riepilogo non trovata per lo screenshot."); return reject("Sezione riepilogo non trovata"); } if (typeof html2canvas === 'undefined') { alert("Errore: Libreria html2canvas non caricata."); return reject("html2canvas non caricata"); } setTimeout(() => { /* console.log("Inizio generazione screenshot...");*/ riepilogoSection.scrollTop = 0;  html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY, windowHeight: riepilogoSection.scrollHeight }) .then(canvas => { const link = document.createElement('a'); let targaSanitized = 'sconosciuta'; let piazzaleSanitized = 'piazzale_sconosciuto'; if (targaSelezionataGlobalmente) { targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_'); const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") { piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_'); if (!piazzaleSanitized) piazzaleSanitized = 'N_D'; } else { piazzaleSanitized = 'N_D'; } } link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`; link.href = canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); console.log(`Screenshot generato e download avviato: ${link.download}`); resolve(); }) .catch(error => { console.error("Errore durante la generazione dello screenshot:", error); alert("Si è verificato un errore durante la generazione dello screenshot."); reject(error); }); }, 100);  }); }
-    
-    async function downloadPhotosAsZip(targa) {
-        if (!targa) {
-            console.warn("Nessuna targa fornita per scaricare le foto come ZIP.");
-            return;
-        }
-        if (typeof JSZip === 'undefined') {
-            alert("Errore: Libreria JSZip non caricata. Impossibile creare ZIP.");
-            return;
-        }
-
-        const originalButtonText = saveAndReturnBtn.textContent;
-        saveAndReturnBtn.textContent = 'Creazione ZIP...';
-        saveAndReturnBtn.disabled = true;
-
-        try {
-            const photos = await getPhotosByTargaAndSezioneFromDB(targa, null); // null per ottenere tutte le foto della targa
-            if (!photos || photos.length === 0) {
-                alert(`Nessuna foto trovata per la targa ${targa} da includere nello ZIP.`);
-                saveAndReturnBtn.textContent = originalButtonText;
-                saveAndReturnBtn.disabled = false;
-                return;
-            }
-
-            const zip = new JSZip();
-            photos.forEach(photoData => {
-                if (photoData.blobData instanceof Blob && photoData.name) {
-                    zip.file(photoData.name, photoData.blobData);
-                }
-            });
-
-            const zipBlob = await zip.generateAsync({type:"blob", compression: "DEFLATE"});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(zipBlob);
-            const zipFileName = `${targa.toUpperCase().replace(/[^A-Z0-9]/g, '_')}.zip`;
-            link.download = zipFileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-            console.log(`File ZIP "${zipFileName}" generato e download avviato.`);
-            alert(`File ZIP "${zipFileName}" per la targa ${targa} scaricato con successo.`);
-
-        } catch (error) {
-            console.error("Errore durante la creazione o il download del file ZIP:", error);
-            alert("Si è verificato un errore durante la creazione del file ZIP delle foto.");
-        } finally {
-            saveAndReturnBtn.textContent = originalButtonText; // Ripristina anche se c'è stato solo lo screenshot
-            saveAndReturnBtn.disabled = false;
-        }
-    }
+    // Rimosso generateAndDownloadScreenshot e downloadPhotosAsZip da qui perché non più usate da handleSavePeriziaAndReturn
+    // Se servono altrove, mantenerle. Per ora le commento.
+    /*
+    function generateAndDownloadScreenshot() { ... }
+    async function downloadPhotosAsZip(targa) { ... }
+    */
 
     async function handleSavePeriziaAndReturn() {
         if (!targaSelezionataGlobalmente) {
             alert("Nessuna targa attiva selezionata per il salvataggio.");
             return;
         }
-        const originalButtonText = saveAndReturnBtn.textContent;
+        const originalButtonText = "Salva Perizia"; // Testo aggiornato
         saveAndReturnBtn.textContent = 'Salvataggio perizia...';
         saveAndReturnBtn.disabled = true;
-        
+
         if (!saveProgress(targaSelezionataGlobalmente)) {
             alert("Salvataggio dati nel browser fallito.");
             saveAndReturnBtn.textContent = originalButtonText;
@@ -1609,32 +1613,26 @@
             return;
         }
         
+        markTargaAsCompleted(targaSelezionataGlobalmente); // Questo ora chiama updateDownloadPhotosButtonState se necessario
+        
+        // Se il riepilogo è attivo, assicurati che il suo contenuto (incluso lo stato del pulsante download) sia aggiornato
         if (document.getElementById('riepilogoSection').classList.contains('active')) {
-            generateSummary();
+            generateSummary(); // Questo chiamerà updateDownloadPhotosButtonState
+        } else {
+             // Se il riepilogo non è attivo, ma abbiamo appena completato la targa,
+             // lo stato del pulsante download verrà comunque aggiornato da markTargaAsCompleted
+             // la prossima volta che il riepilogo verrà visualizzato tramite generateSummary.
         }
         
-        try {
-            await generateAndDownloadScreenshot();
-            // Dopo lo screenshot, prova a generare e scaricare lo ZIP delle foto
-            await downloadPhotosAsZip(targaSelezionataGlobalmente);
-        } catch (e) {
-            console.warn("Generazione screenshot o ZIP fallita, ma i dati sono stati salvati localmente.", e);
-            // L'alert per l'errore ZIP è già in downloadPhotosAsZip
-        }
+        updateNavButtonColors(); // Aggiorna i colori dei pulsanti di navigazione principali
+
+        alert(`Perizia per ${targaSelezionataGlobalmente} salvata localmente.`);
+        saveAndReturnBtn.textContent = originalButtonText;
+        saveAndReturnBtn.disabled = false;
         
-        markTargaAsCompleted(targaSelezionataGlobalmente);
-        updateNavButtonColors();
-        
-        // Il ripristino del bottone è gestito da downloadPhotosAsZip o qui se quello non parte
-        if (saveAndReturnBtn.textContent !== originalButtonText) { // Se non già ripristinato da downloadPhotosAsZip
-             saveAndReturnBtn.textContent = originalButtonText;
-             saveAndReturnBtn.disabled = false;
-        }
-        
-        // Non mostrare un alert generico qui, gli alert specifici sono in generateAndDownloadScreenshot e downloadPhotosAsZip
-        // alert(`Perizia per ${targaSelezionataGlobalmente} salvata localmente. Screenshot e ZIP foto tentati.`);
         showView('landing');
     }
+
 
     function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
     function isInputDefault(inputElement) { if (!inputElement) return true; if (inputElement.type === 'checkbox') return !inputElement.checked; if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0; if (inputElement.type === 'text' || inputElement.type === 'url' || inputElement.tagName === 'TEXTAREA') return inputElement.value.trim() === ""; return true; }
@@ -1773,27 +1771,23 @@
 
     function getFilenameSectionName() {
         let sectionNameForFile = "generale";
-        if (lastSectionBeforeCamera) {
+        if (lastViewBeforeCamera === 'checklist' && lastSectionBeforeCamera) { // Prioritize checklist section
             let tempSectionKey = lastSectionBeforeCamera.toLowerCase();
             if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {
                 sectionNameForFile = tempSectionKey;
             } else if (tempSectionKey === 'danniverifiche') {
                 sectionNameForFile = 'danni';
             } else if (tempSectionKey === 'riepilogo') {
-                sectionNameForFile = 'riepilogo_foto';
-            } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter && currentGallerySectionFilter !== 'riepilogo') {
-                 sectionNameForFile = currentGallerySectionFilter.toLowerCase() === 'danniverifiche' ? 'danni' : currentGallerySectionFilter.toLowerCase();
-            } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter === 'riepilogo') {
-                 sectionNameForFile = 'targa_completa';
+                sectionNameForFile = 'riepilogo_foto'; // Or a more generic name if taking photos from riepilogo view
             }
-        } else if (galleryPageSection.style.display === 'block' && currentGallerySectionFilter) { // Aggiunto controllo se siamo in galleria
+        } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter) { // Then gallery section
             let tempSectionKey = currentGallerySectionFilter.toLowerCase();
-             if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {
+            if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {
                 sectionNameForFile = tempSectionKey;
             } else if (tempSectionKey === 'danniverifiche') {
                 sectionNameForFile = 'danni';
-            } else if (tempSectionKey === 'riepilogo') {
-                 sectionNameForFile = 'targa_completa'; // o 'riepilogo_foto_galleria'
+            } else if (tempSectionKey === 'riepilogo' || tempSectionKey === 'targa_completa') { // If gallery is showing all for targa
+                 sectionNameForFile = 'targa_foto'; // A more generic name for photos taken from "all photos of targa" view
             }
         }
         // console.log("Nome sezione per file foto:", sectionNameForFile, "da lastSectionBeforeCamera:", lastSectionBeforeCamera, "lastView:", lastViewBeforeCamera, "currentGallerySectionFilter:", currentGallerySectionFilter);
@@ -1834,6 +1828,7 @@
             }
 
             // Recupera le foto esistenti per la targa e la sezione corrente da IndexedDB
+            // IMPORTANTE: sectionNameForFile qui DEVE corrispondere a quello che viene salvato in photo.sezione
             const photosInCurrentTargaSection = await getPhotosByTargaAndSezioneFromDB(targaForFile, sectionNameForFile);
 
             let photoNumber;
@@ -1844,31 +1839,32 @@
                 // Ci sono foto esistenti: trova il numero più alto e incrementa
                 let maxExistingNumberInCurrentSection = 0;
                 photosInCurrentTargaSection.forEach(photo => {
-                    const nameParts = photo.name.split(' '); // Es. "001 remarketing TARGATEST.jpeg"
-                    if (nameParts.length > 0) {
-                        const num = parseInt(nameParts[0], 10);
-                        if (!isNaN(num)) {
-                            // Verifica addizionale che il numero appartenga al range logico della sezione corrente
-                            let isInCorrectSectionRange = false;
-                            if (baseNumber === 1 && num >= 1 && num < 101) isInCorrectSectionRange = true;
-                            else if (baseNumber === 101 && num >= 101 && num < 201) isInCorrectSectionRange = true;
-                            else if (baseNumber === 201 && num >= 201) isInCorrectSectionRange = true; // Non limitare superiormente qui, per flessibilità
-                            else if (num >= baseNumber) isInCorrectSectionRange = true; // Fallback generico
+                    // Assicurarsi che la foto appartenga realmente a questa sezione logica
+                    // (getPhotosByTargaAndSezioneFromDB dovrebbe già farlo se sectionNameForFile è preciso)
+                     if (photo.sezione && photo.sezione.toLowerCase() === sectionNameForFile.toLowerCase()) {
+                        const nameParts = photo.name.split(' '); // Es. "001 remarketing TARGATEST.jpeg"
+                        if (nameParts.length > 0) {
+                            const num = parseInt(nameParts[0], 10);
+                            if (!isNaN(num)) {
+                                // Verifica addizionale che il numero appartenga al range logico della sezione corrente
+                                let isInCorrectSectionRange = false;
+                                if (baseNumber === 1 && num >= 1 && num < 101) isInCorrectSectionRange = true;
+                                else if (baseNumber === 101 && num >= 101 && num < 201) isInCorrectSectionRange = true;
+                                else if (baseNumber === 201 && num >= 201) isInCorrectSectionRange = true; 
+                                else if (num >= baseNumber) isInCorrectSectionRange = true; // Fallback
 
 
-                            if (isInCorrectSectionRange && num > maxExistingNumberInCurrentSection) {
-                                maxExistingNumberInCurrentSection = num;
+                                if (isInCorrectSectionRange && num > maxExistingNumberInCurrentSection) {
+                                    maxExistingNumberInCurrentSection = num;
+                                }
                             }
                         }
                     }
                 });
-
-                if (maxExistingNumberInCurrentSection === 0 && baseNumber > 1) { // Aggiunto && baseNumber > 1
-                     // Se non sono stati trovati numeri validi (es. nomi file imprevisti)
-                     // o tutti i numeri erano inferiori al numero base.
-                     // Inizia per sicurezza dal numero base della sezione.
+                
+                if (maxExistingNumberInCurrentSection === 0 && baseNumber > 0) { 
                     photoNumber = baseNumber;
-                } else if (maxExistingNumberInCurrentSection < baseNumber && baseNumber > 0 ) { // Se il massimo è sotto il base number, parti dal base number
+                } else if (maxExistingNumberInCurrentSection < baseNumber && baseNumber > 0 ) { 
                     photoNumber = baseNumber;
                 }
                 else {
@@ -2603,6 +2599,25 @@
     }
     function initSequentialAnimation() { const checklistContainerDiv = document.getElementById('checklistContainer'); if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return; const activeSection = checklistContainerDiv.querySelector('.category-section.active'); if (!activeSection) return; activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me')); const allVisibleElementsInSection = Array.from( activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled), textarea:not(:disabled)') ).filter(el => { let current = el; while (current && current !== activeSection.parentElement) {  if (getComputedStyle(current).display === 'none' || getComputedStyle(current).visibility === 'hidden') return false; current = current.parentElement; } return el.offsetParent !== null;  }); const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el)); if (startIndex === -1 && allVisibleElementsInSection.length > 0) {  return; } if (allVisibleElementsInSection.length === 0) {   return; } const elementsToAnimate = allVisibleElementsInSection.slice(startIndex >= 0 ? startIndex : 0); if (elementsToAnimate.length === 0) return; let currentIndex = 0; let activeListeners = [];  function clearAllActiveAnimationListeners() { activeListeners.forEach(({element, type, handler}) => { element.removeEventListener(type, handler); element.classList.remove('animate-me');  }); activeListeners = []; } clearAllActiveAnimationListeners(); function animateNextElement() { if (currentIndex >= elementsToAnimate.length) { clearAllActiveAnimationListeners(); return; } const currentElement = elementsToAnimate[currentIndex]; if (!isInputDefault(currentElement)) {  currentIndex++; animateNextElement(); return; } currentElement.classList.add('animate-me'); currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); const onValueChange = (event) => { let processChange = false; if (event.type === 'change') { processChange = true; } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {  processChange = true; }  if (processChange && !isInputDefault(currentElement)) {  currentElement.classList.remove('animate-me'); activeListeners = activeListeners.filter(listener => { if (listener.element === currentElement) { listener.element.removeEventListener(listener.type, listener.handler); return false;  } return true;  }); currentIndex++; setTimeout(animateNextElement, 50);  } }; currentElement.addEventListener('change', onValueChange); activeListeners.push({element: currentElement, type: 'change', handler: onValueChange}); if (currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') { currentElement.addEventListener('blur', onValueChange);  activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange}); } } animateNextElement(); }
 
+    function updateDownloadPhotosButtonState() {
+        const downloadBtn = document.getElementById('downloadPhotosBtnRipielogo');
+        if (!downloadBtn) return; // Se il pulsante non esiste, esci
+
+        if (!targaSelezionataGlobalmente) {
+            downloadBtn.style.display = 'none';
+            return;
+        }
+
+        if (isTargaCompleted(targaSelezionataGlobalmente)) {
+            downloadBtn.disabled = false;
+            downloadBtn.style.display = 'block'; // O 'inline-block' o '' a seconda dello stile .action-button
+        } else {
+            downloadBtn.disabled = true;
+            // Mostra il pulsante anche se disabilitato, come da richiesta "congelato"
+            downloadBtn.style.display = 'block'; // O 'inline-block' o ''
+        }
+    }
+
     function showSection(targetId) {
         document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
             el.classList.remove('animate-me');
@@ -2627,13 +2642,91 @@
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
              setTimeout(initSequentialAnimation, 100);
         } else if (targetId === 'riepilogo') {
-            generateSummary();
+            generateSummary(); // Questo chiamerà anche updateDownloadPhotosButtonState()
         }
          window.scrollTo(0, 0);
     }
 
     function getSelectText(selectElementOrId) { const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId; if (el && el.tagName === 'SELECT' && el.value !== "") { if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) { return el.options[el.selectedIndex].text; } return el.value;  } return "N/S";  }
-    function generateSummary() { summaryContent.innerHTML = ''; let targa = targaSelezionataGlobalmente || "N/D"; function createSummaryItem(label, value, isAnomaly = false) { const itemDiv = document.createElement('div'); itemDiv.classList.add('summary-item'); if (isAnomaly) itemDiv.classList.add('summary-anomaly'); itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; return itemDiv; } summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase())); if (targaSelezionataGlobalmente) { const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); let marcaVeicolo = "N/D", modelloVeicolo = "N/D"; if (veicoloAttuale) { marcaVeicolo = veicoloAttuale.marca || "N/D"; modelloVeicolo = veicoloAttuale.modello || "N/D"; } summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D")); const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente); summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary)); } else {  summaryContent.appendChild(createSummaryItem("Marca", "N/D")); summaryContent.appendChild(createSummaryItem("Modello", "N/D")); summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); } summaryContent.innerHTML += `<h3>Remarketing:</h3>`; const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; const isEV = tipoTrazioneValue === 'elettrico'; summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect))); let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza'); let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante"); summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante")); summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia)); let kmStato = getSelectText('stato_chilometri'); summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); let cdcStato = getSelectText('stato_cdc'); summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente")); summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente")); if (isEV) { summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`; let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente")); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente")); } summaryContent.innerHTML += `<h3>Pneumatici:</h3>`; const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }]; pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); }); summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`; summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK')); summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK')); const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : ""; if (noteDanniValue) { const noteDiv = document.createElement('div'); noteDiv.classList.add('summary-item', 'summary-notes'); const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: "; const contentDiv = document.createElement('div'); contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue; noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv); summaryContent.appendChild(noteDiv); } }
+    
+    function generateSummary() {
+        summaryContent.innerHTML = '';
+        let targa = targaSelezionataGlobalmente || "N/D";
+        function createSummaryItem(label, value, isAnomaly = false) {
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('summary-item');
+            if (isAnomaly) itemDiv.classList.add('summary-anomaly');
+            itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`;
+            return itemDiv;
+        }
+        summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase()));
+        if (targaSelezionataGlobalmente) {
+            const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente);
+            let marcaVeicolo = "N/D", modelloVeicolo = "N/D";
+            if (veicoloAttuale) {
+                marcaVeicolo = veicoloAttuale.marca || "N/D";
+                modelloVeicolo = veicoloAttuale.modello || "N/D";
+            }
+            summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo));
+            summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo));
+            summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D"));
+            const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente);
+            summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary));
+        } else {
+            summaryContent.appendChild(createSummaryItem("Marca", "N/D"));
+            summaryContent.appendChild(createSummaryItem("Modello", "N/D"));
+            summaryContent.appendChild(createSummaryItem("Posizione", "N/D"));
+            summaryContent.appendChild(createSummaryItem("Urgente", "N/D"));
+        }
+        summaryContent.innerHTML += `<h3>Remarketing:</h3>`;
+        const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : "";
+        const isEV = tipoTrazioneValue === 'elettrico';
+        summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect)));
+        let equipaggiamento = getSelectText('tipo_equipaggiamento'),
+            presenzaEquip = getSelectText('equipaggiamento_presenza');
+        let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante");
+        summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante"));
+        summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia));
+        let kmStato = getSelectText('stato_chilometri');
+        summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili"));
+        let cdcStato = getSelectText('stato_cdc');
+        summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante"));
+        summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente"));
+        summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente"));
+        if (isEV) {
+            summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`;
+            let cavoRapidaText = getSelectText('cavo_ricarica_rapida');
+            let cavoDomesticaText = getSelectText('cavo_ricarica_domestica');
+            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente"));
+            summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente"));
+        }
+        summaryContent.innerHTML += `<h3>Pneumatici:</h3>`;
+        const pneumaticiFields = [
+            { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' },
+            { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }
+        ];
+        pneumaticiFields.forEach(pneu => {
+            summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme"));
+        });
+        summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`;
+        summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK'));
+        summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK'));
+        const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : "";
+        if (noteDanniValue) {
+            const noteDiv = document.createElement('div');
+            noteDiv.classList.add('summary-item', 'summary-notes');
+            const strongNode = document.createElement('strong');
+            strongNode.textContent = "Note Danni/Verifiche: ";
+            const contentDiv = document.createElement('div');
+            contentDiv.style.whiteSpace = 'pre-wrap';
+            contentDiv.style.paddingLeft = '10px';
+            contentDiv.textContent = noteDanniValue;
+            noteDiv.appendChild(strongNode);
+            noteDiv.appendChild(contentDiv);
+            summaryContent.appendChild(noteDiv);
+        }
+        updateDownloadPhotosButtonState(); // Aggiorna stato pulsante download
+    }
     
     async function fetchAllDataFromSheets() {
         if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch di tutti i dati."); return { success: false, message: "URL Web App non configurato.", data: [] }; }
@@ -3068,6 +3161,20 @@
 
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
+
+        const downloadPhotosBtnRipielogo = document.getElementById('downloadPhotosBtnRipielogo');
+        if (downloadPhotosBtnRipielogo) {
+            downloadPhotosBtnRipielogo.addEventListener('click', function() {
+                if (!this.disabled && targaSelezionataGlobalmente) {
+                    const targa = targaSelezionataGlobalmente.toUpperCase();
+                    // Rimuovi caratteri non alfanumerici se necessario per l'URL
+                    const sanitizedTarga = targa.replace(/[^a-zA-Z0-9]/g, '');
+                    const url = `http://192.168.1.154:8080/${sanitizedTarga}.zip`;
+                    window.location.href = url; // Naviga nella stessa finestra
+                }
+            });
+        }
+
 
         if (headerExitBtn) {
             headerExitBtn.addEventListener('click', () => {
