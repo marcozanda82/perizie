@@ -89,7 +89,7 @@
         #exit-curtain .loading-text {
             font-size: 1.6em;
             letter-spacing: 1px;
-            text-align: center; /* Assicura centratura */
+            text-align: center; 
         }
 
         #preloader .loading-text {
@@ -630,16 +630,10 @@
         #freezeFrameDisplay { 
             display: none; 
             position: absolute;
-            /* Le coordinate top/left vengono ereditate/sovrapposte dal parent se .camera-page-section è il riferimento */
-            /* Se #freezeFrameDisplay è figlio diretto di .camera-page-section e .camera-page-section ha padding-top,
-               allora top:0 e left:0 lo posizioneranno all'interno dell'area con padding.
-               Se invece deve coprire anche l'header, andrebbe posizionato diversamente o l'header nascosto.
-               Dato che l'header (.header-circles) rimane, top:0 e left:0 qui dovrebbero essere relativi all'area sotto l'header.
-            */
             top: 0; 
             left: 0;
-            width: 100%; /* Occupa tutta la larghezza del .camera-page-section */
-            height: 100%; /* Occupa tutta l'altezza del .camera-page-section (dopo il padding) */
+            width: 100%;
+            height: 100%; 
             object-fit: contain; 
             z-index: 2015; 
             border: 8px solid #007FFF; /* Blu Elettrico */
@@ -723,13 +717,13 @@
             color: #00aeff;
             border-bottom: 1px solid #555; 
             padding-bottom: 10px;
-            font-size: 1.4em; /* Leggermente più piccolo per non essere troppo invadente */
+            font-size: 1.4em; 
             text-align: center;
         }
         .modal-content ul {
             list-style-position: inside; 
             padding-left: 5px; 
-            text-align: left; /* Allinea a sinistra il testo delle modifiche */
+            text-align: left; 
         }
         .modal-content ul li {
             margin-bottom: 10px;
@@ -756,12 +750,12 @@
         #galleryPageSection {
             text-align: center;
         }
-         #galleryPageSection h2.section-title { /* Stile per il titolo della galleria */
-            text-align: center; /* Centra il titolo */
+         #galleryPageSection h2.section-title { 
+            text-align: center; 
             margin-bottom: 10px;
         }
-        #galleryPageSection .action-button { /* Stile per il pulsante "Torna all'Elenco" */
-            margin-bottom: 20px; /* Aggiungi spazio sotto il pulsante */
+        #galleryPageSection .action-button { 
+            margin-bottom: 20px; 
         }
         #photoGridContainer {
             display: grid;
@@ -807,7 +801,7 @@
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.2s ease;
-            margin-top: auto; /* Spinge il pulsante in basso se c'è spazio */
+            margin-top: auto; 
         }
          .photo-item-delete-btn:hover {
             background-color: #a41523;
@@ -1083,7 +1077,7 @@
     let currentCameraStream = null;
     let lastViewBeforeCamera = 'landing'; 
     let lastSectionBeforeCamera = null; 
-    let lastViewBeforeGallery = 'landing'; // Per sapere dove tornare dalla galleria
+    let lastViewBeforeGallery = 'landing'; 
 
 
     const targaListContainer = document.getElementById('targaListContainer');
@@ -1135,13 +1129,12 @@
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtn = document.getElementById('closeChangelogBtn');
     const changelogList = document.getElementById('changelogList');
-    const changelogTitle = document.getElementById('changelogTitle'); // Assicurati che esista un elemento h2 con questo ID nel modale.
+    const changelogTitle = document.getElementById('changelogTitle'); 
 
     const latestChangesText = `
         <li>Corretta la sequenza di avvio per evitare blocchi dell'animazione iniziale.</li>
         <li>La finestra "Ultime Modifiche" ora appare dopo il caricamento delle targhe.</li>
-        <li>Galleria interna per le foto scattate, filtrabile per targa.</li>
-        <li>Migliorata gestione header in modalità fotocamera e centraggio video.</li>
+        <li>Galleria interna per le foto scattate, filtrabile per targa selezionata.</li>
         <li>Colore bordo anteprima foto scattata: blu elettrico.</li>
     `;
 
@@ -1346,7 +1339,7 @@
         if (headerCirclesDiv) {
              headerCirclesDiv.style.display = 'flex';
              document.body.style.paddingTop = `${headerCirclesDiv.offsetHeight}px`;
-             cameraPageSection.style.paddingTop = `${headerCirclesDiv.offsetHeight}px`;
+             cameraPageSection.style.paddingTop = `${headerCirclesDiv.offsetHeight}px`; // Applica padding a cameraPageSection
              cameraPageSection.style.height = `calc(100vh - ${headerCirclesDiv.offsetHeight}px)`; 
         } else {
             document.body.style.paddingTop = '0px'; 
@@ -1454,6 +1447,8 @@
                     sectionNameForFile = 'danni';
                     break;
             }
+        } else if (lastViewBeforeCamera === 'gallery' || lastViewBeforeCamera === 'landing' || !lastSectionBeforeCamera) {
+            sectionNameForFile = "generale";
         }
         return sectionNameForFile;
     }
@@ -1501,7 +1496,7 @@
                 if (capturedPhotos.length >= 50) { 
                     capturedPhotos.shift(); 
                 }
-                capturedPhotos.push({ name: filename, dataUrl: imageDataUrl, timestamp: new Date().toISOString(), targa: targaForFile }); // Aggiungi targa per filtraggio
+                capturedPhotos.push({ name: filename, dataUrl: imageDataUrl, timestamp: new Date().toISOString(), targa: targaForFile }); 
                 localStorage.setItem(CAPTURED_PHOTOS_KEY, JSON.stringify(capturedPhotos));
             } catch (e) {
                 console.error("Errore salvataggio foto in localStorage per galleria:", e);
@@ -1524,18 +1519,17 @@
 
     // START: Funzioni per Pagina Galleria
     function showGalleryPage() {
-        // Memorizza la vista corrente PRIMA di cambiare a galleria, per poter tornare indietro
-        if (checklistContainer.style.display === 'block') {
+        if (cameraPageSection.style.display === 'flex') {
+            // Non memorizzare 'camera' come vista precedente per la galleria se la camera è attiva
+        } else if (checklistContainer.style.display === 'block') {
             lastViewBeforeGallery = 'checklist';
         } else if (historyPageSection.style.display === 'block') {
             lastViewBeforeGallery = 'history';
-        } else if (cameraPageSection.style.display === 'flex') {
-            // Se siamo in camera, il ritorno dalla galleria dovrebbe essere gestito da lastViewBeforeCamera
-            lastViewBeforeGallery = lastViewBeforeCamera; 
-        }
-         else {
+        } else {
             lastViewBeforeGallery = 'landing';
         }
+        console.log("Vista prima della galleria: " + lastViewBeforeGallery);
+
 
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
@@ -1544,17 +1538,12 @@
         galleryPageSection.style.display = 'block';
 
         if(utilityNavButtons) utilityNavButtons.style.display = 'flex'; 
-        if (targaSelezionataGlobalmente) {
-            galleryPageTitle.textContent = `Galleria Foto - Targa: ${targaSelezionataGlobalmente}`;
-        } else {
-            galleryPageTitle.textContent = "Galleria Foto - Tutte le Targhe";
-        }
         if(navButtonsContainer) navButtonsContainer.style.display = 'none';
         if(targaDropdownContainer) targaDropdownContainer.style.display = 'none';
         document.querySelector('.header-circles').style.display = 'flex';
+        
+        populatePhotoGrid(targaSelezionataGlobalmente); 
 
-
-        populatePhotoGrid(targaSelezionataGlobalmente); // Passa la targa corrente
         if (pageHeaderContainer.classList.contains('fixed-header')) {
             document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight + 10}px`;
         }
@@ -1572,24 +1561,27 @@
             return;
         }
 
-        let photosToDisplay = allCapturedPhotos;
-        if (filterTarga) {
-            const targaUpper = filterTarga.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            photosToDisplay = allCapturedPhotos.filter(photo => photo.name && photo.name.toUpperCase().includes(targaUpper));
-             if (photosToDisplay.length === 0) {
-                photoGridContainer.innerHTML = `<p>Nessuna foto trovata per la targa ${filterTarga}. Mostro tutte le foto.</p>`;
-                photosToDisplay = allCapturedPhotos; // Mostra tutte se il filtro non dà risultati
+        let photosToDisplay = [];
+        let effectiveFilterTarga = filterTarga ? filterTarga.toUpperCase().replace(/[^A-Z0-9]/g, '') : null;
+
+        if (effectiveFilterTarga) {
+            photosToDisplay = allCapturedPhotos.filter(photo => photo.targa && photo.targa.toUpperCase().replace(/[^A-Z0-9]/g, '') === effectiveFilterTarga);
+            if (photosToDisplay.length > 0) {
+                galleryPageTitle.textContent = `Galleria Foto - Targa: ${filterTarga}`;
+            } else {
+                galleryPageTitle.textContent = `Galleria Foto`; // Titolo generico se nessuna foto per la targa
+                photoGridContainer.innerHTML = `<p>Nessuna foto trovata per la targa ${filterTarga}.</p>`;
+                return; 
             }
+        } else {
+            photosToDisplay = allCapturedPhotos; // Mostra tutte se non c'è filtro
+            galleryPageTitle.textContent = "Galleria Foto - Tutte le Targhe";
         }
         
         if (photosToDisplay.length === 0) {
-            photoGridContainer.innerHTML = '<p>Nessuna foto scattata con questa app ancora.</p>';
-            if (filterTarga) { // Se si stava filtrando ma non ci sono foto per quella targa (e nemmeno totali)
-                 photoGridContainer.innerHTML = `<p>Nessuna foto trovata per la targa ${filterTarga}.</p>`;
-            }
+            photoGridContainer.innerHTML = '<p>Ancora nessuna foto nella galleria.</p>';
             return;
         }
-
 
         photosToDisplay.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
 
@@ -1629,7 +1621,7 @@
             if (capturedPhotos.length !== updatedPhotos.length) {
                 try {
                     localStorage.setItem(CAPTURED_PHOTOS_KEY, JSON.stringify(updatedPhotos));
-                    populatePhotoGrid(targaSelezionataGlobalmente); // Ricarica la griglia, filtrando se necessario
+                    populatePhotoGrid(targaSelezionataGlobalmente); 
                 } catch (e) {
                     console.error("Errore durante l'aggiornamento di localStorage dopo l'eliminazione:", e);
                     alert("Errore durante l'eliminazione della foto.");
@@ -1639,7 +1631,6 @@
             }
         }
     }
-
 
     // END: Funzioni per Pagina Galleria
 
@@ -1656,7 +1647,7 @@
             if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
             if(mainTitleGlobal) mainTitleGlobal.style.display = 'block';
             if(headerCirclesDiv) headerCirclesDiv.style.display = 'flex';
-             // Gestione specifica per targaDropdownContainer e navButtonsContainer
+            
             if(viewName === 'checklist') {
                 if(navButtonsContainer) navButtonsContainer.style.display = 'flex';
                 if(targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
@@ -1707,7 +1698,7 @@
         } else if (viewName === 'gallery') { 
             pageHeaderContainer.classList.add('fixed-header');
             galleryPageSection.style.display = 'block';
-            // Titolo già impostato da showGalleryPage
+            // Titolo già gestito da showGalleryPage
         }
          else if (viewName !== 'camera') { 
              pageHeaderContainer.classList.remove('fixed-header');
@@ -2423,7 +2414,7 @@
             if (lastVersionSeen !== currentAppVersion) {
                 changelogModal.style.display = 'flex';
             }
-            closeChangelogBtn.onclick = () => {
+            closeChangelogBtn.onclick = () => { // Sostituito addEventListener con onclick per semplicità e per evitare duplicati
                 changelogModal.style.display = 'none';
                 localStorage.setItem('appVersionSeen', currentAppVersion);
             };
@@ -2495,11 +2486,10 @@
         if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData);
         if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
         if(backToMainFromGalleryBtn) backToMainFromGalleryBtn.addEventListener('click', () => {
-            // Torna alla vista precedente alla galleria
             if(lastViewBeforeGallery === 'checklist' && targaSelezionataGlobalmente) {
                 showView('checklist');
-                if(lastSectionBeforeCamera) showSection(lastSectionBeforeCamera); // Se avevamo una sezione specifica
-                else showSection('remarketing'); // Default
+                const targetSection = lastSectionBeforeCamera || 'remarketing'; // Usa l'ultima sezione della camera o default
+                showSection(targetSection);
             } else if (lastViewBeforeGallery === 'history') {
                 showView('history');
             }
@@ -2522,10 +2512,10 @@
             headerPhotosBtn.addEventListener('click', () => {
                 console.log("Header Photos/Gallery button clicked");
                 if (cameraPageSection.style.display === 'flex') { 
-                    returnFromCamera(); // Prima chiudi la camera se è aperta
-                     setTimeout(showGalleryPage, 50); // Poi apri la galleria
+                    returnFromCamera();
+                     setTimeout(showGalleryPage, 50); 
                 } else {
-                    showGalleryPage(); // Altrimenti apri direttamente la galleria
+                    showGalleryPage(); 
                 }
             });
         }
@@ -2534,11 +2524,17 @@
                 console.log("Header Perizia button clicked");
                 if (cameraPageSection.style.display === 'flex') { 
                     returnFromCamera(); 
-                } else if (galleryPageSection.style.display === 'block' && targaSelezionataGlobalmente) {
-                    // Se sono in galleria e una targa è selezionata, vai alla checklist di quella targa
-                     showView('checklist');
-                     const lastActiveChecklistPage = localStorage.getItem(LAST_ACTIVE_PERIZIA_PAGE_KEY) || 'remarketing';
-                     showSection(lastActiveChecklistPage);
+                } else if (galleryPageSection.style.display === 'block') {
+                     // Torna alla vista prima della galleria
+                    if(lastViewBeforeGallery === 'checklist' && targaSelezionataGlobalmente) {
+                        showView('checklist');
+                        const targetSection = lastSectionBeforeCamera || 'remarketing'; // Usa l'ultima sezione della camera o default
+                        showSection(targetSection);
+                    } else if (lastViewBeforeGallery === 'history') {
+                        showView('history');
+                    } else {
+                        showView('landing');
+                    }
                 }
                  else if (targaSelezionataGlobalmente) {
                     const lastActivePage = localStorage.getItem(LAST_ACTIVE_PERIZIA_PAGE_KEY);
@@ -2560,18 +2556,20 @@
                 if (cameraPageSection.style.display === 'flex') {
                     returnFromCamera(); 
                 } else {
-                    // Prima di aprire la camera, memorizza la vista corrente se non è la galleria
-                    if (galleryPageSection.style.display !== 'block') {
-                         if (checklistContainer.style.display === 'block') {
-                            lastViewBeforeCamera = 'checklist';
-                             const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
-                            lastSectionBeforeCamera = activeSectionElement ? activeSectionElement.id.replace('Section', '') : null;
-                        } else if (historyPageSection.style.display === 'block') {
-                            lastViewBeforeCamera = 'history';
-                        } else {
-                            lastViewBeforeCamera = 'landing';
-                        }
-                    } // Altrimenti, se ero in galleria, lastViewBeforeCamera è già 'gallery'
+                    if (galleryPageSection.style.display === 'block') {
+                        lastViewBeforeCamera = 'gallery'; // Se apro camera da galleria, il ritorno sarà alla galleria
+                        lastSectionBeforeCamera = null;
+                    } else if (checklistContainer.style.display === 'block') {
+                        lastViewBeforeCamera = 'checklist';
+                        const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
+                        lastSectionBeforeCamera = activeSectionElement ? activeSectionElement.id.replace('Section', '') : null;
+                    } else if (historyPageSection.style.display === 'block') {
+                        lastViewBeforeCamera = 'history';
+                        lastSectionBeforeCamera = null;
+                    } else {
+                        lastViewBeforeCamera = 'landing';
+                        lastSectionBeforeCamera = null;
+                    }
                     showCameraPage(); 
                 }
             });
