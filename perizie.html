@@ -878,18 +878,19 @@
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
-    const cameraPageSection = document.getElementById('cameraPageSection'); // Nuova sezione fotocamera
+    const cameraPageSection = document.getElementById('cameraPageSection'); 
     const cameraStreamElement = document.getElementById('cameraStream');
     const captureBtn = document.getElementById('captureBtn');
     const closeCameraBtn = document.getElementById('closeCameraBtn');
     let currentCameraStream = null;
+    let lastViewBeforeCamera = 'landing'; // Memorizza l'ultima vista prima di aprire la fotocamera
+    let lastSectionBeforeCamera = null; // Memorizza l'ultima sezione di perizia prima della fotocamera
 
 
     const targaListContainer = document.getElementById('targaListContainer');
     const savedTargasListContainer = document.getElementById('savedTargasListContainer');
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
-    // const headerCircles = pageHeaderContainer.querySelector('.header-circles'); // Now directly targeted by ID if needed
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const targaDropdownContainer = document.getElementById('targaDropdownContainer');
     const targaSwitcherDropdown = document.getElementById('targaSwitcherDropdown');
@@ -903,10 +904,9 @@
     
     const backToListBtn = utilityNavButtons.querySelector('#backToListBtn');
     const historyBtn = utilityNavButtons.querySelector('#historyBtn');
-    const mainExitAppBtn = utilityNavButtons.querySelector('#exitAppBtn'); // Renamed to avoid conflict
+    const mainExitAppBtn = utilityNavButtons.querySelector('#exitAppBtn'); 
     let syncToSheetsBtn; 
     
-    // NEW: Header Circle Buttons
     const headerExitBtn = document.getElementById('headerExitBtn');
     const headerPhotosBtn = document.getElementById('headerPhotosBtn');
     const headerPeriziaBtn = document.getElementById('headerPeriziaBtn');
@@ -929,7 +929,7 @@
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
-    const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`; // For "Perizia" button
+    const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
     function updateTargaDetailsDisplay(selectedTarga) {
         if (!targaDetailsDisplay || !selectedTarga || !listaTargheCompleta.length) {
@@ -962,7 +962,7 @@
             return;
         }
         const piazzaleCorrente = veicoloAttuale.piazzale;
-        const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente && !localStorage.getItem(`${APP_PREFIX}deleted_${v.targa.toUpperCase()}`)); // Escludi cancellate
+        const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente && !localStorage.getItem(`${APP_PREFIX}deleted_${v.targa.toUpperCase()}`)); 
         targaSwitcherDropdown.innerHTML = ''; 
         if (targheDelPiazzale.length === 0) {
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
@@ -1090,13 +1090,27 @@
 
     // START: Funzioni per la pagina Fotocamera
     async function showCameraPage() {
+        // Memorizza la vista/sezione corrente prima di aprire la fotocamera
+        if (checklistContainer.style.display === 'block') {
+            lastViewBeforeCamera = 'checklist';
+            const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
+            lastSectionBeforeCamera = activeSectionElement ? activeSectionElement.id.replace('Section', '') : null;
+        } else if (historyPageSection.style.display === 'block') {
+            lastViewBeforeCamera = 'history';
+            lastSectionBeforeCamera = null;
+        } else { // Default alla landing page o se nessun'altra vista è attiva
+            lastViewBeforeCamera = 'landing';
+            lastSectionBeforeCamera = null;
+        }
+        console.log(`Prima della fotocamera: vista='${lastViewBeforeCamera}', sezione='${lastSectionBeforeCamera}'`);
+
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
-        cameraPageSection.style.display = 'flex'; // Usa flex per centrare il video se non occupa tutto
+        cameraPageSection.style.display = 'flex'; 
         
-        pageHeaderContainer.classList.add('fixed-header'); // Assicura che l'header sia fisso
-        document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight}px`; // Adatta il padding del body
+        pageHeaderContainer.classList.add('fixed-header'); 
+        document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight}px`; 
 
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             try {
@@ -1106,53 +1120,71 @@
             } catch (err) {
                 console.error("Errore accesso fotocamera:", err);
                 alert("Impossibile accedere alla fotocamera: " + err.message);
-                hideCameraPage(); // Torna indietro se la fotocamera non è accessibile
+                returnFromCamera(); // Usa la nuova funzione per tornare indietro
             }
         } else {
             alert("Il tuo browser non supporta l'accesso alla fotocamera.");
-            hideCameraPage();
+            returnFromCamera(); // Usa la nuova funzione per tornare indietro
         }
         window.scrollTo(0, 0);
     }
 
-    function hideCameraPage() {
-        cameraPageSection.style.display = 'none';
+    function returnFromCamera() {
         if (currentCameraStream) {
             currentCameraStream.getTracks().forEach(track => track.stop());
             currentCameraStream = null;
             cameraStreamElement.srcObject = null;
         }
-        showView('landing'); // Torna alla pagina principale o ultima vista attiva
+        cameraPageSection.style.display = 'none';
+
+        console.log(`Ritorno da fotocamera a: vista='${lastViewBeforeCamera}', sezione='${lastSectionBeforeCamera}'`);
+
+        if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
+            showView('checklist');
+            showSection(lastSectionBeforeCamera);
+        } else if (lastViewBeforeCamera === 'history') {
+            showView('history');
+        } else { // Default to landing
+            showView('landing');
+        }
+        // Ripristina il padding del body, showView dovrebbe già gestirlo correttamente
+        // ma è bene assicurarsi che l'header non causi problemi di layout
+        if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
+            document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight + 10}px`;
+        } else {
+             document.body.style.paddingTop = `20px`; // o un valore di default
+        }
     }
 
     function capturePhoto() {
-        // Funzione segnaposto per la cattura della foto
-        // L'implementazione effettiva richiede una canvas per disegnare il frame video
-        // e poi convertirlo in data URL o blob per il salvataggio/upload.
-        if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA) {
-            console.log("Pulsante Scatta Foto premuto. Implementare la logica di cattura.");
-            
+        if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
             const canvas = document.createElement('canvas');
             canvas.width = cameraStreamElement.videoWidth;
             canvas.height = cameraStreamElement.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
             
-            // Esempio: mostrare l'immagine catturata (temporaneamente)
-            // const imageDataUrl = canvas.toDataURL('image/png');
-            // console.log("Immagine catturata (Data URL):", imageDataUrl.substring(0,100) + "...");
-            // Per salvare, si potrebbe creare un link di download:
-            // const link = document.createElement('a');
-            // link.href = imageDataUrl;
-            // link.download = `foto_${new Date().toISOString()}.png`;
-            // document.body.appendChild(link);
-            // link.click();
-            // document.body.removeChild(link);
-            
-            alert("Foto scattata (vedi console per i dettagli preliminari). Funzionalità di salvataggio da implementare.");
+            const imageDataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = imageDataUrl;
 
+            let filename = 'foto_catturata';
+            if (targaSelezionataGlobalmente) {
+                filename = `foto_${targaSelezionataGlobalmente}`;
+            }
+            // Aggiungi un timestamp al nome del file per renderlo unico
+            const timestamp = new Date().toISOString().replace(/[:.-]/g, '').replace('T', '_').substring(0, 15); // YYYYMMDD_HHMMSS
+            filename += `_${timestamp}.png`;
+            
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`Foto "${filename}" scaricata!`);
         } else {
-            alert("Stream fotocamera non pronto per la cattura.");
+            alert("Stream fotocamera non pronto o dimensioni video non disponibili per la cattura.");
+            console.warn("Dettagli stream/video per cattura: ", currentCameraStream, cameraStreamElement.readyState, cameraStreamElement.videoWidth, cameraStreamElement.videoHeight);
         }
     }
     // END: Funzioni per la pagina Fotocamera
@@ -1162,7 +1194,7 @@
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
-        cameraPageSection.style.display = 'none'; // Nascondi anche la camera page
+        cameraPageSection.style.display = 'none'; 
         
         let bodyPaddingTopValue = '20px';
         const headerCirclesDiv = document.querySelector('.header-circles'); 
@@ -1215,9 +1247,7 @@
             populateSavedTargasList();
             updateNavButtonColors();
         } else { 
-            // Potrebbe essere una vista non gestita o la camera page,
-            // l'header fisso e il padding del body sono gestiti da showCameraPage
-            if (viewName !== 'camera') { // Evita di sovrascrivere le impostazioni della fotocamera
+            if (viewName !== 'camera') { 
                  pageHeaderContainer.classList.remove('fixed-header');
                  if (headerCirclesDiv) headerCirclesDiv.style.display = 'none'; 
                  if (utilityNavButtons) utilityNavButtons.style.display = 'none';
@@ -1227,14 +1257,13 @@
 
         if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none' && cameraPageSection.style.display === 'none') {
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
-        } else if (cameraPageSection.style.display === 'none') { // Solo se la camera non è attiva
+        } else if (cameraPageSection.style.display === 'none') { 
             let nonFixedHeaderHeight = 0;
             if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {
                  nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
             }
              bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
         }
-        // Non modificare il padding del body se la camera è attiva, gestito da showCameraPage
         if (cameraPageSection.style.display === 'none') {
             document.body.style.paddingTop = bodyPaddingTopValue;
         }
@@ -1907,8 +1936,8 @@
         if (headerPeriziaBtn) {
             headerPeriziaBtn.addEventListener('click', async () => {
                 console.log("Header Perizia button clicked");
-                if (cameraPageSection.style.display === 'flex') { // Se la fotocamera è attiva, chiudila
-                    hideCameraPage();
+                if (cameraPageSection.style.display === 'flex') { // Se la fotocamera è attiva
+                    returnFromCamera(); // Usa la nuova funzione per tornare indietro
                 } else if (targaSelezionataGlobalmente) {
                     const lastActivePage = localStorage.getItem(LAST_ACTIVE_PERIZIA_PAGE_KEY);
                     const targetSection = (lastActivePage && document.getElementById(lastActivePage + 'Section')) ? lastActivePage : 'riepilogo';
@@ -1923,21 +1952,19 @@
             });
         }
         
-        // MODIFICATO: Event Listener per headerCameraBtn
         if (headerCameraBtn) {
             headerCameraBtn.addEventListener('click', () => {
                 console.log("Header Camera button clicked");
                 if (cameraPageSection.style.display === 'flex') {
-                    hideCameraPage();
+                    returnFromCamera(); // Chiudi la fotocamera e torna indietro
                 } else {
-                    showCameraPage();
+                    showCameraPage(); // Apri la fotocamera
                 }
             });
         }
 
-        // Event listener per il pulsante di scatto e chiusura fotocamera
         if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
-        if (closeCameraBtn) closeCameraBtn.addEventListener('click', hideCameraPage);
+        if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera); // Usa la nuova funzione
 
 
         async function initializeApplicationViewAndLoadData() {
@@ -1963,8 +1990,8 @@
                 if (exitCurtain) { 
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none'; 
                     if (pageHeader) pageHeader.style.display = 'none'; 
-                    if (cameraPageSection) cameraPageSection.style.display = 'none'; // Nascondi anche la camera
-                    if (currentCameraStream) { // Ferma lo stream se attivo
+                    if (cameraPageSection) cameraPageSection.style.display = 'none'; 
+                    if (currentCameraStream) { 
                          currentCameraStream.getTracks().forEach(track => track.stop());
                          currentCameraStream = null;
                          if(cameraStreamElement) cameraStreamElement.srcObject = null;
