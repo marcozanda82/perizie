@@ -635,7 +635,7 @@
             height: 100%; 
             object-fit: contain; 
             z-index: 2015; 
-            border: 8px solid #00bcd4; /* Bordo RADDOPPIATO */
+            border: 8px solid #00bcd4; 
             box-sizing: border-box; 
         }
 
@@ -690,45 +690,53 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.6);
-            display: none; /* Nascosto di default */
+            background-color: rgba(0,0,0,0.7); /* Più scuro per maggiore risalto */
+            display: none; 
             justify-content: center;
             align-items: center;
-            z-index: 10000; /* Sopra tutto */
+            z-index: 10000; 
+            padding: 15px;
+            box-sizing: border-box;
         }
         .modal-content {
-            background-color: #2e2e2e;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            width: 80%;
-            max-width: 500px;
-            color: #f0f0f0;
-            border-top: 4px solid #007bff;
+            background-color: #333; /* Sfondo modale più scuro */
+            padding: 20px 25px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+            width: 90%;
+            max-width: 550px;
+            color: #e0e0e0; /* Testo leggermente più chiaro */
+            border-top: 5px solid #007bff;
+            max-height: 80vh; /* Limita altezza e abilita scroll */
+            overflow-y: auto;
         }
         .modal-content h2 {
             margin-top: 0;
+            margin-bottom: 15px;
             color: #00aeff;
-            border-bottom: 1px solid #444;
+            border-bottom: 1px solid #555; /* Bordo più scuro */
             padding-bottom: 10px;
+            font-size: 1.5em;
         }
         .modal-content ul {
-            list-style-type: disc;
-            padding-left: 20px;
+            list-style-position: inside; /* Pallini dentro il box */
+            padding-left: 5px; /* Riduci padding per pallini */
         }
         .modal-content ul li {
-            margin-bottom: 8px;
-            line-height: 1.5;
+            margin-bottom: 10px;
+            line-height: 1.6;
         }
         .modal-close-btn {
             display: block;
-            margin: 20px auto 0 auto;
-            padding: 10px 20px;
+            margin: 25px auto 0 auto;
+            padding: 10px 25px;
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease;
         }
         .modal-close-btn:hover {
             background-color: #0056b3;
@@ -746,37 +754,46 @@
             margin-top: 20px;
         }
         .photo-item {
-            background-color: #333;
-            border-radius: 4px;
+            background-color: #3c3c3c; /* Leggermente più chiaro per contrasto */
+            border-radius: 6px; /* Arrotondamento maggiore */
             padding: 10px;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.35);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .photo-item img {
             max-width: 100%;
-            height: 100px; /* Altezza fissa per uniformità thumbnail */
+            height: 120px; 
             object-fit: cover;
-            border-radius: 3px;
+            border-radius: 4px; /* Angoli arrotondati anche per img */
             margin-bottom: 8px;
-            cursor: pointer; /* Per suggerire che si può cliccare per ingrandire (futuro) */
+            cursor: pointer; 
+            border: 1px solid #555; /* Leggero bordo immagine */
         }
         .photo-item-caption {
-            font-size: 0.8em;
-            color: #ccc;
+            font-size: 0.75em; /* Più piccolo per nomi file lunghi */
+            color: #bdbdbd;
             word-wrap: break-word;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            line-height: 1.3;
+            max-height: 3.9em; /* Limita a circa 3 righe */
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .photo-item-delete-btn {
-            background-color: #dc3545;
+            background-color: #c82333; /* Rosso più scuro */
             color: white;
             border: none;
-            padding: 3px 7px;
-            font-size: 0.8em;
-            border-radius: 3px;
+            padding: 4px 8px;
+            font-size: 0.9em;
+            border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.2s ease;
         }
          .photo-item-delete-btn:hover {
-            background-color: #c82333;
+            background-color: #a41523;
         }
         /* END: Stili per Pagina Galleria */
 
@@ -810,12 +827,14 @@
             #captureBtn { bottom: 20px; padding: 10px 15px; font-size: 1em; }
             #closeCameraBtn { bottom: 15px; right: 15px; width: 40px; height: 40px; font-size: 1.6em; line-height: 38px;}
             #photoGridContainer { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;}
-            .photo-item img { height: 80px; }
+            .photo-item img { height: 100px; }
         }
          @media (max-width: 400px) { 
             .circle-button { width: 40px; height: 40px; font-size: 1.1em;}
             .header-circles { padding: 8px 0; }
             #photoGridContainer { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+            .modal-content { width: 95%; padding: 15px; }
+            .modal-content h2 {font-size: 1.3em;}
         }
     </style>
 </head>
@@ -831,7 +850,7 @@
 
     <div id="changelogModal" class="modal-overlay">
         <div class="modal-content">
-            <h2>Ultime Modifiche</h2>
+            <h2 id="changelogTitle">WebApp Perizie - Novità</h2>
             <ul id="changelogList">
                 </ul>
             <button id="closeChangelogBtn" class="modal-close-btn">Chiudi</button>
@@ -1018,9 +1037,8 @@
             <h2 class="section-title" style="text-align: center;">Galleria Foto Catturate</h2>
             <button id="backToMainFromGalleryBtn" class="action-button" style="margin-bottom: 15px; background-color: #6c757d; border-color: #5a6268;">Torna all'Elenco</button>
             <div id="photoGridContainer">
-                </div>
+            </div>
         </div>
-
 
         <div id="cameraPageSection" class="camera-page-section" style="display: none;">
             <video id="cameraStream" autoplay playsinline></video>
@@ -1035,9 +1053,9 @@
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
-    const galleryPageSection = document.getElementById('galleryPageSection'); // Nuovo
-    const photoGridContainer = document.getElementById('photoGridContainer'); // Nuovo
-    const backToMainFromGalleryBtn = document.getElementById('backToMainFromGalleryBtn'); // Nuovo
+    const galleryPageSection = document.getElementById('galleryPageSection'); 
+    const photoGridContainer = document.getElementById('photoGridContainer'); 
+    const backToMainFromGalleryBtn = document.getElementById('backToMainFromGalleryBtn'); 
 
     const cameraPageSection = document.getElementById('cameraPageSection'); 
     const cameraStreamElement = document.getElementById('cameraStream');
@@ -1092,21 +1110,27 @@
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
-    const CAPTURED_PHOTOS_KEY = `${APP_PREFIX}capturedPhotos`; // Nuovo per galleria
+    const CAPTURED_PHOTOS_KEY = `${APP_PREFIX}capturedPhotos`; 
 
-    // NUOVO: Per Changelog
-    const currentAppVersion = "1.3.0"; // Incrementa questo per mostrare il changelog
+    const currentAppVersion = "1.3.1"; 
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtn = document.getElementById('closeChangelogBtn');
     const changelogList = document.getElementById('changelogList');
+    const changelogTitle = document.getElementById('changelogTitle');
+
     const latestChangesText = `
-        <li>Anteprima foto scattate con bordo colorato (spessore raddoppiato).</li>
-        <li>Navigazione tramite swipe laterale tra le sezioni della perizia (Remarketing, Pneumatici, Danni, Riepilogo).</li>
-        <li>Icone della barra superiore ora colorate per una migliore identificazione.</li>
-        <li>Pulsante "Galleria" ora apre una galleria interna con le foto scattate dall'app.</li>
+        <li>Corretta la sequenza di avvio per evitare blocchi dell'animazione iniziale.</li>
+        <li>La finestra "Ultime Modifiche" ora appare dopo il caricamento delle targhe.</li>
+        <li>Titolo della finestra "Ultime Modifiche" aggiornato con nome app e versione.</li>
+        <li>Introdotta pagina Galleria per visualizzare le foto scattate (accessibile dal pulsante "Galleria" in alto).</li>
+        <li>Le foto scattate vengono salvate internamente per la visualizzazione nella galleria (attenzione ai limiti di spazio di localStorage).</li>
+        <li>Aggiunta possibilità di eliminare foto dalla galleria interna.</li>
         <li>Migliorata la gestione della visualizzazione dell'header in modalità fotocamera.</li>
-        <li>Introdotta questa finestra per le ultime modifiche al primo avvio di una nuova versione.</li>
-    `; // AGGIORNA QUESTO CON LE TUE MODIFICHE REALI
+        <li>Centratura dello stream video e dell'anteprima foto (usando 'object-fit: contain').</li>
+        <li>Aumento dello spessore del bordo per l'anteprima della foto dopo lo scatto.</li>
+        <li>Navigazione tramite swipe laterale tra le sezioni della perizia.</li>
+        <li>Icone della barra superiore colorate.</li>
+    `;
 
 
     let touchstartX = 0;
@@ -1281,7 +1305,7 @@
         } else if (historyPageSection.style.display === 'block') {
             lastViewBeforeCamera = 'history';
             lastSectionBeforeCamera = null;
-        } else if (galleryPageSection.style.display === 'block') { // NUOVO: Se ero in galleria
+        } else if (galleryPageSection.style.display === 'block') { 
             lastViewBeforeCamera = 'gallery';
             lastSectionBeforeCamera = null;
         }
@@ -1294,7 +1318,7 @@
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
-        galleryPageSection.style.display = 'none'; // Nascondi galleria
+        galleryPageSection.style.display = 'none'; 
         cameraStreamElement.style.display = 'block'; 
         freezeFrameDisplayElement.style.display = 'none'; 
         cameraPageSection.style.display = 'flex'; 
@@ -1302,7 +1326,7 @@
         if(utilityNavButtons) utilityNavButtons.style.display = 'none';
         if(mainTitleGlobal) mainTitleGlobal.style.display = 'none';
         if(targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-        if(navButtonsContainer) navButtonsContainer.style.display = 'none';
+        if(navButtonsContainer) navButtonsContainer.style.display = 'none'; 
 
         pageHeaderContainer.classList.add('fixed-header'); 
         const headerCirclesDiv = document.querySelector('.header-circles');
@@ -1310,11 +1334,11 @@
              headerCirclesDiv.style.display = 'flex';
              document.body.style.paddingTop = `${headerCirclesDiv.offsetHeight}px`;
              cameraPageSection.style.paddingTop = `${headerCirclesDiv.offsetHeight}px`;
-             cameraPageSection.style.height = `calc(100vh - ${headerCirclesDiv.offsetHeight}px)`; // Usa 100vh
+             cameraPageSection.style.height = `calc(100vh - ${headerCirclesDiv.offsetHeight}px)`; 
         } else {
             document.body.style.paddingTop = '0px'; 
             cameraPageSection.style.paddingTop = `0px`; 
-            cameraPageSection.style.height = `100vh`; // Usa 100vh
+            cameraPageSection.style.height = `100vh`;
         }
 
 
@@ -1395,7 +1419,7 @@
             showSection(lastSectionBeforeCamera);
         } else if (lastViewBeforeCamera === 'history') {
             showView('history');
-        } else if (lastViewBeforeCamera === 'gallery') { // NUOVO: Ritorno alla galleria
+        } else if (lastViewBeforeCamera === 'gallery') { 
             showGalleryPage();
         }
          else { 
@@ -1459,18 +1483,15 @@
             document.body.removeChild(link);
             console.log(`Foto "${filename}" scaricata.`);
 
-            // Salva in localStorage per la galleria
             try {
                 let capturedPhotos = JSON.parse(localStorage.getItem(CAPTURED_PHOTOS_KEY) || '[]');
-                // Limita il numero di foto salvate per non eccedere lo storage, es. 50 più recenti
                 if (capturedPhotos.length >= 50) { 
-                    capturedPhotos.shift(); // Rimuovi la più vecchia
+                    capturedPhotos.shift(); 
                 }
                 capturedPhotos.push({ name: filename, dataUrl: imageDataUrl, timestamp: new Date().toISOString() });
                 localStorage.setItem(CAPTURED_PHOTOS_KEY, JSON.stringify(capturedPhotos));
             } catch (e) {
                 console.error("Errore salvataggio foto in localStorage per galleria:", e);
-                // Potrebbe essere un errore di spazio esaurito
             }
 
 
@@ -1490,18 +1511,17 @@
 
     // START: Funzioni per Pagina Galleria
     function showGalleryPage() {
-        lastViewBeforeCamera = 'gallery'; // Imposta per corretto ritorno se si apre la camera dalla galleria
+        lastViewBeforeCamera = 'gallery'; 
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
         cameraPageSection.style.display = 'none';
         galleryPageSection.style.display = 'block';
 
-        // Nascondi elementi specifici dell'header, lascia .header-circles
-        if(utilityNavButtons) utilityNavButtons.style.display = 'flex'; // Potrebbe servire "Torna Elenco"
         if(mainTitleGlobal) mainTitleGlobal.innerHTML = "Galleria Foto Scattate";
-        if(targaDropdownContainer) targaDropdownContainer.style.display = 'none';
+        if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
         if(navButtonsContainer) navButtonsContainer.style.display = 'none';
+        if(targaDropdownContainer) targaDropdownContainer.style.display = 'none';
         document.querySelector('.header-circles').style.display = 'flex';
 
 
@@ -1513,7 +1533,7 @@
     }
 
     function populatePhotoGrid() {
-        photoGridContainer.innerHTML = ''; // Pulisci la griglia
+        photoGridContainer.innerHTML = ''; 
         let capturedPhotos = [];
         try {
             capturedPhotos = JSON.parse(localStorage.getItem(CAPTURED_PHOTOS_KEY) || '[]');
@@ -1528,7 +1548,6 @@
             return;
         }
 
-        // Ordina per timestamp decrescente (più recenti prima)
         capturedPhotos.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
 
         capturedPhotos.forEach((photoData, index) => {
@@ -1538,17 +1557,20 @@
             const img = document.createElement('img');
             img.src = photoData.dataUrl;
             img.alt = photoData.name;
-            // Potresti aggiungere un event listener per ingrandire l'immagine al click
-
+            
             const caption = document.createElement('div');
             caption.classList.add('photo-item-caption');
             caption.textContent = photoData.name;
             
             const deleteBtn = document.createElement('button');
             deleteBtn.classList.add('photo-item-delete-btn');
-            deleteBtn.innerHTML = '&times;'; // Carattere X per elimina
+            deleteBtn.innerHTML = '&times;'; 
             deleteBtn.title = "Elimina foto";
-            deleteBtn.addEventListener('click', () => deleteCapturedPhoto(index, capturedPhotos));
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Evita bubbling se img ha listener per ingrandire
+                // Passa l'array originale per modificarlo direttamente
+                deleteCapturedPhoto(photoData.timestamp, capturedPhotos); 
+            });
 
             photoItemDiv.appendChild(img);
             photoItemDiv.appendChild(caption);
@@ -1557,15 +1579,22 @@
         });
     }
     
-    function deleteCapturedPhoto(photoIndex, currentPhotoArray) {
+    function deleteCapturedPhoto(timestampToDelete, currentPhotoArray) {
         if (confirm("Sei sicuro di voler eliminare questa foto dalla galleria dell'app?")) {
-            currentPhotoArray.splice(photoIndex, 1); // Rimuovi l'elemento all'indice specificato
-             try {
-                localStorage.setItem(CAPTURED_PHOTOS_KEY, JSON.stringify(currentPhotoArray));
-                populatePhotoGrid(); // Ricarica la griglia
-            } catch (e) {
-                console.error("Errore durante l'aggiornamento di localStorage dopo l'eliminazione:", e);
-                alert("Errore durante l'eliminazione della foto.");
+            // Trova l'indice basato sul timestamp, che dovrebbe essere univoco
+            const photoIndexToDelete = currentPhotoArray.findIndex(photo => photo.timestamp === timestampToDelete);
+            
+            if (photoIndexToDelete > -1) {
+                currentPhotoArray.splice(photoIndexToDelete, 1);
+                try {
+                    localStorage.setItem(CAPTURED_PHOTOS_KEY, JSON.stringify(currentPhotoArray));
+                    populatePhotoGrid(); 
+                } catch (e) {
+                    console.error("Errore durante l'aggiornamento di localStorage dopo l'eliminazione:", e);
+                    alert("Errore durante l'eliminazione della foto.");
+                }
+            } else {
+                console.warn("Foto da eliminare non trovata:", timestampToDelete);
             }
         }
     }
@@ -1578,24 +1607,20 @@
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
         if(cameraPageSection) cameraPageSection.style.display = 'none';
-        if(galleryPageSection) galleryPageSection.style.display = 'none'; // Nascondi galleria
+        if(galleryPageSection) galleryPageSection.style.display = 'none'; 
         
         const headerCirclesDiv = document.querySelector('.header-circles');
-        if (viewName !== 'camera') { // Se non siamo in camera, ripristina header
+        if (viewName !== 'camera') { 
             if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
             if(mainTitleGlobal) mainTitleGlobal.style.display = 'block';
-            // targaDropdown e navButtons sono gestiti specificamente sotto
             if(headerCirclesDiv) headerCirclesDiv.style.display = 'flex';
         }
-
-
-        let bodyPaddingTopValue = '0px'; 
 
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
             if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
-            if (navButtonsContainer) navButtonsContainer.style.display = 'none'; 
+             if (navButtonsContainer) navButtonsContainer.style.display = 'none'; 
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             if (listaTargheCompleta.length > 0 &&
                 (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
@@ -1633,8 +1658,9 @@
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             populateSavedTargasList();
             updateNavButtonColors();
-        } else if (viewName === 'gallery') { // Gestione per la nuova pagina galleria
+        } else if (viewName === 'gallery') { 
             pageHeaderContainer.classList.add('fixed-header');
+            galleryPageSection.style.display = 'block';
             if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Galleria Foto Scattate";
             if (navButtonsContainer) navButtonsContainer.style.display = 'none';
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
@@ -1646,6 +1672,7 @@
              if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
         }
 
+        let bodyPaddingTopValue = '0px';
         if (viewName !== 'camera') {
             if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
                 bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
@@ -1969,7 +1996,53 @@
         if(targheLoadingStatus) targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
     }
 
-    async function caricaEPopolaTarghe() { const preloaderInstance = document.getElementById('preloader');  if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server..."; try { const r = await fetch(GOOGLE_SHEET_CSV_URL + `&nocache=${new Date().getTime()}`); if (!r.ok) { let e = `HTTP ${r.status}.`; if (r.status === 0) e = "Errore di rete o CORS."; else if (r.status === 404) e = "File CSV non trovato (404)."; else if (r.status === 403) e = "Accesso al file CSV negato (403)."; throw new Error(e); } const csv = await r.text(); const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== ''); if (lines.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV."; listaTargheCompleta = []; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } listaTargheCompleta = lines.map(l => { const p = l.split(','); return {  targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(), marca: (p[1] || '').trim().replace(/^"|"$/g, ''), modello: (p[2] || '').trim().replace(/^"|"$/g, ''), piazzale: (p[3] || '').trim().replace(/^"|"$/g, '') }; }).filter(i => i.targa && i.targa.length > 3);  if (listaTargheCompleta.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";  if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } setupSheetFilterDropdown(); popolaTargheFiltrate(); } catch (e) { console.error("Errore caricamento/popolamento targhe:", e); if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = '';  listaTargheCompleta = []; } finally { if (preloaderInstance && !changelogModal.style.display || changelogModal.style.display === 'none') { preloaderInstance.classList.add('hidden'); setTimeout(() => { if (preloaderInstance) preloaderInstance.style.display = 'none'; }, 700); } } }
+    async function caricaEPopolaTarghe() { 
+        // NON nascondere il preloader qui; verrà gestito da initializeApplicationViewAndLoadData
+        if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server..."; 
+        try { 
+            const r = await fetch(GOOGLE_SHEET_CSV_URL + `&nocache=${new Date().getTime()}`); 
+            if (!r.ok) { 
+                let e = `HTTP ${r.status}.`; 
+                if (r.status === 0) e = "Errore di rete o CORS."; 
+                else if (r.status === 404) e = "File CSV non trovato (404)."; 
+                else if (r.status === 403) e = "Accesso al file CSV negato (403)."; 
+                throw new Error(e); 
+            } 
+            const csv = await r.text(); 
+            const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== ''); 
+            if (lines.length === 0) { 
+                if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV."; 
+                listaTargheCompleta = []; 
+                if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; 
+                if (targaListContainer) targaListContainer.innerHTML = ''; 
+                return; 
+            } 
+            listaTargheCompleta = lines.map(l => { 
+                const p = l.split(','); 
+                return {  
+                    targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(), 
+                    marca: (p[1] || '').trim().replace(/^"|"$/g, ''), 
+                    modello: (p[2] || '').trim().replace(/^"|"$/g, ''), 
+                    piazzale: (p[3] || '').trim().replace(/^"|"$/g, '') 
+                }; 
+            }).filter(i => i.targa && i.targa.length > 3);  
+            if (listaTargheCompleta.length === 0) { 
+                if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";  
+                if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; 
+                if (targaListContainer) targaListContainer.innerHTML = ''; 
+                return; 
+            } 
+            setupSheetFilterDropdown(); 
+            popolaTargheFiltrate(); 
+        } catch (e) { 
+            console.error("Errore caricamento/popolamento targhe:", e); 
+            if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`; 
+            if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; 
+            if (targaListContainer) targaListContainer.innerHTML = '';  
+            listaTargheCompleta = []; 
+        } 
+        // Rimosso il blocco finally che nascondeva il preloader
+    }
     function initSequentialAnimation() { const checklistContainerDiv = document.getElementById('checklistContainer'); if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return; const activeSection = checklistContainerDiv.querySelector('.category-section.active'); if (!activeSection) return; activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me')); const allVisibleElementsInSection = Array.from( activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled), textarea:not(:disabled)') ).filter(el => { let current = el; while (current && current !== activeSection.parentElement) {  if (getComputedStyle(current).display === 'none' || getComputedStyle(current).visibility === 'hidden') return false; current = current.parentElement; } return el.offsetParent !== null;  }); const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el)); if (startIndex === -1 && allVisibleElementsInSection.length > 0) {  return; } if (allVisibleElementsInSection.length === 0) {   return; } const elementsToAnimate = allVisibleElementsInSection.slice(startIndex >= 0 ? startIndex : 0); if (elementsToAnimate.length === 0) return; let currentIndex = 0; let activeListeners = [];  function clearAllActiveAnimationListeners() { activeListeners.forEach(({element, type, handler}) => { element.removeEventListener(type, handler); element.classList.remove('animate-me');  }); activeListeners = []; } clearAllActiveAnimationListeners(); function animateNextElement() { if (currentIndex >= elementsToAnimate.length) { clearAllActiveAnimationListeners(); return; } const currentElement = elementsToAnimate[currentIndex]; if (!isInputDefault(currentElement)) {  currentIndex++; animateNextElement(); return; } currentElement.classList.add('animate-me'); currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); const onValueChange = (event) => { let processChange = false; if (event.type === 'change') { processChange = true; } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {  processChange = true; }  if (processChange && !isInputDefault(currentElement)) {  currentElement.classList.remove('animate-me'); activeListeners = activeListeners.filter(listener => { if (listener.element === currentElement) { listener.element.removeEventListener(listener.type, listener.handler); return false;  } return true;  }); currentIndex++; setTimeout(animateNextElement, 50);  } }; currentElement.addEventListener('change', onValueChange); activeListeners.push({element: currentElement, type: 'change', handler: onValueChange}); if (currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') { currentElement.addEventListener('blur', onValueChange);  activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange}); } } animateNextElement(); }
 
     function showSection(targetId) {
@@ -2280,32 +2353,45 @@
         }
     }
 
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const preloader = document.getElementById('preloader'); 
+    async function initializeApplicationViewAndLoadData() {
+        const preloader = document.getElementById('preloader');
         
-        // Changelog Logic
-        if (changelogModal && closeChangelogBtn && changelogList) {
-            const lastVersionSeen = localStorage.getItem('appVersionSeen');
-            if (lastVersionSeen !== currentAppVersion) {
-                changelogList.innerHTML = latestChangesText;
-                changelogModal.style.display = 'flex';
-            }
-            closeChangelogBtn.addEventListener('click', () => {
-                changelogModal.style.display = 'none';
-                localStorage.setItem('appVersionSeen', currentAppVersion);
-                // Se il preloader era in attesa del changelog per scomparire
-                if (preloader && !preloader.classList.contains('hidden')) {
-                     preloader.classList.add('hidden');
-                     setTimeout(() => { if (preloader) preloader.style.display = 'none'; }, 700);
-                }
-            });
-        } else if (preloader) { // Se non c'è modale changelog, nascondi preloader normalmente
-             preloader.classList.add('hidden');
-             setTimeout(() => { if (preloader) preloader.style.display = 'none'; }, 700);
+        if (preloader) {
+            preloader.style.display = 'flex';
+            preloader.classList.remove('hidden');
+            preloader.style.opacity = '1';
+            preloader.style.visibility = 'visible';
+            const loadingText = preloader.querySelector('.loading-text');
+            if (loadingText) loadingText.textContent = 'CARICAMENTO ELENCO TARGHE...';
         }
 
+        await caricaEPopolaTarghe(); 
 
+        if (preloader) {
+            preloader.classList.add('hidden');
+            setTimeout(() => { if (preloader) preloader.style.display = 'none'; }, 700);
+        }
+        
+        showView('landing'); 
+
+        // Changelog Logic
+        if (changelogModal && closeChangelogBtn && changelogList && changelogTitle) {
+            const lastVersionSeen = localStorage.getItem('appVersionSeen');
+            changelogTitle.textContent = `WebApp Perizie - Novità v${currentAppVersion}`;
+            changelogList.innerHTML = latestChangesText;
+
+            if (lastVersionSeen !== currentAppVersion) {
+                changelogModal.style.display = 'flex';
+            }
+            closeChangelogBtn.onclick = () => {
+                changelogModal.style.display = 'none';
+                localStorage.setItem('appVersionSeen', currentAppVersion);
+            };
+        }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
         syncToSheetsBtn = document.createElement('button');
         syncToSheetsBtn.id = 'syncToSheetsBtn';
         syncToSheetsBtn.classList.add('action-button');
@@ -2368,7 +2454,7 @@
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
         if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData);
         if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
-        if(backToMainFromGalleryBtn) backToMainFromGalleryBtn.addEventListener('click', () => showView('landing')); // Nuovo
+        if(backToMainFromGalleryBtn) backToMainFromGalleryBtn.addEventListener('click', () => showView('landing')); 
 
 
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn);
@@ -2380,12 +2466,12 @@
                 triggerMainExit(); 
             });
         }
-        if (headerPhotosBtn) { // MODIFICATO per aprire la galleria interna
+        if (headerPhotosBtn) { 
             headerPhotosBtn.addEventListener('click', () => {
                 console.log("Header Photos/Gallery button clicked");
-                if (cameraPageSection.style.display === 'flex') { // Se la fotocamera è attiva, prima chiudila
+                if (cameraPageSection.style.display === 'flex') { 
                     returnFromCamera();
-                     setTimeout(showGalleryPage, 50); // piccolo delay per assicurare transizione
+                     setTimeout(showGalleryPage, 50); 
                 } else {
                     showGalleryPage();
                 }
@@ -2428,22 +2514,8 @@
             checklistContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
             checklistContainer.addEventListener('touchend', handleTouchEnd, { passive: true });
         }
-
-
-        async function initializeApplicationViewAndLoadData() {
-            // La logica del changelog ora gestisce la scomparsa del preloader
-            // se il changelog viene mostrato.
-            // Se il changelog non viene mostrato, il preloader scompare come prima.
-            if (!changelogModal || changelogModal.style.display === 'none') {
-                if (preloader) {
-                    preloader.classList.add('hidden');
-                    setTimeout(() => { if (preloader) preloader.style.display = 'none'; }, 700);
-                }
-            }
-            showView('landing'); 
-            await caricaEPopolaTarghe();
-        }
-        initializeApplicationViewAndLoadData();
+        
+        initializeApplicationViewAndLoadData(); // CHIAMATA FUNZIONE DI INIZIALIZZAZIONE
         
         if (mainExitAppBtn) { 
             mainExitAppBtn.addEventListener('click', () => { 
