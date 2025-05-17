@@ -765,6 +765,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            position: relative; /* Per URL.revokeObjectURL in futuro */
         }
         .photo-item img {
             max-width: 100%;
@@ -1113,15 +1114,17 @@
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
-    const CAPTURED_PHOTOS_KEY = `${APP_PREFIX}capturedPhotos`; 
+    // const CAPTURED_PHOTOS_KEY = `${APP_PREFIX}capturedPhotos`; // RIMOSSO - Non più usato per le foto
 
-    const currentAppVersion = "1.3.2"; // MODIFICA: Versione aggiornata per nuove funzionalità
+    const currentAppVersion = "1.4.0"; // MODIFICA: Versione aggiornata per IndexedDB
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtn = document.getElementById('closeChangelogBtn');
     const changelogList = document.getElementById('changelogList');
     const changelogTitle = document.getElementById('changelogTitle');
 
     const latestChangesText = `
+        <li><strong>Importante: Implementato IndexedDB per l'archiviazione delle foto, consentendo di salvare un numero molto maggiore di immagini.</strong></li>
+        <li>Le foto vengono ora salvate come Blob (JPEG) per una maggiore efficienza.</li>
         <li>Modificata la cattura foto in JPEG per ridurre dimensioni e migliorata gestione errori galleria.</li>
         <li>Galleria ora filtrabile per targa e sezione.</li>
         <li>Header completo (con selettore targa e navigazione sezioni) visibile in galleria se aperta da una perizia.</li>
@@ -1135,11 +1138,136 @@
     const swipeThreshold = 50; 
     const sectionOrder = ['remarketing', 'pneumatici', 'danniVerifiche', 'riepilogo'];
 
-    // Variabili per il contesto della galleria
     let currentGalleryTargaFilter = null;
-    let currentGallerySectionFilter = null; // Può essere 'remarketing', 'pneumatici', 'danniVerifiche', 'riepilogo' (per tutte le foto della targa), o null (globale)
+    let currentGallerySectionFilter = null; 
     let lastViewBeforeGallery = 'landing';
     let lastSectionBeforeGallery = null;
+
+    // START: IndexedDB Helper Functions
+    const IDB_NAME = 'PeriziePhotoDB_v1'; // Rinominato per evitare conflitti con versioni precedenti se necessario
+    const IDB_VERSION = 1;
+    const PHOTO_STORE_NAME = 'capturedPhotosStore'; // Rinominato per chiarezza
+    let dbPromise = null;
+
+    function openPhotoDB() {
+        if (dbPromise) return dbPromise;
+
+        dbPromise = new Promise((resolve, reject) => {
+            const request = indexedDB.open(IDB_NAME, IDB_VERSION);
+
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(PHOTO_STORE_NAME)) {
+                    const store = db.createObjectStore(PHOTO_STORE_NAME, { keyPath: 'timestamp' });
+                    store.createIndex('targaIdx', 'targa', { unique: false });
+                    store.createIndex('sezioneIdx', 'sezione', { unique: false });
+                    store.createIndex('targaSezioneIdx', ['targa', 'sezione'], { unique: false });
+                    console.log('Object store created/updated:', PHOTO_STORE_NAME);
+                }
+            };
+
+            request.onsuccess = (event) => {
+                console.log('Database opened successfully');
+                resolve(event.target.result);
+            };
+
+            request.onerror = (event) => {
+                console.error("Errore apertura IndexedDB:", event.target.error);
+                dbPromise = null; // Resetta la promise in caso di errore per futuri tentativi
+                reject(event.target.error);
+            };
+        });
+        return dbPromise;
+    }
+
+    async function savePhotoToDB(photoData) {
+        const db = await openPhotoDB();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(PHOTO_STORE_NAME, 'readwrite');
+            const store = transaction.objectStore(PHOTO_STORE_NAME);
+            const request = store.put(photoData);
+
+            request.onsuccess = () => {
+                console.log('Foto salvata in DB con timestamp:', photoData.timestamp);
+                resolve();
+            };
+            request.onerror = (event) => {
+                console.error('Errore salvataggio foto in IndexedDB:', event.target.error);
+                reject(event.target.error);
+            };
+            transaction.oncomplete = () => {
+                console.log('Transazione salvataggio foto completata.');
+            };
+            transaction.onerror = (event) => {
+                console.error('Errore transazione salvataggio foto:', event.target.error);
+                reject(event.target.error);
+            };
+        });
+    }
+
+    async function getAllPhotosFromDB() {
+        const db = await openPhotoDB();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(PHOTO_STORE_NAME, 'readonly');
+            const store = transaction.objectStore(PHOTO_STORE_NAME);
+            const request = store.getAll();
+
+            request.onsuccess = (event) => {
+                resolve(event.target.result || []);
+            };
+            request.onerror = (event) => {
+                console.error('Errore recupero tutte le foto da IndexedDB:', event.target.error);
+                reject(event.target.error);
+            };
+        });
+    }
+    
+    async function getPhotosByTargaAndSezioneFromDB(targaFilter, sectionKeyFilter) {
+        const db = await openPhotoDB();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(PHOTO_STORE_NAME, 'readonly');
+            const store = transaction.objectStore(PHOTO_STORE_NAME);
+            let request;
+
+            if (targaFilter && sectionKeyFilter && sectionKeyFilter !== 'riepilogo') {
+                const targaSezioneIndex = store.index('targaSezioneIdx');
+                request = targaSezioneIndex.getAll(IDBKeyRange.only([targaFilter.toUpperCase(), sectionKeyFilter]));
+            } else if (targaFilter) {
+                const targaIndex = store.index('targaIdx');
+                request = targaIndex.getAll(IDBKeyRange.only(targaFilter.toUpperCase()));
+            } else { // Nessun filtro specifico di targa o sezione (galleria globale)
+                request = store.getAll();
+            }
+
+            request.onsuccess = (event) => {
+                resolve(event.target.result || []);
+            };
+            request.onerror = (event) => {
+                console.error('Errore recupero foto filtrate da IndexedDB:', event.target.error);
+                reject(event.target.error);
+            };
+        });
+    }
+
+
+    async function deletePhotoFromDB(timestampToDelete) {
+        const db = await openPhotoDB();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(PHOTO_STORE_NAME, 'readwrite');
+            const store = transaction.objectStore(PHOTO_STORE_NAME);
+            const request = store.delete(timestampToDelete);
+
+            request.onsuccess = () => {
+                console.log('Foto eliminata da DB con timestamp:', timestampToDelete);
+                resolve();
+            };
+            request.onerror = (event) => {
+                console.error('Errore eliminazione foto da IndexedDB:', event.target.error);
+                reject(event.target.error);
+            };
+        });
+    }
+    // END: IndexedDB Helper Functions
 
 
     function updateTargaDetailsDisplay(selectedTarga) {
@@ -1285,6 +1413,21 @@
             console.log(`Dati posizione rimossi per ${targaUpper}.`);
             localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`);
             console.log(`Dati urgenza rimossi per ${targaUpper}.`);
+
+            // Aggiunta: Cancellare le foto associate da IndexedDB
+            getPhotosByTargaAndSezioneFromDB(targaUpper, null) // null per sezione prende tutte le foto della targa
+                .then(photos => {
+                    const deletePromises = photos.map(photo => deletePhotoFromDB(photo.timestamp));
+                    return Promise.all(deletePromises);
+                })
+                .then(() => {
+                    console.log(`Tutte le foto per ${targaUpper} cancellate da IndexedDB.`);
+                    if (galleryPageSection.style.display === 'block' && (currentGalleryTargaFilter === targaUpper || !currentGalleryTargaFilter)) {
+                         populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter); // Aggiorna la galleria se visibile
+                    }
+                })
+                .catch(err => console.error(`Errore cancellazione foto da DB per targa ${targaUpper}:`, err));
+
         } catch (e) {
             console.error(`Errore durante la cancellazione dei dati locali per ${targaUpper}:`, e);
             alert(`Errore cancellazione dati locali per ${targaUpper}.`);
@@ -1303,7 +1446,7 @@
     async function showCameraPage() {
         if (galleryPageSection.style.display === 'block') {
             lastViewBeforeCamera = 'gallery';
-            lastSectionBeforeCamera = currentGallerySectionFilter; // Salva il filtro sezione della galleria
+            lastSectionBeforeCamera = currentGallerySectionFilter; 
         } else if (checklistContainer.style.display === 'block') {
             lastViewBeforeCamera = 'checklist';
             const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
@@ -1417,7 +1560,7 @@
         console.log(`Ritorno da fotocamera a: vista='${lastViewBeforeCamera}', sezione='${lastSectionBeforeCamera}'`);
 
         if (lastViewBeforeCamera === 'gallery') { 
-            showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter); // Usa i filtri attivi della galleria
+            showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter);
         } else if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
             showView('checklist'); 
             showSection(lastSectionBeforeCamera);
@@ -1430,21 +1573,18 @@
 
     function getFilenameSectionName() {
         let sectionNameForFile = "generale"; 
-        // Usa lastSectionBeforeCamera, che ora può venire anche dalla galleria o checklist
         if (lastSectionBeforeCamera) { 
             let tempSectionKey = lastSectionBeforeCamera.toLowerCase();
             if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {
                 sectionNameForFile = tempSectionKey;
             } else if (tempSectionKey === 'danniverifiche') {
                 sectionNameForFile = 'danni';
-            } else if (tempSectionKey === 'riepilogo') { // Sezione riepilogo checklist
+            } else if (tempSectionKey === 'riepilogo') { 
                 sectionNameForFile = 'riepilogo_foto'; 
             } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter && currentGallerySectionFilter !== 'riepilogo') {
-                 // Se ero in galleria filtrata per sezione (es. remarketing), usa quella sezione
                  sectionNameForFile = currentGallerySectionFilter.toLowerCase() === 'danniverifiche' ? 'danni' : currentGallerySectionFilter.toLowerCase();
             } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter === 'riepilogo') {
-                 // Se ero in galleria in modalità "tutte le foto per targa" (da riepilogo)
-                 sectionNameForFile = 'targa_completa'; // O un nome generico per la targa
+                 sectionNameForFile = 'targa_completa'; 
             }
         }
         console.log("Nome sezione per file foto:", sectionNameForFile, "da lastSectionBeforeCamera:", lastSectionBeforeCamera, "lastView:", lastViewBeforeCamera);
@@ -1463,56 +1603,68 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
             
-            const imageDataUrl = canvas.toDataURL('image/jpeg', 0.7); 
-            
-            freezeFrameDisplayElement.src = imageDataUrl;
+            // Mostra anteprima
+            freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7); // Anteprima rapida con dataURL
             freezeFrameDisplayElement.style.display = 'block';
             cameraStreamElement.style.display = 'none'; 
             captureBtn.disabled = true; 
 
+            // Genera nome file
             const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');
             const sectionNameForFile = getFilenameSectionName();
-
             const counterKey = `${APP_PREFIX}photoCount_${targaForFile}_${sectionNameForFile}`;
             let photoNumber = parseInt(localStorage.getItem(counterKey) || '0') + 1;
             localStorage.setItem(counterKey, photoNumber.toString());
-            
             const formattedPhotoNumber = String(photoNumber).padStart(3, '0');
             const filename = `${formattedPhotoNumber} ${sectionNameForFile} ${targaForFile}.jpeg`; 
             
-            const link = document.createElement('a');
-            link.href = imageDataUrl;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            console.log(`Foto "${filename}" scaricata.`);
-
-            try {
-                let capturedPhotos = JSON.parse(localStorage.getItem(CAPTURED_PHOTOS_KEY) || '[]');
-                if (capturedPhotos.length >= 50) { 
-                    capturedPhotos.shift(); 
+            // Salva come Blob in IndexedDB
+            canvas.toBlob(async function(blob) {
+                if (!blob) {
+                    console.error("Errore: canvas.toBlob ha restituito null.");
+                    alert("Errore nella conversione della foto. Riprova.");
+                    freezeFrameDisplayElement.style.display = 'none';
+                    freezeFrameDisplayElement.src = '#'; 
+                    cameraStreamElement.style.display = 'block';
+                    captureBtn.disabled = false; 
+                    return;
                 }
-                capturedPhotos.push({ name: filename, dataUrl: imageDataUrl, timestamp: new Date().toISOString() });
-                localStorage.setItem(CAPTURED_PHOTOS_KEY, JSON.stringify(capturedPhotos));
-            } catch (e) {
-                console.error("Errore salvataggio foto in localStorage per galleria:", e.name, e.message, e);
-                if (e.name === 'QuotaExceededError' || 
-                    (e.message && e.message.toLowerCase().includes('quota')) ||
-                    (e.message && e.message.toLowerCase().includes('storage'))) { 
-                    alert("Memoria per la galleria piena! Impossibile salvare altre foto nella galleria interna.\n\nLa foto corrente è stata scaricata, ma non apparirà nella galleria.\n\nPer liberare spazio, puoi eliminare vecchie foto dalla galleria o cancellare tutti i salvataggi dalla pagina 'Salvataggi'.");
-                } else {
-                    alert("Si è verificato un errore sconosciuto durante il salvataggio della foto nella galleria interna.");
-                }
-            }
 
-            // MODIFICA: Tempo anteprima dimezzato a 1 secondo
-            setTimeout(() => {
-                freezeFrameDisplayElement.style.display = 'none';
-                freezeFrameDisplayElement.src = '#'; 
-                cameraStreamElement.style.display = 'block';
-                captureBtn.disabled = false; 
-            }, 1000);
+                const photoObjectToSave = {
+                    name: filename,
+                    blobData: blob,
+                    timestamp: new Date().toISOString(),
+                    targa: targaForFile,
+                    sezione: sectionNameForFile
+                };
+
+                try {
+                    await savePhotoToDB(photoObjectToSave);
+                    console.log(`Foto "${filename}" salvata in IndexedDB.`);
+
+                    // Download (opzionale, come prima)
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob); // Usa il blob per il download
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href); // Pulisci l'URL oggetto del download
+                    console.log(`Foto "${filename}" scaricata.`);
+
+                } catch (error) {
+                    console.error("Errore salvataggio foto in IndexedDB o download:", error);
+                    alert("Errore durante il salvataggio della foto nel database locale (IndexedDB).");
+                } finally {
+                     // Ripristina interfaccia dopo 1 secondo (indipendentemente dal successo del salvataggio in DB, l'anteprima è mostrata)
+                    setTimeout(() => {
+                        freezeFrameDisplayElement.style.display = 'none';
+                        freezeFrameDisplayElement.src = '#'; 
+                        cameraStreamElement.style.display = 'block';
+                        captureBtn.disabled = false; 
+                    }, 1000);
+                }
+            }, 'image/jpeg', 0.7); // Qualità JPEG
 
         } else {
             console.warn("Stream fotocamera non pronto o dimensioni video non disponibili per la cattura.");
@@ -1522,8 +1674,7 @@
     // END: Funzioni per la pagina Fotocamera
 
     // START: Funzioni per Pagina Galleria
-    function showGalleryPage(targaToFilter = null, sectionToFilter = null) {
-        // Salva lo stato corrente prima di entrare in galleria
+    async function showGalleryPage(targaToFilter = null, sectionToFilter = null) {
         if (checklistContainer.style.display === 'block') {
             lastViewBeforeGallery = 'checklist';
             const activeSectionEl = document.querySelector('#checklistContainer .category-section.active');
@@ -1534,10 +1685,10 @@
         } else if (historyPageSection.style.display === 'block') {
             lastViewBeforeGallery = 'history';
             lastSectionBeforeGallery = null;
-        } // Non aggiornare se la vista precedente era 'camera' o 'gallery' stessa
+        } 
 
         currentGalleryTargaFilter = targaToFilter ? targaToFilter.toUpperCase() : null;
-        currentGallerySectionFilter = sectionToFilter; // es. 'remarketing', 'riepilogo', null
+        currentGallerySectionFilter = sectionToFilter; 
 
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
@@ -1549,17 +1700,17 @@
         let galleryTitleText = "Galleria Foto Catturate";
 
         if (currentGalleryTargaFilter) {
-            targaSelezionataGlobalmente = currentGalleryTargaFilter; // Sincronizza il contesto globale
+            targaSelezionataGlobalmente = currentGalleryTargaFilter; 
             mainTitleGlobal.style.display = 'none';
             targaDropdownContainer.style.display = 'flex';
-            populateTargaSwitcherDropdown(); // Si basa su targaSelezionataGlobalmente
+            populateTargaSwitcherDropdown(); 
             if(targaSwitcherDropdown.value.toUpperCase() !== currentGalleryTargaFilter) {
                 targaSwitcherDropdown.value = currentGalleryTargaFilter;
             }
             updateTargaDetailsDisplay(currentGalleryTargaFilter);
             navButtonsContainer.style.display = 'flex';
             mainPageNavButtons.style.display = 'flex';
-            utilityNavButtons.style.display = 'flex'; // Mantieni visibili anche i bottoni utility
+            utilityNavButtons.style.display = 'flex'; 
 
             navButtons.forEach(b => b.classList.remove('active'));
             let sectionNameForTitle = "Tutte le foto";
@@ -1567,7 +1718,7 @@
                 const navButtonForSection = mainPageNavButtons.querySelector(`button[data-target="${currentGallerySectionFilter}"]`);
                 if (navButtonForSection) {
                     navButtonForSection.classList.add('active');
-                    sectionNameForTitle = navButtonForSection.textContent.split('. ')[1] || currentGallerySectionFilter; // Estrai nome pulito
+                    sectionNameForTitle = navButtonForSection.textContent.split('. ')[1] || currentGallerySectionFilter; 
                 } else {
                      sectionNameForTitle = currentGallerySectionFilter.charAt(0).toUpperCase() + currentGallerySectionFilter.slice(1);
                 }
@@ -1576,106 +1727,106 @@
                  if (riepilogoNavButton) riepilogoNavButton.classList.add('active');
             }
             galleryTitleText = `Galleria: ${currentGalleryTargaFilter} - ${sectionNameForTitle}`;
-            updateNavButtonColors(); // Aggiorna colori basati su targaSelezionataGlobalmente
-        } else { // Galleria Globale (nessuna targa specifica)
+            updateNavButtonColors(); 
+        } else { 
             mainTitleGlobal.style.display = 'block';
-            mainTitleGlobal.innerHTML = "Galleria Foto Catturate"; // O usa galleryTitleText
+            mainTitleGlobal.innerHTML = "Galleria Foto Catturate"; 
             targaDropdownContainer.style.display = 'none';
-            navButtonsContainer.style.display = 'none'; // Nascondi i nav button delle sezioni perizia
+            navButtonsContainer.style.display = 'none'; 
             utilityNavButtons.style.display = 'flex'; 
         }
         if(galleryTitleElement) galleryTitleElement.textContent = galleryTitleText;
 
-        populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter);
+        await populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter);
         if (pageHeaderContainer.classList.contains('fixed-header')) {
             document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight + 10}px`;
         }
         window.scrollTo(0,0);
     }
 
-    function populatePhotoGrid(targaFilter, sectionKeyFilter) {
+    async function populatePhotoGrid(targaFilter, sectionKeyFilter) {
         photoGridContainer.innerHTML = ''; 
-        let allCapturedPhotos = [];
+        
         try {
-            allCapturedPhotos = JSON.parse(localStorage.getItem(CAPTURED_PHOTOS_KEY) || '[]');
-        } catch (e) {
-            console.error("Errore nel parsing delle foto da localStorage:", e);
-            photoGridContainer.innerHTML = '<p>Errore nel caricare le foto.</p>';
-            return;
-        }
+            let photosToDisplay;
+            if (targaFilter) {
+                let effectiveSectionKey = sectionKeyFilter;
+                if (sectionKeyFilter && sectionKeyFilter.toLowerCase() === 'danniverifiche') {
+                    effectiveSectionKey = 'danni';
+                } else if (sectionKeyFilter && sectionKeyFilter.toLowerCase() === 'riepilogo'){
+                    effectiveSectionKey = null; // Per 'riepilogo' mostriamo tutte le foto della targa
+                }
+                photosToDisplay = await getPhotosByTargaAndSezioneFromDB(targaFilter, effectiveSectionKey);
+            } else {
+                photosToDisplay = await getAllPhotosFromDB(); // Galleria globale
+            }
 
-        let photosToDisplay = allCapturedPhotos;
+            if (photosToDisplay.length === 0) {
+                photoGridContainer.innerHTML = '<p>Nessuna foto trovata per i filtri applicati.</p>';
+                return;
+            }
 
-        if (targaFilter) {
-            const targaUpper = targaFilter.toUpperCase();
-            photosToDisplay = photosToDisplay.filter(photo => {
-                const nameParts = photo.name.split(' ');
-                if (nameParts.length < 3) return false;
-                const photoTargaInName = nameParts[nameParts.length - 1].split('.')[0].toUpperCase();
-                return photoTargaInName === targaUpper;
-            });
+            photosToDisplay.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)); 
 
-            if (sectionKeyFilter && sectionKeyFilter !== 'riepilogo') {
-                let filterMatchKey = sectionKeyFilter.toLowerCase();
-                if (filterMatchKey === 'danniverifiche') filterMatchKey = 'danni'; 
+            photosToDisplay.forEach((photoData) => {
+                const photoItemDiv = document.createElement('div');
+                photoItemDiv.classList.add('photo-item');
+                const img = document.createElement('img');
                 
-                photosToDisplay = photosToDisplay.filter(photo => {
-                    const nameParts = photo.name.split(' ');
-                    if (nameParts.length < 3) return false;
-                    const photoSectionInName = nameParts[1].toLowerCase();
-                    return photoSectionInName === filterMatchKey;
+                if (photoData.blobData instanceof Blob) {
+                    img.src = URL.createObjectURL(photoData.blobData);
+                    // Considerare URL.revokeObjectURL(img.src) quando l'elemento non è più visibile
+                    // o quando la galleria viene ripulita/nascosta.
+                    // Per semplicità, non lo implemento qui, ma è importante per la memoria.
+                    img.onload = () => { 
+                        // console.log("Blob caricato in img:", photoData.name);
+                        // URL.revokeObjectURL(img.src); // Revocare qui è troppo presto se l'immagine è ancora visibile
+                    };
+                    img.onerror = () => {
+                        console.error("Errore caricamento blob in img:", photoData.name);
+                        img.alt = `Errore caricamento ${photoData.name}`;
+                    }
+                } else if (photoData.dataUrl) { // Fallback se per caso ci fossero vecchi dati in dataUrl
+                    img.src = photoData.dataUrl;
+                } else {
+                    console.warn("Dati immagine mancanti per:", photoData.name);
+                    img.alt = `Dati mancanti ${photoData.name}`;
+                }
+                
+                img.alt = photoData.name;
+                const caption = document.createElement('div');
+                caption.classList.add('photo-item-caption');
+                caption.textContent = photoData.name;
+                const deleteBtn = document.createElement('button');
+                deleteBtn.classList.add('photo-item-delete-btn');
+                deleteBtn.innerHTML = '&times;'; 
+                deleteBtn.title = "Elimina foto";
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); 
+                    deleteCapturedPhoto(photoData.timestamp); 
                 });
-            } 
-            // Se sectionKeyFilter è 'riepilogo', non c'è ulteriore filtro di sezione per questa targa.
-            // Se sectionKeyFilter è null (ma targaFilter c'è), mostra tutte le foto per la targa (comportamento implicito di 'riepilogo')
-        }
-        // Se targaFilter è null, photosToDisplay rimane allCapturedPhotos (galleria globale)
+                photoItemDiv.appendChild(img);
+                photoItemDiv.appendChild(caption);
+                photoItemDiv.appendChild(deleteBtn);
+                photoGridContainer.appendChild(photoItemDiv);
+            });
 
-        if (photosToDisplay.length === 0) {
-            photoGridContainer.innerHTML = '<p>Nessuna foto trovata per i filtri applicati.</p>';
+        } catch (e) {
+            console.error("Errore nel parsing o recupero delle foto da IndexedDB:", e);
+            photoGridContainer.innerHTML = '<p>Errore nel caricare le foto dal database.</p>';
             return;
         }
-
-        photosToDisplay.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)); // Ordina sempre
-
-        photosToDisplay.forEach((photoData) => { // Non serve 'index' qui
-            const photoItemDiv = document.createElement('div');
-            photoItemDiv.classList.add('photo-item');
-            const img = document.createElement('img');
-            img.src = photoData.dataUrl;
-            img.alt = photoData.name;
-            const caption = document.createElement('div');
-            caption.classList.add('photo-item-caption');
-            caption.textContent = photoData.name;
-            const deleteBtn = document.createElement('button');
-            deleteBtn.classList.add('photo-item-delete-btn');
-            deleteBtn.innerHTML = '&times;'; 
-            deleteBtn.title = "Elimina foto";
-            deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); 
-                deleteCapturedPhoto(photoData.timestamp, allCapturedPhotos); // Passa l'array originale completo
-            });
-            photoItemDiv.appendChild(img);
-            photoItemDiv.appendChild(caption);
-            photoItemDiv.appendChild(deleteBtn);
-            photoGridContainer.appendChild(photoItemDiv);
-        });
     }
     
-    function deleteCapturedPhoto(timestampToDelete, masterPhotoArray) { // Riceve l'array master
+    async function deleteCapturedPhoto(timestampToDelete) { 
         if (confirm("Sei sicuro di voler eliminare questa foto dalla galleria dell'app?")) {
-            const photoIndexToDelete = masterPhotoArray.findIndex(photo => photo.timestamp === timestampToDelete);
-            if (photoIndexToDelete > -1) {
-                masterPhotoArray.splice(photoIndexToDelete, 1); // Modifica l'array master
-                try {
-                    localStorage.setItem(CAPTURED_PHOTOS_KEY, JSON.stringify(masterPhotoArray)); // Salva l'array master modificato
-                    populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter); // Ripopola con i filtri correnti
-                } catch (e) {
-                    console.error("Errore durante l'aggiornamento di localStorage dopo l'eliminazione:", e);
-                    alert("Errore durante l'eliminazione della foto.");
-                }
-            } else {
-                console.warn("Foto da eliminare non trovata nell'array master:", timestampToDelete);
+            try {
+                await deletePhotoFromDB(timestampToDelete);
+                // Ripopola con i filtri correnti
+                await populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter); 
+            } catch (e) {
+                console.error("Errore durante l'eliminazione della foto da IndexedDB o ripopolamento:", e);
+                alert("Errore durante l'eliminazione della foto.");
             }
         }
     }
@@ -1692,7 +1843,6 @@
         const headerCirclesDiv = document.querySelector('.header-circles');
         if (viewName !== 'camera') { 
             if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
-            // mainTitleGlobal visibility è gestita specificamente per viewName ora
             if(headerCirclesDiv) headerCirclesDiv.style.display = 'flex';
         }
 
@@ -1737,18 +1887,15 @@
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             populateSavedTargasList();
         } else if (viewName === 'gallery') { 
-            // La logica di visualizzazione dell'header per la galleria è ora in showGalleryPage()
-            // Questa chiamata qui assicura che la section sia visibile, ma showGalleryPage farà il setup fine
             pageHeaderContainer.classList.add('fixed-header');
             galleryPageSection.style.display = 'block'; 
-            // Non impostare il titolo qui, lo fa showGalleryPage
         } else if (viewName !== 'camera') { 
              pageHeaderContainer.classList.remove('fixed-header');
              if (headerCirclesDiv) headerCirclesDiv.style.display = 'none'; 
              if (utilityNavButtons) utilityNavButtons.style.display = 'none';
              if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
         }
-        updateNavButtonColors(); // Chiamata alla fine per riflettere lo stato
+        updateNavButtonColors(); 
 
         let bodyPaddingTopValue = '0px';
         if (viewName !== 'camera') {
@@ -1908,7 +2055,45 @@
         }
     }
 
-    function clearAllSavedData() { if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni, urgenze, flag di cancellazione e filtro piazzale)?\n\nAzione irreversibile.")) { let c = 0; const keysToRemove = []; for (let i=localStorage.length-1;i>=0;i--) { const k=localStorage.key(i); if (k.startsWith(APP_PREFIX)) { keysToRemove.push(k); } } keysToRemove.forEach(k => { localStorage.removeItem(k); c++; }); alert(`${c} elementi cancellati.`); if(sheetFilterDropdown) sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');  populateSavedTargasList(); if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();  if (typeof showView === 'function') showView('landing'); } }
+    function clearAllSavedData() { 
+        if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse perizie, posizioni, urgenze, foto, flag di cancellazione e filtro piazzale)?\n\nAzione irreversibile.")) { 
+            let c = 0; 
+            const keysToRemove = []; 
+            for (let i=localStorage.length-1;i>=0;i--) { 
+                const k=localStorage.key(i); 
+                if (k.startsWith(APP_PREFIX)) { 
+                    keysToRemove.push(k); 
+                } 
+            } 
+            keysToRemove.forEach(k => { localStorage.removeItem(k); c++; }); 
+            
+            // Cancellare tutte le foto da IndexedDB
+            openPhotoDB().then(db => {
+                const transaction = db.transaction(PHOTO_STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(PHOTO_STORE_NAME);
+                const request = store.clear(); // Cancella tutti gli oggetti nello store
+                request.onsuccess = () => {
+                    console.log(`Tutte le foto cancellate da IndexedDB (${PHOTO_STORE_NAME}).`);
+                    alert(`${c} elementi di localStorage e tutte le foto da IndexedDB cancellati.`); 
+                    if(sheetFilterDropdown) sheetFilterDropdown.value = 'all'; 
+                    localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');  
+                    populateSavedTargasList(); 
+                    if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();  
+                    if (typeof showView === 'function') showView('landing'); 
+                    if (galleryPageSection.style.display === 'block') { // Aggiorna la galleria se è visibile
+                        populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter);
+                    }
+                };
+                request.onerror = (event) => {
+                    console.error('Errore cancellazione foto da IndexedDB:', event.target.error);
+                    alert(`Errore durante la cancellazione delle foto da IndexedDB. ${c} elementi di localStorage cancellati.`);
+                };
+            }).catch(err => {
+                console.error("Errore apertura DB per cancellazione foto:", err);
+                alert("Errore apertura DB per cancellare le foto. Solo i dati di localStorage sono stati cancellati.");
+            });
+        } 
+    }
     function setupSheetFilterDropdown() { if (!sheetFilterDropdown) return; const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== '').sort())]; sheetFilterDropdown.innerHTML = ''; sources.forEach(source => { const option = document.createElement('option'); option.value = source; option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source; sheetFilterDropdown.appendChild(option); }); const savedPiazzaleFilter = localStorage.getItem(`${APP_PREFIX}selectedPiazzaleFilter`); if (savedPiazzaleFilter && sources.includes(savedPiazzaleFilter)) { sheetFilterDropdown.value = savedPiazzaleFilter; } else { sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); } sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange); sheetFilterDropdown.addEventListener('change', handleSheetFilterChange); }
     function handleSheetFilterChange() { if (sheetFilterDropdown) { localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value); } popolaTargheFiltrate(); targaSelezionataGlobalmente = null; }
     
@@ -2043,8 +2228,8 @@
                 delB.addEventListener('click', function(event) { 
                     event.stopPropagation(); 
                     const tDelUpper = this.dataset.targa; 
-                    clearLocalDataForTarga(tDelUpper);
-                    if (confirm(`I dati locali per la targa ${item.targa} sono stati cancellati.\n\nVuoi anche marcarla per la cancellazione da Google Sheets alla prossima sincronizzazione?`)) {
+                    clearLocalDataForTarga(tDelUpper); // Questa ora include la cancellazione da IndexedDB
+                    if (confirm(`I dati locali e le foto per la targa ${item.targa} sono stati cancellati.\n\nVuoi anche marcarla per la cancellazione da Google Sheets alla prossima sincronizzazione?`)) {
                         try {
                             localStorage.setItem(`${APP_PREFIX}deleted_${tDelUpper}`, new Date().toISOString());
                             console.log(`Targa ${tDelUpper} contrassegnata per la cancellazione da Sheets.`);
@@ -2439,6 +2624,21 @@
             const loadingText = preloader.querySelector('.loading-text');
             if (loadingText) loadingText.textContent = 'CARICAMENTO ELENCO TARGHE...';
         }
+        
+        try {
+            await openPhotoDB(); // Assicurati che il DB sia pronto prima di caricare il resto
+            console.log("IndexedDB inizializzato o già pronto.");
+        } catch (error) {
+            console.error("Errore critico inizializzazione IndexedDB:", error);
+            if (preloader) {
+                const loadingText = preloader.querySelector('.loading-text');
+                if (loadingText) loadingText.textContent = 'ERRORE DATABASE FOTO!';
+            }
+            alert("Errore critico nell'inizializzazione del database delle foto. L'app potrebbe non funzionare correttamente.");
+            // Non nascondere il preloader qui, o fornire un'indicazione chiara dell'errore
+            return; // Interrompe l'inizializzazione se il DB fallisce
+        }
+
 
         await caricaEPopolaTarghe(); 
 
@@ -2512,8 +2712,7 @@
                 this.disabled = true;
                 if (galleryPageSection.style.display === 'block') {
                     targaSelezionataGlobalmente = nuovaTargaSelezionata.toUpperCase(); 
-                    // currentGallerySectionFilter è già impostato e dovrebbe essere mantenuto (es. 'remarketing' o 'riepilogo')
-                    showGalleryPage(targaSelezionataGlobalmente, currentGallerySectionFilter); 
+                    await showGalleryPage(targaSelezionataGlobalmente, currentGallerySectionFilter); 
                 } else {
                     let currentActiveSectionId = 'remarketing'; 
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
@@ -2559,7 +2758,7 @@
         }
 
         if (headerPhotosBtn) { 
-            headerPhotosBtn.addEventListener('click', () => {
+            headerPhotosBtn.addEventListener('click', async () => {
                 console.log("Header Photos/Gallery button clicked");
                 let targaForGallery = null;
                 let sectionKeyForGallery = null; 
@@ -2568,15 +2767,15 @@
                     targaForGallery = targaSelezionataGlobalmente;
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
                     if (activeSectionElement) {
-                        sectionKeyForGallery = activeSectionElement.id.replace('Section', ''); // 'remarketing', 'riepilogo', etc.
+                        sectionKeyForGallery = activeSectionElement.id.replace('Section', ''); 
                     }
-                } // Se non siamo in checklist o non c'è targa, i filtri rimangono null (galleria globale)
+                } 
 
                 if (cameraPageSection.style.display === 'flex') { 
-                    returnFromCamera(); // Gestirà il ritorno alla vista precedente (che potrebbe essere galleria)
-                     setTimeout(() => showGalleryPage(targaForGallery, sectionKeyForGallery), 50); 
+                    returnFromCamera(); 
+                     setTimeout(async () => await showGalleryPage(targaForGallery, sectionKeyForGallery), 50); 
                 } else {
-                    showGalleryPage(targaForGallery, sectionKeyForGallery);
+                    await showGalleryPage(targaForGallery, sectionKeyForGallery);
                 }
             });
         }
@@ -2587,7 +2786,6 @@
                 if (cameraPageSection.style.display === 'flex') { 
                     returnFromCamera(); 
                 } else if (galleryPageSection.style.display === 'block') { 
-                    // Se sono in galleria, e la galleria ha un contesto di targa/sezione, torna a quella sezione
                     if (currentGalleryTargaFilter && lastViewBeforeGallery === 'checklist' && lastSectionBeforeGallery) {
                         if (targaSelezionataGlobalmente !== currentGalleryTargaFilter) {
                             targaSelezionataGlobalmente = currentGalleryTargaFilter;
@@ -2595,10 +2793,10 @@
                         }
                         showView('checklist');
                         showSection(lastSectionBeforeGallery);
-                    } else { // Fallback se la galleria era globale o contesto non chiaro
+                    } else { 
                         showView('landing');
                     }
-                } else if (targaSelezionataGlobalmente) { // Se sono in un'altra vista ma una perizia è attiva
+                } else if (targaSelezionataGlobalmente) { 
                     const lastActivePage = localStorage.getItem(LAST_ACTIVE_PERIZIA_PAGE_KEY);
                     const targetSection = (lastActivePage && document.getElementById(lastActivePage + 'Section')) ? lastActivePage : 'riepilogo';
                     if (checklistContainer.style.display !== 'block' || targaSwitcherDropdown.value.toUpperCase() !== targaSelezionataGlobalmente.toUpperCase()) {
@@ -2606,7 +2804,7 @@
                     } else {
                         showSection(targetSection);
                     }
-                } else { // Nessuna perizia attiva, vai a landing
+                } else { 
                     showView('landing');
                 }
             });
@@ -2626,19 +2824,15 @@
         if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
         if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera); 
 
-        navButtons.forEach(b => b.addEventListener('click', function() {
+        navButtons.forEach(b => b.addEventListener('click', async function() {
             const targetId = this.dataset.target;
             if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter) {
-                // Se siamo in galleria con una targa attiva, i pulsanti di navigazione filtrano la galleria
                 currentGallerySectionFilter = targetId; 
-                showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter); 
+                await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter); 
             } else if (checklistContainer.style.display === 'block' || (!targaSelezionataGlobalmente && landingPageSection.style.display === 'block')) {
-                // Comportamento normale se siamo in checklist o se proviamo a navigare da landing (verrà gestito da showSection/handleTargaSelection)
                 showSection(targetId);
             } else if (!currentGalleryTargaFilter && galleryPageSection.style.display === 'block') {
-                // Se siamo in galleria globale, cliccare un nav button non dovrebbe fare nulla o portare a landing
                  console.log("Click su nav button da galleria globale, azione non definita o vai a landing.");
-                 // showView('landing'); // O non fare nulla
             }
         }));
 
