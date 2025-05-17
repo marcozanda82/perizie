@@ -628,16 +628,31 @@
          #captureBtn i {
             margin-right: 8px;
         }
+        /* NUOVO STILE PER IL PULSANTE CHIUDI FOTOCAMERA */
         #closeCameraBtn {
             position: absolute;
-            bottom: 30px; /* Stessa distanza dal basso del capture button */
-            right: 20px; /* Posizionato a destra */
+            bottom: 20px; 
+            right: 20px; 
             z-index: 2010;
-            padding: 10px 15px;
-            font-size: 0.9em;
-            background-color: #6c757d;
-            border-color: #5a6268;
+            width: 45px; /* Dimensione quadrata */
+            height: 45px; /* Dimensione quadrata */
+            background-color: rgba(40, 40, 40, 0.8); /* Sfondo semitrasparente */
+            color: #ff4d4d; /* Colore X rosso acceso */
+            border: 1px solid #ff4d4d; /* Bordo rosso */
+            border-radius: 4px; /* Angoli leggermente arrotondati */
+            font-size: 1.8em; /* Dimensione della X */
+            line-height: 43px; /* Centra la X verticalmente */
+            text-align: center;
+            padding: 0; /* Rimuove padding interno se presente */
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
+        #closeCameraBtn:hover {
+            background-color: rgba(255, 77, 77, 0.9); /* Sfondo rosso acceso al hover */
+            color: #fff; /* X bianca al hover */
+            border-color: #fff;
+        }
+
         /* Assicura che l'header sia sopra la camera page quando è attiva */
         #pageHeaderContainer.fixed-header {
             z-index: 2020; /* Deve essere più alto di .camera-page-section */
@@ -647,8 +662,7 @@
 
         @media (max-width: 768px) {
             .content-wrapper { margin-top: 0; }
-            /* .circle { width: 1.2cm; height: 1.2cm; } */ /* Commented out as .circle is replaced */
-            .circle-button { width: 45px; height: 45px; font-size: 1.2em;} /* Responsive circle buttons */
+            .circle-button { width: 45px; height: 45px; font-size: 1.2em;} 
             #navButtons button, .action-button { padding: 8px 10px; font-size: 0.85em; }
             #mainPageNavButtons { width: 100%; padding: 5px; box-sizing: border-box; }
             #mainPageNavButtons button { font-size: 0.8em; padding: 6px 8px; }
@@ -673,9 +687,9 @@
             #sheetFilterDropdown { width: 100%; }
             .fill-defaults-btn { top: 15px; right: 15px; width: 30px; height: 30px; font-size: 1.2em; }
             #captureBtn { bottom: 20px; padding: 10px 15px; font-size: 1em; }
-            #closeCameraBtn { bottom: 20px; padding: 8px 12px; font-size: 0.8em; right: 15px;}
+            #closeCameraBtn { bottom: 15px; right: 15px; width: 40px; height: 40px; font-size: 1.6em; line-height: 38px;}
         }
-         @media (max-width: 400px) { /* Further adjustments for very small screens */
+         @media (max-width: 400px) { 
             .circle-button { width: 40px; height: 40px; font-size: 1.1em;}
             .header-circles { padding: 8px 0; }
         }
@@ -869,8 +883,7 @@
         <div id="cameraPageSection" class="camera-page-section" style="display: none;">
             <video id="cameraStream" autoplay playsinline></video>
             <button id="captureBtn" class="action-button"><i class="fas fa-camera"></i> Scatta Foto</button>
-            <button id="closeCameraBtn" class="action-button">Chiudi Fotocamera</button>
-        </div>
+            <button id="closeCameraBtn" class="action-button">&times;</button> </div>
 
     </div>
 <script>
@@ -878,20 +891,19 @@
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
-    const cameraPageSection = document.getElementById('cameraPageSection'); // Nuova sezione fotocamera
+    const cameraPageSection = document.getElementById('cameraPageSection'); 
     const cameraStreamElement = document.getElementById('cameraStream');
     const captureBtn = document.getElementById('captureBtn');
     const closeCameraBtn = document.getElementById('closeCameraBtn');
     let currentCameraStream = null;
-    let lastViewBeforeCamera = 'landing'; // Memorizza l'ultima vista prima di aprire la fotocamera
-    let lastSectionBeforeCamera = null; // Memorizza l'ultima sezione di perizia prima della fotocamera
+    let lastViewBeforeCamera = 'landing'; 
+    let lastSectionBeforeCamera = null; 
 
 
     const targaListContainer = document.getElementById('targaListContainer');
     const savedTargasListContainer = document.getElementById('savedTargasListContainer');
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
-    // const headerCircles = pageHeaderContainer.querySelector('.header-circles'); // Now directly targeted by ID if needed
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const targaDropdownContainer = document.getElementById('targaDropdownContainer');
     const targaSwitcherDropdown = document.getElementById('targaSwitcherDropdown');
@@ -905,10 +917,9 @@
     
     const backToListBtn = utilityNavButtons.querySelector('#backToListBtn');
     const historyBtn = utilityNavButtons.querySelector('#historyBtn');
-    const mainExitAppBtn = utilityNavButtons.querySelector('#exitAppBtn'); // Renamed to avoid conflict
+    const mainExitAppBtn = utilityNavButtons.querySelector('#exitAppBtn'); 
     let syncToSheetsBtn; 
     
-    // NEW: Header Circle Buttons
     const headerExitBtn = document.getElementById('headerExitBtn');
     const headerPhotosBtn = document.getElementById('headerPhotosBtn');
     const headerPeriziaBtn = document.getElementById('headerPeriziaBtn');
@@ -931,7 +942,7 @@
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
     const APP_PREFIX = 'periziaApp_';
-    const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`; // For "Perizia" button
+    const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
     function updateTargaDetailsDisplay(selectedTarga) {
         if (!targaDetailsDisplay || !selectedTarga || !listaTargheCompleta.length) {
@@ -964,7 +975,7 @@
             return;
         }
         const piazzaleCorrente = veicoloAttuale.piazzale;
-        const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente && !localStorage.getItem(`${APP_PREFIX}deleted_${v.targa.toUpperCase()}`)); // Escludi cancellate
+        const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente && !localStorage.getItem(`${APP_PREFIX}deleted_${v.targa.toUpperCase()}`)); 
         targaSwitcherDropdown.innerHTML = ''; 
         if (targheDelPiazzale.length === 0) {
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
@@ -1092,7 +1103,6 @@
 
     // START: Funzioni per la pagina Fotocamera
     async function showCameraPage() {
-        // Memorizza la vista/sezione corrente prima di aprire la fotocamera
         if (checklistContainer.style.display === 'block') {
             lastViewBeforeCamera = 'checklist';
             const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
@@ -1100,7 +1110,7 @@
         } else if (historyPageSection.style.display === 'block') {
             lastViewBeforeCamera = 'history';
             lastSectionBeforeCamera = null;
-        } else { // Default alla landing page o se nessun'altra vista è attiva
+        } else { 
             lastViewBeforeCamera = 'landing';
             lastSectionBeforeCamera = null;
         }
@@ -1115,9 +1125,11 @@
         document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight}px`; 
 
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            const constraints = {
+            const constraints = { // Richiesta di risoluzione più alta
                 video: {
                     facingMode: "environment",
+                    width: { ideal: 1920, min: 1280 },
+                    height: { ideal: 1080, min: 720 },
                     advanced: [{ focusMode: "continuous" }]
                 },
                 audio: false
@@ -1128,20 +1140,18 @@
                 cameraStreamElement.srcObject = stream;
                 currentCameraStream = stream;
 
-                // Prova ad applicare i vincoli dopo aver ottenuto lo stream, per alcuni browser/fotocamere
                 const videoTrack = stream.getVideoTracks()[0];
                 if (videoTrack && typeof videoTrack.applyConstraints === 'function') {
                     try {
                         await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
-                        console.log("Vincolo focusMode 'continuous' applicato con successo (via applyConstraints).");
+                        console.log("Vincolo focusMode 'continuous' applicato.");
                     } catch (e) {
-                        console.warn("Impossibile applicare focusMode 'continuous' via applyConstraints:", e);
-                        // Tentativo con 'auto' se 'continuous' non è supportato
+                        console.warn("Impossibile applicare focusMode 'continuous' via applyConstraints:", e.name, e.message);
                         try {
-                            await videoTrack.applyConstraints({ advanced: [{ focusMode: 'auto' }] });
-                            console.log("Vincolo focusMode 'auto' applicato con successo (via applyConstraints).");
+                             await videoTrack.applyConstraints({ advanced: [{ focusMode: 'auto' }] });
+                             console.log("Vincolo focusMode 'auto' applicato come fallback.");
                         } catch (e2) {
-                            console.warn("Impossibile applicare focusMode 'auto' via applyConstraints:", e2);
+                            console.warn("Impossibile applicare focusMode 'auto' via applyConstraints:", e2.name, e2.message);
                         }
                     }
                 } else {
@@ -1149,16 +1159,16 @@
                 }
 
             } catch (err) {
-                console.error("Errore accesso fotocamera con focusMode 'continuous':", err);
-                // Fallback: prova senza il vincolo advanced focusMode se il primo tentativo fallisce
+                console.error("Errore accesso fotocamera con constraints iniziali:", err.name, err.message);
+                // Fallback: prova senza constraints di risoluzione/focus specifici se il primo tentativo fallisce
                 try {
-                    console.log("Tentativo di fallback senza focusMode avanzato...");
+                    console.log("Tentativo di fallback con constraints minimi...");
                     const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
                     cameraStreamElement.srcObject = fallbackStream;
                     currentCameraStream = fallbackStream;
-                    console.log("Accesso fotocamera riuscito in fallback (senza focusMode avanzato).");
+                    console.log("Accesso fotocamera riuscito in fallback (constraints minimi).");
                 } catch (fallbackErr) {
-                    console.error("Errore accesso fotocamera anche in fallback:", fallbackErr);
+                    console.error("Errore accesso fotocamera anche in fallback:", fallbackErr.name, fallbackErr.message);
                     alert("Impossibile accedere alla fotocamera: " + fallbackErr.message);
                     returnFromCamera();
                 }
@@ -1185,7 +1195,7 @@
             showSection(lastSectionBeforeCamera);
         } else if (lastViewBeforeCamera === 'history') {
             showView('history');
-        } else { // Default to landing
+        } else { 
             showView('landing');
         }
         if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
@@ -1198,8 +1208,11 @@
     function capturePhoto() {
         if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
             const canvas = document.createElement('canvas');
-            canvas.width = cameraStreamElement.videoWidth;
+            // Usa la risoluzione effettiva dello stream per il canvas
+            canvas.width = cameraStreamElement.videoWidth; 
             canvas.height = cameraStreamElement.videoHeight;
+            console.log(`Cattura foto con risoluzione: ${canvas.width}x${canvas.height}`);
+
             const ctx = canvas.getContext('2d');
             ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
             
@@ -1219,9 +1232,9 @@
             link.click();
             document.body.removeChild(link);
             
-            alert(`Foto "${filename}" scaricata!`);
+            // Rimosso alert: console.log(`Foto "${filename}" scaricata.`); 
         } else {
-            alert("Stream fotocamera non pronto o dimensioni video non disponibili per la cattura.");
+            console.warn("Stream fotocamera non pronto o dimensioni video non disponibili per la cattura.");
             console.warn("Dettagli stream/video per cattura: ", currentCameraStream, cameraStreamElement.readyState, cameraStreamElement.videoWidth, cameraStreamElement.videoHeight);
         }
     }
@@ -1958,7 +1971,6 @@
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
 
-        // Event Listeners for Header Circle Buttons
         if (headerExitBtn) {
             headerExitBtn.addEventListener('click', () => {
                 console.log("Header Exit button clicked");
@@ -1974,8 +1986,8 @@
         if (headerPeriziaBtn) {
             headerPeriziaBtn.addEventListener('click', async () => {
                 console.log("Header Perizia button clicked");
-                if (cameraPageSection.style.display === 'flex') { // Se la fotocamera è attiva
-                    returnFromCamera(); // Usa la nuova funzione per tornare indietro
+                if (cameraPageSection.style.display === 'flex') { 
+                    returnFromCamera(); 
                 } else if (targaSelezionataGlobalmente) {
                     const lastActivePage = localStorage.getItem(LAST_ACTIVE_PERIZIA_PAGE_KEY);
                     const targetSection = (lastActivePage && document.getElementById(lastActivePage + 'Section')) ? lastActivePage : 'riepilogo';
@@ -1994,15 +2006,15 @@
             headerCameraBtn.addEventListener('click', () => {
                 console.log("Header Camera button clicked");
                 if (cameraPageSection.style.display === 'flex') {
-                    returnFromCamera(); // Chiudi la fotocamera e torna indietro
+                    returnFromCamera(); 
                 } else {
-                    showCameraPage(); // Apri la fotocamera
+                    showCameraPage(); 
                 }
             });
         }
 
         if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
-        if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera); // Usa la nuova funzione
+        if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera); 
 
 
         async function initializeApplicationViewAndLoadData() {
