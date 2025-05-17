@@ -212,59 +212,95 @@
         h1, h2 { text-align: center; color: #ffffff; }
         h1#mainTitleGlobal { line-height: 1.2; margin-bottom: 10px; margin-top: 5px; font-size: 1.6em;}
         
+        /* === MODIFICHE/AGGIUNTE PER I MENU A TENDINA PIAZZALE E TARGA === */
         #targaDropdownContainer {
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 5px; 
+            display: flex; /* Gestito da JS, ma imposta flex per il layout */
+            flex-direction: row; /* Dispone i gruppi di menu orizzontalmente */
+            align-items: flex-start; /* Allinea i gruppi in alto */
+            justify-content: center; /* Centra i gruppi se c'è spazio */
+            gap: 20px; /* Spazio tra il gruppo piazzale e il gruppo targa */
             margin-top: 5px;
             margin-bottom: 10px;
+            flex-wrap: wrap; /* Permette ai gruppi di andare a capo su schermi piccoli */
         }
+
+        .dropdown-item-container {
+            display: flex;
+            flex-direction: column; /* Impila etichetta, select e span verticalmente */
+            align-items: center; /* Centra gli elementi nel gruppo */
+        }
+
+        .dropdown-label {
+            font-size: 0.9em;
+            color: #dddddd;
+            margin-bottom: 3px; /* Spazio sotto l'etichetta */
+        }
+
+        #piazzaleSwitcherDropdown,
         #targaSwitcherDropdown {
-            padding: 8px 12px; 
-            background-color: #383838; 
+            padding: 8px 12px;
+            background-color: #383838;
             color: #f0f0f0;
             border: 1px solid #555;
             border-radius: 4px;
-            min-width: 180px; 
+            min-width: 180px;
             max-width: 220px;
-            font-size: 1.1em; 
+            font-size: 1.1em;
             font-family: sans-serif;
             cursor: pointer;
-            text-align: center; 
+            text-align: center;
+            margin-bottom: 3px; /* Spazio prima dello span dei dettagli */
         }
+
+        #piazzaleSwitcherDropdown:hover,
         #targaSwitcherDropdown:hover {
             background-color: #454545;
             border-color: #666;
         }
+
+        #piazzaleSwitcherDropdown option,
         #targaSwitcherDropdown option {
-            padding: 5px; 
+            padding: 5px;
             background-color: #383838;
             color: #f0f0f0;
-            text-align: left; 
+            text-align: left;
         }
-        #targaDetailsDisplay {
+
+        /* Stile comune per gli span dei dettagli sotto i dropdown */
+        .details-display-span { /* Era #targaDetailsDisplay, ora una classe per entrambi */
             font-size: 0.8em;
             color: #cccccc;
-            margin-top: 3px; 
             text-align: center;
-            min-height: 1.2em; 
-            line-height: 1.3; /* Aggiunto per migliore leggibilità */
+            min-height: 1.2em;
+            line-height: 1.3;
+            width: 100%; /* Assicura che lo span occupi la larghezza per centrare il testo */
         }
         
-        @media (min-width: 480px) { 
+        /* Media query per impilare i gruppi su schermi molto piccoli se necessario */
+        @media (max-width: 480px) { /* Regola questo breakpoint se necessario */
             #targaDropdownContainer {
-                flex-direction: row; 
-                align-items: center; 
+                flex-direction: column; /* Impila il gruppo piazzale sopra il gruppo targa */
+                align-items: center; /* Centra i gruppi quando impilati */
             }
-            #targaDetailsDisplay {
-                margin-top: 0;
-                margin-left: 10px;
-                text-align: left;
+            .dropdown-item-container {
+                width: 100%; /* Fai in modo che i container occupino tutta la larghezza */
+                margin-bottom: 10px; /* Spazio tra i gruppi impilati */
+            }
+            .dropdown-item-container:last-child {
+                margin-bottom: 0;
+            }
+            /* Ripristina stile dropdown per schermi piccoli se necessario */
+            #piazzaleSwitcherDropdown,
+            #targaSwitcherDropdown {
+                min-width: 160px;
+                font-size: 1em;
+            }
+            .details-display-span {
+                font-size: 0.75em;
             }
         }
-        
+        /* === FINE MODIFICHE/AGGIUNTE PER I MENU A TENDINA === */
+
 
         h2.section-title { color: #cccccc; border-bottom: 1px solid #444444; padding-bottom: 5px; margin-top: 30px; text-align: left; }
         h3, h4 { color: #bbbbbb; margin-top: 20px; margin-bottom: 10px; }
@@ -274,8 +310,8 @@
         input[type="checkbox"], input[type="text"], input[type="url"], select, input[type="radio"], textarea { margin-right: 8px; vertical-align: middle; padding: 8px; background-color: #333; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; margin-bottom: 5px; font-family: sans-serif;}
         input[type="text"], input[type="url"], textarea { width: calc(100% - 20px); box-sizing: border-box; }
         input[type="radio"] { margin-left: 5px; }
-        select:not(#targaSwitcherDropdown) { min-width: 220px; } 
-        label { vertical-align: middle; display: block; margin-bottom: 5px; color: #e0e0e0; }
+        select:not(#targaSwitcherDropdown):not(#piazzaleSwitcherDropdown) { min-width: 220px; } /* Escludi i nuovi dropdown dallo stile generico */
+        label:not(.dropdown-label) { vertical-align: middle; display: block; margin-bottom: 5px; color: #e0e0e0; } /* Escludi etichette dropdown */
         textarea {resize: vertical;}
 
         .category-section ul li > input[type="checkbox"] {
@@ -560,9 +596,8 @@
             #mainPageNavButtons { width: 100%; padding: 5px; box-sizing: border-box; }
             #mainPageNavButtons button { font-size: 0.8em; padding: 6px 8px; }
             #utilityNavButtons button { font-size: 0.85em; padding: 8px 10px; }
-            input[type="text"], input[type="url"], select:not(#targaSwitcherDropdown), textarea { width: 100%; box-sizing: border-box; }
-            #targaSwitcherDropdown { min-width: 160px; font-size: 1em; } 
-            #targaDetailsDisplay { font-size: 0.75em; }
+            input[type="text"]:not(.posizione-input), input[type="url"], select:not(#targaSwitcherDropdown):not(#piazzaleSwitcherDropdown), textarea { width: 100%; box-sizing: border-box; } /* Escludi anche piazzaleSwitcherDropdown */
+            /* Gli stili specifici per #piazzaleSwitcherDropdown e #targaSwitcherDropdown su schermi piccoli sono gestiti nella loro media query dedicata (max-width: 480px) */
             .table-scroll-wrapper { overflow-x: auto; }
             .targa-list-table-content { min-width: 600px; } 
             .targa-list-header { display: flex !important; }
@@ -611,9 +646,17 @@
             <button id="exitAppBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Esci</button>
         </div>
         <h1 id="mainTitleGlobal">Checklist Perizia Veicolo</h1>
-        <div id="targaDropdownContainer" style="display: none;">
-            <select id="targaSwitcherDropdown"></select>
-            <span id="targaDetailsDisplay"></span>
+        <div id="targaDropdownContainer" style="display: none;"> <div class="dropdown-item-container">
+                <label for="piazzaleSwitcherDropdown" class="dropdown-label">Piazzale:</label>
+                <select id="piazzaleSwitcherDropdown">
+                    </select>
+                <span id="piazzaleDetailsDisplay" class="details-display-span"></span>
+            </div>
+
+            <div class="dropdown-item-container">
+                <label for="targaSwitcherDropdown" class="dropdown-label">Targa:</label>
+                <select id="targaSwitcherDropdown"></select>
+                <span id="targaDetailsDisplay" class="details-display-span"></span> </div>
         </div>
         <div id="navButtons">
             <div id="mainPageNavButtons">
@@ -775,7 +818,11 @@
     const pageHeaderContainer = document.getElementById('pageHeaderContainer');
     const headerCircles = pageHeaderContainer.querySelector('.header-circles');
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
+    
+    // Variabili per i nuovi dropdown
     const targaDropdownContainer = document.getElementById('targaDropdownContainer');
+    const piazzaleSwitcherDropdown = document.getElementById('piazzaleSwitcherDropdown'); // NUOVO
+    const piazzaleDetailsDisplay = document.getElementById('piazzaleDetailsDisplay'); // NUOVO
     const targaSwitcherDropdown = document.getElementById('targaSwitcherDropdown');
     const targaDetailsDisplay = document.getElementById('targaDetailsDisplay'); 
 
@@ -807,46 +854,77 @@
     
     let listaTargheCompleta = [];
     let targaSelezionataGlobalmente = null;
+    // Aggiungere variabile per piazzale selezionato globalmente se necessario per la logica futura
+    let piazzaleSelezionatoGlobalmente = null; 
     const APP_PREFIX = 'periziaApp_';
 
-    function updateTargaDetailsDisplay(selectedTarga) {
-        if (!targaDetailsDisplay || !selectedTarga || !listaTargheCompleta.length) {
-            if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
-            return;
-        }
-        const veicolo = listaTargheCompleta.find(v => v.targa.toUpperCase() === selectedTarga.toUpperCase());
-        if (veicolo) {
-            let detailsText = '';
-            const marca = veicolo.marca ? String(veicolo.marca).trim() : '';
-            const modello = veicolo.modello ? String(veicolo.modello).trim() : '';
-            if (marca) detailsText += marca;
-            if (modello) detailsText += (detailsText ? ' ' : '') + modello;
-            targaDetailsDisplay.textContent = detailsText || '';
-        } else {
+    // --- MODIFICA PER GESTIRE DETTAGLI TARGA E POTENZIALMENTE PIAZZALE ---
+    function updateDropdownDetails() {
+        // Dettagli Targa
+        if (targaDetailsDisplay && targaSelezionataGlobalmente && listaTargheCompleta.length) {
+            const veicolo = listaTargheCompleta.find(v => v.targa.toUpperCase() === targaSelezionataGlobalmente.toUpperCase());
+            if (veicolo) {
+                let detailsText = '';
+                const marca = veicolo.marca ? String(veicolo.marca).trim() : '';
+                const modello = veicolo.modello ? String(veicolo.modello).trim() : '';
+                if (marca) detailsText += marca;
+                if (modello) detailsText += (detailsText ? ' ' : '') + modello;
+                targaDetailsDisplay.textContent = detailsText || '';
+            } else {
+                targaDetailsDisplay.textContent = '';
+            }
+        } else if (targaDetailsDisplay) {
             targaDetailsDisplay.textContent = '';
+        }
+
+        // Dettagli Piazzale (Esempio, da adattare alla logica effettiva dei piazzali)
+        if (piazzaleDetailsDisplay && piazzaleSelezionatoGlobalmente) {
+            // Qui potresti mostrare informazioni aggiuntive sul piazzale se necessario
+            // Per ora, potrebbe rimanere vuoto o mostrare il nome del piazzale stesso
+            piazzaleDetailsDisplay.textContent = piazzaleSelezionatoGlobalmente; 
+        } else if (piazzaleDetailsDisplay) {
+            piazzaleDetailsDisplay.textContent = '';
         }
     }
 
+
     function populateTargaSwitcherDropdown() {
         if (!targaSwitcherDropdown || !targaSelezionataGlobalmente || !listaTargheCompleta.length) {
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
+            // Non nascondere l'intero targaDropdownContainer se il piazzale è ancora visibile
+            // if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
             return;
         }
         const veicoloAttuale = listaTargheCompleta.find(v => v.targa.toUpperCase() === targaSelezionataGlobalmente.toUpperCase());
-        if (!veicoloAttuale || !veicoloAttuale.piazzale) {
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-            if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
-            return;
+        
+        // Filtra le targhe per il piazzale correntemente selezionato (piazzaleSelezionatoGlobalmente)
+        // o per il piazzale del veicolo attuale se piazzaleSelezionatoGlobalmente non è ancora definito
+        const piazzaleDiRiferimento = piazzaleSelezionatoGlobalmente || (veicoloAttuale ? veicoloAttuale.piazzale : null);
+
+        if (!piazzaleDiRiferimento) {
+             targaSwitcherDropdown.innerHTML = '<option value="">Nessun piazzale</option>';
+             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
+             return;
         }
-        const piazzaleCorrente = veicoloAttuale.piazzale;
-        const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente && !localStorage.getItem(`${APP_PREFIX}deleted_${v.targa.toUpperCase()}`)); // Escludi cancellate
+
+        const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleDiRiferimento && !localStorage.getItem(`${APP_PREFIX}deleted_${v.targa.toUpperCase()}`));
         targaSwitcherDropdown.innerHTML = ''; 
+        
         if (targheDelPiazzale.length === 0) {
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
+            targaSwitcherDropdown.innerHTML = '<option value="">Nessuna targa</option>';
+            // Non nascondere l'intero container qui
             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
             return;
         }
+        
+        // Aggiungi un'opzione di default se nessuna targa è selezionata o se la targa selezionata non è in questo piazzale
+        if (!targheDelPiazzale.some(v => v.targa.toUpperCase() === targaSelezionataGlobalmente.toUpperCase())) {
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "Seleziona Targa";
+            targaSwitcherDropdown.appendChild(defaultOption);
+        }
+
         targheDelPiazzale.sort((a, b) => a.targa.localeCompare(b.targa)); 
         targheDelPiazzale.forEach(v => {
             const option = document.createElement('option');
@@ -857,9 +935,69 @@
             }
             targaSwitcherDropdown.appendChild(option);
         });
-        if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
-        updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
+        
+        if (targaDropdownContainer && getComputedStyle(targaDropdownContainer).display === 'none' && (piazzaleSwitcherDropdown.options.length > 0 || targaSwitcherDropdown.options.length > 0)) {
+             targaDropdownContainer.style.display = 'flex';
+        }
+        updateDropdownDetails(); 
     }
+
+    // --- NUOVA FUNZIONE PER POPOLARE IL DROPDOWN DEI PIAZZALI ---
+    function populatePiazzaleSwitcherDropdown() {
+        if (!piazzaleSwitcherDropdown || !listaTargheCompleta.length) {
+            // Non nascondere l'intero targaDropdownContainer se il dropdown delle targhe è ancora visibile
+            if (piazzaleDetailsDisplay) piazzaleDetailsDisplay.textContent = '';
+            return;
+        }
+
+        const piazzaliUnici = [...new Set(listaTargheCompleta.map(v => v.piazzale).filter(p => p && p.trim() !== ''))].sort();
+        piazzaleSwitcherDropdown.innerHTML = ''; // Pulisci le opzioni esistenti
+
+        if (piazzaliUnici.length === 0) {
+            piazzaleSwitcherDropdown.innerHTML = '<option value="">Nessun piazzale</option>';
+            if (piazzaleDetailsDisplay) piazzaleDetailsDisplay.textContent = '';
+            // Potrebbe essere necessario aggiornare anche il dropdown delle targhe
+            populateTargaSwitcherDropdown(); 
+            return;
+        }
+        
+        // Aggiungi un'opzione di default "Seleziona Piazzale"
+        const defaultOption = document.createElement('option');
+        defaultOption.value = ""; // Valore vuoto per l'opzione di default
+        defaultOption.textContent = "Seleziona Piazzale";
+        piazzaleSwitcherDropdown.appendChild(defaultOption);
+
+        piazzaliUnici.forEach(piazzale => {
+            const option = document.createElement('option');
+            option.value = piazzale;
+            option.textContent = piazzale;
+            if (piazzale === piazzaleSelezionatoGlobalmente) {
+                option.selected = true;
+            }
+            piazzaleSwitcherDropdown.appendChild(option);
+        });
+
+        // Se un piazzale era già selezionato (es. da caricamento stato), mantienilo
+        if (piazzaleSelezionatoGlobalmente && !piazzaliUnici.includes(piazzaleSelezionatoGlobalmente)) {
+            // Se il piazzale precedentemente selezionato non esiste più, resetta
+            piazzaleSelezionatoGlobalmente = null; 
+            if (piazzaleSwitcherDropdown.options.length > 0) {
+                 piazzaleSwitcherDropdown.value = ""; // Seleziona "Seleziona Piazzale"
+            }
+        } else if (piazzaleSelezionatoGlobalmente) {
+             piazzaleSwitcherDropdown.value = piazzaleSelezionatoGlobalmente;
+        }
+
+
+        if (targaDropdownContainer && getComputedStyle(targaDropdownContainer).display === 'none' && (piazzaleSwitcherDropdown.options.length > 0 || targaSwitcherDropdown.options.length > 0)) {
+            targaDropdownContainer.style.display = 'flex';
+        }
+        // Aggiorna i dettagli (potrebbe essere solo il nome del piazzale)
+        updateDropdownDetails();
+        // Aggiorna il dropdown delle targhe in base al piazzale selezionato (o default)
+        populateTargaSwitcherDropdown(); 
+    }
+
 
     async function inviaPeriziaSingolaASheets(periziaDaInviare) { 
         if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') { console.error("URL della Web App Google Sheets non configurato."); return { success: false, message: "URL Web App non configurato." }; } 
@@ -891,7 +1029,6 @@
     
     async function fetchLatestPeriziaFromSheets(targa) { 
         if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch."); return null; } 
-        // Check if targa is marked for deletion locally
         if (localStorage.getItem(`${APP_PREFIX}deleted_${targa.toUpperCase()}`)) {
             console.log(`WorkspaceLatestPerizia: Targa ${targa} marcata come cancellata localmente. Non verrà recuperata da Sheets.`);
             return null;
@@ -943,13 +1080,12 @@
     function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa.toUpperCase()]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa.toUpperCase()} marked complete locally.`);}catch(e){console.error("Errore LS Mark Err:",e);}}
     function unmarkTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe(); if(completed[targa.toUpperCase()]){ delete completed[targa.toUpperCase()]; localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed)); console.log(`${targa.toUpperCase()} unmarked as complete locally.`);}}catch(e){console.error("Errore LS Unmark Err:",e);}}
     
-    // --- NUOVA FUNZIONE PER CANCELLARE I DATI LOCALI ---
     function clearLocalDataForTarga(targaUpper) {
         if (!targaUpper) return;
         try {
             localStorage.removeItem(`${APP_PREFIX}data_${targaUpper}`);
             console.log(`Dati modulo rimossi per ${targaUpper}.`);
-            unmarkTargaAsCompleted(targaUpper); // Rimuove il flag di completamento locale
+            unmarkTargaAsCompleted(targaUpper); 
             localStorage.removeItem(`${APP_PREFIX}posizione_${targaUpper}`);
             console.log(`Dati posizione rimossi per ${targaUpper}.`);
             localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`);
@@ -959,38 +1095,6 @@
             alert(`Errore cancellazione dati locali per ${targaUpper}.`);
         }
     }
-
-    // --- FUNZIONE OBSOLETA: deleteProgressForTarga ---
-    /*
-    function deleteProgressForTarga(targa) {
-        if (!targa) { return; }
-        const targaUpper = targa.toUpperCase();
-        try {
-            localStorage.removeItem(`${APP_PREFIX}data_${targaUpper}`);
-            console.log(`Dati modulo rimossi per ${targaUpper}.`);
-            unmarkTargaAsCompleted(targaUpper); 
-            localStorage.removeItem(`${APP_PREFIX}posizione_${targaUpper}`);
-            console.log(`Dati posizione rimossi per ${targaUpper}.`);
-            localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`);
-            console.log(`Dati urgenza rimossi per ${targaUpper}.`);
-            
-            // NUOVA AGGIUNTA: Contrassegna per la cancellazione da Sheet
-            localStorage.setItem(`${APP_PREFIX}deleted_${targaUpper}`, new Date().toISOString());
-            console.log(`Targa ${targaUpper} contrassegnata per la cancellazione da Sheets.`);
-
-        } catch (e) {
-            console.error(`Errore cancellazione dati per ${targaUpper}:`, e);
-            alert(`Errore cancellazione dati per ${targaUpper}.`);
-        }
-        if (typeof popolaTargheFiltrate === 'function') { 
-            popolaTargheFiltrate(); // Aggiorna la lista
-        }
-        if (targaSelezionataGlobalmente && targaSelezionataGlobalmente.toUpperCase() === targaUpper) { 
-            targaSelezionataGlobalmente = null;
-            showView('landing'); 
-        }
-    }
-    */
 
     function generateAndDownloadScreenshot() { return new Promise((resolve, reject) => { const riepilogoSection = document.getElementById('riepilogoSection'); if (!riepilogoSection) { alert("Errore: Sezione Riepilogo non trovata per lo screenshot."); return reject("Sezione riepilogo non trovata"); } if (typeof html2canvas === 'undefined') { alert("Errore: Libreria html2canvas non caricata."); return reject("html2canvas non caricata"); } setTimeout(() => { console.log("Inizio generazione screenshot..."); riepilogoSection.scrollTop = 0;  html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY, windowHeight: riepilogoSection.scrollHeight }) .then(canvas => { const link = document.createElement('a'); let targaSanitized = 'sconosciuta'; let piazzaleSanitized = 'piazzale_sconosciuto'; if (targaSelezionataGlobalmente) { targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_'); const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") { piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_'); if (!piazzaleSanitized) piazzaleSanitized = 'N_D'; } else { piazzaleSanitized = 'N_D'; } } link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`; link.href = canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); console.log(`Screenshot generato e download avviato: ${link.download}`); resolve(); }) .catch(error => { console.error("Errore durante la generazione dello screenshot:", error); alert("Si è verificato un errore durante la generazione dello screenshot."); reject(error); }); }, 100);  }); }
     async function handleSavePeriziaAndReturn() {  if (!targaSelezionataGlobalmente) { alert("Nessuna targa attiva selezionata per il salvataggio."); return; } const originalButtonText = saveAndReturnBtn.textContent; saveAndReturnBtn.textContent = 'Salvataggio locale...'; saveAndReturnBtn.disabled = true; if (!saveProgress(targaSelezionataGlobalmente)) {  alert("Salvataggio dati nel browser fallito."); saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; return; } if (document.getElementById('riepilogoSection').classList.contains('active')) { generateSummary();  } try { await generateAndDownloadScreenshot(); } catch (e) { console.warn("Generazione screenshot fallita, ma i dati sono stati salvati localmente.", e); } markTargaAsCompleted(targaSelezionataGlobalmente);  updateNavButtonColors();  saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; alert(`Perizia per ${targaSelezionataGlobalmente} salvata localmente e screenshot tentato.`); showView('landing');  }
@@ -1009,7 +1113,10 @@
         if (utilityNavButtons) utilityNavButtons.style.display = 'flex'; 
         if (navButtonsContainer) navButtonsContainer.style.display = 'none'; 
         if (mainTitleGlobal) mainTitleGlobal.style.display = 'block'; 
+        
+        // Gestione visibilità contenitore dropdown
         if (targaDropdownContainer) targaDropdownContainer.style.display = 'none'; 
+        if (piazzaleDetailsDisplay) piazzaleDetailsDisplay.textContent = ''; 
         if (targaDetailsDisplay) targaDetailsDisplay.textContent = ''; 
 
         if (viewName === 'landing') {
@@ -1027,12 +1134,16 @@
             pageHeaderContainer.classList.add('fixed-header');
             headerCircles.style.display = 'flex';
             if (navButtonsContainer) navButtonsContainer.style.display = 'flex'; 
-            if (!targaSelezionataGlobalmente) { 
-                console.warn("Tentativo di mostrare checklist senza targa selezionata. Reindirizzamento a landing.");
-                showView('landing'); 
-                return;
+            
+            if (!targaSelezionataGlobalmente && !piazzaleSelezionatoGlobalmente) { 
+                 // Se né targa né piazzale sono selezionati, potrebbe essere un nuovo avvio o un errore
+                 // Potrebbe essere meglio mostrare prima la selezione del piazzale se è il primo passo
+                console.warn("Tentativo di mostrare checklist senza targa o piazzale selezionato.");
+                // Forse reindirizzare a 'landing' o gestire diversamente
+                // showView('landing'); return; 
             }
-            if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente.toUpperCase()}`)) {
+
+            if (targaSelezionataGlobalmente && localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente.toUpperCase()}`)) {
                 console.warn(`Tentativo di mostrare checklist per targa ${targaSelezionataGlobalmente} cancellata. Reindirizzamento a landing.`);
                 showView('landing');
                 alert(`La perizia per ${targaSelezionataGlobalmente} è stata cancellata e non può essere modificata.`);
@@ -1041,9 +1152,12 @@
 
             checklistContainer.style.display = 'block';
             if (mainTitleGlobal) mainTitleGlobal.style.display = 'none'; 
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex'; 
-            populateTargaSwitcherDropdown(); 
-            updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
+            if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex'; // Mostra il contenitore dei dropdown
+            
+            populatePiazzaleSwitcherDropdown(); // Popola e imposta il piazzale
+            populateTargaSwitcherDropdown();    // Popola e imposta la targa
+            updateDropdownDetails();            // Aggiorna i testi dei dettagli
+
             if (tipoTrazioneSelect) handleTrazioneChange();
             updateNavButtonColors(); 
         } else if (viewName === 'history') {
@@ -1087,11 +1201,12 @@
             return; 
         }
 
+        // Se la targa selezionata è la stessa e siamo già nella checklist, aggiorna solo i dettagli e la sezione
         if (targaSelezionataGlobalmente === targaUpper && checklistContainer.style.display === 'block') {
-            if (targaSwitcherDropdown.value !== targaUpper) {
+            if (targaSwitcherDropdown.value !== targaUpper) { // Assicurati che il dropdown sia sincronizzato
                 targaSwitcherDropdown.value = targaUpper;
             }
-            updateTargaDetailsDisplay(targaUpper);
+            updateDropdownDetails(); // Aggiorna span dettagli
             if (targetSectionId) {
                  const currentActiveSectionEl = document.querySelector('#checklistContainer .category-section.active');
                  const currentActiveSectionId = currentActiveSectionEl ? currentActiveSectionEl.id.replace('Section', '') : null;
@@ -1103,7 +1218,19 @@
         }
 
         targaSelezionataGlobalmente = targaUpper;
-        console.log(`Targa ${targaSelezionataGlobalmente} selezionata. Target section: ${targetSectionId}`);
+        // Trova il piazzale della targa selezionata e aggiorna piazzaleSelezionatoGlobalmente
+        const veicoloSelezionato = listaTargheCompleta.find(v => v.targa.toUpperCase() === targaUpper);
+        if (veicoloSelezionato && veicoloSelezionato.piazzale) {
+            piazzaleSelezionatoGlobalmente = veicoloSelezionato.piazzale;
+            if (piazzaleSwitcherDropdown) piazzaleSwitcherDropdown.value = piazzaleSelezionatoGlobalmente;
+        } else if (veicoloSelezionato && !veicoloSelezionato.piazzale && piazzaleSwitcherDropdown){
+            // Se il veicolo non ha un piazzale, ma il dropdown piazzali esiste, deselezionalo
+            piazzaleSelezionatoGlobalmente = null;
+            piazzaleSwitcherDropdown.value = "";
+        }
+
+
+        console.log(`Targa ${targaSelezionataGlobalmente} selezionata. Piazzale: ${piazzaleSelezionatoGlobalmente}. Target section: ${targetSectionId}`);
         if (targheLoadingStatus && landingPageSection.style.display === 'block') {
             targheLoadingStatus.textContent = `Caricamento dati per ${targaSelezionataGlobalmente}...`;
         }
@@ -1174,6 +1301,9 @@
                 showSection('remarketing'); 
             }
         }
+        // Assicurati che i dropdown siano aggiornati dopo aver selezionato la targa
+        populatePiazzaleSwitcherDropdown();
+        populateTargaSwitcherDropdown();
     }
     
     function populateSavedTargasList() {
@@ -1219,7 +1349,6 @@
     function setupSheetFilterDropdown() { if (!sheetFilterDropdown) return; const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== '').sort())]; sheetFilterDropdown.innerHTML = ''; sources.forEach(source => { const option = document.createElement('option'); option.value = source; option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source; sheetFilterDropdown.appendChild(option); }); const savedPiazzaleFilter = localStorage.getItem(`${APP_PREFIX}selectedPiazzaleFilter`); if (savedPiazzaleFilter && sources.includes(savedPiazzaleFilter)) { sheetFilterDropdown.value = savedPiazzaleFilter; } else { sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); } sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange); sheetFilterDropdown.addEventListener('change', handleSheetFilterChange); }
     function handleSheetFilterChange() { if (sheetFilterDropdown) { localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value); } popolaTargheFiltrate(); targaSelezionataGlobalmente = null; }
     
-    // --- MODIFICATA: popolaTargheFiltrate ---
     function popolaTargheFiltrate() {
         const tEl = document.getElementById('targaListContainer');
         if (!tEl) return;
@@ -1339,7 +1468,6 @@
             const modelloCol = document.createElement('span'); modelloCol.classList.add('targa-col', 'targa-col-modello'); modelloCol.textContent = item.modello || 'N/D'; li.appendChild(modelloCol); 
             const piazzaleCol = document.createElement('span'); piazzaleCol.classList.add('targa-col', 'targa-col-piazzale'); piazzaleCol.textContent = item.piazzale || 'N/D'; li.appendChild(piazzaleCol); 
             
-            // --- MODIFICA LISTENER PULSANTE CANCELLAZIONE ---
             const actionsCol = document.createElement('span'); 
             actionsCol.classList.add('targa-col', 'targa-col-actions'); 
             if (!isLocallyDeletedFlag) { 
@@ -1352,11 +1480,7 @@
                 delB.addEventListener('click', function(event) { 
                     event.stopPropagation(); 
                     const tDelUpper = this.dataset.targa; 
-
-                    // 1. Sicuramente cancellare i dati di salvataggio in locale
                     clearLocalDataForTarga(tDelUpper);
-
-                    // 2. Chiedere tramite finestra di dialogo per marchiare la targa come eliminata da Sheets
                     if (confirm(`I dati locali per la targa ${item.targa} sono stati cancellati.\n\nVuoi anche marcarla per la cancellazione da Google Sheets alla prossima sincronizzazione?`)) {
                         try {
                             localStorage.setItem(`${APP_PREFIX}deleted_${tDelUpper}`, new Date().toISOString());
@@ -1368,13 +1492,12 @@
                     } else {
                         console.log(`L'utente ha scelto di non marcare ${tDelUpper} per la cancellazione da Sheets.`);
                     }
-
-                    // Aggiorna la lista e la vista in ogni caso
                     if (typeof popolaTargheFiltrate === 'function') {
                         popolaTargheFiltrate();
                     }
                     if (targaSelezionataGlobalmente && targaSelezionataGlobalmente.toUpperCase() === tDelUpper) {
                         targaSelezionataGlobalmente = null;
+                        piazzaleSelezionatoGlobalmente = null; // Resetta anche il piazzale
                         showView('landing');
                     }
                 }); 
@@ -1389,7 +1512,7 @@
         if(targheLoadingStatus) targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
     }
 
-    async function caricaEPopolaTarghe() { const preloaderInstance = document.getElementById('preloader');  if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server..."; try { const r = await fetch(GOOGLE_SHEET_CSV_URL + `&nocache=${new Date().getTime()}`); if (!r.ok) { let e = `HTTP ${r.status}.`; if (r.status === 0) e = "Errore di rete o CORS."; else if (r.status === 404) e = "File CSV non trovato (404)."; else if (r.status === 403) e = "Accesso al file CSV negato (403)."; throw new Error(e); } const csv = await r.text(); const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== ''); if (lines.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV."; listaTargheCompleta = []; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } listaTargheCompleta = lines.map(l => { const p = l.split(','); return {  targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(), marca: (p[1] || '').trim().replace(/^"|"$/g, ''), modello: (p[2] || '').trim().replace(/^"|"$/g, ''), piazzale: (p[3] || '').trim().replace(/^"|"$/g, '') }; }).filter(i => i.targa && i.targa.length > 3);  if (listaTargheCompleta.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";  if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } setupSheetFilterDropdown(); popolaTargheFiltrate(); } catch (e) { console.error("Errore caricamento/popolamento targhe:", e); if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = '';  listaTargheCompleta = []; } finally { if (preloaderInstance) { preloaderInstance.classList.add('hidden'); setTimeout(() => { if (preloaderInstance) preloaderInstance.style.display = 'none'; }, 700); } } }
+    async function caricaEPopolaTarghe() { const preloaderInstance = document.getElementById('preloader');  if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server..."; try { const r = await fetch(GOOGLE_SHEET_CSV_URL + `&nocache=${new Date().getTime()}`); if (!r.ok) { let e = `HTTP ${r.status}.`; if (r.status === 0) e = "Errore di rete o CORS."; else if (r.status === 404) e = "File CSV non trovato (404)."; else if (r.status === 403) e = "Accesso al file CSV negato (403)."; throw new Error(e); } const csv = await r.text(); const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== ''); if (lines.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV."; listaTargheCompleta = []; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } listaTargheCompleta = lines.map(l => { const p = l.split(','); return {  targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(), marca: (p[1] || '').trim().replace(/^"|"$/g, ''), modello: (p[2] || '').trim().replace(/^"|"$/g, ''), piazzale: (p[3] || '').trim().replace(/^"|"$/g, '') }; }).filter(i => i.targa && i.targa.length > 3);  if (listaTargheCompleta.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";  if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } setupSheetFilterDropdown(); popolaTargheFiltrate(); populatePiazzaleSwitcherDropdown(); /* AGGIUNTO: popola dropdown piazzali */ } catch (e) { console.error("Errore caricamento/popolamento targhe:", e); if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; if (targaListContainer) targaListContainer.innerHTML = '';  listaTargheCompleta = []; } finally { if (preloaderInstance) { preloaderInstance.classList.add('hidden'); setTimeout(() => { if (preloaderInstance) preloaderInstance.style.display = 'none'; }, 700); } } }
     function initSequentialAnimation() { const checklistContainerDiv = document.getElementById('checklistContainer'); if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return; const activeSection = checklistContainerDiv.querySelector('.category-section.active'); if (!activeSection) return; activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me')); const allVisibleElementsInSection = Array.from( activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled), textarea:not(:disabled)') ).filter(el => { let current = el; while (current && current !== activeSection.parentElement) {  if (getComputedStyle(current).display === 'none' || getComputedStyle(current).visibility === 'hidden') return false; current = current.parentElement; } return el.offsetParent !== null;  }); const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el)); if (startIndex === -1 && allVisibleElementsInSection.length > 0) {  return; } if (allVisibleElementsInSection.length === 0) {   return; } const elementsToAnimate = allVisibleElementsInSection.slice(startIndex >= 0 ? startIndex : 0); if (elementsToAnimate.length === 0) return; let currentIndex = 0; let activeListeners = [];  function clearAllActiveAnimationListeners() { activeListeners.forEach(({element, type, handler}) => { element.removeEventListener(type, handler); element.classList.remove('animate-me');  }); activeListeners = []; } clearAllActiveAnimationListeners(); function animateNextElement() { if (currentIndex >= elementsToAnimate.length) { clearAllActiveAnimationListeners(); return; } const currentElement = elementsToAnimate[currentIndex]; if (!isInputDefault(currentElement)) {  currentIndex++; animateNextElement(); return; } currentElement.classList.add('animate-me'); currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); const onValueChange = (event) => { let processChange = false; if (event.type === 'change') { processChange = true; } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {  processChange = true; }  if (processChange && !isInputDefault(currentElement)) {  currentElement.classList.remove('animate-me'); activeListeners = activeListeners.filter(listener => { if (listener.element === currentElement) { listener.element.removeEventListener(listener.type, listener.handler); return false;  } return true;  }); currentIndex++; setTimeout(animateNextElement, 50);  } }; currentElement.addEventListener('change', onValueChange); activeListeners.push({element: currentElement, type: 'change', handler: onValueChange}); if (currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') { currentElement.addEventListener('blur', onValueChange);  activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange}); } } animateNextElement(); }
 
     function showSection(targetId) {
@@ -1404,11 +1527,14 @@
         if (checklistContainer.style.display === 'block') { 
             if (mainTitleGlobal) mainTitleGlobal.style.display = 'none';
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
-            populateTargaSwitcherDropdown(); 
-            updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
+            // Assicurati che i dropdown siano popolati e i dettagli aggiornati
+            populatePiazzaleSwitcherDropdown();
+            populateTargaSwitcherDropdown();
+            updateDropdownDetails(); 
         } else {
             if (mainTitleGlobal) mainTitleGlobal.style.display = 'block';
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
+             if (piazzaleDetailsDisplay) piazzaleDetailsDisplay.textContent = '';
             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
         }
         const targetSectionElement = document.getElementById(targetId + 'Section');
@@ -1422,7 +1548,7 @@
 
     navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
     function getSelectText(selectElementOrId) { const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId; if (el && el.tagName === 'SELECT' && el.value !== "") { if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) { return el.options[el.selectedIndex].text; } return el.value;  } return "N/S";  }
-    function generateSummary() { summaryContent.innerHTML = ''; let targa = targaSelezionataGlobalmente || "N/D"; function createSummaryItem(label, value, isAnomaly = false) { const itemDiv = document.createElement('div'); itemDiv.classList.add('summary-item'); if (isAnomaly) itemDiv.classList.add('summary-anomaly'); itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; return itemDiv; } summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase())); if (targaSelezionataGlobalmente) { const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); let marcaVeicolo = "N/D", modelloVeicolo = "N/D"; if (veicoloAttuale) { marcaVeicolo = veicoloAttuale.marca || "N/D"; modelloVeicolo = veicoloAttuale.modello || "N/D"; } summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D")); const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente); summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary)); } else {  summaryContent.appendChild(createSummaryItem("Marca", "N/D")); summaryContent.appendChild(createSummaryItem("Modello", "N/D")); summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); } summaryContent.innerHTML += `<h3>Remarketing:</h3>`; const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; const isEV = tipoTrazioneValue === 'elettrico'; summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect))); let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza'); let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante"); summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante")); summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia)); let kmStato = getSelectText('stato_chilometri'); summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); let cdcStato = getSelectText('stato_cdc'); summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente")); summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente")); if (isEV) { summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`; let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente")); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente")); } summaryContent.innerHTML += `<h3>Pneumatici:</h3>`; const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }]; pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); }); summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`; summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK')); summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK')); const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : ""; if (noteDanniValue) { const noteDiv = document.createElement('div'); noteDiv.classList.add('summary-item', 'summary-notes'); const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: "; const contentDiv = document.createElement('div'); contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue; noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv); summaryContent.appendChild(noteDiv); } }
+    function generateSummary() { summaryContent.innerHTML = ''; let targa = targaSelezionataGlobalmente || "N/D"; function createSummaryItem(label, value, isAnomaly = false) { const itemDiv = document.createElement('div'); itemDiv.classList.add('summary-item'); if (isAnomaly) itemDiv.classList.add('summary-anomaly'); itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; return itemDiv; } summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase())); if (targaSelezionataGlobalmente) { const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); let marcaVeicolo = "N/D", modelloVeicolo = "N/D", piazzaleVeicolo = "N/D"; if (veicoloAttuale) { marcaVeicolo = veicoloAttuale.marca || "N/D"; modelloVeicolo = veicoloAttuale.modello || "N/D"; piazzaleVeicolo = veicoloAttuale.piazzale || "N/D"; } summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); summaryContent.appendChild(createSummaryItem("Piazzale", piazzaleVeicolo)); summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D")); const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente); summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary)); } else {  summaryContent.appendChild(createSummaryItem("Marca", "N/D")); summaryContent.appendChild(createSummaryItem("Modello", "N/D")); summaryContent.appendChild(createSummaryItem("Piazzale", "N/D")); summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); } summaryContent.innerHTML += `<h3>Remarketing:</h3>`; const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; const isEV = tipoTrazioneValue === 'elettrico'; summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect))); let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza'); let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante"); summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante")); summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia)); let kmStato = getSelectText('stato_chilometri'); summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); let cdcStato = getSelectText('stato_cdc'); summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente")); summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente")); if (isEV) { summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`; let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente")); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente")); } summaryContent.innerHTML += `<h3>Pneumatici:</h3>`; const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }]; pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); }); summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`; summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK')); summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK')); const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : ""; if (noteDanniValue) { const noteDiv = document.createElement('div'); noteDiv.classList.add('summary-item', 'summary-notes'); const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: "; const contentDiv = document.createElement('div'); contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue; noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv); summaryContent.appendChild(noteDiv); } }
     
     async function fetchAllDataFromSheets() { 
         if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch di tutti i dati."); return { success: false, message: "URL Web App non configurato.", data: [] }; } 
@@ -1694,6 +1820,38 @@
         });
         if (tipoTrazioneSelect) tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
         
+        // --- EVENT LISTENER PER IL NUOVO DROPDOWN PIAZZALI ---
+        if (piazzaleSwitcherDropdown) {
+            piazzaleSwitcherDropdown.addEventListener('change', async function() {
+                const nuovoPiazzaleSelezionato = this.value;
+                if (nuovoPiazzaleSelezionato !== piazzaleSelezionatoGlobalmente) {
+                    piazzaleSelezionatoGlobalmente = nuovoPiazzaleSelezionato;
+                    targaSelezionataGlobalmente = null; // Resetta la targa quando cambia il piazzale
+                    
+                    // Aggiorna i dropdown e i dettagli
+                    populateTargaSwitcherDropdown(); // Questo aggiornerà le targhe per il nuovo piazzale
+                    updateDropdownDetails();
+
+                    // Se siamo nella checklist, e il piazzale selezionato è vuoto (es. "Seleziona Piazzale")
+                    // potresti voler resettare il form o reindirizzare, o semplicemente non caricare una targa.
+                    // Se invece un piazzale valido è selezionato, ma nessuna targa, il form resterà vuoto.
+                    if (checklistContainer.style.display === 'block') {
+                        if (!piazzaleSelezionatoGlobalmente) { // Nessun piazzale selezionato
+                            resetChecklistForm();
+                            updateNavButtonColors(); // Resetta i colori dei bottoni di navigazione
+                        } else {
+                            // Il dropdown delle targhe è stato aggiornato, ma nessuna targa è auto-selezionata.
+                            // L'utente dovrà selezionare una targa dal nuovo elenco.
+                            // Potresti voler resettare il form se nessuna targa è selezionata.
+                            resetChecklistForm(); // Resetta il form in attesa di selezione targa
+                            updateNavButtonColors();
+                        }
+                    }
+                }
+            });
+        }
+
+
         if (targaSwitcherDropdown) {
             targaSwitcherDropdown.addEventListener('change', async function() {
                 const nuovaTargaSelezionata = this.value;
@@ -1707,10 +1865,17 @@
                     await handleTargaSelectionAndSync(nuovaTargaSelezionata, currentActiveSectionId); 
                     this.disabled = false; 
                 } else if (nuovaTargaSelezionata) {
-                    updateTargaDetailsDisplay(nuovaTargaSelezionata);
+                    updateDropdownDetails();
+                } else if (!nuovaTargaSelezionata && checklistContainer.style.display === 'block') {
+                    // Se la targa viene deselezionata (es. "Seleziona Targa")
+                    targaSelezionataGlobalmente = null;
+                    resetChecklistForm();
+                    updateNavButtonColors();
+                    updateDropdownDetails();
                 }
             });
         }
+
 
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
@@ -1730,7 +1895,7 @@
                 const loadingText = preloaderElement.querySelector('.loading-text');
                 if (loadingText) loadingText.textContent = 'CARICAMENTO ELENCO...';
             }
-            await caricaEPopolaTarghe();
+            await caricaEPopolaTarghe(); // Questo ora popolerà anche il dropdown dei piazzali
         }
         initializeApplicationViewAndLoadData();
         if (exitAppBtn) { exitAppBtn.addEventListener('click', () => { const exitCurtain = document.getElementById('exit-curtain'); const mainContentWrapper = document.getElementById('mainContentWrapper'); const pageHeader = document.getElementById('pageHeaderContainer'); if (exitCurtain) { if (mainContentWrapper) mainContentWrapper.style.display = 'none'; if (pageHeader) pageHeader.style.display = 'none'; document.body.style.paddingTop = '0px'; const exitLoadingText = exitCurtain.querySelector('.loading-text'); const barContainer = exitCurtain.querySelector('.loader-bar-container'); const defaultCloseText = "CHIUSURA IN CORSO..."; const glitchText = "ERRORE DI SISTEMA..."; exitCurtain.classList.remove('glitching', 'flash-out-effect');  if (exitLoadingText) { exitLoadingText.textContent = defaultCloseText; exitLoadingText.style.animation = 'textGlow 1.8s infinite alternate ease-in-out'; exitLoadingText.style.color = '#ff8787'; exitLoadingText.style.textShadow = ''; } exitCurtain.setAttribute('data-text', defaultCloseText); if (barContainer) barContainer.style.display = 'flex'; exitCurtain.classList.add('visible-no-transition'); exitCurtain.style.display = 'flex';  setTimeout(() => { exitCurtain.classList.add('glitching'); if (exitLoadingText) { exitLoadingText.textContent = glitchText; exitLoadingText.style.animation = '';  } exitCurtain.setAttribute('data-text', glitchText); setTimeout(() => { exitCurtain.classList.remove('glitching'); if (exitLoadingText) { exitLoadingText.textContent = 'Applicazione terminata.'; exitLoadingText.style.animation = 'none';  exitLoadingText.style.color = '#FFFFFF';  exitLoadingText.style.textShadow = 'none'; } if (barContainer) barContainer.style.display = 'none';  setTimeout(() => { exitCurtain.classList.add('flash-out-effect');  setTimeout(() => { const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi'; fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })  .then(response => console.log('Macrodroid trigger request sent.')) .catch(error => console.error('Error sending Macrodroid trigger:', error)); }, 500);  }, 700);  }, 800);  }, 800);  } }); }
