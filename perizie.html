@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Perizia Veicolo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
@@ -391,9 +391,9 @@
         #navButtons button.nav-btn-partial { background-color: #ffc107 !important; border-color: #e0a800 !important; color: #212529 !important; }
         #navButtons button.nav-btn-untouched { background-color: #dc3545 !important; border-color: #c82333 !important; color: white !important; }
 
-        #landingPageSection, .category-section, #historyPageSection { padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a; max-width: 850px; margin-left: auto; margin-right: auto; }
+        #landingPageSection, .category-section, #historyPageSection, .camera-page-section { padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a; max-width: 850px; margin-left: auto; margin-right: auto; }
 
-        .category-section, #historyPageSection { display: none; }
+        .category-section, #historyPageSection, .camera-page-section { display: none; } /* Camera page hidden by default */
         #landingPageSection { display: block; }
         .category-section.active { display: block; }
 
@@ -590,6 +590,61 @@
         }
         input[type="checkbox"].animate-me, select.animate-me { position: relative; z-index: 1; }
 
+        /* START: Stili per la pagina Fotocamera */
+        .camera-page-section {
+            position: fixed; /* Copre l'intera viewport */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000; /* Sfondo nero per la fotocamera */
+            z-index: 2000; /* Sopra gli altri contenuti, ma sotto l'header fisso se necessario */
+            display: none; /* Nascosto di default */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0; /* Rimuove il padding per il full-screen */
+            margin: 0; /* Rimuove il margin per il full-screen */
+            border: none; /* Rimuove il bordo per il full-screen */
+            border-radius: 0; /* Rimuove il border-radius per il full-screen */
+            max-width: none; /* Consente il full-width */
+        }
+        #cameraStream {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Copre l'area mantenendo le proporzioni */
+        }
+        #captureBtn {
+            position: absolute;
+            bottom: 30px; 
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2010; /* Sopra il video */
+            padding: 12px 20px;
+            font-size: 1.1em;
+            background-color: #007bff;
+            border-color: #0056b3;
+        }
+         #captureBtn i {
+            margin-right: 8px;
+        }
+        #closeCameraBtn {
+            position: absolute;
+            bottom: 30px; /* Stessa distanza dal basso del capture button */
+            right: 20px; /* Posizionato a destra */
+            z-index: 2010;
+            padding: 10px 15px;
+            font-size: 0.9em;
+            background-color: #6c757d;
+            border-color: #5a6268;
+        }
+        /* Assicura che l'header sia sopra la camera page quando è attiva */
+        #pageHeaderContainer.fixed-header {
+            z-index: 2020; /* Deve essere più alto di .camera-page-section */
+        }
+        /* END: Stili per la pagina Fotocamera */
+
+
         @media (max-width: 768px) {
             .content-wrapper { margin-top: 0; }
             /* .circle { width: 1.2cm; height: 1.2cm; } */ /* Commented out as .circle is replaced */
@@ -617,6 +672,8 @@
             #sheetFilterContainer label { margin-bottom: 5px; margin-right: 0; text-align: left;}
             #sheetFilterDropdown { width: 100%; }
             .fill-defaults-btn { top: 15px; right: 15px; width: 30px; height: 30px; font-size: 1.2em; }
+            #captureBtn { bottom: 20px; padding: 10px 15px; font-size: 1em; }
+            #closeCameraBtn { bottom: 20px; padding: 8px 12px; font-size: 0.8em; right: 15px;}
         }
          @media (max-width: 400px) { /* Further adjustments for very small screens */
             .circle-button { width: 40px; height: 40px; font-size: 1.1em;}
@@ -648,7 +705,7 @@
             <button id="headerExitBtn" class="circle-button" title="Esci dall'applicazione"><i class="fas fa-power-off"></i></button>
             <button id="headerPhotosBtn" class="circle-button" title="Apri Google Foto"><i class="fas fa-images"></i></button>
             <button id="headerPeriziaBtn" class="circle-button" title="Vai all'ultima perizia/sezione"><i class="fas fa-clipboard-list"></i></button>
-            <button id="headerCameraBtn" class="circle-button" title="Fotocamera (funzione da definire)"><i class="fas fa-camera-retro"></i></button>
+            <button id="headerCameraBtn" class="circle-button" title="Fotocamera"><i class="fas fa-camera-retro"></i></button>
         </div>
         <div id="utilityNavButtons">
             <button id="backToListBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe</button>
@@ -698,7 +755,7 @@
 
         <div id="checklistContainer" style="display: none;">
             <div id="remarketingSection" class="category-section">
-                <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection">&#x2713;</button>
+                <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection">✓</button>
                 <h2 class="section-title">1. Foto Remarketing</h2>
                 <ul>
                     <li>
@@ -769,7 +826,7 @@
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
             </div>
             <div id="pneumaticiSection" class="category-section">
-                <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="pneumaticiSection">&#x2713;</button>
+                <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="pneumaticiSection">✓</button>
                 <h2 class="section-title">2. Foto Pneumatici</h2>
                 <ul>
                     <li><label for="pneumatico_as">Ant. sinistro:</label><select id="pneumatico_as"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
@@ -780,7 +837,7 @@
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
             </div>
             <div id="danniVerificheSection" class="category-section">
-                <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="danniVerificheSection">&#x2713;</button>
+                <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="danniVerificheSection">✓</button>
                 <h2 class="section-title">3. Foto Danni e Verifiche</h2>
                 <ul>
                     <li><label for="motore_accende">Motore si accende:</label><select id="motore_accende"><option value="">Seleziona...</option><option value="ok">OK</option><option value="non_ok">Non OK</option></select></li>
@@ -808,12 +865,26 @@
                 <button id="backToLandingFromHistoryBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe Principale</button>
             </div>
         </div>
+
+        <div id="cameraPageSection" class="camera-page-section" style="display: none;">
+            <video id="cameraStream" autoplay playsinline></video>
+            <button id="captureBtn" class="action-button"><i class="fas fa-camera"></i> Scatta Foto</button>
+            <button id="closeCameraBtn" class="action-button">Chiudi Fotocamera</button>
+        </div>
+
     </div>
 <script>
     // Variabili globali
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
+    const cameraPageSection = document.getElementById('cameraPageSection'); // Nuova sezione fotocamera
+    const cameraStreamElement = document.getElementById('cameraStream');
+    const captureBtn = document.getElementById('captureBtn');
+    const closeCameraBtn = document.getElementById('closeCameraBtn');
+    let currentCameraStream = null;
+
+
     const targaListContainer = document.getElementById('targaListContainer');
     const savedTargasListContainer = document.getElementById('savedTargasListContainer');
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
@@ -1017,12 +1088,84 @@
     function getSectionStatus(sectionElementId, targaData) { const inputs = getSectionInputs(sectionElementId); if (inputs.length === 0) return 'completed';  let allDefaultOrNA = true;  let allNonDefaultAndApplicable = true;  let hasAtLeastOneNonDefaultAndApplicable = false; inputs.forEach(input => { let isEffectivelyDefault = false; const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined; let currentValue = savedValue; if (savedValue === undefined) {  if (input.type === 'checkbox') currentValue = input.checked; else currentValue = input.value; } if (input.type === 'checkbox') { isEffectivelyDefault = !currentValue; } else if (input.tagName === 'SELECT') { isEffectivelyDefault = (currentValue === "" || (input.options.length > 0 && currentValue === input.options[0].value)); if ((input.id === 'cavo_ricarica_rapida' || input.id === 'cavo_ricarica_domestica') && currentValue === 'non_applicabile') { isEffectivelyDefault = true; } } else {  isEffectivelyDefault = (currentValue === ""); } if (!isEffectivelyDefault) { allDefaultOrNA = false; hasAtLeastOneNonDefaultAndApplicable = true; } else {  allNonDefaultAndApplicable = false; } }); if (allDefaultOrNA) return 'untouched'; if (allNonDefaultAndApplicable) return 'completed'; if (hasAtLeastOneNonDefaultAndApplicable) return 'partial';  return 'untouched';  }
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente.toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
+    // START: Funzioni per la pagina Fotocamera
+    async function showCameraPage() {
+        landingPageSection.style.display = 'none';
+        checklistContainer.style.display = 'none';
+        historyPageSection.style.display = 'none';
+        cameraPageSection.style.display = 'flex'; // Usa flex per centrare il video se non occupa tutto
+        
+        pageHeaderContainer.classList.add('fixed-header'); // Assicura che l'header sia fisso
+        document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight}px`; // Adatta il padding del body
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+                cameraStreamElement.srcObject = stream;
+                currentCameraStream = stream;
+            } catch (err) {
+                console.error("Errore accesso fotocamera:", err);
+                alert("Impossibile accedere alla fotocamera: " + err.message);
+                hideCameraPage(); // Torna indietro se la fotocamera non è accessibile
+            }
+        } else {
+            alert("Il tuo browser non supporta l'accesso alla fotocamera.");
+            hideCameraPage();
+        }
+        window.scrollTo(0, 0);
+    }
+
+    function hideCameraPage() {
+        cameraPageSection.style.display = 'none';
+        if (currentCameraStream) {
+            currentCameraStream.getTracks().forEach(track => track.stop());
+            currentCameraStream = null;
+            cameraStreamElement.srcObject = null;
+        }
+        showView('landing'); // Torna alla pagina principale o ultima vista attiva
+    }
+
+    function capturePhoto() {
+        // Funzione segnaposto per la cattura della foto
+        // L'implementazione effettiva richiede una canvas per disegnare il frame video
+        // e poi convertirlo in data URL o blob per il salvataggio/upload.
+        if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA) {
+            console.log("Pulsante Scatta Foto premuto. Implementare la logica di cattura.");
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = cameraStreamElement.videoWidth;
+            canvas.height = cameraStreamElement.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
+            
+            // Esempio: mostrare l'immagine catturata (temporaneamente)
+            // const imageDataUrl = canvas.toDataURL('image/png');
+            // console.log("Immagine catturata (Data URL):", imageDataUrl.substring(0,100) + "...");
+            // Per salvare, si potrebbe creare un link di download:
+            // const link = document.createElement('a');
+            // link.href = imageDataUrl;
+            // link.download = `foto_${new Date().toISOString()}.png`;
+            // document.body.appendChild(link);
+            // link.click();
+            // document.body.removeChild(link);
+            
+            alert("Foto scattata (vedi console per i dettagli preliminari). Funzionalità di salvataggio da implementare.");
+
+        } else {
+            alert("Stream fotocamera non pronto per la cattura.");
+        }
+    }
+    // END: Funzioni per la pagina Fotocamera
+
+
     function showView(viewName) {
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
+        cameraPageSection.style.display = 'none'; // Nascondi anche la camera page
+        
         let bodyPaddingTopValue = '20px';
-        const headerCirclesDiv = document.querySelector('.header-circles'); // Get the div containing circle buttons
+        const headerCirclesDiv = document.querySelector('.header-circles'); 
 
         if (utilityNavButtons) utilityNavButtons.style.display = 'flex'; 
         if (navButtonsContainer) navButtonsContainer.style.display = 'none'; 
@@ -1072,22 +1215,29 @@
             populateSavedTargasList();
             updateNavButtonColors();
         } else { 
-            pageHeaderContainer.classList.remove('fixed-header');
-            if (headerCirclesDiv) headerCirclesDiv.style.display = 'none'; // Hide on other views if necessary
-            if (utilityNavButtons) utilityNavButtons.style.display = 'none';
-            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
+            // Potrebbe essere una vista non gestita o la camera page,
+            // l'header fisso e il padding del body sono gestiti da showCameraPage
+            if (viewName !== 'camera') { // Evita di sovrascrivere le impostazioni della fotocamera
+                 pageHeaderContainer.classList.remove('fixed-header');
+                 if (headerCirclesDiv) headerCirclesDiv.style.display = 'none'; 
+                 if (utilityNavButtons) utilityNavButtons.style.display = 'none';
+                 if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
+            }
         }
 
-        if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
+        if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none' && cameraPageSection.style.display === 'none') {
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
-        } else {
+        } else if (cameraPageSection.style.display === 'none') { // Solo se la camera non è attiva
             let nonFixedHeaderHeight = 0;
             if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {
                  nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
             }
              bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
         }
-        document.body.style.paddingTop = bodyPaddingTopValue;
+        // Non modificare il padding del body se la camera è attiva, gestito da showCameraPage
+        if (cameraPageSection.style.display === 'none') {
+            document.body.style.paddingTop = bodyPaddingTopValue;
+        }
         window.scrollTo(0, 0);
     }
 
@@ -1416,7 +1566,6 @@
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
             populateTargaSwitcherDropdown(); 
             updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
-            // Store last active section for the "Perizia" button
             localStorage.setItem(LAST_ACTIVE_PERIZIA_PAGE_KEY, targetId);
         } else {
             if (mainTitleGlobal) mainTitleGlobal.style.display = 'block';
@@ -1667,7 +1816,6 @@
         }
     }
 
-    // Function to simulate click on the main exit button
     function triggerMainExit() {
         if (mainExitAppBtn) {
             mainExitAppBtn.click();
@@ -1747,7 +1895,7 @@
         if (headerExitBtn) {
             headerExitBtn.addEventListener('click', () => {
                 console.log("Header Exit button clicked");
-                triggerMainExit(); // Call the function that clicks the main exit button
+                triggerMainExit(); 
             });
         }
         if (headerPhotosBtn) {
@@ -1759,29 +1907,37 @@
         if (headerPeriziaBtn) {
             headerPeriziaBtn.addEventListener('click', async () => {
                 console.log("Header Perizia button clicked");
-                if (targaSelezionataGlobalmente) {
-                    // If a targa is selected, try to go to its last viewed section or riepilogo
+                if (cameraPageSection.style.display === 'flex') { // Se la fotocamera è attiva, chiudila
+                    hideCameraPage();
+                } else if (targaSelezionataGlobalmente) {
                     const lastActivePage = localStorage.getItem(LAST_ACTIVE_PERIZIA_PAGE_KEY);
                     const targetSection = (lastActivePage && document.getElementById(lastActivePage + 'Section')) ? lastActivePage : 'riepilogo';
-                    
-                    // Ensure the checklist view is active for this targa
                     if (checklistContainer.style.display !== 'block' || targaSwitcherDropdown.value.toUpperCase() !== targaSelezionataGlobalmente.toUpperCase()) {
                         await handleTargaSelectionAndSync(targaSelezionataGlobalmente, targetSection);
                     } else {
                         showSection(targetSection);
                     }
                 } else {
-                    // If no targa is selected, go to landing page
                     showView('landing');
                 }
             });
         }
+        
+        // MODIFICATO: Event Listener per headerCameraBtn
         if (headerCameraBtn) {
             headerCameraBtn.addEventListener('click', () => {
-                console.log("Header Camera button clicked - Funzione da implementare");
-                alert("Funzione Fotocamera non ancora implementata.");
+                console.log("Header Camera button clicked");
+                if (cameraPageSection.style.display === 'flex') {
+                    hideCameraPage();
+                } else {
+                    showCameraPage();
+                }
             });
         }
+
+        // Event listener per il pulsante di scatto e chiusura fotocamera
+        if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
+        if (closeCameraBtn) closeCameraBtn.addEventListener('click', hideCameraPage);
 
 
         async function initializeApplicationViewAndLoadData() {
@@ -1799,7 +1955,6 @@
         }
         initializeApplicationViewAndLoadData();
         
-        // Original Exit Button Logic (now also triggered by headerExitBtn via triggerMainExit)
         if (mainExitAppBtn) { 
             mainExitAppBtn.addEventListener('click', () => { 
                 const exitCurtain = document.getElementById('exit-curtain'); 
@@ -1808,6 +1963,12 @@
                 if (exitCurtain) { 
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none'; 
                     if (pageHeader) pageHeader.style.display = 'none'; 
+                    if (cameraPageSection) cameraPageSection.style.display = 'none'; // Nascondi anche la camera
+                    if (currentCameraStream) { // Ferma lo stream se attivo
+                         currentCameraStream.getTracks().forEach(track => track.stop());
+                         currentCameraStream = null;
+                         if(cameraStreamElement) cameraStreamElement.srcObject = null;
+                    }
                     document.body.style.paddingTop = '0px'; 
                     const exitLoadingText = exitCurtain.querySelector('.loading-text'); 
                     const barContainer = exitCurtain.querySelector('.loader-bar-container'); 
