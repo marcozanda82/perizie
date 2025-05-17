@@ -592,34 +592,46 @@
 
         /* START: Stili per la pagina Fotocamera */
         .camera-page-section {
-            position: fixed; /* Copre l'intera viewport */
+            position: fixed; 
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #000; /* Sfondo nero per la fotocamera */
-            z-index: 2000; /* Sopra gli altri contenuti, ma sotto l'header fisso se necessario */
-            display: none; /* Nascosto di default */
+            background-color: #000; 
+            z-index: 2000; 
+            display: none; 
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 0; /* Rimuove il padding per il full-screen */
-            margin: 0; /* Rimuove il margin per il full-screen */
-            border: none; /* Rimuove il bordo per il full-screen */
-            border-radius: 0; /* Rimuove il border-radius per il full-screen */
-            max-width: none; /* Consente il full-width */
+            padding: 0; 
+            margin: 0; 
+            border: none; 
+            border-radius: 0; 
+            max-width: none; 
         }
         #cameraStream {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Copre l'area mantenendo le proporzioni */
+            object-fit: cover; 
         }
+        /* NUOVO: Stile per il display del freeze frame */
+        #freezeFrameDisplay {
+            display: none; /* Nascosto di default */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Come il video stream */
+            z-index: 2015; /* Sopra il video, sotto i pulsanti */
+        }
+
         #captureBtn {
             position: absolute;
             bottom: 30px; 
             left: 50%;
             transform: translateX(-50%);
-            z-index: 2010; /* Sopra il video */
+            z-index: 2020; /* Sopra il video e il freeze frame */
             padding: 12px 20px;
             font-size: 1.1em;
             background-color: #007bff;
@@ -628,34 +640,33 @@
          #captureBtn i {
             margin-right: 8px;
         }
-        /* NUOVO STILE PER IL PULSANTE CHIUDI FOTOCAMERA */
+        
         #closeCameraBtn {
             position: absolute;
             bottom: 20px; 
             right: 20px; 
-            z-index: 2010;
-            width: 45px; /* Dimensione quadrata */
-            height: 45px; /* Dimensione quadrata */
-            background-color: rgba(40, 40, 40, 0.8); /* Sfondo semitrasparente */
-            color: #ff4d4d; /* Colore X rosso acceso */
-            border: 1px solid #ff4d4d; /* Bordo rosso */
-            border-radius: 4px; /* Angoli leggermente arrotondati */
-            font-size: 1.8em; /* Dimensione della X */
-            line-height: 43px; /* Centra la X verticalmente */
+            z-index: 2020; /* Sopra il video e il freeze frame */
+            width: 45px; 
+            height: 45px; 
+            background-color: rgba(40, 40, 40, 0.8); 
+            color: #ff4d4d; 
+            border: 1px solid #ff4d4d;
+            border-radius: 4px; 
+            font-size: 1.8em; 
+            line-height: 43px; 
             text-align: center;
-            padding: 0; /* Rimuove padding interno se presente */
+            padding: 0; 
             cursor: pointer;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
         #closeCameraBtn:hover {
-            background-color: rgba(255, 77, 77, 0.9); /* Sfondo rosso acceso al hover */
-            color: #fff; /* X bianca al hover */
+            background-color: rgba(255, 77, 77, 0.9); 
+            color: #fff; 
             border-color: #fff;
         }
 
-        /* Assicura che l'header sia sopra la camera page quando è attiva */
         #pageHeaderContainer.fixed-header {
-            z-index: 2020; /* Deve essere più alto di .camera-page-section */
+            z-index: 2030; /* Deve essere più alto di .camera-page-section e dei suoi contenuti */
         }
         /* END: Stili per la pagina Fotocamera */
 
@@ -882,8 +893,9 @@
 
         <div id="cameraPageSection" class="camera-page-section" style="display: none;">
             <video id="cameraStream" autoplay playsinline></video>
-            <button id="captureBtn" class="action-button"><i class="fas fa-camera"></i> Scatta Foto</button>
-            <button id="closeCameraBtn" class="action-button">&times;</button> </div>
+            <img id="freezeFrameDisplay" src="#" alt="Foto Catturata" style="display: none;"> <button id="captureBtn" class="action-button"><i class="fas fa-camera"></i> Scatta Foto</button>
+            <button id="closeCameraBtn" class="action-button">×</button> 
+        </div>
 
     </div>
 <script>
@@ -893,6 +905,7 @@
     const historyPageSection = document.getElementById('historyPageSection');
     const cameraPageSection = document.getElementById('cameraPageSection'); 
     const cameraStreamElement = document.getElementById('cameraStream');
+    const freezeFrameDisplayElement = document.getElementById('freezeFrameDisplay'); // Nuovo
     const captureBtn = document.getElementById('captureBtn');
     const closeCameraBtn = document.getElementById('closeCameraBtn');
     let currentCameraStream = null;
@@ -1119,13 +1132,15 @@
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
+        cameraStreamElement.style.display = 'block'; // Assicura che il video sia visibile all'inizio
+        freezeFrameDisplayElement.style.display = 'none'; // Assicura che il freeze frame sia nascosto
         cameraPageSection.style.display = 'flex'; 
         
         pageHeaderContainer.classList.add('fixed-header'); 
         document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight}px`; 
 
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            const constraints = { // Richiesta di risoluzione più alta
+            const constraints = { 
                 video: {
                     facingMode: "environment",
                     width: { ideal: 1920, min: 1280 },
@@ -1141,6 +1156,9 @@
                 currentCameraStream = stream;
 
                 const videoTrack = stream.getVideoTracks()[0];
+                const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+                console.log("Capacità traccia video:", JSON.stringify(capabilities, null, 2));
+
                 if (videoTrack && typeof videoTrack.applyConstraints === 'function') {
                     try {
                         await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
@@ -1160,9 +1178,8 @@
 
             } catch (err) {
                 console.error("Errore accesso fotocamera con constraints iniziali:", err.name, err.message);
-                // Fallback: prova senza constraints di risoluzione/focus specifici se il primo tentativo fallisce
                 try {
-                    console.log("Tentativo di fallback con constraints minimi...");
+                    console.log("Tentativo di fallback con constraints minimi (solo facingMode)...");
                     const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
                     cameraStreamElement.srcObject = fallbackStream;
                     currentCameraStream = fallbackStream;
@@ -1187,6 +1204,8 @@
             cameraStreamElement.srcObject = null;
         }
         cameraPageSection.style.display = 'none';
+        cameraStreamElement.style.display = 'block'; // Resetta la visibilità del video
+        freezeFrameDisplayElement.style.display = 'none'; // Nascondi il freeze frame
 
         console.log(`Ritorno da fotocamera a: vista='${lastViewBeforeCamera}', sezione='${lastSectionBeforeCamera}'`);
 
@@ -1206,9 +1225,10 @@
     }
 
     function capturePhoto() {
+        if (captureBtn.disabled) return; // Non fare nulla se il pulsante è disabilitato
+
         if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
             const canvas = document.createElement('canvas');
-            // Usa la risoluzione effettiva dello stream per il canvas
             canvas.width = cameraStreamElement.videoWidth; 
             canvas.height = cameraStreamElement.videoHeight;
             console.log(`Cattura foto con risoluzione: ${canvas.width}x${canvas.height}`);
@@ -1217,22 +1237,36 @@
             ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
             
             const imageDataUrl = canvas.toDataURL('image/png');
+            
+            // Mostra il freeze frame
+            freezeFrameDisplayElement.src = imageDataUrl;
+            freezeFrameDisplayElement.style.display = 'block';
+            cameraStreamElement.style.display = 'none'; // Nascondi il video stream
+            captureBtn.disabled = true; // Disabilita il pulsante durante il freeze
+
+            // Logica per il download (mantenuta ma senza alert)
             const link = document.createElement('a');
             link.href = imageDataUrl;
-
             let filename = 'foto_catturata';
             if (targaSelezionataGlobalmente) {
                 filename = `foto_${targaSelezionataGlobalmente}`;
             }
             const timestamp = new Date().toISOString().replace(/[:.-]/g, '').replace('T', '_').substring(0, 15);
             filename += `_${timestamp}.png`;
-            
             link.download = filename;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
-            // Rimosso alert: console.log(`Foto "${filename}" scaricata.`); 
+            console.log(`Foto "${filename}" scaricata.`);
+
+            // Dopo 2 secondi, ripristina lo stream
+            setTimeout(() => {
+                freezeFrameDisplayElement.style.display = 'none';
+                freezeFrameDisplayElement.src = '#'; // Rimuovi l'immagine per liberare memoria
+                cameraStreamElement.style.display = 'block';
+                captureBtn.disabled = false; // Riabilita il pulsante
+            }, 2000);
+
         } else {
             console.warn("Stream fotocamera non pronto o dimensioni video non disponibili per la cattura.");
             console.warn("Dettagli stream/video per cattura: ", currentCameraStream, cameraStreamElement.readyState, cameraStreamElement.videoWidth, cameraStreamElement.videoHeight);
@@ -1245,7 +1279,7 @@
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
-        cameraPageSection.style.display = 'none'; 
+        if(cameraPageSection) cameraPageSection.style.display = 'none';  // Assicurati che la camera sia nascosta
         
         let bodyPaddingTopValue = '20px';
         const headerCirclesDiv = document.querySelector('.header-circles'); 
@@ -1306,16 +1340,16 @@
             }
         }
 
-        if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none' && cameraPageSection.style.display === 'none') {
+        if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none' && (!cameraPageSection || cameraPageSection.style.display === 'none')) {
             bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
-        } else if (cameraPageSection.style.display === 'none') { 
+        } else if (!cameraPageSection || cameraPageSection.style.display === 'none') { 
             let nonFixedHeaderHeight = 0;
             if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {
                  nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
             }
              bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
         }
-        if (cameraPageSection.style.display === 'none') {
+        if (!cameraPageSection || cameraPageSection.style.display === 'none') {
             document.body.style.paddingTop = bodyPaddingTopValue;
         }
         window.scrollTo(0, 0);
