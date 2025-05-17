@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Perizia Veicolo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         /* Preloader & Exit Curtain Styles */
         #preloader {
@@ -94,8 +95,8 @@
         #preloader .loading-text {
             color: #00aeff;
             animation: textGlow 1.8s infinite alternate ease-in-out;
-            text-align: center; /* MODIFICA: Testo preloader centrato */
-            width: 100%; /* MODIFICA: Assicura che prenda larghezza per centratura */
+            text-align: center; 
+            width: 100%; 
         }
         
         #exit-curtain .loading-text {
@@ -314,7 +315,7 @@
         
 
         h2.section-title { color: #cccccc; border-bottom: 1px solid #444444; padding-bottom: 5px; margin-top: 30px; text-align: left; }
-        #galleryPageSection h2.section-title { margin-top: 10px; text-align: center; } /* Stile per titolo galleria */
+        #galleryPageSection h2.section-title { margin-top: 10px; text-align: center; } 
         h3, h4 { color: #bbbbbb; margin-top: 20px; margin-bottom: 10px; }
         h4 {font-size: 1.1em; color: #c0c0c0; margin-top: 15px; margin-bottom: 8px;}
         ul { list-style-type: none; padding-left: 0; }
@@ -750,6 +751,7 @@
         #galleryPageSection {
             text-align: center;
         }
+        /* #galleryActions è rimosso perché lo ZIP è automatico */
         #photoGridContainer {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -767,6 +769,7 @@
             justify-content: space-between;
             position: relative; 
         }
+        /* .photo-item.selected e .photo-item-checkbox sono rimossi */
         .photo-item img {
             max-width: 100%;
             height: 120px; 
@@ -803,15 +806,15 @@
 
         /* START: Stili per Lightbox Immagine */
         #imageLightbox {
-            display: none; /* Nascosto di default */
+            display: none; 
             position: fixed;
-            z-index: 3000; /* Sopra la maggior parte degli elementi */
+            z-index: 3000; 
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto; /* Abilita scroll se l'immagine è troppo grande */
-            background-color: rgba(0,0,0,0.85); /* Overlay scuro */
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.85); 
             justify-content: center;
             align-items: center;
         }
@@ -820,21 +823,21 @@
             margin: auto;
             padding: 0;
             width: 90%;
-            max-width: 700px; /* Limita larghezza massima immagine */
+            max-width: 700px; 
         }
         #lightboxImage {
             display: block;
             width: 100%;
             height: auto;
-            max-height: 80vh; /* Limita altezza per lasciare spazio al pulsante chiudi */
+            max-height: 80vh; 
             object-fit: contain;
             border: 3px solid #444;
             border-radius: 5px;
         }
         #closeLightboxBtn {
             position: absolute;
-            top: -5px; /* Leggermente sopra l'immagine */
-            right: -5px; /* Leggermente a destra dell'immagine */
+            top: -5px; 
+            right: -5px; 
             color: #fff;
             background-color: #333;
             border: 1px solid #555;
@@ -889,6 +892,7 @@
             #lightboxContent { width: 95%; }
             #lightboxImage { max-height: 75vh; }
             #closeLightboxBtn { font-size: 22px; top: 0px; right: 0px; padding: 0px 8px;}
+            /* #galleryActions non serve più qui */
         }
          @media (max-width: 400px) { 
             .circle-button { width: 40px; height: 40px; font-size: 1.1em;}
@@ -914,7 +918,7 @@
             <h2 id="changelogTitle">WebApp Perizie - Novità</h2>
             <ul id="changelogList">
                 </ul>
-            <button id="closeChangelogBtn" class="modal-close-btn">Chiudi</button>
+            <button id="closeChangelogBtnModal" class="modal-close-btn">Chiudi</button>
         </div>
     </div>
 
@@ -1087,7 +1091,7 @@
             <div id="riepilogoSection" class="category-section">
                 <h2 class="section-title">Riepilogo Perizia</h2>
                 <div id="summaryContent"><p><em>Compila le sezioni precedenti...</em></p></div>
-                <button id="saveAndReturnBtn" class="action-button" style="background-color: #28a745; border-color: #1e7e34; margin-top: 15px;">Salva Perizia</button>
+                <button id="saveAndReturnBtn" class="action-button" style="background-color: #28a745; border-color: #1e7e34; margin-top: 15px;">Salva Perizia e Foto</button>
             </div>
         </div>
 
@@ -1170,10 +1174,9 @@
     const cavoRapidaSelect = document.getElementById('cavo_ricarica_rapida');
     const cavoDomesticaSelect = document.getElementById('cavo_ricarica_domestica');
     
-    // Lightbox elements
     const imageLightbox = document.getElementById('imageLightbox');
     const lightboxImage = document.getElementById('lightboxImage');
-    const closeLightboxBtn = document.getElementById('closeLightboxBtn');
+    const closeLightboxBtnElem = document.getElementById('closeLightboxBtn'); // Rinominato per evitare conflitto
     let currentLightboxImageObjectUrl = null;
 
 
@@ -1185,18 +1188,19 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    const currentAppVersion = "1.5.0"; // MODIFICA: Versione per swipe galleria e lightbox
+    const currentAppVersion = "1.6.0"; // MODIFICA: Versione per ZIP automatico
     const changelogModal = document.getElementById('changelogModal');
-    const closeChangelogBtnModal = document.getElementById('closeChangelogBtn'); // Rinominato per evitare conflitto
+    const closeChangelogBtnModal = document.getElementById('closeChangelogBtnModal'); 
     const changelogList = document.getElementById('changelogList');
     const changelogTitle = document.getElementById('changelogTitle');
 
     const latestChangesText = `
-        <li><strong>Swipe per navigare tra le sezioni della galleria (per targa).</strong></li>
-        <li><strong>Click su anteprima foto in galleria per ingrandimento (lightbox).</strong></li>
-        <li><strong>Durata anteprima foto dopo scatto dimezzata a 0.5 secondi.</strong></li>
-        <li>Importante: Implementato IndexedDB per l'archiviazione delle foto.</li>
-        <li>Le foto vengono ora salvate come Blob (JPEG) per una maggiore efficienza.</li>
+        <li><strong>ZIP con tutte le foto della perizia scaricato automaticamente al "Salva Perizia".</strong></li>
+        <li><strong>Nome del file ZIP basato sulla targa.</strong></li>
+        <li>Rimossa selezione manuale foto/checkbox dalla galleria per ZIP.</li>
+        <li>Swipe per navigare tra le sezioni della galleria (per targa).</li>
+        <li>Click su anteprima foto in galleria per ingrandimento (lightbox).</li>
+        <li>Durata anteprima foto dopo scatto dimezzata a 0.5 secondi.</li>
     `;
 
 
@@ -1263,7 +1267,7 @@
                 reject(event.target.error);
             };
             transaction.oncomplete = () => {
-                console.log('Transazione salvataggio foto completata.');
+                // console.log('Transazione salvataggio foto completata.'); // Log opzionale
             };
             transaction.onerror = (event) => {
                 console.error('Errore transazione salvataggio foto:', event.target.error);
@@ -1302,7 +1306,7 @@
                 
                 const targaSezioneIndex = store.index('targaSezioneIdx');
                 request = targaSezioneIndex.getAll(IDBKeyRange.only([targaFilter.toUpperCase(), effectiveSectionKey]));
-            } else if (targaFilter) { // Se sectionKeyFilter è null o 'riepilogo', prendi tutte per la targa
+            } else if (targaFilter) { 
                 const targaIndex = store.index('targaIdx');
                 request = targaIndex.getAll(IDBKeyRange.only(targaFilter.toUpperCase()));
             } else { 
@@ -1394,7 +1398,7 @@
 
     async function inviaPeriziaSingolaASheets(periziaDaInviare) { 
         if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') { console.error("URL della Web App Google Sheets non configurato."); return { success: false, message: "URL Web App non configurato." }; } 
-        console.log("Tentativo di invio perizia a Google Sheets:", periziaDaInviare); 
+        // console.log("Tentativo di invio perizia a Google Sheets:", periziaDaInviare); 
         try { 
             const response = await fetch(GOOGLE_SHEET_WEB_APP_URL, { method: 'POST', mode: 'cors',  cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' },  body: JSON.stringify(periziaDaInviare)  }); 
             let responseData; 
@@ -1408,7 +1412,7 @@
                 catch (e) { responseData = { status: "error", message: "Risposta non JSON dal server: " + textResponse.substring(0,100) + "..."}; } 
             } 
             if (response.ok && responseData.status === "success") { 
-                console.log("Perizia inviata con successo a Google Sheets:", responseData.message, "Dati ritornati:", responseData.data); 
+                // console.log("Perizia inviata con successo a Google Sheets:", responseData.message, "Dati ritornati:", responseData.data); 
                 return { success: true, message: responseData.message, data: responseData.data }; 
             } else { 
                 console.error("Errore dall'API di Google Sheets o risposta non OK:", responseData.message || `HTTP Status ${response.status}`); 
@@ -1423,11 +1427,11 @@
     async function fetchLatestPeriziaFromSheets(targa) { 
         if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch."); return null; } 
         if (localStorage.getItem(`${APP_PREFIX}deleted_${targa.toUpperCase()}`)) {
-            console.log(`WorkspaceLatestPerizia: Targa ${targa} marcata come cancellata localmente. Non verrà recuperata da Sheets.`);
+            // console.log(`WorkspaceLatestPerizia: Targa ${targa} marcata come cancellata localmente. Non verrà recuperata da Sheets.`);
             return null;
         }
         const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=getPerizia&targa=${encodeURIComponent(targa.toUpperCase())}&nocache=${new Date().getTime()}`; 
-        console.log("Fetching latest perizia from Sheets for targa:", targa, "URL:", fetchUrl); 
+        // console.log("Fetching latest perizia from Sheets for targa:", targa, "URL:", fetchUrl); 
         try { 
             const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); 
             if (!response.ok) { 
@@ -1439,10 +1443,10 @@
             if (contentType && contentType.indexOf("application/json") !== -1) { 
                 const result = await response.json(); 
                 if (result.status === "success" && result.data) { 
-                    console.log("Dati perizia singola ricevuti da Sheets:", result.data); 
+                    // console.log("Dati perizia singola ricevuti da Sheets:", result.data); 
                     return result.data;  
                 } else if (result.status === "notfound") { 
-                    console.log("Perizia non trovata in Sheets per targa:", targa); 
+                    // console.log("Perizia non trovata in Sheets per targa:", targa); 
                     return null; 
                 } else { 
                     console.warn("Risposta da Sheets (singola) non conteneva dati validi o status non era 'success'/'notfound':", result.message || result); 
@@ -1503,8 +1507,103 @@
         }
     }
 
-    function generateAndDownloadScreenshot() { return new Promise((resolve, reject) => { const riepilogoSection = document.getElementById('riepilogoSection'); if (!riepilogoSection) { alert("Errore: Sezione Riepilogo non trovata per lo screenshot."); return reject("Sezione riepilogo non trovata"); } if (typeof html2canvas === 'undefined') { alert("Errore: Libreria html2canvas non caricata."); return reject("html2canvas non caricata"); } setTimeout(() => { console.log("Inizio generazione screenshot..."); riepilogoSection.scrollTop = 0;  html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY, windowHeight: riepilogoSection.scrollHeight }) .then(canvas => { const link = document.createElement('a'); let targaSanitized = 'sconosciuta'; let piazzaleSanitized = 'piazzale_sconosciuto'; if (targaSelezionataGlobalmente) { targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_'); const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") { piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_'); if (!piazzaleSanitized) piazzaleSanitized = 'N_D'; } else { piazzaleSanitized = 'N_D'; } } link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`; link.href = canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); console.log(`Screenshot generato e download avviato: ${link.download}`); resolve(); }) .catch(error => { console.error("Errore durante la generazione dello screenshot:", error); alert("Si è verificato un errore durante la generazione dello screenshot."); reject(error); }); }, 100);  }); }
-    async function handleSavePeriziaAndReturn() {  if (!targaSelezionataGlobalmente) { alert("Nessuna targa attiva selezionata per il salvataggio."); return; } const originalButtonText = saveAndReturnBtn.textContent; saveAndReturnBtn.textContent = 'Salvataggio locale...'; saveAndReturnBtn.disabled = true; if (!saveProgress(targaSelezionataGlobalmente)) {  alert("Salvataggio dati nel browser fallito."); saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; return; } if (document.getElementById('riepilogoSection').classList.contains('active')) { generateSummary();  } try { await generateAndDownloadScreenshot(); } catch (e) { console.warn("Generazione screenshot fallita, ma i dati sono stati salvati localmente.", e); } markTargaAsCompleted(targaSelezionataGlobalmente);  updateNavButtonColors();  saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; alert(`Perizia per ${targaSelezionataGlobalmente} salvata localmente e screenshot tentato.`); showView('landing');  }
+    function generateAndDownloadScreenshot() { return new Promise((resolve, reject) => { const riepilogoSection = document.getElementById('riepilogoSection'); if (!riepilogoSection) { alert("Errore: Sezione Riepilogo non trovata per lo screenshot."); return reject("Sezione riepilogo non trovata"); } if (typeof html2canvas === 'undefined') { alert("Errore: Libreria html2canvas non caricata."); return reject("html2canvas non caricata"); } setTimeout(() => { /* console.log("Inizio generazione screenshot...");*/ riepilogoSection.scrollTop = 0;  html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY, windowHeight: riepilogoSection.scrollHeight }) .then(canvas => { const link = document.createElement('a'); let targaSanitized = 'sconosciuta'; let piazzaleSanitized = 'piazzale_sconosciuto'; if (targaSelezionataGlobalmente) { targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_'); const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") { piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_'); if (!piazzaleSanitized) piazzaleSanitized = 'N_D'; } else { piazzaleSanitized = 'N_D'; } } link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`; link.href = canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); console.log(`Screenshot generato e download avviato: ${link.download}`); resolve(); }) .catch(error => { console.error("Errore durante la generazione dello screenshot:", error); alert("Si è verificato un errore durante la generazione dello screenshot."); reject(error); }); }, 100);  }); }
+    
+    async function downloadPhotosAsZip(targa) {
+        if (!targa) {
+            console.warn("Nessuna targa fornita per scaricare le foto come ZIP.");
+            return;
+        }
+        if (typeof JSZip === 'undefined') {
+            alert("Errore: Libreria JSZip non caricata. Impossibile creare ZIP.");
+            return;
+        }
+
+        const originalButtonText = saveAndReturnBtn.textContent;
+        saveAndReturnBtn.textContent = 'Creazione ZIP...';
+        saveAndReturnBtn.disabled = true;
+
+        try {
+            const photos = await getPhotosByTargaAndSezioneFromDB(targa, null); // null per ottenere tutte le foto della targa
+            if (!photos || photos.length === 0) {
+                alert(`Nessuna foto trovata per la targa ${targa} da includere nello ZIP.`);
+                saveAndReturnBtn.textContent = originalButtonText;
+                saveAndReturnBtn.disabled = false;
+                return;
+            }
+
+            const zip = new JSZip();
+            photos.forEach(photoData => {
+                if (photoData.blobData instanceof Blob && photoData.name) {
+                    zip.file(photoData.name, photoData.blobData);
+                }
+            });
+
+            const zipBlob = await zip.generateAsync({type:"blob", compression: "DEFLATE"});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(zipBlob);
+            const zipFileName = `${targa.toUpperCase().replace(/[^A-Z0-9]/g, '_')}.zip`;
+            link.download = zipFileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            console.log(`File ZIP "${zipFileName}" generato e download avviato.`);
+            alert(`File ZIP "${zipFileName}" per la targa ${targa} scaricato con successo.`);
+
+        } catch (error) {
+            console.error("Errore durante la creazione o il download del file ZIP:", error);
+            alert("Si è verificato un errore durante la creazione del file ZIP delle foto.");
+        } finally {
+            saveAndReturnBtn.textContent = originalButtonText; // Ripristina anche se c'è stato solo lo screenshot
+            saveAndReturnBtn.disabled = false;
+        }
+    }
+
+    async function handleSavePeriziaAndReturn() {  
+        if (!targaSelezionataGlobalmente) { 
+            alert("Nessuna targa attiva selezionata per il salvataggio."); 
+            return; 
+        } 
+        const originalButtonText = saveAndReturnBtn.textContent; 
+        saveAndReturnBtn.textContent = 'Salvataggio perizia...'; 
+        saveAndReturnBtn.disabled = true; 
+        
+        if (!saveProgress(targaSelezionataGlobalmente)) {  
+            alert("Salvataggio dati nel browser fallito."); 
+            saveAndReturnBtn.textContent = originalButtonText; 
+            saveAndReturnBtn.disabled = false; 
+            return; 
+        } 
+        
+        if (document.getElementById('riepilogoSection').classList.contains('active')) { 
+            generateSummary();  
+        } 
+        
+        try { 
+            await generateAndDownloadScreenshot(); 
+            // Dopo lo screenshot, prova a generare e scaricare lo ZIP delle foto
+            await downloadPhotosAsZip(targaSelezionataGlobalmente);
+        } catch (e) { 
+            console.warn("Generazione screenshot o ZIP fallita, ma i dati sono stati salvati localmente.", e); 
+            // L'alert per l'errore ZIP è già in downloadPhotosAsZip
+        } 
+        
+        markTargaAsCompleted(targaSelezionataGlobalmente);  
+        updateNavButtonColors();  
+        
+        // Il ripristino del bottone è gestito da downloadPhotosAsZip o qui se quello non parte
+        if (saveAndReturnBtn.textContent !== originalButtonText) { // Se non già ripristinato da downloadPhotosAsZip
+             saveAndReturnBtn.textContent = originalButtonText;
+             saveAndReturnBtn.disabled = false;
+        }
+        
+        // Non mostrare un alert generico qui, gli alert specifici sono in generateAndDownloadScreenshot e downloadPhotosAsZip
+        // alert(`Perizia per ${targaSelezionataGlobalmente} salvata localmente. Screenshot e ZIP foto tentati.`); 
+        showView('landing');  
+    }
+
     function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
     function isInputDefault(inputElement) { if (!inputElement) return true; if (inputElement.type === 'checkbox') return !inputElement.checked; if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0; if (inputElement.type === 'text' || inputElement.type === 'url' || inputElement.tagName === 'TEXTAREA') return inputElement.value.trim() === ""; return true; }
     function getSectionInputs(sectionElementId) { const sectionDiv = document.getElementById(sectionElementId); if (!sectionDiv) return []; return Array.from(sectionDiv.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)')); }
@@ -1574,33 +1673,33 @@
 
                 const videoTrack = stream.getVideoTracks()[0];
                 const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
-                console.log("Capacità traccia video:", JSON.stringify(capabilities, null, 2));
+                // console.log("Capacità traccia video:", JSON.stringify(capabilities, null, 2));
 
                 if (videoTrack && typeof videoTrack.applyConstraints === 'function') {
                     try {
                         await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
-                        console.log("Vincolo focusMode 'continuous' applicato.");
+                        // console.log("Vincolo focusMode 'continuous' applicato.");
                     } catch (e) {
                         console.warn("Impossibile applicare focusMode 'continuous' via applyConstraints:", e.name, e.message);
                         try {
                              await videoTrack.applyConstraints({ advanced: [{ focusMode: 'auto' }] });
-                             console.log("Vincolo focusMode 'auto' applicato come fallback.");
+                             // console.log("Vincolo focusMode 'auto' applicato come fallback.");
                         } catch (e2) {
                             console.warn("Impossibile applicare focusMode 'auto' via applyConstraints:", e2.name, e2.message);
                         }
                     }
                 } else {
-                     console.log("Autofocus (focusMode: continuous) richiesto in initial constraints.");
+                     // console.log("Autofocus (focusMode: continuous) richiesto in initial constraints.");
                 }
 
             } catch (err) {
                 console.error("Errore accesso fotocamera con constraints iniziali:", err.name, err.message);
                 try {
-                    console.log("Tentativo di fallback con constraints minimi (solo facingMode)...");
+                    // console.log("Tentativo di fallback con constraints minimi (solo facingMode)...");
                     const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
                     cameraStreamElement.srcObject = fallbackStream;
                     currentCameraStream = fallbackStream;
-                    console.log("Accesso fotocamera riuscito in fallback (constraints minimi).");
+                    // console.log("Accesso fotocamera riuscito in fallback (constraints minimi).");
                 } catch (fallbackErr) {
                     console.error("Errore accesso fotocamera anche in fallback:", fallbackErr.name, fallbackErr.message);
                     alert("Impossibile accedere alla fotocamera: " + fallbackErr.message);
@@ -1626,7 +1725,7 @@
         cameraPageSection.style.paddingTop = ''; 
         cameraPageSection.style.height = '';    
 
-        console.log(`Ritorno da fotocamera a: vista='${lastViewBeforeCamera}', sezione='${lastSectionBeforeCamera}'`);
+        // console.log(`Ritorno da fotocamera a: vista='${lastViewBeforeCamera}', sezione='${lastSectionBeforeCamera}'`);
 
         if (lastViewBeforeCamera === 'gallery') { 
             showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter);
@@ -1656,7 +1755,7 @@
                  sectionNameForFile = 'targa_completa'; 
             }
         }
-        console.log("Nome sezione per file foto:", sectionNameForFile, "da lastSectionBeforeCamera:", lastSectionBeforeCamera, "lastView:", lastViewBeforeCamera);
+        // console.log("Nome sezione per file foto:", sectionNameForFile, "da lastSectionBeforeCamera:", lastSectionBeforeCamera, "lastView:", lastViewBeforeCamera);
         return sectionNameForFile;
     }
 
@@ -1667,7 +1766,7 @@
             const canvas = document.createElement('canvas');
             canvas.width = cameraStreamElement.videoWidth; 
             canvas.height = cameraStreamElement.videoHeight;
-            console.log(`Cattura foto con risoluzione: ${canvas.width}x${canvas.height}`);
+            // console.log(`Cattura foto con risoluzione: ${canvas.width}x${canvas.height}`);
 
             const ctx = canvas.getContext('2d');
             ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
@@ -1689,7 +1788,6 @@
                 if (!blob) {
                     console.error("Errore: canvas.toBlob ha restituito null.");
                     alert("Errore nella conversione della foto. Riprova.");
-                    // Ripristina subito l'interfaccia in caso di errore di blob
                     freezeFrameDisplayElement.style.display = 'none';
                     freezeFrameDisplayElement.src = '#'; 
                     cameraStreamElement.style.display = 'block';
@@ -1722,13 +1820,12 @@
                     console.error("Errore salvataggio foto in IndexedDB o download:", error);
                     alert("Errore durante il salvataggio della foto nel database locale (IndexedDB).");
                 } finally {
-                    // MODIFICA: Durata anteprima dimezzata a 0.5 secondi
                     setTimeout(() => {
                         freezeFrameDisplayElement.style.display = 'none';
                         freezeFrameDisplayElement.src = '#'; 
                         cameraStreamElement.style.display = 'block';
                         captureBtn.disabled = false; 
-                    }, 500); // <<< MODIFICATO DA 1000 A 500
+                    }, 500); 
                 }
             }, 'image/jpeg', 0.7); 
 
@@ -1778,20 +1875,19 @@
             utilityNavButtons.style.display = 'flex'; 
 
             navButtons.forEach(b => b.classList.remove('active'));
-            let sectionNameForTitle = "Tutte le foto"; // Default per 'riepilogo' o se sezione non trovata
+            let sectionNameForTitle = "Tutte le foto"; 
             if (currentGallerySectionFilter && currentGallerySectionFilter !== 'riepilogo') {
                 const navButtonForSection = mainPageNavButtons.querySelector(`button[data-target="${currentGallerySectionFilter}"]`);
                 if (navButtonForSection) {
                     navButtonForSection.classList.add('active');
                     sectionNameForTitle = navButtonForSection.textContent.split('. ')[1] || currentGallerySectionFilter; 
-                } else { // Sezione non nei bottoni principali (es. 'danni')
+                } else { 
                      sectionNameForTitle = currentGallerySectionFilter.charAt(0).toUpperCase() + currentGallerySectionFilter.slice(1);
-                     if (currentGallerySectionFilter === 'danniverifiche') sectionNameForTitle = 'Danni/Verifiche'; // Nome corretto
+                     if (currentGallerySectionFilter === 'danniverifiche') sectionNameForTitle = 'Danni/Verifiche'; 
                 }
             } else if (currentGallerySectionFilter === 'riepilogo') {
                  const riepilogoNavButton = mainPageNavButtons.querySelector(`button[data-target="riepilogo"]`);
                  if (riepilogoNavButton) riepilogoNavButton.classList.add('active');
-                 // sectionNameForTitle rimane "Tutte le foto"
             }
             galleryTitleText = `Galleria: ${currentGalleryTargaFilter} - ${sectionNameForTitle}`;
             updateNavButtonColors(); 
@@ -1817,14 +1913,14 @@
         try {
             let photosToDisplay;
             let effectiveSectionKey = sectionKeyFilter;
-            if (targaFilter) { // Se c'è un filtro targa, applichiamo anche il filtro sezione (se presente)
+            if (targaFilter) { 
                 if (sectionKeyFilter && sectionKeyFilter.toLowerCase() === 'danniverifiche') {
                     effectiveSectionKey = 'danni';
                 } else if (sectionKeyFilter && sectionKeyFilter.toLowerCase() === 'riepilogo'){
-                    effectiveSectionKey = null; // Per 'riepilogo' mostriamo tutte le foto della targa
+                    effectiveSectionKey = null; 
                 }
                 photosToDisplay = await getPhotosByTargaAndSezioneFromDB(targaFilter, effectiveSectionKey);
-            } else { // Galleria globale
+            } else { 
                 photosToDisplay = await getAllPhotosFromDB(); 
             }
 
@@ -1840,7 +1936,7 @@
                 const photoItemDiv = document.createElement('div');
                 photoItemDiv.classList.add('photo-item');
                 const img = document.createElement('img');
-                let objectUrl = null; // Per tener traccia dell'URL oggetto
+                let objectUrl = null; 
                 
                 if (photoData.blobData instanceof Blob) {
                     objectUrl = URL.createObjectURL(photoData.blobData);
@@ -1851,7 +1947,7 @@
                 }
                 
                 img.alt = photoData.name;
-                img.dataset.timestamp = photoData.timestamp; // Per recuperare il blob per il lightbox
+                img.dataset.timestamp = photoData.timestamp; 
 
                 img.addEventListener('click', function() {
                     openImageLightbox(this.dataset.timestamp);
@@ -1866,7 +1962,7 @@
                 deleteBtn.title = "Elimina foto";
                 deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation(); 
-                    if (objectUrl) { // Revoca l'URL se l'elemento sta per essere rimosso
+                    if (objectUrl) { 
                         URL.revokeObjectURL(objectUrl);
                     }
                     deleteCapturedPhoto(photoData.timestamp); 
@@ -1906,11 +2002,11 @@
                 const photoData = event.target.result;
                 if (photoData && photoData.blobData instanceof Blob) {
                     if (currentLightboxImageObjectUrl) {
-                        URL.revokeObjectURL(currentLightboxImageObjectUrl); // Revoca URL precedente
+                        URL.revokeObjectURL(currentLightboxImageObjectUrl); 
                     }
                     currentLightboxImageObjectUrl = URL.createObjectURL(photoData.blobData);
                     lightboxImage.src = currentLightboxImageObjectUrl;
-                    imageLightbox.style.display = 'flex'; // Usa flex per centrare
+                    imageLightbox.style.display = 'flex'; 
                 } else {
                     console.error("Foto non trovata o dati blob non validi per il lightbox.");
                     alert("Impossibile caricare l'immagine ingrandita.");
@@ -1932,7 +2028,7 @@
             URL.revokeObjectURL(currentLightboxImageObjectUrl);
             currentLightboxImageObjectUrl = null;
         }
-        lightboxImage.src = '#'; // Pulisci src
+        lightboxImage.src = '#'; 
     }
 
     // END: Funzioni per Pagina Galleria e Lightbox
@@ -1944,7 +2040,7 @@
         historyPageSection.style.display = 'none';
         if(cameraPageSection) cameraPageSection.style.display = 'none';
         if(galleryPageSection) galleryPageSection.style.display = 'none'; 
-        if(imageLightbox) imageLightbox.style.display = 'none'; // Assicurati che lightbox sia chiuso
+        if(imageLightbox) imageLightbox.style.display = 'none'; 
         
         const headerCirclesDiv = document.querySelector('.header-circles');
         if (viewName !== 'camera') { 
@@ -2023,7 +2119,7 @@
         const targaUpper = selectedTarga.toUpperCase();
 
         if (localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`)) {
-            console.log(`handleTargaSelectionAndSync: Targa ${targaUpper} è stata cancellata localmente. Non verrà caricata.`);
+            // console.log(`handleTargaSelectionAndSync: Targa ${targaUpper} è stata cancellata localmente. Non verrà caricata.`);
             if (targheLoadingStatus && landingPageSection.style.display === 'block') {
                 targheLoadingStatus.textContent = `Targa ${targaUpper} cancellata. Selezionane un'altra.`;
             }
@@ -2049,7 +2145,7 @@
         }
 
         targaSelezionataGlobalmente = targaUpper;
-        console.log(`Targa ${targaSelezionataGlobalmente} selezionata. Target section: ${targetSectionId}`);
+        // console.log(`Targa ${targaSelezionataGlobalmente} selezionata. Target section: ${targetSectionId}`);
         if (targheLoadingStatus && landingPageSection.style.display === 'block') {
             targheLoadingStatus.textContent = `Caricamento dati per ${targaSelezionataGlobalmente}...`;
         }
@@ -2076,7 +2172,7 @@
         }
         
         if (sheetsPeriziaData && sheetsRecordTimestamp && (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp)) {
-            console.log(`Dati da Google Sheets per ${targaSelezionataGlobalmente} sono più recenti. Uso quelli.`);
+            // console.log(`Dati da Google Sheets per ${targaSelezionataGlobalmente} sono più recenti. Uso quelli.`);
             try {
                 if (!localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente}`)) {
                     localStorage.setItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`, JSON.stringify(sheetsDatiPerizia));
@@ -2085,13 +2181,13 @@
                     if (isSheetsDataCompleted) markTargaAsCompleted(targaSelezionataGlobalmente);
                     else unmarkTargaAsCompleted(targaSelezionataGlobalmente);
                 } else {
-                    console.log(`Targa ${targaSelezionataGlobalmente} marcata per cancellazione, non sovrascrivo con dati da Sheets anche se più recenti.`);
+                    // console.log(`Targa ${targaSelezionataGlobalmente} marcata per cancellazione, non sovrascrivo con dati da Sheets anche se più recenti.`);
                 }
             } catch (e) { console.error("Errore salvataggio dati da Sheets in LS:", e); }
         } else if (localData) {
-            console.log(`Dati locali per ${targaSelezionataGlobalmente} sono più recenti o uguali, o Sheets non ha dati, o è marcata cancellata.`);
+            // console.log(`Dati locali per ${targaSelezionataGlobalmente} sono più recenti o uguali, o Sheets non ha dati, o è marcata cancellata.`);
         } else if (!localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente}`)) { 
-            console.log(`Nessun dato per ${targaSelezionataGlobalmente}. Inizio perizia da zero.`);
+            // console.log(`Nessun dato per ${targaSelezionataGlobalmente}. Inizio perizia da zero.`);
             resetChecklistForm(); 
         }
         
@@ -2343,7 +2439,7 @@
                             alert(`Errore nel marcare ${tDelUpper} per la cancellazione da Sheets.`);
                         }
                     } else {
-                        console.log(`L'utente ha scelto di non marcare ${tDelUpper} per la cancellazione da Sheets.`);
+                        // console.log(`L'utente ha scelto di non marcare ${tDelUpper} per la cancellazione da Sheets.`);
                     }
                     if (typeof popolaTargheFiltrate === 'function') {
                         popolaTargheFiltrate();
@@ -2446,7 +2542,7 @@
     async function fetchAllDataFromSheets() { 
         if (!GOOGLE_SHEET_WEB_APP_URL) { console.error("URL della Web App Google Sheets non configurato per il fetch di tutti i dati."); return { success: false, message: "URL Web App non configurato.", data: [] }; } 
         const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?nocache=${new Date().getTime()}`;  
-        console.log("Fetching all perizie from Sheets. URL:", fetchUrl); 
+        // console.log("Fetching all perizie from Sheets. URL:", fetchUrl); 
         try { 
             const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); 
             if (!response.ok) { 
@@ -2458,13 +2554,13 @@
             if (contentType && contentType.indexOf("application/json") !== -1) { 
                 const result = await response.json(); 
                 if (Array.isArray(result)) {  
-                    console.log("Dati globali ricevuti da Sheets (array diretto):", result.length, "perizie."); 
+                    // console.log("Dati globali ricevuti da Sheets (array diretto):", result.length, "perizie."); 
                     return { success: true, data: result, message: "Dati recuperati con successo." }; 
                 } else if (result && result.status === "success" && Array.isArray(result.data)) {  
-                    console.log("Dati globali ricevuti da Sheets (oggetto con .data):", result.data.length, "perizie."); 
+                    // console.log("Dati globali ricevuti da Sheets (oggetto con .data):", result.data.length, "perizie."); 
                     return { success: true, data: result.data, message: result.message || "Dati recuperati con successo."}; 
                 } else if (result && result.status === "notfound") {   
-                    console.log("Nessuna perizia trovata in Sheets (notfound).");  
+                    // console.log("Nessuna perizia trovata in Sheets (notfound).");  
                     return { success: true, data: [], message: result.message || "Nessuna perizia trovata."}; 
                 } else { 
                     console.warn("Risposta da Sheets (globale) non era un array o oggetto atteso:", result); 
@@ -2493,7 +2589,7 @@
         let errorMessages = [];
 
         syncToSheetsBtn.textContent = "Sinc (0/4 DelSheets)...";
-        console.log("SYNC - Fase 0: Processo cancellazioni per Google Sheets.");
+        // console.log("SYNC - Fase 0: Processo cancellazioni per Google Sheets.");
         let deletionRequests = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
@@ -2504,13 +2600,13 @@
         }
         if (deletionRequests.length > 0) {
             for (const targa of deletionRequests) {
-                console.log(`SYNC - Tentativo di cancellazione targa ${targa} da Sheets...`);
+                // console.log(`SYNC - Tentativo di cancellazione targa ${targa} da Sheets...`);
                 const deleteUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=deletePerizia&targa=${encodeURIComponent(targa)}`;
                 try {
                     const response = await fetch(deleteUrl, { method: 'POST', mode: 'cors', body: JSON.stringify({targa: targa})}); 
                     const result = await response.json();
                     if (response.ok && result.status === "success") {
-                        console.log(`SYNC - Targa ${targa} cancellata con successo da Sheets.`);
+                        // console.log(`SYNC - Targa ${targa} cancellata con successo da Sheets.`);
                         localStorage.removeItem(`${APP_PREFIX}deleted_${targa}`); 
                         sheetsDeletionsSuccessCount++;
                     } else {
@@ -2525,19 +2621,19 @@
                 }
             }
         }
-        console.log(`SYNC - Fase 0 completata. Cancellazioni Sheets: ${sheetsDeletionsSuccessCount} successi, ${sheetsDeletionsFailedCount} fallimenti.`);
+        // console.log(`SYNC - Fase 0 completata. Cancellazioni Sheets: ${sheetsDeletionsSuccessCount} successi, ${sheetsDeletionsFailedCount} fallimenti.`);
 
         syncToSheetsBtn.textContent = "Sinc (1/4 RecSheets)...";
-        console.log("SYNC - Fase 1: Recupero di tutti i dati da Google Sheets.");
+        // console.log("SYNC - Fase 1: Recupero di tutti i dati da Google Sheets.");
         const sheetsResponse = await fetchAllDataFromSheets();
         if (!sheetsResponse.success) {
             alert(`Errore nel recupero dei dati da Sheets:\n${sheetsResponse.message}\nLa sincronizzazione potrebbe essere incompleta.`);
         }
         const allSheetsData = sheetsResponse.data || []; 
-        console.log(`SYNC - Fase 1 completata. Ricevute ${allSheetsData.length} perizie da Sheets.`);
+        // console.log(`SYNC - Fase 1 completata. Ricevute ${allSheetsData.length} perizie da Sheets.`);
 
         syncToSheetsBtn.textContent = "Sinc (2/4 AggLoc)...";
-        console.log("SYNC - Fase 2: Confronto dati Sheets con localStorage e aggiornamento locale.");
+        // console.log("SYNC - Fase 2: Confronto dati Sheets con localStorage e aggiornamento locale.");
         if (allSheetsData.length > 0) {
             for (const sheetPerizia of allSheetsData) {
                 if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) {
@@ -2547,7 +2643,7 @@
                 const targa = sheetPerizia.targa.toUpperCase();
 
                 if (localStorage.getItem(`${APP_PREFIX}deleted_${targa}`)) {
-                    console.log(`SYNC - Targa ${targa} è marcata per la cancellazione localmente. Non verrà aggiornata da Sheets.`);
+                    // console.log(`SYNC - Targa ${targa} è marcata per la cancellazione localmente. Non verrà aggiornata da Sheets.`);
                     continue; 
                 }
 
@@ -2563,7 +2659,7 @@
                 const sheetsRecordTimestamp = new Date(sheetPerizia.timestamp); 
                 
                 if (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp) {
-                    console.log(`SYNC - Targa ${targa}: Dati Sheets più recenti (Sheets Record TS: ${sheetsRecordTimestamp}, Locale datiPerizia TS: ${localDatiPeriziaTimestamp || 'N/A'}). Aggiorno localStorage.`);
+                    // console.log(`SYNC - Targa ${targa}: Dati Sheets più recenti (Sheets Record TS: ${sheetsRecordTimestamp}, Locale datiPerizia TS: ${localDatiPeriziaTimestamp || 'N/A'}). Aggiorno localStorage.`);
                     try {
                         localStorage.setItem(localDataKey, JSON.stringify(sheetPerizia.datiPerizia)); 
                         if (sheetPerizia.hasOwnProperty('posizione')) { savePosizioneForTarga(targa, sheetPerizia.posizione); }
@@ -2577,14 +2673,14 @@
                         localUpdatesFailedCount++;
                     }
                 } else {
-                    console.log(`SYNC - Targa ${targa}: Dati locali più recenti o uguali. Nessun aggiornamento da Sheets.`);
+                    // console.log(`SYNC - Targa ${targa}: Dati locali più recenti o uguali. Nessun aggiornamento da Sheets.`);
                 }
             }
         }
-        console.log(`SYNC - Fase 2 completata. Aggiornate/Create localmente ${updatedFromSheetsCount} perizie da Sheets. Errori locali: ${localUpdatesFailedCount}`);
+        // console.log(`SYNC - Fase 2 completata. Aggiornate/Create localmente ${updatedFromSheetsCount} perizie da Sheets. Errori locali: ${localUpdatesFailedCount}`);
 
         syncToSheetsBtn.textContent = "Sinc (3/4 InvioSheets)...";
-        console.log("SYNC - Fase 3: Invio delle perizie locali a Google Sheets.");
+        // console.log("SYNC - Fase 3: Invio delle perizie locali a Google Sheets.");
         let perizieLocaliKeys = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
@@ -2593,7 +2689,7 @@
                  if (!localStorage.getItem(`${APP_PREFIX}deleted_${targaFromKey}`)) {
                     perizieLocaliKeys.push(key);
                  } else {
-                    console.log(`SYNC - Targa ${targaFromKey} marcata per cancellazione, non verrà inviata a Sheets.`);
+                    // console.log(`SYNC - Targa ${targaFromKey} marcata per cancellazione, non verrà inviata a Sheets.`);
                  }
             }
         }
@@ -2630,12 +2726,12 @@
                 datiPerizia: datiPeriziaSalvatiLocalmente, 
                 timestamp: datiPeriziaSalvatiLocalmente.timestamp 
             };
-            console.log(`SYNC - Invio targa ${targa} a Sheets...`);
+            // console.log(`SYNC - Invio targa ${targa} a Sheets...`);
             const result = await inviaPeriziaSingolaASheets(periziaDaInviare);
             if (result.success) {
                 localToSheetsSuccessCount++;
                 if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) {
-                    console.log(`SYNC - Timestamp per ${targa} su Sheets (${result.data.timestamp}) è più recente del timestamp dei datiPerizia locali (${datiPeriziaSalvatiLocalmente.timestamp}). Aggiorno timestamp locale.`);
+                    // console.log(`SYNC - Timestamp per ${targa} su Sheets (${result.data.timestamp}) è più recente del timestamp dei datiPerizia locali (${datiPeriziaSalvatiLocalmente.timestamp}). Aggiorno timestamp locale.`);
                     datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp; 
                     try { localStorage.setItem(key, JSON.stringify(datiPeriziaSalvatiLocalmente)); } catch (e) { console.error(`SYNC - Errore salvataggio timestamp aggiornato da server per ${targa}:`,e); }
                 }
@@ -2644,7 +2740,7 @@
                 errorMessages.push(`Targa ${targa} (Invio Sheets): ${result.message || 'Errore sconosciuto'}`);
             }
         }
-        console.log("SYNC - Fase 3 completata.");
+        // console.log("SYNC - Fase 3 completata.");
 
         syncToSheetsBtn.textContent = "Sinc (4/4 Fine)";
         let finalMessage = `Sincronizzazione completata.\n\n`;
@@ -2683,10 +2779,7 @@
     }
 
     function handleTouchStart(event) {
-        // Non fare nulla se il lightbox è aperto
         if (imageLightbox && imageLightbox.style.display === 'flex') return;
-
-        // Non fare nulla se l'elemento toccato è un input, select o textarea
         const targetElement = event.target;
         if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button')) {
             return;
@@ -2699,7 +2792,6 @@
 
     function handleTouchEnd(event) {
         if (imageLightbox && imageLightbox.style.display === 'flex') return;
-        
         const targetElement = event.target;
          if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button')) {
             return;
@@ -2724,20 +2816,22 @@
             const currentIndex = sectionOrder.indexOf(currentSectionId);
             if (currentIndex === -1) return;
 
-            if (deltaX > 0 && currentIndex > 0) { // Swipe a destra (vai a sinistra)
+            if (deltaX > 0 && currentIndex > 0) { 
                 showSection(sectionOrder[currentIndex - 1]);
-            } else if (deltaX < 0 && currentIndex < sectionOrder.length - 1) { // Swipe a sinistra (vai a destra)
+            } else if (deltaX < 0 && currentIndex < sectionOrder.length - 1) { 
                 showSection(sectionOrder[currentIndex + 1]);
             }
         } else if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter) {
-            // Swipe nella galleria (quando una targa è selezionata)
-            let currentGallerySectionId = currentGallerySectionFilter || 'riepilogo'; // Se null, considera riepilogo come base
+            let currentGallerySectionId = currentGallerySectionFilter || 'riepilogo'; 
             const currentIndex = sectionOrder.indexOf(currentGallerySectionId);
-            if (currentIndex === -1) return;
+            if (currentIndex === -1) { // Se la sezione corrente non è in sectionOrder (es. una sezione custom), non fare nulla
+                console.warn("Sezione galleria corrente non trovata in sectionOrder per swipe:", currentGallerySectionId);
+                return;
+            }
 
-            if (deltaX > 0 && currentIndex > 0) { // Swipe a destra
+            if (deltaX > 0 && currentIndex > 0) { 
                 await showGalleryPage(currentGalleryTargaFilter, sectionOrder[currentIndex - 1]);
-            } else if (deltaX < 0 && currentIndex < sectionOrder.length - 1) { // Swipe a sinistra
+            } else if (deltaX < 0 && currentIndex < sectionOrder.length - 1) { 
                 await showGalleryPage(currentGalleryTargaFilter, sectionOrder[currentIndex + 1]);
             }
         }
@@ -2862,7 +2956,7 @@
         
         if(backToMainFromGalleryBtn) {
              backToMainFromGalleryBtn.addEventListener('click', () => {
-                console.log(`Ritorno da galleria a: vista='${lastViewBeforeGallery}', sezione='${lastSectionBeforeGallery}'`);
+                // console.log(`Ritorno da galleria a: vista='${lastViewBeforeGallery}', sezione='${lastSectionBeforeGallery}'`);
                 if (lastViewBeforeGallery === 'checklist' && currentGalleryTargaFilter && lastSectionBeforeGallery) {
                     if (targaSelezionataGlobalmente !== currentGalleryTargaFilter) {
                          targaSelezionataGlobalmente = currentGalleryTargaFilter;
@@ -2881,14 +2975,14 @@
 
         if (headerExitBtn) {
             headerExitBtn.addEventListener('click', () => {
-                console.log("Header Exit button clicked");
+                // console.log("Header Exit button clicked");
                 triggerMainExit(); 
             });
         }
 
         if (headerPhotosBtn) { 
             headerPhotosBtn.addEventListener('click', async () => {
-                console.log("Header Photos/Gallery button clicked");
+                // console.log("Header Photos/Gallery button clicked");
                 let targaForGallery = null;
                 let sectionKeyForGallery = null; 
 
@@ -2911,7 +3005,7 @@
 
         if (headerPeriziaBtn) {
             headerPeriziaBtn.addEventListener('click', async () => {
-                console.log("Header Perizia button clicked");
+                // console.log("Header Perizia button clicked");
                 if (cameraPageSection.style.display === 'flex') { 
                     returnFromCamera(); 
                 } else if (galleryPageSection.style.display === 'block') { 
@@ -2941,7 +3035,7 @@
         
         if (headerCameraBtn) {
             headerCameraBtn.addEventListener('click', () => {
-                console.log("Header Camera button clicked");
+                // console.log("Header Camera button clicked");
                 if (cameraPageSection.style.display === 'flex') {
                     returnFromCamera(); 
                 } else {
@@ -2961,17 +3055,16 @@
             } else if (checklistContainer.style.display === 'block' || (!targaSelezionataGlobalmente && landingPageSection.style.display === 'block')) {
                 showSection(targetId);
             } else if (!currentGalleryTargaFilter && galleryPageSection.style.display === 'block') {
-                 console.log("Click su nav button da galleria globale, azione non definita o vai a landing.");
+                 // console.log("Click su nav button da galleria globale, azione non definita o vai a landing.");
             }
         }));
 
-        // Event listener per chiudere il lightbox
-        if (closeLightboxBtn) {
-            closeLightboxBtn.addEventListener('click', closeImageLightbox);
+        if (closeLightboxBtnElem) {
+            closeLightboxBtnElem.addEventListener('click', closeImageLightbox);
         }
         if (imageLightbox) {
             imageLightbox.addEventListener('click', function(event) {
-                if (event.target === imageLightbox) { // Chiudi solo se si clicca sull'overlay
+                if (event.target === imageLightbox) { 
                     closeImageLightbox();
                 }
             });
@@ -2981,7 +3074,6 @@
             checklistContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
             checklistContainer.addEventListener('touchend', handleTouchEnd, { passive: true });
         }
-        // Aggiungi listener per swipe alla galleria
         if (galleryPageSection) {
             galleryPageSection.addEventListener('touchstart', handleTouchStart, { passive: true });
             galleryPageSection.addEventListener('touchend', handleTouchEnd, { passive: true });
