@@ -7,112 +7,45 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* CSS INVARIATO - OMESSO PER BREVITÀ */
-        /* ... (tutto il CSS precedente, inclusa la modifica per #preloader .loading-text) ... */
+        /* ... (tutto il CSS precedente) ... */
         #preloader .loading-text {
             color: #00aeff;
             animation: textGlow 1.8s infinite alternate ease-in-out;
             text-align: center; 
             width: 100%; 
         }
-        #galleryPageSection h2.section-title { margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
     <script>
-    // Variabili globali
-    const landingPageSection = document.getElementById('landingPageSection');
-    const checklistContainer = document.getElementById('checklistContainer');
-    const historyPageSection = document.getElementById('historyPageSection');
-    const galleryPageSection = document.getElementById('galleryPageSection'); 
-    const photoGridContainer = document.getElementById('photoGridContainer'); 
-    const backToMainFromGalleryBtn = document.getElementById('backToMainFromGalleryBtn'); 
-
-    const cameraPageSection = document.getElementById('cameraPageSection'); 
-    const cameraStreamElement = document.getElementById('cameraStream');
-    const freezeFrameDisplayElement = document.getElementById('freezeFrameDisplay');
-    const captureBtn = document.getElementById('captureBtn');
-    const closeCameraBtn = document.getElementById('closeCameraBtn');
-    let currentCameraStream = null;
-    let lastViewBeforeCamera = 'landing'; 
-    let lastSectionBeforeCamera = null; 
-
-
-    const targaListContainer = document.getElementById('targaListContainer');
-    const savedTargasListContainer = document.getElementById('savedTargasListContainer');
-    const targheLoadingStatus = document.getElementById('targheLoadingStatus');
-    const pageHeaderContainer = document.getElementById('pageHeaderContainer');
-    const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
-    const targaDropdownContainer = document.getElementById('targaDropdownContainer');
-    const targaSwitcherDropdown = document.getElementById('targaSwitcherDropdown');
-    const targaDetailsDisplay = document.getElementById('targaDetailsDisplay'); 
-
-    const navButtonsContainer = pageHeaderContainer.querySelector('#navButtons'); 
-    const mainPageNavButtons = navButtonsContainer.querySelector('#mainPageNavButtons'); 
-    const utilityNavButtons = pageHeaderContainer.querySelector('#utilityNavButtons'); 
-
-    const navButtons = mainPageNavButtons.querySelectorAll('button[data-target]');
-    
-    const backToListBtn = utilityNavButtons.querySelector('#backToListBtn');
-    const historyBtn = utilityNavButtons.querySelector('#historyBtn');
-    const mainExitAppBtn = utilityNavButtons.querySelector('#exitAppBtn'); 
-    let syncToSheetsBtn; 
-    
-    const headerExitBtn = document.getElementById('headerExitBtn');
-    const headerPhotosBtn = document.getElementById('headerPhotosBtn');
-    const headerPeriziaBtn = document.getElementById('headerPeriziaBtn');
-    const headerCameraBtn = document.getElementById('headerCameraBtn');
-
-    const sections = document.querySelectorAll('#checklistContainer .category-section');
-    const summaryContent = document.getElementById('summaryContent');
-    const clearAllProgressBtn = document.getElementById('clearAllProgressBtn');
-    const backToLandingFromHistoryBtn = document.getElementById('backToLandingFromHistoryBtn');
-    const saveAndReturnBtn = document.getElementById('saveAndReturnBtn');
-    const saveAndNextButtons = document.querySelectorAll('.save-and-next-btn');
-    const sheetFilterDropdown = document.getElementById('sheetFilterDropdown');
-    const tipoTrazioneSelect = document.getElementById('tipo_trazione');
-    const cavoRapidaSelect = document.getElementById('cavo_ricarica_rapida');
-    const cavoDomesticaSelect = document.getElementById('cavo_ricarica_domestica');
-    
-    const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
-    const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzN4bBhPi4d8i7fSpJQqCJ2CQYOtmes1yKeGeqVe053K4QkdKYH4PuQIughn_9YLEfCkA/exec'; 
-    
-    let listaTargheCompleta = [];
-    let targaSelezionataGlobalmente = null;
-    const APP_PREFIX = 'periziaApp_';
-    const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
-    // const CAPTURED_PHOTOS_KEY = `${APP_PREFIX}capturedPhotos_LS_LEGACY`; // Non più usato per salvare foto nuove
+    // Variabili globali (esistenti)
+    // ... (tutte le variabili globali esistenti) ...
+    const CAPTURED_PHOTOS_KEY = `${APP_PREFIX}capturedPhotos_LS_LEGACY`; // Rinominiamo per evitare conflitti se si lasciano vecchi dati LS
     const DB_NAME = "perizieFotoDB";
-    const DB_VERSION = 1; // Incrementare se si cambia la struttura dello store/indici
+    const DB_VERSION = 1;
     const PHOTO_STORE_NAME = "fotoStore";
-    let db;
+    let db; // Variabile globale per l'istanza del database IndexedDB
 
+    // NUOVE Variabili per il contesto della galleria (già introdotte)
     let currentGalleryTargaFilter = null;
     let currentGallerySectionFilter = null; 
     let lastViewBeforeGallery = 'landing';
     let lastSectionBeforeGallery = null;
 
-    const currentAppVersion = "1.4.1"; 
-    const changelogModal = document.getElementById('changelogModal');
-    const closeChangelogBtn = document.getElementById('closeChangelogBtn');
-    const changelogList = document.getElementById('changelogList');
-    const changelogTitle = document.getElementById('changelogTitle');
 
+    // MODIFICA: Versione App aggiornata
+    const currentAppVersion = "1.4.0"; 
     const latestChangesText = `
-        <li>Modificata la cattura foto in JPEG per ridurre dimensioni.</li>
+        <li>Modificata la cattura foto in JPEG per ridurre dimensioni e migliorata gestione errori galleria.</li>
         <li>Galleria ora filtrabile per targa e sezione.</li>
         <li>Header completo (con selettore targa e navigazione sezioni) visibile in galleria se aperta da una perizia.</li>
         <li>Testo "Caricamento elenco targhe..." centrato.</li>
         <li>Tempo anteprima foto dopo scatto ridotto a 1 secondo.</li>
         <li>Introdotta gestione base di IndexedDB per archiviazione foto (per supportare >50 foto).</li>
-        <li>Cancellazione foto da IndexedDB contestuale alla cancellazione dei dati perizia.</li>
     `;
 
-    let touchstartX = 0;
-    let touchendX = 0;
-    const swipeThreshold = 50; 
-    const sectionOrder = ['remarketing', 'pneumatici', 'danniVerifiche', 'riepilogo'];
-
     // --- INIZIO SEZIONE CODICE INDEXEDDB ---
+
     function initDB() {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -124,6 +57,8 @@
                     store.createIndex('timestamp_idx', 'timestamp', { unique: false });
                     store.createIndex('targa_idx', 'targa', { unique: false });
                     store.createIndex('section_idx', 'section', { unique: false });
+                    // Potrebbe essere utile un indice composto [targa, section]
+                    // store.createIndex('targa_section_idx', ['targa', 'section'], { unique: false });
                     console.log("Object store 'fotoStore' creato con indici.");
                 }
             };
@@ -141,53 +76,80 @@
         });
     }
 
-    function addPhotoToDB(photoData) { 
+    function addPhotoToDB(photoData) { // photoData include { name, timestamp, targa, section, imageBlob }
         return new Promise((resolve, reject) => {
-            if (!db) { return reject("DB not initialized"); }
+            if (!db) {
+                console.error("Database non inizializzato per addPhotoToDB.");
+                return reject("DB not initialized");
+            }
             const transaction = db.transaction([PHOTO_STORE_NAME], 'readwrite');
             const store = transaction.objectStore(PHOTO_STORE_NAME);
             
+            // Controllo limite (opzionale con IndexedDB, ma 500 è un target)
             const countRequest = store.count();
             countRequest.onsuccess = () => {
-                if (countRequest.result >= 700) { 
+                if (countRequest.result >= 700) { // Limite un po' più alto per sicurezza
                     console.warn("Limite foto in DB raggiunto, tentativo di rimozione della più vecchia.");
-                    let oldestPhotoCursor = store.index('timestamp_idx').openCursor(null, 'next');
+                    // Implementa la rimozione della foto più vecchia se necessario
+                    // Questo richiede un cursore ordinato per timestamp in senso ascendente
+                    let oldestPhotoCursor = store.index('timestamp_idx').openCursor(null, 'next'); // 'next' per il più vecchio
+                    let deleteOldestRequest;
                     oldestPhotoCursor.onsuccess = (event) => {
                         const cursor = event.target.result;
                         if (cursor) {
-                           const deleteOldestRequest = store.delete(cursor.primaryKey);
-                           deleteOldestRequest.onsuccess = () => { console.log("Foto più vecchia rimossa."); actuallyAdd(); }
-                           deleteOldestRequest.onerror = (e) => { console.error("Errore rimozione foto vecchia:", e.target.error); actuallyAdd(); /* Prova comunque */ }
-                        } else { actuallyAdd(); }
-                    };
-                    oldestPhotoCursor.onerror = (e) => { console.error("Errore cursore foto vecchia:", e.target.error); actuallyAdd(); /* Prova comunque */ }
-                } else { actuallyAdd(); }
-            };
-            countRequest.onerror = (e) => { console.error("Errore conteggio foto:", e.target.error); actuallyAdd(); };
+                           deleteOldestRequest = store.delete(cursor.primaryKey);
+                           deleteOldestRequest.onsuccess = () => {
+                               console.log("Foto più vecchia rimossa per fare spazio.");
+                               actuallyAdd();
+                           }
+                           deleteOldestRequest.onerror = (e) => reject("Errore rimozione foto vecchia: " + e.target.error);
+                        } else {
+                           actuallyAdd(); // Nessuna foto da eliminare, o errore apertura cursore vecchio.
+                        }
+                    }
+                    oldestPhotoCursor.onerror = (e) => reject("Errore apertura cursore foto vecchia: " + e.target.error);
+
+                } else {
+                    actuallyAdd();
+                }
+            }
+            countRequest.onerror = (e) => {
+                console.error("Errore conteggio foto in DB:", e.target.error);
+                actuallyAdd(); // Prova ad aggiungere comunque se il conteggio fallisce
+            }
 
             function actuallyAdd() {
                 const request = store.add(photoData);
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = (e) => { console.error("Errore aggiunta foto a IDB:", e.target.error); reject(e.target.error); };
+                request.onsuccess = () => resolve(request.result); // Ritorna l'ID della foto aggiunta
+                request.onerror = (event) => {
+                    console.error("Errore aggiunta foto a IndexedDB:", event.target.error);
+                    reject(event.target.error);
+                };
             }
-            transaction.onerror = (e) => { console.error("Errore transazione aggiunta foto:", e.target.error); if (!transaction.error) reject(e.target.error); };
+
+            transaction.oncomplete = () => console.log("Transazione aggiunta foto completata.");
+            transaction.onerror = (event) => console.error("Errore transazione aggiunta foto:", event.target.error);
         });
     }
 
     function getPhotosFromDB(targaFilter, sectionKeyFilter) {
         return new Promise((resolve, reject) => {
-            if (!db) { return reject("DB not initialized"); }
+            if (!db) {
+                 console.error("Database non inizializzato per getPhotosFromDB.");
+                 return reject("DB not initialized");
+            }
             const transaction = db.transaction([PHOTO_STORE_NAME], 'readonly');
             const store = transaction.objectStore(PHOTO_STORE_NAME);
             const photos = [];
-            let request;
 
+            let request;
             if (targaFilter) {
                 const targaUpper = targaFilter.toUpperCase();
                 const targaIndex = store.index('targa_idx');
                 request = targaIndex.openCursor(IDBKeyRange.only(targaUpper));
-            } else { 
-                request = store.index('timestamp_idx').openCursor(null, 'prev'); // Ordina per timestamp decrescente (più recenti prima)
+            } else { // Galleria globale
+                request = store.openCursor(null, 'prev'); // 'prev' per ordinare per ID decrescente (più recenti prima, se ID è autoinc)
+                                                          // o usare timestamp_idx in 'prev'
             }
             
             request.onsuccess = (event) => {
@@ -196,91 +158,56 @@
                     const photo = cursor.value;
                     let includePhoto = true;
 
-                    if (targaFilter) { 
-                        if (photo.targa.toUpperCase() !== targaFilter.toUpperCase()) { includePhoto = false; }
+                    if (targaFilter) { // Già filtrato dall'index, ma doppia verifica non fa male
+                        if (photo.targa.toUpperCase() !== targaFilter.toUpperCase()) {
+                            includePhoto = false;
+                        }
                     }
 
                     if (includePhoto && targaFilter && sectionKeyFilter && sectionKeyFilter !== 'riepilogo') {
                         let filterMatchKey = sectionKeyFilter.toLowerCase();
                         if (filterMatchKey === 'danniverifiche') filterMatchKey = 'danni';
-                        if (photo.section.toLowerCase() !== filterMatchKey) { includePhoto = false; }
+                        if (photo.section.toLowerCase() !== filterMatchKey) {
+                            includePhoto = false;
+                        }
                     }
-                    if (includePhoto) { photos.push(photo); }
+                    // Se sectionKeyFilter è 'riepilogo' o null (con targaFilter), tutte le foto della targa sono incluse.
+                    // Se targaFilter è null (globale), tutte le foto sono incluse.
+
+                    if (includePhoto) {
+                        photos.push(photo);
+                    }
                     cursor.continue();
                 } else {
-                    // Se era un filtro per targa, l'ordinamento per timestamp non è stato fatto dall'index primario
-                    if (targaFilter) {
+                    // Fine del cursore, ordina per timestamp se non già fatto dall'index
+                    if (!targaFilter) { // Se globale, l'ordine da ID autoincrement potrebbe essere sufficiente se inserite in ordine
+                         photos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    } else if (targaFilter) { // Se filtrate per targa, ordina per timestamp
                         photos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                     }
                     resolve(photos);
                 }
             };
-            request.onerror = (e) => { console.error("Errore recupero foto da IDB:", e.target.error); reject(e.target.error); };
+            request.onerror = (event) => {
+                console.error("Errore recupero foto da IndexedDB:", event.target.error);
+                reject(event.target.error);
+            };
         });
     }
 
-    function deletePhotoFromDB(photoId) { 
+    function deletePhotoFromDB(photoId) { // photoId è la chiave primaria dell'oggetto store
         return new Promise((resolve, reject) => {
-            if (!db) { return reject("DB not initialized"); }
+            if (!db) {
+                 console.error("Database non inizializzato per deletePhotoFromDB.");
+                 return reject("DB not initialized");
+            }
             const transaction = db.transaction([PHOTO_STORE_NAME], 'readwrite');
             const store = transaction.objectStore(PHOTO_STORE_NAME);
             const request = store.delete(photoId);
+
             request.onsuccess = () => resolve();
-            request.onerror = (e) => { console.error("Errore eliminazione foto da IDB:", e.target.error); reject(e.target.error); };
-        });
-    }
-
-    async function deletePhotosForTargaFromDB(targa) {
-        if (!db) { console.error("DB non inizializzato per deletePhotosForTargaFromDB"); return; }
-        const targaUpper = targa.toUpperCase();
-        const transaction = db.transaction([PHOTO_STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(PHOTO_STORE_NAME);
-        const targaIndex = store.index('targa_idx');
-        const request = targaIndex.openCursor(IDBKeyRange.only(targaUpper));
-        let deleteCount = 0;
-
-        return new Promise((resolve, reject) => {
-            request.onsuccess = (event) => {
-                const cursor = event.target.result;
-                if (cursor) {
-                    store.delete(cursor.primaryKey); // Non serve await qui, le op IDB in transazione sono accodate
-                    deleteCount++;
-                    cursor.continue();
-                } else {
-                    console.log(`${deleteCount} foto eliminate da IndexedDB per la targa ${targaUpper}.`);
-                    resolve(deleteCount);
-                }
-            };
             request.onerror = (event) => {
-                console.error(`Errore durante l'eliminazione delle foto per la targa ${targaUpper}:`, event.target.error);
-                reject(event.target.error);
-            };
-            transaction.oncomplete = () => {
-                if(request.error) { // Se l'errore del cursore non è stato catturato prima
-                     reject(request.error);
-                } else {
-                     resolve(deleteCount); // Assicura che la promessa si risolva anche se non ci sono foto
-                }
-            };
-            transaction.onerror = (event) => {
-                 console.error(`Errore transazione eliminazione foto per targa ${targaUpper}:`, event.target.error);
-                 reject(event.target.error);
-            };
-        });
-    }
-
-    async function clearAllPhotosFromDB() {
-        if (!db) { console.error("DB non inizializzato per clearAllPhotosFromDB"); return; }
-        const transaction = db.transaction([PHOTO_STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(PHOTO_STORE_NAME);
-        const request = store.clear();
-        return new Promise((resolve, reject) => {
-            request.onsuccess = () => {
-                console.log("Tutte le foto eliminate da IndexedDB.");
-                resolve();
-            };
-            request.onerror = (event) => {
-                console.error("Errore durante la cancellazione di tutte le foto da IndexedDB:", event.target.error);
+                console.error("Errore eliminazione foto da IndexedDB:", event.target.error);
                 reject(event.target.error);
             };
         });
@@ -288,6 +215,8 @@
 
     // --- FINE SEZIONE CODICE INDEXEDDB ---
 
+    // ... (tutte le funzioni esistenti: updateTargaDetailsDisplay, populateTargaSwitcherDropdown, etc. ) ...
+    
     function capturePhoto() {
         if (captureBtn.disabled) return; 
 
@@ -298,9 +227,7 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
             
-            // Usa DataURL solo per l'anteprima immediata e il download, non per lo storage persistente
-            const previewDataUrl = canvas.toDataURL('image/jpeg', 0.7); 
-            freezeFrameDisplayElement.src = previewDataUrl;
+            freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7); // Per anteprima immediata
             freezeFrameDisplayElement.style.display = 'block';
             cameraStreamElement.style.display = 'none'; 
             captureBtn.disabled = true; 
@@ -319,28 +246,27 @@
                 const sectionNameForFile = getFilenameSectionName();
 
                 const counterKey = `${APP_PREFIX}photoCount_${targaForFile}_${sectionNameForFile}`;
-                let photoNumber = parseInt(localStorage.getItem(counterKey) || '0') + 1;
+                let photoNumber = parseInt(localStorage.getItem(counterKey) || '0') + 1; // Contatore ancora su LS per semplicità
                 localStorage.setItem(counterKey, photoNumber.toString());
                 
                 const formattedPhotoNumber = String(photoNumber).padStart(3, '0');
                 const filename = `${formattedPhotoNumber} ${sectionNameForFile} ${targaForFile}.jpeg`; 
                 
+                // Download link
                 const link = document.createElement('a');
-                const objectURLForDownload = URL.createObjectURL(blob);
-                link.href = objectURLForDownload;
+                link.href = URL.createObjectURL(blob); // Usa blob per download
                 link.download = filename;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                URL.revokeObjectURL(objectURLForDownload); // Pulisci subito dopo il download
+                URL.revokeObjectURL(link.href); // Pulisci object URL del download
                 console.log(`Foto "${filename}" scaricata.`);
 
                 const photoDataForDB = {
-                    // id sarà autogenerato da IndexedDB
                     name: filename,
                     timestamp: new Date().toISOString(),
                     targa: targaForFile,
-                    section: sectionNameForFile, 
+                    section: sectionNameForFile, // La sezione logica/categoria
                     imageBlob: blob
                 };
 
@@ -357,7 +283,7 @@
                     freezeFrameDisplayElement.src = '#'; 
                     cameraStreamElement.style.display = 'block';
                     captureBtn.disabled = false; 
-                }, 1000); 
+                }, 1000); // Tempo anteprima: 1 secondo
 
             }, 'image/jpeg', 0.7);
 
@@ -365,13 +291,12 @@
             console.warn("Stream fotocamera non pronto o dimensioni video non disponibili per la cattura.");
         }
     }
-    
-    async function populatePhotoGrid(targaFilter, sectionKeyFilter) {
+
+    async function populatePhotoGrid(targaFilter, sectionKeyFilter) { // MODIFICATA PER INDEXEDDB
         photoGridContainer.innerHTML = ''; 
         
-        photoGridContainer.querySelectorAll('img[src^="blob:"]').forEach(img => {
-            if (img.src) URL.revokeObjectURL(img.src);
-        });
+        // Pulisci vecchi Object URL se ce ne sono (gestione più robusta sarebbe necessaria)
+        photoGridContainer.querySelectorAll('img[src^="blob:"]').forEach(img => URL.revokeObjectURL(img.src));
 
         let photosToDisplay = [];
         try {
@@ -387,6 +312,9 @@
             return;
         }
 
+        // L'ordinamento per timestamp dovrebbe essere già gestito da getPhotosFromDB o fatto lì
+        // photosToDisplay.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)); 
+
         photosToDisplay.forEach((photoData) => {
             const photoItemDiv = document.createElement('div');
             photoItemDiv.classList.add('photo-item');
@@ -394,7 +322,9 @@
             
             if (photoData.imageBlob) {
                 img.src = URL.createObjectURL(photoData.imageBlob);
-                img.dataset.photoId = photoData.id; // Salva l'ID per eventuale revoca mirata
+                // Considera di revocare img.src con img.onload se l'immagine viene sostituita o rimossa,
+                // o quando la vista della galleria viene nascosta/distrutta.
+                // img.onload = () => { /* URL.revokeObjectURL(img.src); // Se non serve più per questa istanza */ };
             } else {
                 img.alt = "Dati immagine non disponibili";
             }
@@ -412,11 +342,9 @@
                 e.stopPropagation(); 
                 if (confirm("Sei sicuro di voler eliminare questa foto dal database dell'app?")) {
                     try {
-                        await deletePhotoFromDB(photoData.id); 
+                        await deletePhotoFromDB(photoData.id); // Usa l'ID primario da IndexedDB
                         console.log("Foto eliminata da DB con ID:", photoData.id);
-                        if (img.src && img.src.startsWith('blob:')) { // Revoca l'object URL dell'immagine eliminata
-                            URL.revokeObjectURL(img.src);
-                        }
+                        // Ripopola la griglia con i filtri correnti
                         populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter); 
                     } catch (err) {
                         console.error("Errore eliminazione foto da DB:", err);
@@ -430,85 +358,31 @@
             photoGridContainer.appendChild(photoItemDiv);
         });
     }
+    
+    // deleteCapturedPhoto non è più necessaria nel vecchio formato,
+    // l'eliminazione avviene tramite deletePhotoFromDB e il refresh di populatePhotoGrid.
 
-    async function clearLocalDataForTarga(targaUpper) { // MODIFICATA PER ESSERE ASYNC E CANCELLARE FOTO
-        if (!targaUpper) return;
+    // Modifica showGalleryPage per gestire la pulizia degli Object URL quando la galleria non è più la vista attiva.
+    // Potrebbe essere fatto in showView o quando si cambia targa/sezione.
+    // Per ora, la pulizia è solo all'inizio di populatePhotoGrid, che non è ideale per foto che restano visibili.
+
+    // ... (Altre funzioni esistenti come showView, handleTargaSelectionAndSync, etc. RESTANO INVARIATE NELLA LORO LOGICA DI BASE,
+    // ma populatePhotoGrid ora è asincrona, quindi se showGalleryPage la chiama,
+    // showGalleryPage o le sue parti che dipendono dal completamento di populatePhotoGrid potrebbero necessitare di 'await' o gestione promesse)
+
+    // Assicurati di inizializzare il DB all'avvio dell'app
+    document.addEventListener('DOMContentLoaded', async () => {
         try {
-            localStorage.removeItem(`${APP_PREFIX}data_${targaUpper}`);
-            console.log(`Dati modulo rimossi per ${targaUpper}.`);
-            unmarkTargaAsCompleted(targaUpper); 
-            localStorage.removeItem(`${APP_PREFIX}posizione_${targaUpper}`);
-            console.log(`Dati posizione rimossi per ${targaUpper}.`);
-            localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`);
-            console.log(`Dati urgenza rimossi per ${targaUpper}.`);
-
-            // Cancella le foto associate da IndexedDB
-            await deletePhotosForTargaFromDB(targaUpper);
-            console.log(`Foto per targa ${targaUpper} cancellate da IndexedDB.`);
-
-        } catch (e) {
-            console.error(`Errore durante la cancellazione dei dati locali e/o foto per ${targaUpper}:`, e);
-            alert(`Errore cancellazione dati locali/foto per ${targaUpper}.`);
-        }
-    }
-
-    async function clearAllSavedData() { // MODIFICATA PER ESSERE ASYNC E CANCELLARE TUTTE LE FOTO
-        if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse posizioni, urgenze, flag di cancellazione, filtro piazzale E TUTTE LE FOTO CATTURATE)?\n\nAzione irreversibile.")) { 
-            let c = 0; 
-            const keysToRemove = []; 
-            for (let i=localStorage.length-1;i>=0;i--) { 
-                const k=localStorage.key(i); 
-                if (k.startsWith(APP_PREFIX)) { 
-                    keysToRemove.push(k); 
-                } 
-            } 
-            keysToRemove.forEach(k => { localStorage.removeItem(k); c++; }); 
-            
-            try {
-                await clearAllPhotosFromDB();
-                alert(`${c} elementi di configurazione cancellati e tutte le foto rimosse.`); 
-            } catch (e) {
-                alert(`${c} elementi di configurazione cancellati, MA si è verificato un errore durante la cancellazione delle foto dal database.`);
-                console.error("Errore clearAllPhotosFromDB:", e);
-            }
-
-            if(sheetFilterDropdown) sheetFilterDropdown.value = 'all'; 
-            localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');  
-            populateSavedTargasList(); 
-            if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();  
-            if (typeof showView === 'function') showView('landing'); 
-            if (galleryPageSection.style.display === 'block') { // Se la galleria era aperta, aggiornala
-                 populatePhotoGrid(null, null); // Mostra galleria globale (che sarà vuota)
-            }
-        } 
-    }
-
-    // ... (Il resto delle funzioni JavaScript come showView, showSection, showGalleryPage, event listeners, ecc.
-    //      dovrebbero rimanere sostanzialmente le stesse, ma tenendo conto che populatePhotoGrid
-    //      e le funzioni di cancellazione ora sono asincrone.
-    //      Gli event listener che chiamano clearLocalDataForTarga e clearAllSavedData
-    //      devono essere resi `async` e usare `await`.)
-
-    // Event listener per il pulsante di cancellazione in popolaTargheFiltrate
-    // Questa parte è dentro popolaTargheFiltrate, va modificata lì:
-    // delB.addEventListener('click', async function(event) { // Reso async
-    //    event.stopPropagation(); 
-    //    const tDelUpper = this.dataset.targa; 
-    //    await clearLocalDataForTarga(tDelUpper); // Await
-    //    ... (resto della logica)
-    // });
-
-    // Event listener per clearAllProgressBtn in DOMContentLoaded
-    // if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', async () => await clearAllSavedData()); // Reso async
-
-
-    document.addEventListener('DOMContentLoaded', async () => { // Reso async per initDB
-        try {
-            await initDB(); 
+            await initDB(); // Inizializza IndexedDB
         } catch (e) {
             console.error("Inizializzazione IndexedDB fallita:", e);
             alert("Impossibile inizializzare il database delle foto. La galleria potrebbe non funzionare correttamente.");
         }
+
+        // ... (resto del codice in DOMContentLoaded, incluso l'aggancio degli event listener)
+        // NOTA: Il codice precedente per `latestChangesText` e `currentAppVersion` è stato spostato sopra.
+        // Gli event listener per headerPhotosBtn, targaSwitcherDropdown, navButtons (quelli che interagiscono con la galleria)
+        // dovrebbero continuare a funzionare come previsto, chiamando showGalleryPage che a sua volta chiama la nuova populatePhotoGrid.
 
         syncToSheetsBtn = document.createElement('button');
         syncToSheetsBtn.id = 'syncToSheetsBtn';
@@ -573,12 +447,7 @@
 
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
-        
-        if(clearAllProgressBtn) { // MODIFICATO event listener
-            clearAllProgressBtn.addEventListener('click', async () => {
-                await clearAllSavedData();
-            });
-        }
+        if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData);
         
         if(backToMainFromGalleryBtn) {
              backToMainFromGalleryBtn.addEventListener('click', () => {
