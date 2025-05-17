@@ -94,6 +94,8 @@
         #preloader .loading-text {
             color: #00aeff;
             animation: textGlow 1.8s infinite alternate ease-in-out;
+            text-align: center; /* MODIFICA: Testo preloader centrato */
+            width: 100%; /* MODIFICA: Assicura che prenda larghezza per centratura */
         }
         
         #exit-curtain .loading-text {
@@ -312,6 +314,7 @@
         
 
         h2.section-title { color: #cccccc; border-bottom: 1px solid #444444; padding-bottom: 5px; margin-top: 30px; text-align: left; }
+        #galleryPageSection h2.section-title { margin-top: 10px; text-align: center; } /* Stile per titolo galleria */
         h3, h4 { color: #bbbbbb; margin-top: 20px; margin-bottom: 10px; }
         h4 {font-size: 1.1em; color: #c0c0c0; margin-top: 15px; margin-bottom: 8px;}
         ul { list-style-type: none; padding-left: 0; }
@@ -1112,25 +1115,18 @@
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
     const CAPTURED_PHOTOS_KEY = `${APP_PREFIX}capturedPhotos`; 
 
-    const currentAppVersion = "1.3.1"; // Aggiorna se fai modifiche importanti alla logica/UI
+    const currentAppVersion = "1.3.2"; // MODIFICA: Versione aggiornata per nuove funzionalità
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtn = document.getElementById('closeChangelogBtn');
     const changelogList = document.getElementById('changelogList');
     const changelogTitle = document.getElementById('changelogTitle');
 
     const latestChangesText = `
-        <li>Corretta la sequenza di avvio per evitare blocchi dell'animazione iniziale.</li>
-        <li>La finestra "Ultime Modifiche" ora appare dopo il caricamento delle targhe.</li>
-        <li>Titolo della finestra "Ultime Modifiche" aggiornato con nome app e versione.</li>
-        <li>Introdotta pagina Galleria per visualizzare le foto scattate (accessibile dal pulsante "Galleria" in alto).</li>
-        <li>Le foto scattate vengono salvate internamente per la visualizzazione nella galleria (attenzione ai limiti di spazio di localStorage).</li>
-        <li>Aggiunta possibilità di eliminare foto dalla galleria interna.</li>
-        <li>Migliorata la gestione della visualizzazione dell'header in modalità fotocamera.</li>
-        <li>Centratura dello stream video e dell'anteprima foto (usando 'object-fit: contain').</li>
-        <li>Aumento dello spessore del bordo per l'anteprima della foto dopo lo scatto.</li>
-        <li>Navigazione tramite swipe laterale tra le sezioni della perizia.</li>
-        <li>Icone della barra superiore colorate.</li>
         <li>Modificata la cattura foto in JPEG per ridurre dimensioni e migliorata gestione errori galleria.</li>
+        <li>Galleria ora filtrabile per targa e sezione.</li>
+        <li>Header completo (con selettore targa e navigazione sezioni) visibile in galleria se aperta da una perizia.</li>
+        <li>Testo "Caricamento elenco targhe..." centrato.</li>
+        <li>Tempo anteprima foto dopo scatto ridotto a 1 secondo.</li>
     `;
 
 
@@ -1138,6 +1134,12 @@
     let touchendX = 0;
     const swipeThreshold = 50; 
     const sectionOrder = ['remarketing', 'pneumatici', 'danniVerifiche', 'riepilogo'];
+
+    // Variabili per il contesto della galleria
+    let currentGalleryTargaFilter = null;
+    let currentGallerySectionFilter = null; // Può essere 'remarketing', 'pneumatici', 'danniVerifiche', 'riepilogo' (per tutte le foto della targa), o null (globale)
+    let lastViewBeforeGallery = 'landing';
+    let lastSectionBeforeGallery = null;
 
 
     function updateTargaDetailsDisplay(selectedTarga) {
@@ -1295,22 +1297,21 @@
     function isInputDefault(inputElement) { if (!inputElement) return true; if (inputElement.type === 'checkbox') return !inputElement.checked; if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0; if (inputElement.type === 'text' || inputElement.type === 'url' || inputElement.tagName === 'TEXTAREA') return inputElement.value.trim() === ""; return true; }
     function getSectionInputs(sectionElementId) { const sectionDiv = document.getElementById(sectionElementId); if (!sectionDiv) return []; return Array.from(sectionDiv.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)')); }
     function getSectionStatus(sectionElementId, targaData) { const inputs = getSectionInputs(sectionElementId); if (inputs.length === 0) return 'completed';  let allDefaultOrNA = true;  let allNonDefaultAndApplicable = true;  let hasAtLeastOneNonDefaultAndApplicable = false; inputs.forEach(input => { let isEffectivelyDefault = false; const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined; let currentValue = savedValue; if (savedValue === undefined) {  if (input.type === 'checkbox') currentValue = input.checked; else currentValue = input.value; } if (input.type === 'checkbox') { isEffectivelyDefault = !currentValue; } else if (input.tagName === 'SELECT') { isEffectivelyDefault = (currentValue === "" || (input.options.length > 0 && currentValue === input.options[0].value)); if ((input.id === 'cavo_ricarica_rapida' || input.id === 'cavo_ricarica_domestica') && currentValue === 'non_applicabile') { isEffectivelyDefault = true; } } else {  isEffectivelyDefault = (currentValue === ""); } if (!isEffectivelyDefault) { allDefaultOrNA = false; hasAtLeastOneNonDefaultAndApplicable = true; } else {  allNonDefaultAndApplicable = false; } }); if (allDefaultOrNA) return 'untouched'; if (allNonDefaultAndApplicable) return 'completed'; if (hasAtLeastOneNonDefaultAndApplicable) return 'partial';  return 'untouched';  }
-    function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente.toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; if (targetSection === 'riepilogo') { if (isTargaCompleted(targaSelezionataGlobalmente)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
+    function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none' && galleryPageSection.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${(targaSelezionataGlobalmente || currentGalleryTargaFilter || "").toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; const activeTargaForStatus = targaSelezionataGlobalmente || currentGalleryTargaFilter; if (targetSection === 'riepilogo') { if (isTargaCompleted(activeTargaForStatus)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
     // START: Funzioni per la pagina Fotocamera
     async function showCameraPage() {
-        if (checklistContainer.style.display === 'block') {
+        if (galleryPageSection.style.display === 'block') {
+            lastViewBeforeCamera = 'gallery';
+            lastSectionBeforeCamera = currentGallerySectionFilter; // Salva il filtro sezione della galleria
+        } else if (checklistContainer.style.display === 'block') {
             lastViewBeforeCamera = 'checklist';
             const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
             lastSectionBeforeCamera = activeSectionElement ? activeSectionElement.id.replace('Section', '') : null;
         } else if (historyPageSection.style.display === 'block') {
             lastViewBeforeCamera = 'history';
             lastSectionBeforeCamera = null;
-        } else if (galleryPageSection.style.display === 'block') { 
-            lastViewBeforeCamera = 'gallery';
-            lastSectionBeforeCamera = null;
-        }
-         else { 
+        } else { 
             lastViewBeforeCamera = 'landing';
             lastSectionBeforeCamera = null;
         }
@@ -1415,38 +1416,41 @@
 
         console.log(`Ritorno da fotocamera a: vista='${lastViewBeforeCamera}', sezione='${lastSectionBeforeCamera}'`);
 
-        if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
+        if (lastViewBeforeCamera === 'gallery') { 
+            showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter); // Usa i filtri attivi della galleria
+        } else if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
             showView('checklist'); 
             showSection(lastSectionBeforeCamera);
         } else if (lastViewBeforeCamera === 'history') {
             showView('history');
-        } else if (lastViewBeforeCamera === 'gallery') { 
-            showGalleryPage();
-        }
-         else { 
+        } else { 
             showView('landing');
         }
     }
 
     function getFilenameSectionName() {
         let sectionNameForFile = "generale"; 
-        if (lastViewBeforeCamera === 'checklist' && lastSectionBeforeCamera) {
-            switch (lastSectionBeforeCamera) {
-                case 'remarketing':
-                    sectionNameForFile = 'remarketing';
-                    break;
-                case 'pneumatici':
-                    sectionNameForFile = 'pneumatici';
-                    break;
-                case 'danniVerifiche':
-                    sectionNameForFile = 'danni';
-                    break;
+        // Usa lastSectionBeforeCamera, che ora può venire anche dalla galleria o checklist
+        if (lastSectionBeforeCamera) { 
+            let tempSectionKey = lastSectionBeforeCamera.toLowerCase();
+            if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {
+                sectionNameForFile = tempSectionKey;
+            } else if (tempSectionKey === 'danniverifiche') {
+                sectionNameForFile = 'danni';
+            } else if (tempSectionKey === 'riepilogo') { // Sezione riepilogo checklist
+                sectionNameForFile = 'riepilogo_foto'; 
+            } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter && currentGallerySectionFilter !== 'riepilogo') {
+                 // Se ero in galleria filtrata per sezione (es. remarketing), usa quella sezione
+                 sectionNameForFile = currentGallerySectionFilter.toLowerCase() === 'danniverifiche' ? 'danni' : currentGallerySectionFilter.toLowerCase();
+            } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter === 'riepilogo') {
+                 // Se ero in galleria in modalità "tutte le foto per targa" (da riepilogo)
+                 sectionNameForFile = 'targa_completa'; // O un nome generico per la targa
             }
         }
+        console.log("Nome sezione per file foto:", sectionNameForFile, "da lastSectionBeforeCamera:", lastSectionBeforeCamera, "lastView:", lastViewBeforeCamera);
         return sectionNameForFile;
     }
 
-    // ========== MODIFIED FUNCTION START ==========
     function capturePhoto() {
         if (captureBtn.disabled) return; 
 
@@ -1459,7 +1463,6 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
             
-            // MODIFICA 1: Usa JPEG con compressione (es. qualità 0.7)
             const imageDataUrl = canvas.toDataURL('image/jpeg', 0.7); 
             
             freezeFrameDisplayElement.src = imageDataUrl;
@@ -1467,7 +1470,7 @@
             cameraStreamElement.style.display = 'none'; 
             captureBtn.disabled = true; 
 
-            const targaForFile = targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase().replace(/[^A-Z0-9]/g, '') : 'SCONOSCIUTA';
+            const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');
             const sectionNameForFile = getFilenameSectionName();
 
             const counterKey = `${APP_PREFIX}photoCount_${targaForFile}_${sectionNameForFile}`;
@@ -1475,7 +1478,6 @@
             localStorage.setItem(counterKey, photoNumber.toString());
             
             const formattedPhotoNumber = String(photoNumber).padStart(3, '0');
-            // MODIFICA 1.1: Aggiorna l'estensione del file a .jpeg
             const filename = `${formattedPhotoNumber} ${sectionNameForFile} ${targaForFile}.jpeg`; 
             
             const link = document.createElement('a');
@@ -1495,7 +1497,6 @@
                 localStorage.setItem(CAPTURED_PHOTOS_KEY, JSON.stringify(capturedPhotos));
             } catch (e) {
                 console.error("Errore salvataggio foto in localStorage per galleria:", e.name, e.message, e);
-                // MODIFICA 2: Gestione errori migliorata
                 if (e.name === 'QuotaExceededError' || 
                     (e.message && e.message.toLowerCase().includes('quota')) ||
                     (e.message && e.message.toLowerCase().includes('storage'))) { 
@@ -1505,84 +1506,155 @@
                 }
             }
 
+            // MODIFICA: Tempo anteprima dimezzato a 1 secondo
             setTimeout(() => {
                 freezeFrameDisplayElement.style.display = 'none';
                 freezeFrameDisplayElement.src = '#'; 
                 cameraStreamElement.style.display = 'block';
                 captureBtn.disabled = false; 
-            }, 2000);
+            }, 1000);
 
         } else {
             console.warn("Stream fotocamera non pronto o dimensioni video non disponibili per la cattura.");
             console.warn("Dettagli stream/video per cattura: ", currentCameraStream, cameraStreamElement.readyState, cameraStreamElement.videoWidth, cameraStreamElement.videoHeight);
         }
     }
-    // ========== MODIFIED FUNCTION END ==========
-
     // END: Funzioni per la pagina Fotocamera
 
     // START: Funzioni per Pagina Galleria
-    function showGalleryPage() {
-        lastViewBeforeCamera = 'gallery'; 
+    function showGalleryPage(targaToFilter = null, sectionToFilter = null) {
+        // Salva lo stato corrente prima di entrare in galleria
+        if (checklistContainer.style.display === 'block') {
+            lastViewBeforeGallery = 'checklist';
+            const activeSectionEl = document.querySelector('#checklistContainer .category-section.active');
+            lastSectionBeforeGallery = activeSectionEl ? activeSectionEl.id.replace('Section', '') : null;
+        } else if (landingPageSection.style.display === 'block') {
+            lastViewBeforeGallery = 'landing';
+            lastSectionBeforeGallery = null;
+        } else if (historyPageSection.style.display === 'block') {
+            lastViewBeforeGallery = 'history';
+            lastSectionBeforeGallery = null;
+        } // Non aggiornare se la vista precedente era 'camera' o 'gallery' stessa
+
+        currentGalleryTargaFilter = targaToFilter ? targaToFilter.toUpperCase() : null;
+        currentGallerySectionFilter = sectionToFilter; // es. 'remarketing', 'riepilogo', null
+
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
         cameraPageSection.style.display = 'none';
         galleryPageSection.style.display = 'block';
+        
+        const galleryTitleElement = galleryPageSection.querySelector('h2.section-title');
+        let galleryTitleText = "Galleria Foto Catturate";
 
-        if(mainTitleGlobal) mainTitleGlobal.innerHTML = "Galleria Foto Scattate";
-        if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
-        if(navButtonsContainer) navButtonsContainer.style.display = 'none';
-        if(targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-        document.querySelector('.header-circles').style.display = 'flex';
+        if (currentGalleryTargaFilter) {
+            targaSelezionataGlobalmente = currentGalleryTargaFilter; // Sincronizza il contesto globale
+            mainTitleGlobal.style.display = 'none';
+            targaDropdownContainer.style.display = 'flex';
+            populateTargaSwitcherDropdown(); // Si basa su targaSelezionataGlobalmente
+            if(targaSwitcherDropdown.value.toUpperCase() !== currentGalleryTargaFilter) {
+                targaSwitcherDropdown.value = currentGalleryTargaFilter;
+            }
+            updateTargaDetailsDisplay(currentGalleryTargaFilter);
+            navButtonsContainer.style.display = 'flex';
+            mainPageNavButtons.style.display = 'flex';
+            utilityNavButtons.style.display = 'flex'; // Mantieni visibili anche i bottoni utility
 
+            navButtons.forEach(b => b.classList.remove('active'));
+            let sectionNameForTitle = "Tutte le foto";
+            if (currentGallerySectionFilter && currentGallerySectionFilter !== 'riepilogo') {
+                const navButtonForSection = mainPageNavButtons.querySelector(`button[data-target="${currentGallerySectionFilter}"]`);
+                if (navButtonForSection) {
+                    navButtonForSection.classList.add('active');
+                    sectionNameForTitle = navButtonForSection.textContent.split('. ')[1] || currentGallerySectionFilter; // Estrai nome pulito
+                } else {
+                     sectionNameForTitle = currentGallerySectionFilter.charAt(0).toUpperCase() + currentGallerySectionFilter.slice(1);
+                }
+            } else if (currentGallerySectionFilter === 'riepilogo') {
+                 const riepilogoNavButton = mainPageNavButtons.querySelector(`button[data-target="riepilogo"]`);
+                 if (riepilogoNavButton) riepilogoNavButton.classList.add('active');
+            }
+            galleryTitleText = `Galleria: ${currentGalleryTargaFilter} - ${sectionNameForTitle}`;
+            updateNavButtonColors(); // Aggiorna colori basati su targaSelezionataGlobalmente
+        } else { // Galleria Globale (nessuna targa specifica)
+            mainTitleGlobal.style.display = 'block';
+            mainTitleGlobal.innerHTML = "Galleria Foto Catturate"; // O usa galleryTitleText
+            targaDropdownContainer.style.display = 'none';
+            navButtonsContainer.style.display = 'none'; // Nascondi i nav button delle sezioni perizia
+            utilityNavButtons.style.display = 'flex'; 
+        }
+        if(galleryTitleElement) galleryTitleElement.textContent = galleryTitleText;
 
-        populatePhotoGrid();
+        populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter);
         if (pageHeaderContainer.classList.contains('fixed-header')) {
             document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight + 10}px`;
         }
         window.scrollTo(0,0);
     }
 
-    function populatePhotoGrid() {
+    function populatePhotoGrid(targaFilter, sectionKeyFilter) {
         photoGridContainer.innerHTML = ''; 
-        let capturedPhotos = [];
+        let allCapturedPhotos = [];
         try {
-            capturedPhotos = JSON.parse(localStorage.getItem(CAPTURED_PHOTOS_KEY) || '[]');
+            allCapturedPhotos = JSON.parse(localStorage.getItem(CAPTURED_PHOTOS_KEY) || '[]');
         } catch (e) {
             console.error("Errore nel parsing delle foto da localStorage:", e);
             photoGridContainer.innerHTML = '<p>Errore nel caricare le foto.</p>';
             return;
         }
 
-        if (capturedPhotos.length === 0) {
-            photoGridContainer.innerHTML = '<p>Nessuna foto scattata con questa app ancora.</p>';
+        let photosToDisplay = allCapturedPhotos;
+
+        if (targaFilter) {
+            const targaUpper = targaFilter.toUpperCase();
+            photosToDisplay = photosToDisplay.filter(photo => {
+                const nameParts = photo.name.split(' ');
+                if (nameParts.length < 3) return false;
+                const photoTargaInName = nameParts[nameParts.length - 1].split('.')[0].toUpperCase();
+                return photoTargaInName === targaUpper;
+            });
+
+            if (sectionKeyFilter && sectionKeyFilter !== 'riepilogo') {
+                let filterMatchKey = sectionKeyFilter.toLowerCase();
+                if (filterMatchKey === 'danniverifiche') filterMatchKey = 'danni'; 
+                
+                photosToDisplay = photosToDisplay.filter(photo => {
+                    const nameParts = photo.name.split(' ');
+                    if (nameParts.length < 3) return false;
+                    const photoSectionInName = nameParts[1].toLowerCase();
+                    return photoSectionInName === filterMatchKey;
+                });
+            } 
+            // Se sectionKeyFilter è 'riepilogo', non c'è ulteriore filtro di sezione per questa targa.
+            // Se sectionKeyFilter è null (ma targaFilter c'è), mostra tutte le foto per la targa (comportamento implicito di 'riepilogo')
+        }
+        // Se targaFilter è null, photosToDisplay rimane allCapturedPhotos (galleria globale)
+
+        if (photosToDisplay.length === 0) {
+            photoGridContainer.innerHTML = '<p>Nessuna foto trovata per i filtri applicati.</p>';
             return;
         }
 
-        capturedPhotos.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+        photosToDisplay.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)); // Ordina sempre
 
-        capturedPhotos.forEach((photoData, index) => {
+        photosToDisplay.forEach((photoData) => { // Non serve 'index' qui
             const photoItemDiv = document.createElement('div');
             photoItemDiv.classList.add('photo-item');
-
             const img = document.createElement('img');
             img.src = photoData.dataUrl;
             img.alt = photoData.name;
-            
             const caption = document.createElement('div');
             caption.classList.add('photo-item-caption');
             caption.textContent = photoData.name;
-            
             const deleteBtn = document.createElement('button');
             deleteBtn.classList.add('photo-item-delete-btn');
             deleteBtn.innerHTML = '&times;'; 
             deleteBtn.title = "Elimina foto";
             deleteBtn.addEventListener('click', (e) => {
                 e.stopPropagation(); 
-                deleteCapturedPhoto(photoData.timestamp, capturedPhotos); 
+                deleteCapturedPhoto(photoData.timestamp, allCapturedPhotos); // Passa l'array originale completo
             });
-
             photoItemDiv.appendChild(img);
             photoItemDiv.appendChild(caption);
             photoItemDiv.appendChild(deleteBtn);
@@ -1590,25 +1662,23 @@
         });
     }
     
-    function deleteCapturedPhoto(timestampToDelete, currentPhotoArray) {
+    function deleteCapturedPhoto(timestampToDelete, masterPhotoArray) { // Riceve l'array master
         if (confirm("Sei sicuro di voler eliminare questa foto dalla galleria dell'app?")) {
-            const photoIndexToDelete = currentPhotoArray.findIndex(photo => photo.timestamp === timestampToDelete);
-            
+            const photoIndexToDelete = masterPhotoArray.findIndex(photo => photo.timestamp === timestampToDelete);
             if (photoIndexToDelete > -1) {
-                currentPhotoArray.splice(photoIndexToDelete, 1);
+                masterPhotoArray.splice(photoIndexToDelete, 1); // Modifica l'array master
                 try {
-                    localStorage.setItem(CAPTURED_PHOTOS_KEY, JSON.stringify(currentPhotoArray));
-                    populatePhotoGrid(); 
+                    localStorage.setItem(CAPTURED_PHOTOS_KEY, JSON.stringify(masterPhotoArray)); // Salva l'array master modificato
+                    populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter); // Ripopola con i filtri correnti
                 } catch (e) {
                     console.error("Errore durante l'aggiornamento di localStorage dopo l'eliminazione:", e);
                     alert("Errore durante l'eliminazione della foto.");
                 }
             } else {
-                console.warn("Foto da eliminare non trovata:", timestampToDelete);
+                console.warn("Foto da eliminare non trovata nell'array master:", timestampToDelete);
             }
         }
     }
-
     // END: Funzioni per Pagina Galleria
 
 
@@ -1622,25 +1692,25 @@
         const headerCirclesDiv = document.querySelector('.header-circles');
         if (viewName !== 'camera') { 
             if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
-            if(mainTitleGlobal) mainTitleGlobal.style.display = 'block';
+            // mainTitleGlobal visibility è gestita specificamente per viewName ora
             if(headerCirclesDiv) headerCirclesDiv.style.display = 'flex';
         }
 
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             pageHeaderContainer.classList.add('fixed-header');
-            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
-             if (navButtonsContainer) navButtonsContainer.style.display = 'none'; 
+            if (mainTitleGlobal) { mainTitleGlobal.innerHTML = "Elenco Veicoli"; mainTitleGlobal.style.display = 'block';}
+            if (navButtonsContainer) navButtonsContainer.style.display = 'none'; 
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             if (listaTargheCompleta.length > 0 &&
                 (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
                 typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
             }
-            updateNavButtonColors(); 
         } else if (viewName === 'checklist') {
             pageHeaderContainer.classList.add('fixed-header');
             if (navButtonsContainer) navButtonsContainer.style.display = 'flex'; 
+            if (mainPageNavButtons) mainPageNavButtons.style.display = 'flex';
             if (!targaSelezionataGlobalmente) { 
                 console.warn("Tentativo di mostrare checklist senza targa selezionata. Reindirizzamento a landing.");
                 showView('landing'); 
@@ -1659,28 +1729,26 @@
             populateTargaSwitcherDropdown(); 
             updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
             if (tipoTrazioneSelect) handleTrazioneChange();
-            updateNavButtonColors(); 
         } else if (viewName === 'history') {
             pageHeaderContainer.classList.add('fixed-header');
             historyPageSection.style.display = 'block';
-            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
+            if (mainTitleGlobal) { mainTitleGlobal.innerHTML = "Cronistoria Salvataggi"; mainTitleGlobal.style.display = 'block'; }
             if (navButtonsContainer) navButtonsContainer.style.display = 'none';
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             populateSavedTargasList();
-            updateNavButtonColors();
         } else if (viewName === 'gallery') { 
+            // La logica di visualizzazione dell'header per la galleria è ora in showGalleryPage()
+            // Questa chiamata qui assicura che la section sia visibile, ma showGalleryPage farà il setup fine
             pageHeaderContainer.classList.add('fixed-header');
-            galleryPageSection.style.display = 'block';
-            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Galleria Foto Scattate";
-            if (navButtonsContainer) navButtonsContainer.style.display = 'none';
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-        }
-         else if (viewName !== 'camera') { 
+            galleryPageSection.style.display = 'block'; 
+            // Non impostare il titolo qui, lo fa showGalleryPage
+        } else if (viewName !== 'camera') { 
              pageHeaderContainer.classList.remove('fixed-header');
              if (headerCirclesDiv) headerCirclesDiv.style.display = 'none'; 
              if (utilityNavButtons) utilityNavButtons.style.display = 'none';
              if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
         }
+        updateNavButtonColors(); // Chiamata alla fine per riflettere lo stato
 
         let bodyPaddingTopValue = '0px';
         if (viewName !== 'camera') {
@@ -2082,7 +2150,6 @@
          window.scrollTo(0, 0); 
     }
 
-    navButtons.forEach(b => b.addEventListener('click', function() { showSection(this.dataset.target); }));
     function getSelectText(selectElementOrId) { const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId; if (el && el.tagName === 'SELECT' && el.value !== "") { if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) { return el.options[el.selectedIndex].text; } return el.value;  } return "N/S";  }
     function generateSummary() { summaryContent.innerHTML = ''; let targa = targaSelezionataGlobalmente || "N/D"; function createSummaryItem(label, value, isAnomaly = false) { const itemDiv = document.createElement('div'); itemDiv.classList.add('summary-item'); if (isAnomaly) itemDiv.classList.add('summary-anomaly'); itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; return itemDiv; } summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase())); if (targaSelezionataGlobalmente) { const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); let marcaVeicolo = "N/D", modelloVeicolo = "N/D"; if (veicoloAttuale) { marcaVeicolo = veicoloAttuale.marca || "N/D"; modelloVeicolo = veicoloAttuale.modello || "N/D"; } summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D")); const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente); summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary)); } else {  summaryContent.appendChild(createSummaryItem("Marca", "N/D")); summaryContent.appendChild(createSummaryItem("Modello", "N/D")); summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); } summaryContent.innerHTML += `<h3>Remarketing:</h3>`; const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; const isEV = tipoTrazioneValue === 'elettrico'; summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect))); let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza'); let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante"); summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante")); summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia)); let kmStato = getSelectText('stato_chilometri'); summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); let cdcStato = getSelectText('stato_cdc'); summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente")); summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente")); if (isEV) { summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`; let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente")); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente")); } summaryContent.innerHTML += `<h3>Pneumatici:</h3>`; const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }]; pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); }); summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`; summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK')); summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK')); const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : ""; if (noteDanniValue) { const noteDiv = document.createElement('div'); noteDiv.classList.add('summary-item', 'summary-notes'); const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: "; const contentDiv = document.createElement('div'); contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue; noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv); summaryContent.appendChild(noteDiv); } }
     
@@ -2382,7 +2449,6 @@
         
         showView('landing'); 
 
-        // Changelog Logic
         if (changelogModal && closeChangelogBtn && changelogList && changelogTitle) {
             const lastVersionSeen = localStorage.getItem('appVersionSeen');
             changelogTitle.textContent = `WebApp Perizie - Novità v${currentAppVersion}`;
@@ -2440,30 +2506,47 @@
         });
         if (tipoTrazioneSelect) tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
         
-        if (targaSwitcherDropdown) {
-            targaSwitcherDropdown.addEventListener('change', async function() {
-                const nuovaTargaSelezionata = this.value;
-                if (nuovaTargaSelezionata && nuovaTargaSelezionata.toUpperCase() !== (targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase() : null)) {
+        targaSwitcherDropdown.addEventListener('change', async function() {
+            const nuovaTargaSelezionata = this.value;
+            if (nuovaTargaSelezionata && nuovaTargaSelezionata.toUpperCase() !== (targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase() : null)) {
+                this.disabled = true;
+                if (galleryPageSection.style.display === 'block') {
+                    targaSelezionataGlobalmente = nuovaTargaSelezionata.toUpperCase(); 
+                    // currentGallerySectionFilter è già impostato e dovrebbe essere mantenuto (es. 'remarketing' o 'riepilogo')
+                    showGalleryPage(targaSelezionataGlobalmente, currentGallerySectionFilter); 
+                } else {
                     let currentActiveSectionId = 'remarketing'; 
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
                     if (activeSectionElement && activeSectionElement.id) {
                         currentActiveSectionId = activeSectionElement.id.replace('Section', '');
                     }
-                    this.disabled = true;                     
-                    await handleTargaSelectionAndSync(nuovaTargaSelezionata, currentActiveSectionId); 
-                    this.disabled = false; 
-                } else if (nuovaTargaSelezionata) {
-                    updateTargaDetailsDisplay(nuovaTargaSelezionata);
+                    await handleTargaSelectionAndSync(nuovaTargaSelezionata, currentActiveSectionId);
                 }
-            });
-        }
+                this.disabled = false;
+            } else if (nuovaTargaSelezionata) {
+                updateTargaDetailsDisplay(nuovaTargaSelezionata);
+            }
+        });
 
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
         if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData);
-        if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
-        if(backToMainFromGalleryBtn) backToMainFromGalleryBtn.addEventListener('click', () => showView('landing')); 
-
+        
+        if(backToMainFromGalleryBtn) {
+             backToMainFromGalleryBtn.addEventListener('click', () => {
+                console.log(`Ritorno da galleria a: vista='${lastViewBeforeGallery}', sezione='${lastSectionBeforeGallery}'`);
+                if (lastViewBeforeGallery === 'checklist' && currentGalleryTargaFilter && lastSectionBeforeGallery) {
+                    if (targaSelezionataGlobalmente !== currentGalleryTargaFilter) {
+                         targaSelezionataGlobalmente = currentGalleryTargaFilter;
+                         loadProgress(targaSelezionataGlobalmente); 
+                    }
+                    showView('checklist');
+                    showSection(lastSectionBeforeGallery);
+                } else {
+                    showView('landing'); 
+                }
+            });
+        }
 
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
@@ -2474,23 +2557,48 @@
                 triggerMainExit(); 
             });
         }
+
         if (headerPhotosBtn) { 
             headerPhotosBtn.addEventListener('click', () => {
                 console.log("Header Photos/Gallery button clicked");
+                let targaForGallery = null;
+                let sectionKeyForGallery = null; 
+
+                if (checklistContainer.style.display === 'block' && targaSelezionataGlobalmente) {
+                    targaForGallery = targaSelezionataGlobalmente;
+                    const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
+                    if (activeSectionElement) {
+                        sectionKeyForGallery = activeSectionElement.id.replace('Section', ''); // 'remarketing', 'riepilogo', etc.
+                    }
+                } // Se non siamo in checklist o non c'è targa, i filtri rimangono null (galleria globale)
+
                 if (cameraPageSection.style.display === 'flex') { 
-                    returnFromCamera();
-                     setTimeout(showGalleryPage, 50); 
+                    returnFromCamera(); // Gestirà il ritorno alla vista precedente (che potrebbe essere galleria)
+                     setTimeout(() => showGalleryPage(targaForGallery, sectionKeyForGallery), 50); 
                 } else {
-                    showGalleryPage();
+                    showGalleryPage(targaForGallery, sectionKeyForGallery);
                 }
             });
         }
+
         if (headerPeriziaBtn) {
             headerPeriziaBtn.addEventListener('click', async () => {
                 console.log("Header Perizia button clicked");
                 if (cameraPageSection.style.display === 'flex') { 
                     returnFromCamera(); 
-                } else if (targaSelezionataGlobalmente) {
+                } else if (galleryPageSection.style.display === 'block') { 
+                    // Se sono in galleria, e la galleria ha un contesto di targa/sezione, torna a quella sezione
+                    if (currentGalleryTargaFilter && lastViewBeforeGallery === 'checklist' && lastSectionBeforeGallery) {
+                        if (targaSelezionataGlobalmente !== currentGalleryTargaFilter) {
+                            targaSelezionataGlobalmente = currentGalleryTargaFilter;
+                            loadProgress(targaSelezionataGlobalmente);
+                        }
+                        showView('checklist');
+                        showSection(lastSectionBeforeGallery);
+                    } else { // Fallback se la galleria era globale o contesto non chiaro
+                        showView('landing');
+                    }
+                } else if (targaSelezionataGlobalmente) { // Se sono in un'altra vista ma una perizia è attiva
                     const lastActivePage = localStorage.getItem(LAST_ACTIVE_PERIZIA_PAGE_KEY);
                     const targetSection = (lastActivePage && document.getElementById(lastActivePage + 'Section')) ? lastActivePage : 'riepilogo';
                     if (checklistContainer.style.display !== 'block' || targaSwitcherDropdown.value.toUpperCase() !== targaSelezionataGlobalmente.toUpperCase()) {
@@ -2498,7 +2606,7 @@
                     } else {
                         showSection(targetSection);
                     }
-                } else {
+                } else { // Nessuna perizia attiva, vai a landing
                     showView('landing');
                 }
             });
@@ -2517,6 +2625,22 @@
 
         if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
         if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera); 
+
+        navButtons.forEach(b => b.addEventListener('click', function() {
+            const targetId = this.dataset.target;
+            if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter) {
+                // Se siamo in galleria con una targa attiva, i pulsanti di navigazione filtrano la galleria
+                currentGallerySectionFilter = targetId; 
+                showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter); 
+            } else if (checklistContainer.style.display === 'block' || (!targaSelezionataGlobalmente && landingPageSection.style.display === 'block')) {
+                // Comportamento normale se siamo in checklist o se proviamo a navigare da landing (verrà gestito da showSection/handleTargaSelection)
+                showSection(targetId);
+            } else if (!currentGalleryTargaFilter && galleryPageSection.style.display === 'block') {
+                // Se siamo in galleria globale, cliccare un nav button non dovrebbe fare nulla o portare a landing
+                 console.log("Click su nav button da galleria globale, azione non definita o vai a landing.");
+                 // showView('landing'); // O non fare nulla
+            }
+        }));
 
         if (checklistContainer) {
             checklistContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
