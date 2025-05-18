@@ -2848,19 +2848,19 @@
                 }
                 
                 const targaOriginale = targaSelezionataGlobalmente; // Mantiene il formato originale per TARGA.zip
-                //const MACRODROID_SERVER_URL = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/server';
-                const LOCAL_ZIP_BASE_URL = 'https://192.168.1.154:8080/'; // Corretto IP se necessario
+                const MACRODROID_SERVER_URL = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/server';
+                const LOCAL_ZIP_BASE_URL = 'http://192.168.15.4:8080/'; // Corretto IP se necessario
 
                 downloadRiepilogoTriggerBtn.disabled = true;
                 downloadRiepilogoTriggerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>&nbsp;Triggers...';
 
                 try {
-                   // console.log('Avvio trigger Macrodroid Server...');
-                   // await fetch(MACRODROID_SERVER_URL, { method: 'GET', mode: 'no-cors' });
-                   // console.log('Trigger Macrodroid Server inviato.');
+                    console.log('Avvio trigger Macrodroid Server...');
+                    await fetch(MACRODROID_SERVER_URL, { method: 'GET', mode: 'no-cors' });
+                    console.log('Trigger Macrodroid Server inviato.');
                     // Non c'è modo di sapere se è andato a buon fine con no-cors, ma inviamo.
 
-                  //  await new Promise(resolve => setTimeout(resolve, 1000)); // Attendi 1 secondo
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Attendi 1 secondo
 
                     const zipUrl = `${LOCAL_ZIP_BASE_URL}${targaOriginale}.zip`;
                     console.log(`Avvio trigger download ZIP: ${zipUrl}`);
@@ -3037,8 +3037,8 @@
                             setTimeout(() => { 
                                 exitCurtain.classList.add('flash-out-effect');  
                                 setTimeout(() => { 
-                                    //const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi'; 
-                                   // fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' }).catch(error => console.error('Errore Macrodroid:', error)); 
+                                    const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi'; 
+                                    fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' }).catch(error => console.error('Errore Macrodroid:', error)); 
                                 }, 500);  
                             }, 700);  
                         }, 800);  
