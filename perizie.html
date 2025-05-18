@@ -811,7 +811,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto; 
+            overflow: hidden; /* Modificato per evitare scroll della lightbox stessa */
             background-color: rgba(0,0,0,0.85); 
             justify-content: center;
             align-items: center;
@@ -847,7 +847,7 @@
             border-radius: 50%;
             cursor: pointer;
             transition: color 0.3s, background-color 0.3s;
-            z-index: 3010; /* Assicura sia sopra l'immagine */
+            z-index: 3020; /* Assicura sia sopra gli indicatori */
         }
         #closeLightboxBtn:hover,
         #closeLightboxBtn:focus {
@@ -857,24 +857,31 @@
         }
         /* Stili per indicatori di fine corsa lightbox */
         .lightbox-edge-indicator {
-            position: fixed; /* Relativo alla viewport, copre l'intero bordo */
-            top: 0;
-            width: 5px; /* Spessore linea */
-            height: 100%;
+            position: fixed; 
             background-color: red;
-            z-index: 3005; /* Sotto il bottone di chiusura ma sopra il contenuto principale della lightbox */
+            z-index: 3015; /* Sotto il bottone di chiusura ma sopra il contenuto principale della lightbox */
             opacity: 0;
             transition: opacity 0.2s ease-out;
-            pointer-events: none; /* Non deve intercettare i click */
+            pointer-events: none; 
         }
-        #lightboxEdgeIndicatorLeft {
+        #lightboxEdgeIndicatorLeft, #lightboxEdgeIndicatorRight {
+            top: 0;
+            width: 5px; 
+            height: 100%;
+        }
+        #lightboxEdgeIndicatorLeft { left: 0; }
+        #lightboxEdgeIndicatorRight { right: 0; }
+
+        #lightboxEdgeIndicatorTop, #lightboxEdgeIndicatorBottom {
             left: 0;
+            width: 100%;
+            height: 5px; 
         }
-        #lightboxEdgeIndicatorRight {
-            right: 0;
-        }
+        #lightboxEdgeIndicatorTop { top: 0; }
+        #lightboxEdgeIndicatorBottom { bottom: 0; }
+
         .lightbox-edge-indicator.visible {
-            opacity: 0.7; /* Visibile ma leggermente trasparente */
+            opacity: 0.7; 
         }
         /* END: Stili per Lightbox Immagine */
 
@@ -953,6 +960,8 @@
     <div id="imageLightbox">
         <div id="lightboxEdgeIndicatorLeft" class="lightbox-edge-indicator"></div>
         <div id="lightboxEdgeIndicatorRight" class="lightbox-edge-indicator"></div>
+        <div id="lightboxEdgeIndicatorTop" class="lightbox-edge-indicator"></div>
+        <div id="lightboxEdgeIndicatorBottom" class="lightbox-edge-indicator"></div>
         <span id="closeLightboxBtn">&times;</span>
         <div id="lightboxContent">
             <img id="lightboxImage" src="#" alt="Immagine Ingrandita">
@@ -1200,12 +1209,11 @@
     const closeLightboxBtnElem = document.getElementById('closeLightboxBtn');
     let currentLightboxImageObjectUrl = null;
 
-    // Variabili per la navigazione swipe nella lightbox
     let lightboxPhotoList = [];
     let currentLightboxPhotoIndex = -1;
     let lightboxTouchStartX = 0;
     let lightboxTouchStartY = 0;
-    let isLightboxSwipePotential = false; // Flag per gestire preventDefault su touchmove
+    let isLightboxSwipePotential = false; 
 
 
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
@@ -1216,7 +1224,7 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    const currentAppVersion = "1.6.1"; // Versione aggiornata per indicatore fine corsa
+    const currentAppVersion = "1.6.2"; // Versione aggiornata per indicatori fine corsa orientati
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtnModal = document.getElementById('closeChangelogBtnModal');
     const changelogList = document.getElementById('changelogList');
@@ -1230,7 +1238,8 @@
         <li>Click su anteprima foto in galleria per ingrandimento (lightbox).</li>
         <li>Durata anteprima foto dopo scatto dimezzata a 0.5 secondi.</li>
         <li>Swipe orizzontale e verticale nell'anteprima foto per navigare tra le immagini della sezione corrente.</li>
-        <li><strong>NOVITÀ: Indicatore visivo (linea rossa) e prevenzione aggiornamento pagina allo swipe oltre prima/ultima foto nella lightbox.</strong></li>
+        <li>Indicatore visivo (linea rossa) e prevenzione aggiornamento pagina allo swipe oltre prima/ultima foto nella lightbox.</li>
+        <li><strong>NOVITÀ: La linea rossa di fine corsa nella lightbox ora è orizzontale per swipe verticali e verticale per swipe orizzontali.</strong></li>
     `;
 
 
@@ -1244,7 +1253,6 @@
     let lastViewBeforeGallery = 'landing';
     let lastSectionBeforeGallery = null;
 
-    // START: IndexedDB Helper Functions
     const IDB_NAME = 'PeriziePhotoDB_v1';
     const IDB_VERSION = 1;
     const PHOTO_STORE_NAME = 'capturedPhotosStore';
@@ -1269,12 +1277,6 @@
         return dbPromise;
     }
 
-    async function savePhotoToDB(photoData) { /* ... (codice invariato) ... */ }
-    async function getAllPhotosFromDB() { /* ... (codice invariato) ... */ }
-    async function getPhotosByTargaAndSezioneFromDB(targaFilter, sectionKeyFilter) { /* ... (codice invariato) ... */ }
-    async function deletePhotoFromDB(timestampToDelete) { /* ... (codice invariato) ... */ }
-    // END: IndexedDB Helper Functions (Assumendo che siano invariati come da richiesta precedente)
-    // (Se necessario, reincollare il corpo completo delle funzioni da IndexedDB)
     async function savePhotoToDB(photoData) {
         const db = await openPhotoDB();
         return new Promise((resolve, reject) => {
@@ -1327,38 +1329,6 @@
         });
     }
 
-
-    function updateTargaDetailsDisplay(selectedTarga) { /* ... (codice invariato) ... */ }
-    function populateTargaSwitcherDropdown() { /* ... (codice invariato) ... */ }
-    async function inviaPeriziaSingolaASheets(periziaDaInviare) { /* ... (codice invariato) ... */ }
-    async function fetchLatestPeriziaFromSheets(targa) { /* ... (codice invariato) ... */ }
-    function fillSectionPositiveOrDefaults(sectionId) { /* ... (codice invariato) ... */ }
-    function handleTrazioneChange() { /* ... (codice invariato) ... */ }
-    function savePosizioneForTarga(targa, posizione) { /* ... (codice invariato) ... */ }
-    function loadPosizioneForTarga(targa) { /* ... (codice invariato) ... */ }
-    function saveUrgentStatusForTarga(targa, isUrgent) { /* ... (codice invariato) ... */ }
-    function loadUrgentStatusForTarga(targa) { /* ... (codice invariato) ... */ }
-    function resetChecklistForm() { /* ... (codice invariato) ... */ }
-    function saveProgress(targa) { /* ... (codice invariato) ... */ }
-    function loadProgress(targa) { /* ... (codice invariato) ... */ }
-    function getCompletedTarghe() { /* ... (codice invariato) ... */ }
-    function isTargaCompleted(targa) { /* ... (codice invariato) ... */ }
-    function markTargaAsCompleted(targa) { /* ... (codice invariato) ... */ }
-    function unmarkTargaAsCompleted(targa) { /* ... (codice invariato) ... */ }
-    function clearLocalDataForTarga(targaUpper) { /* ... (codice invariato) ... */ }
-    function generateAndDownloadScreenshot() { /* ... (codice invariato) ... */ }
-    async function downloadPhotosAsZip(targa) { /* ... (codice invariato) ... */ }
-    async function handleSavePeriziaAndReturn() { /* ... (codice invariato) ... */ }
-    function handleSaveAndNext() { /* ... (codice invariato) ... */ }
-    function isInputDefault(inputElement) { /* ... (codice invariato) ... */ }
-    function getSectionInputs(sectionElementId) { /* ... (codice invariato) ... */ }
-    function getSectionStatus(sectionElementId, targaData) { /* ... (codice invariato) ... */ }
-    function updateNavButtonColors() { /* ... (codice invariato) ... */ }
-    async function showCameraPage() { /* ... (codice invariato) ... */ }
-    function returnFromCamera() { /* ... (codice invariato) ... */ }
-    function getFilenameSectionName() { /* ... (codice invariato) ... */ }
-    function capturePhoto() { /* ... (codice invariato) ... */ }
-    // (Se necessario, reincollare il corpo completo delle funzioni non modificate)
     function updateTargaDetailsDisplay(selectedTarga) {if (!targaDetailsDisplay || !selectedTarga || !listaTargheCompleta.length) {if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';return;}const veicolo = listaTargheCompleta.find(v => v.targa.toUpperCase() === selectedTarga.toUpperCase());if (veicolo) {let detailsText = '';const marca = veicolo.marca ? String(veicolo.marca).trim() : '';const modello = veicolo.modello ? String(veicolo.modello).trim() : '';if (marca) detailsText += marca;if (modello) detailsText += (detailsText ? ' ' : '') + modello;targaDetailsDisplay.textContent = detailsText || '';} else {targaDetailsDisplay.textContent = '';}}
     function populateTargaSwitcherDropdown() {if (!targaSwitcherDropdown || !targaSelezionataGlobalmente || !listaTargheCompleta.length) {if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';return;}const veicoloAttuale = listaTargheCompleta.find(v => v.targa.toUpperCase() === targaSelezionataGlobalmente.toUpperCase());if (!veicoloAttuale || !veicoloAttuale.piazzale) {if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';return;}const piazzaleCorrente = veicoloAttuale.piazzale;const targheDelPiazzale = listaTargheCompleta.filter(v => v.piazzale === piazzaleCorrente && !localStorage.getItem(`${APP_PREFIX}deleted_${v.targa.toUpperCase()}`));targaSwitcherDropdown.innerHTML = '';if (targheDelPiazzale.length === 0) {if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';return;}targheDelPiazzale.sort((a, b) => a.targa.localeCompare(b.targa));targheDelPiazzale.forEach(v => {const option = document.createElement('option');option.value = v.targa.toUpperCase();option.textContent = v.targa;if (v.targa.toUpperCase() === targaSelezionataGlobalmente.toUpperCase()) {option.selected = true;}targaSwitcherDropdown.appendChild(option);});if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';updateTargaDetailsDisplay(targaSelezionataGlobalmente);}
     async function inviaPeriziaSingolaASheets(periziaDaInviare) { if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') { console.error("URL della Web App Google Sheets non configurato."); return { success: false, message: "URL Web App non configurato." }; } try { const response = await fetch(GOOGLE_SHEET_WEB_APP_URL, { method: 'POST', mode: 'cors',  cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' },  body: JSON.stringify(periziaDaInviare)  }); let responseData; const contentType = response.headers.get("content-type"); if (contentType && contentType.indexOf("application/json") !== -1) { responseData = await response.json(); } else { const textResponse = await response.text(); console.warn("Risposta dal server non è JSON, ricevuta come testo:", textResponse); try { responseData = JSON.parse(textResponse); } catch (e) { responseData = { status: "error", message: "Risposta non JSON dal server: " + textResponse.substring(0,100) + "..."}; } } if (response.ok && responseData.status === "success") { return { success: true, message: responseData.message, data: responseData.data }; } else { console.error("Errore dall'API di Google Sheets o risposta non OK:", responseData.message || `HTTP Status ${response.status}`); return { success: false, message: responseData.message || `Errore server (HTTP ${response.status})` }; } } catch (error) { console.error("Errore di rete o fetch durante l'invio a Google Sheets:", error); return { success: false, message: "Errore di rete: " + error.message }; } }
@@ -1390,8 +1360,6 @@
     function getFilenameSectionName() {let sectionNameForFile = "generale";if (lastSectionBeforeCamera) {let tempSectionKey = lastSectionBeforeCamera.toLowerCase();if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {sectionNameForFile = tempSectionKey;} else if (tempSectionKey === 'danniverifiche') {sectionNameForFile = 'danni';} else if (tempSectionKey === 'riepilogo') {sectionNameForFile = 'riepilogo_foto';} else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter && currentGallerySectionFilter !== 'riepilogo') {sectionNameForFile = currentGallerySectionFilter.toLowerCase() === 'danniverifiche' ? 'danni' : currentGallerySectionFilter.toLowerCase();} else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter === 'riepilogo') {sectionNameForFile = 'targa_completa';}}return sectionNameForFile;}
     function capturePhoto() {if (captureBtn.disabled) return;if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {const canvas = document.createElement('canvas');canvas.width = cameraStreamElement.videoWidth;canvas.height = cameraStreamElement.videoHeight;const ctx = canvas.getContext('2d');ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7);freezeFrameDisplayElement.style.display = 'block';cameraStreamElement.style.display = 'none';captureBtn.disabled = true;const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');const sectionNameForFile = getFilenameSectionName();const counterKey = `${APP_PREFIX}photoCount_${targaForFile}_${sectionNameForFile}`;let photoNumber = parseInt(localStorage.getItem(counterKey) || '0') + 1;localStorage.setItem(counterKey, photoNumber.toString());const formattedPhotoNumber = String(photoNumber).padStart(3, '0');const filename = `${formattedPhotoNumber} ${sectionNameForFile} ${targaForFile}.jpeg`;canvas.toBlob(async function(blob) {if (!blob) {alert("Errore conversione foto.");freezeFrameDisplayElement.style.display = 'none';freezeFrameDisplayElement.src = '#';cameraStreamElement.style.display = 'block';captureBtn.disabled = false;return;}const photoObjectToSave = {name: filename,blobData: blob,timestamp: new Date().toISOString(),targa: targaForFile,sezione: sectionNameForFile};try {await savePhotoToDB(photoObjectToSave);const link = document.createElement('a');link.href = URL.createObjectURL(blob);link.download = filename;document.body.appendChild(link);link.click();document.body.removeChild(link);URL.revokeObjectURL(link.href);} catch (error) {alert("Errore salvataggio foto IndexedDB.");} finally {setTimeout(() => {freezeFrameDisplayElement.style.display = 'none';freezeFrameDisplayElement.src = '#';cameraStreamElement.style.display = 'block';captureBtn.disabled = false;}, 500);}}, 'image/jpeg', 0.7);} else {console.warn("Stream fotocamera non pronto.");}}
 
-
-    // START: Funzioni per Pagina Galleria e Lightbox (MODIFICATE PER SWIPE E INDICATORI)
     async function showGalleryPage(targaToFilter = null, sectionToFilter = null) {
         if (checklistContainer.style.display === 'block') {
             lastViewBeforeGallery = 'checklist';
@@ -1528,7 +1496,6 @@
         }
     }
 
-    async function deleteCapturedPhoto(timestampToDelete) { /* ... (codice invariato dalla versione precedente) ... */ }
      async function deleteCapturedPhoto(timestampToDelete) {
         if (confirm("Sei sicuro di voler eliminare questa foto dalla galleria dell'app?")) {
             try {
@@ -1555,7 +1522,7 @@
         } else if (lightboxPhotoList.length > 0) {
             if (currentLightboxPhotoIndex < 0) currentLightboxPhotoIndex = 0;
             if (currentLightboxPhotoIndex >= lightboxPhotoList.length) currentLightboxPhotoIndex = lightboxPhotoList.length -1;
-            await updateLightboxImage();
+            // await updateLightboxImage(); // Evita ricorsione infinita se la logica ha un bug
         }
     }
 
@@ -1601,8 +1568,13 @@
             lightboxPhotoList = await getPhotosByTargaAndSezioneFromDB(targaContext, effectiveSectionKeyForDB);
 
             if (!lightboxPhotoList || lightboxPhotoList.length === 0) {
-                // Fallback a singola foto se la lista per swipe è vuota
-                return openImageLightbox(clickedPhotoTimestamp); // Richiama con fallback
+                 const db = await openPhotoDB(); // Fallback a singola foto
+                const transaction = db.transaction(PHOTO_STORE_NAME, 'readonly');
+                const store = transaction.objectStore(PHOTO_STORE_NAME);
+                const request = store.get(clickedPhotoTimestamp);
+                request.onsuccess = (event) => { /* ... come sopra ... */ };
+                request.onerror = (err) => { /* ... come sopra ... */ };
+                return;
             }
 
             lightboxPhotoList.sort((a,b) => {
@@ -1613,7 +1585,7 @@
 
             currentLightboxPhotoIndex = lightboxPhotoList.findIndex(photo => photo.timestamp === clickedPhotoTimestamp);
 
-            if (currentLightboxPhotoIndex === -1) { // Foto non trovata nella lista, apri come singola
+            if (currentLightboxPhotoIndex === -1) { 
                 const clickedPhotoData = await (async () => {
                     const db = await openPhotoDB();
                     const transaction = db.transaction(PHOTO_STORE_NAME, 'readonly');
@@ -1649,27 +1621,23 @@
         lightboxImage.src = '#';
         lightboxPhotoList = [];
         currentLightboxPhotoIndex = -1;
-        isLightboxSwipePotential = false; // Resetta anche questo flag
+        isLightboxSwipePotential = false;
     }
 
-    // NUOVA funzione per mostrare indicatori di fine corsa
-    function showEdgeIndicator(side) {
-        const indicatorLeft = document.getElementById('lightboxEdgeIndicatorLeft');
-        const indicatorRight = document.getElementById('lightboxEdgeIndicatorRight');
-        let indicatorToShow = null;
-
-        if (side === 'left' && indicatorLeft) indicatorToShow = indicatorLeft;
-        else if (side === 'right' && indicatorRight) indicatorToShow = indicatorRight;
-
-        if (indicatorToShow) {
-            indicatorToShow.classList.add('visible');
-            setTimeout(() => {
-                indicatorToShow.classList.remove('visible');
-            }, 300); // Durata visibilità indicatore
+    function showEdgeIndicator(type) {
+        let indicatorElement = null;
+        switch (type) {
+            case 'left': indicatorElement = document.getElementById('lightboxEdgeIndicatorLeft'); break;
+            case 'right': indicatorElement = document.getElementById('lightboxEdgeIndicatorRight'); break;
+            case 'top': indicatorElement = document.getElementById('lightboxEdgeIndicatorTop'); break;
+            case 'bottom': indicatorElement = document.getElementById('lightboxEdgeIndicatorBottom'); break;
+        }
+        if (indicatorElement) {
+            indicatorElement.classList.add('visible');
+            setTimeout(() => { indicatorElement.classList.remove('visible'); }, 300);
         }
     }
     
-    // Funzioni per gestire lo swipe sulla lightbox (MODIFICATE)
     function handleLightboxTouchStart(event) {
         lightboxTouchStartX = event.changedTouches[0].screenX;
         lightboxTouchStartY = event.changedTouches[0].screenY;
@@ -1678,8 +1646,6 @@
 
     function handleLightboxTouchMove(event) {
         if (isLightboxSwipePotential && imageLightbox.style.display === 'flex') {
-            // Previene il comportamento di default del browser (es. pull-to-refresh, overscroll navigation)
-            // solo se un tocco è iniziato DENTRO la lightbox aperta.
             event.preventDefault();
         }
     }
@@ -1689,11 +1655,10 @@
             isLightboxSwipePotential = false;
             return;
         }
-        if (lightboxPhotoList.length <= 1 && (event.target === imageLightbox || event.target.closest('#lightboxContent'))) { // Se c'è solo una foto o nessuna, non fare nulla per lo swipe
+         if (lightboxPhotoList.length <= 1 && (event.target === imageLightbox || event.target.closest('#lightboxContent'))) {
              isLightboxSwipePotential = false;
              return;
         }
-
 
         const lightboxTouchEndX = event.changedTouches[0].screenX;
         const lightboxTouchEndY = event.changedTouches[0].screenY;
@@ -1705,49 +1670,27 @@
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) { // Orizzontale
             if (deltaX > 0) { // Destra (Precedente)
                 if (currentLightboxPhotoIndex > 0) { currentLightboxPhotoIndex--; swiped = true; } 
-                else { showEdgeIndicator('left'); }
+                else { showEdgeIndicator('left'); } // Mostra indicatore VERTICALE sinistro
             } else { // Sinistra (Successiva)
                 if (currentLightboxPhotoIndex < lightboxPhotoList.length - 1) { currentLightboxPhotoIndex++; swiped = true; } 
-                else { showEdgeIndicator('right'); }
+                else { showEdgeIndicator('right'); } // Mostra indicatore VERTICALE destro
             }
         } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > swipeThreshold) { // Verticale
             if (deltaY > 0) { // Giù (Precedente)
                 if (currentLightboxPhotoIndex > 0) { currentLightboxPhotoIndex--; swiped = true; } 
-                else { showEdgeIndicator('left'); } // o 'top' se avessimo indicatori alto/basso
+                else { showEdgeIndicator('top'); } // Mostra indicatore ORIZZONTALE superiore
             } else { // Su (Successiva)
                 if (currentLightboxPhotoIndex < lightboxPhotoList.length - 1) { currentLightboxPhotoIndex++; swiped = true; } 
-                else { showEdgeIndicator('right'); } // o 'bottom'
+                else { showEdgeIndicator('bottom'); } // Mostra indicatore ORIZZONTALE inferiore
             }
         }
 
         if (swiped) {
             updateLightboxImage();
         }
-        isLightboxSwipePotential = false; // Resetta il flag alla fine del tocco
+        isLightboxSwipePotential = false;
     }
-    // END: Funzioni per Pagina Galleria e Lightbox
 
-
-    function showView(viewName) { /* ... (codice invariato) ... */ }
-    async function handleTargaSelectionAndSync(selectedTarga, targetSectionId = null) { /* ... (codice invariato) ... */ }
-    function populateSavedTargasList() { /* ... (codice invariato) ... */ }
-    function clearAllSavedData() { /* ... (codice invariato) ... */ }
-    function setupSheetFilterDropdown() { /* ... (codice invariato) ... */ }
-    function handleSheetFilterChange() { /* ... (codice invariato) ... */ }
-    function popolaTargheFiltrate() { /* ... (codice invariato) ... */ }
-    async function caricaEPopolaTarghe() { /* ... (codice invariato) ... */ }
-    function initSequentialAnimation() { /* ... (codice invariato) ... */ }
-    function showSection(targetId) { /* ... (codice invariato) ... */ }
-    function getSelectText(selectElementOrId) { /* ... (codice invariato) ... */ }
-    function generateSummary() { /* ... (codice invariato) ... */ }
-    async function fetchAllDataFromSheets() { /* ... (codice invariato) ... */ }
-    async function syncAllLocalDataToSheets() { /* ... (codice invariato) ... */ }
-    function triggerMainExit() { /* ... (codice invariato) ... */ }
-    function handleTouchStart(event) { /* ... (codice invariato) ... */ }
-    function handleTouchEnd(event) { /* ... (codice invariato) ... */ }
-    async function handleSwipeGesture() { /* ... (codice invariato) ... */ }
-    async function initializeApplicationViewAndLoadData() { /* ... (codice invariato) ... */ }
-    // (Se necessario, reincollare il corpo completo delle funzioni non modificate)
     function showView(viewName) {landingPageSection.style.display = 'none';checklistContainer.style.display = 'none';historyPageSection.style.display = 'none';if(cameraPageSection) cameraPageSection.style.display = 'none';if(galleryPageSection) galleryPageSection.style.display = 'none';if(imageLightbox) imageLightbox.style.display = 'none';const headerCirclesDiv = document.querySelector('.header-circles');if (viewName !== 'camera') {if(utilityNavButtons) utilityNavButtons.style.display = 'flex';if(headerCirclesDiv) headerCirclesDiv.style.display = 'flex';}if (viewName === 'landing') {landingPageSection.style.display = 'block';pageHeaderContainer.classList.add('fixed-header');if (mainTitleGlobal) { mainTitleGlobal.innerHTML = "Elenco Veicoli"; mainTitleGlobal.style.display = 'block';}if (navButtonsContainer) navButtonsContainer.style.display = 'none';if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';if (listaTargheCompleta.length > 0 &&(!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&typeof popolaTargheFiltrate === 'function') {popolaTargheFiltrate();}} else if (viewName === 'checklist') {pageHeaderContainer.classList.add('fixed-header');if (navButtonsContainer) navButtonsContainer.style.display = 'flex';if (mainPageNavButtons) mainPageNavButtons.style.display = 'flex';if (!targaSelezionataGlobalmente) {showView('landing');return;}if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente.toUpperCase()}`)) {showView('landing');alert(`La perizia per ${targaSelezionataGlobalmente} è stata cancellata.`);return;}checklistContainer.style.display = 'block';if (mainTitleGlobal) mainTitleGlobal.style.display = 'none';if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';populateTargaSwitcherDropdown();updateTargaDetailsDisplay(targaSelezionataGlobalmente);if (tipoTrazioneSelect) handleTrazioneChange();} else if (viewName === 'history') {pageHeaderContainer.classList.add('fixed-header');historyPageSection.style.display = 'block';if (mainTitleGlobal) { mainTitleGlobal.innerHTML = "Cronistoria Salvataggi"; mainTitleGlobal.style.display = 'block'; }if (navButtonsContainer) navButtonsContainer.style.display = 'none';if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';populateSavedTargasList();} else if (viewName === 'gallery') {pageHeaderContainer.classList.add('fixed-header');galleryPageSection.style.display = 'block';} else if (viewName !== 'camera') {pageHeaderContainer.classList.remove('fixed-header');if (headerCirclesDiv) headerCirclesDiv.style.display = 'none';if (utilityNavButtons) utilityNavButtons.style.display = 'none';if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";}updateNavButtonColors();let bodyPaddingTopValue = '0px';if (viewName !== 'camera') {if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;} else {let nonFixedHeaderHeight = 0;if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;}bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;}document.body.style.paddingTop = bodyPaddingTopValue;}window.scrollTo(0, 0);}
     async function handleTargaSelectionAndSync(selectedTarga, targetSectionId = null) {const targaUpper = selectedTarga.toUpperCase();if (localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`)) {if (targheLoadingStatus && landingPageSection.style.display === 'block') {targheLoadingStatus.textContent = `Targa ${targaUpper} cancellata.`;}if (targaSelezionataGlobalmente === targaUpper && checklistContainer.style.display === 'block') {showView('landing');}return;}if (targaSelezionataGlobalmente === targaUpper && checklistContainer.style.display === 'block') {if (targaSwitcherDropdown.value !== targaUpper) {targaSwitcherDropdown.value = targaUpper;}updateTargaDetailsDisplay(targaUpper);if (targetSectionId) {const currentActiveSectionEl = document.querySelector('#checklistContainer .category-section.active');const currentActiveSectionId = currentActiveSectionEl ? currentActiveSectionEl.id.replace('Section', '') : null;if (currentActiveSectionId !== targetSectionId) {showSection(targetSectionId);}}return;}targaSelezionataGlobalmente = targaUpper;if (targheLoadingStatus && landingPageSection.style.display === 'block') {targheLoadingStatus.textContent = `Caricamento ${targaSelezionataGlobalmente}...`;}let localData = null;let localDatiPeriziaTimestamp = null;const localJson = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`);if (localJson) {try {localData = JSON.parse(localJson);localDatiPeriziaTimestamp = localData.timestamp ? new Date(localData.timestamp) : null;} catch (e) { localData = null; }}const sheetsPeriziaData = await fetchLatestPeriziaFromSheets(targaSelezionataGlobalmente);let sheetsRecordTimestamp = null;let sheetsDatiPerizia = null;let isSheetsDataCompleted = false;if (sheetsPeriziaData && sheetsPeriziaData.timestamp && sheetsPeriziaData.datiPerizia) {sheetsRecordTimestamp = new Date(sheetsPeriziaData.timestamp);sheetsDatiPerizia = sheetsPeriziaData.datiPerizia;isSheetsDataCompleted = sheetsPeriziaData.completata || false;}if (sheetsPeriziaData && sheetsRecordTimestamp && (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp)) {try {if (!localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente}`)) {localStorage.setItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`, JSON.stringify(sheetsDatiPerizia));savePosizioneForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.posizione || "");saveUrgentStatusForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.urgente || false);if (isSheetsDataCompleted) markTargaAsCompleted(targaSelezionataGlobalmente);else unmarkTargaAsCompleted(targaSelezionataGlobalmente);}} catch (e) { console.error("Errore LS:", e); }}if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente}`)) {showView('landing');return;}loadProgress(targaSelezionataGlobalmente);if (targheLoadingStatus && landingPageSection.style.display === 'block') {targheLoadingStatus.textContent = "Clicca targa per perizia:";}showView('checklist');if (targetSectionId && document.getElementById(targetSectionId + 'Section')) {showSection(targetSectionId);} else {const firstNav = Array.from(navButtons).find(b => b.dataset.target && !['backToListBtn', 'historyBtn', 'mainExitAppBtn'].includes(b.id));if (firstNav && firstNav.dataset.target) {showSection(firstNav.dataset.target);} else if (navButtons.length > 0 && navButtons[0].dataset.target) {showSection(navButtons[0].dataset.target);} else {showSection('remarketing');}}}
     function populateSavedTargasList() {savedTargasListContainer.innerHTML = '';let hasSaves = false;const tempSavedTargas = [];for (let i = 0; i < localStorage.length; i++) {const key = localStorage.key(i);if (key.startsWith(`${APP_PREFIX}data_`)) {const targa = key.substring(`${APP_PREFIX}data_`.length);if (targa && !localStorage.getItem(`${APP_PREFIX}deleted_${targa}`) && !tempSavedTargas.includes(targa)) {tempSavedTargas.push(targa);}}}if (tempSavedTargas.length > 0) hasSaves = true;tempSavedTargas.sort();tempSavedTargas.forEach(targa => {const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' };let displayText = targa;let details = [];if (vehicleDetails.marca) details.push(vehicleDetails.marca);if (vehicleDetails.modello) details.push(vehicleDetails.modello);if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`);if (details.length > 0) {displayText += ` - ${details.join(' ')}`;}const button = document.createElement('button');button.classList.add('saved-targa-button');button.textContent = displayText;button.dataset.targa = targa;button.addEventListener('click', async function() {await handleTargaSelectionAndSync(this.dataset.targa);});savedTargasListContainer.appendChild(button);});if (!hasSaves) {savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio.</p>';}}
@@ -1921,7 +1864,6 @@
             lightboxDiv.addEventListener('click', function(event) {
                 if (event.target === lightboxDiv) closeImageLightbox();
             });
-            // Listeners per swipe su lightbox (passive: false per permettere preventDefault su touchmove)
             lightboxDiv.addEventListener('touchstart', handleLightboxTouchStart, { passive: false });
             lightboxDiv.addEventListener('touchmove', handleLightboxTouchMove, { passive: false });
             lightboxDiv.addEventListener('touchend', handleLightboxTouchEnd, { passive: true });
