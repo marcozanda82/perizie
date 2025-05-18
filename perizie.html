@@ -416,26 +416,33 @@
         .category-section {
             position: relative; 
         }
-        .fill-defaults-btn {
+        .page-action-buttons-container {
             position: absolute;
             top: 20px; 
             right: 20px;
+            display: flex;
+            gap: 10px; /* Spazio tra i bottoni */
+            z-index: 10;
+        }
+        .page-action-button { /* Stile base per i bottoni di azione pagina */
             width: 35px;
             height: 35px;
-            background-color: #007bff; 
             color: white;
-            border: 1px solid #0056b3;
+            border: 1px solid;
             border-radius: 4px;
             font-size: 1.5em; 
             line-height: 1; 
             cursor: pointer;
-            z-index: 10; 
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 0;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .fill-defaults-btn { /* Bottone compila default */
+            background-color: #007bff; 
+            border-color: #0056b3;
         }
         .fill-defaults-btn:hover {
             background-color: #0056b3;
@@ -443,6 +450,18 @@
         }
         .fill-defaults-btn:active {
              background-color: #004085;
+        }
+        .reset-page-btn { /* Bottone reset pagina */
+            background-color: #ffc107; /* Giallo */
+            border-color: #e0a800;
+            color: #212529; /* Testo scuro per contrasto */
+        }
+        .reset-page-btn:hover {
+            background-color: #e0a800;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .reset-page-btn:active {
+            background-color: #c69500;
         }
 
 
@@ -899,6 +918,36 @@
         #swipe-end-indicator-bottom { left: 0; right: 0; bottom: 0; height: 5px; }
         /* END: Stili per Indicatore Fine Swipe */
 
+        /* Riepilogo Header Flex Container */
+        .riepilogo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%; /* Assicura che occupi tutta la larghezza della section */
+        }
+
+        /* Stile per il bottone Download ZIP */
+        #downloadZipBtn {
+            padding: 8px 12px;
+            background-color: #17a2b8; /* Un colore diverso per distinguerlo */
+            color: white;
+            border: 1px solid #117a8b;
+            border-radius: 4px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none; /* Rimuove sottolineatura se usato come <a> */
+            display: inline-flex; /* Per allineare icona e testo */
+            align-items: center;
+            gap: 5px; /* Spazio tra icona e testo */
+        }
+        #downloadZipBtn:hover {
+            background-color: #117a8b;
+        }
+        #downloadZipBtn i {
+            font-size: 1.1em; /* Icona leggermente più grande del testo */
+        }
+
 
         @media (max-width: 768px) {
             .content-wrapper { margin-top: 0; }
@@ -925,7 +974,8 @@
             #sheetFilterContainer { display: flex; flex-direction: column; align-items: stretch; }
             #sheetFilterContainer label { margin-bottom: 5px; margin-right: 0; text-align: left;}
             #sheetFilterDropdown { width: 100%; }
-            .fill-defaults-btn { top: 15px; right: 15px; width: 30px; height: 30px; font-size: 1.2em; }
+            .page-action-buttons-container { top: 15px; right: 15px; gap: 8px;}
+            .page-action-button { width: 30px; height: 30px; font-size: 1.2em; }
             #captureBtn { bottom: 30px; width: 60px; height: 60px; border-width: 3px; box-shadow: 0 0 0 3px #333;}
             #captureBtn::before { width: 40px; height: 40px; }
             #closeCameraBtn { bottom: 15px; right: 15px; width: 40px; height: 40px; font-size: 1.6em; line-height: 38px;}
@@ -934,6 +984,7 @@
             #lightboxContent { width: 95%; }
             #lightboxImage { max-height: 75vh; }
             #closeLightboxBtn { font-size: 22px; top: 0px; right: 0px; padding: 0px 8px;}
+             #downloadZipBtn { padding: 6px 10px; font-size: 0.85em; }
         }
          @media (max-width: 400px) {
             .circle-button { width: 40px; height: 40px; font-size: 1.1em;}
@@ -943,6 +994,10 @@
             .modal-content h2 {font-size: 1.3em;}
             #captureBtn { bottom: 25px; width: 55px; height: 55px; border-width: 3px; box-shadow: 0 0 0 3px #222;}
             #captureBtn::before { width: 35px; height: 35px; background-color: #222; }
+            .riepilogo-header { flex-direction: column; align-items: flex-start; gap: 10px;}
+            .riepilogo-header .section-title { width: 100%; text-align: center; } /* Titolo centrato sopra */
+            #downloadZipBtn { width: 100%; justify-content: center;} /* Bottone a tutta larghezza */
+
 
         }
     </style>
@@ -1042,7 +1097,10 @@
 
         <div id="checklistContainer" style="display: none;"> 
             <div id="remarketingSection" class="category-section">
-                <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection">✓</button>
+                <div class="page-action-buttons-container">
+                    <button class="page-action-button reset-page-btn" title="Azzera Campi Pagina" data-sectionid="remarketingSection"><i class="fas fa-undo"></i></button>
+                    <button class="page-action-button fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection"><i class="fas fa-check"></i></button>
+                </div>
                 <h2 class="section-title">1. Foto Remarketing</h2>
                 <ul>
                     <li>
@@ -1113,7 +1171,10 @@
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
             </div>
             <div id="pneumaticiSection" class="category-section">
-                <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="pneumaticiSection">✓</button>
+                <div class="page-action-buttons-container">
+                    <button class="page-action-button reset-page-btn" title="Azzera Campi Pagina" data-sectionid="pneumaticiSection"><i class="fas fa-undo"></i></button>
+                    <button class="page-action-button fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="pneumaticiSection"><i class="fas fa-check"></i></button>
+                </div>
                 <h2 class="section-title">2. Foto Pneumatici</h2>
                 <ul>
                     <li><label for="pneumatico_as">Ant. sinistro:</label><select id="pneumatico_as"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
@@ -1124,7 +1185,10 @@
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
             </div>
             <div id="danniVerificheSection" class="category-section">
-                <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="danniVerificheSection">✓</button>
+                <div class="page-action-buttons-container">
+                     <button class="page-action-button reset-page-btn" title="Azzera Campi Pagina" data-sectionid="danniVerificheSection"><i class="fas fa-undo"></i></button>
+                    <button class="page-action-button fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="danniVerificheSection"><i class="fas fa-check"></i></button>
+                </div>
                 <h2 class="section-title">3. Foto Danni e Verifiche</h2>
                 <ul>
                     <li><label for="motore_accende">Motore si accende:</label><select id="motore_accende"><option value="">Seleziona...</option><option value="ok">OK</option><option value="non_ok">Non OK</option></select></li>
@@ -1138,8 +1202,12 @@
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Vai al Riepilogo</button></div>
             </div>
             <div id="riepilogoSection" class="category-section">
-                <h2 class="section-title">Riepilogo Perizia</h2>
-                <div id="summaryContent"><p><em>Compila le sezioni precedenti...</em></p></div>
+                <div class="riepilogo-header">
+                    <h2 class="section-title" style="margin-bottom: 0; border-bottom: none;">Riepilogo Perizia</h2>
+                    <a href="#" id="downloadZipBtn" class="action-button" title="Download ZIP Perizia" target="_blank" style="display: none;"> <i class="fas fa-file-archive"></i> Download ZIP
+                    </a>
+                </div>
+                <div id="summaryContent" style="margin-top: 15px;"><p><em>Compila le sezioni precedenti...</em></p></div>
                 <button id="saveAndReturnBtn" class="action-button" style="background-color: #28a745; border-color: #1e7e34; margin-top: 15px;">Salva Perizia e Foto</button>
             </div>
         </div>
@@ -1230,6 +1298,8 @@
     let currentLightboxPhotoList = [];
     let currentLightboxPhotoIndex = -1;
 
+    const downloadZipBtn = document.getElementById('downloadZipBtn'); // NUOVO: Riferimento al bottone Download
+
 
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
     const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzN4bBhPi4d8i7fSpJQqCJ2CQYOtmes1yKeGeqVe053K4QkdKYH4PuQIughn_9YLEfCkA/exec'; 
@@ -1239,43 +1309,27 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    const currentAppVersion = "1.6.3"; // MODIFICA: Versione aggiornata per riflettere nuove modifiche
+    const currentAppVersion = "1.6.4"; // MODIFICA: Versione aggiornata
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtnModal = document.getElementById('closeChangelogBtnModal'); 
     const changelogList = document.getElementById('changelogList');
     const changelogTitle = document.getElementById('changelogTitle');
 
     const latestChangesText = `
-        <li><strong>Miglioramenti Interfaccia Fotocamera:</strong>
+        <li><strong>Nuovi Pulsanti Azione Pagina:</strong>
             <ul>
-                <li>Rimosso testo superfluo vicino ai controlli della fotocamera.</li>
+                <li>Aggiunto pulsante "Azzera Campi" (<i class="fas fa-undo"></i>) per le sezioni Remarketing, Pneumatici e Danni/Verifiche.</li>
+                <li>I pulsanti "Azzera" e "Compila Default" sono ora affiancati in alto a destra di ogni sezione operativa.</li>
             </ul>
         </li>
-        <li><strong>Navigazione Foto Migliorata (Lightbox):</strong>
+        <li><strong>Download Perizia ZIP:</strong>
             <ul>
-                <li>Abilitato swipe orizzontale per passare alla foto successiva/precedente nella lightbox.</li>
-                <li>Abilitato swipe verticale per passare alla foto successiva/precedente nella lightbox. (NUOVO)</li>
-                <li>Indicatore visivo (linea rossa) a fine corsa dello swipe foto (orizzontale e verticale).</li>
+                <li>Aggiunto pulsante "Download ZIP" (<i class="fas fa-file-archive"></i>) nella sezione Riepilogo, a destra del titolo.</li>
+                <li>Il link punta a <code>https://192.168.1.154:8080/TARGA.zip</code>, sostituendo TARGA con la targa attiva.</li>
+                <li>Il pulsante è visibile solo quando una targa è selezionata e si è nella sezione Riepilogo.</li>
             </ul>
         </li>
-         <li><strong>Navigazione Sezioni Migliorata:</strong>
-            <ul>
-                <li>Indicatore visivo (linea rossa) a fine corsa dello swipe sezioni.</li>
-            </ul>
-        </li>
-        <li><strong>Galleria Foto:</strong>
-            <ul>
-                <li>Impedito il "pull-to-refresh" (ricarica pagina) con swipe verticale verso il basso quando si è all'inizio della griglia foto. Indicatore visivo a fine corsa. (Confermato e potenziato con CSS)</li>
-            </ul>
-        </li>
-        <li><strong>Contesto Galleria:</strong>
-            <ul>
-                <li>Navigando alla galleria da una perizia (targa/sezione), la galleria si apre filtrata per tale contesto. (Logica esistente verificata)</li>
-            </ul>
-        </li>
-        <li>Corretto bug reset contatore foto per sezioni vuote.</li>
-        <li>Pulsante "X" su lista targhe ora cancella solo dati locali.</li>
-        <li>Nuovo pulsante su Cronistoria per marcare/annullare marcatura cancellazione da server.</li>
+        <li>Miglioramenti Interfaccia Fotocamera e Navigazione Foto (come da v1.6.3).</li>
     `;
 
 
@@ -1409,6 +1463,35 @@
         }
     }
     // END: Swipe End Indicator Function
+
+    // NUOVO: Funzione per azzerare i campi di una sezione
+    function resetSectionFields(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+
+        section.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        section.querySelectorAll('input[type="text"]').forEach(txt => txt.value = '');
+        section.querySelectorAll('textarea').forEach(ta => ta.value = '');
+        section.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
+        
+        // Gestione specifica per i select dei cavi EV se la logica di disabilitazione è attiva
+        if (sectionId === 'remarketingSection') {
+            handleTrazioneChange(); // Riesegue per sistemare i select dei cavi EV
+        }
+
+        updateNavButtonColors(); // Aggiorna i colori dei bottoni di navigazione
+        // Potrebbe essere utile un feedback visivo o salvare automaticamente dopo il reset
+        if (targaSelezionataGlobalmente) {
+            saveProgress(targaSelezionataGlobalmente); // Salva lo stato resettato
+        }
+        // Se presente, rimuove l'animazione "animate-me" dai campi
+        section.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me'));
+        // Se è attiva l'animazione sequenziale, la fa ripartire
+        if (typeof initSequentialAnimation === 'function' && section.classList.contains('active')) {
+            setTimeout(initSequentialAnimation, 50);
+        }
+         alert(`Campi della sezione ${section.querySelector('h2.section-title')?.textContent.trim() || sectionId} azzerati.`);
+    }
 
 
     function updateTargaDetailsDisplay(selectedTarga) {
@@ -1580,8 +1663,9 @@
         if (document.getElementById('riepilogoSection').classList.contains('active')) { generateSummary(); } 
         try { 
             await generateAndDownloadScreenshot(); 
-            await downloadPhotosAsZip(targaSelezionataGlobalmente);
-        } catch (e) { console.warn("Generazione screenshot/ZIP fallita, dati salvati localmente.", e); } 
+            // Non chiamare più downloadPhotosAsZip qui, verrà gestito dal nuovo bottone
+            // await downloadPhotosAsZip(targaSelezionataGlobalmente);
+        } catch (e) { console.warn("Generazione screenshot fallita, dati salvati localmente.", e); } 
         markTargaAsCompleted(targaSelezionataGlobalmente); updateNavButtonColors();  
         if (saveAndReturnBtn.textContent !== originalButtonText) {
              saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false;
@@ -2107,6 +2191,7 @@
                 typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
             }
+            if (downloadZipBtn) downloadZipBtn.style.display = 'none'; // Nasconde il bottone ZIP se non siamo in riepilogo
         } else if (viewName === 'checklist') {
             pageHeaderContainer.classList.add('fixed-header');
             if (navButtonsContainer) navButtonsContainer.style.display = 'flex'; 
@@ -2121,6 +2206,15 @@
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex'; 
             populateTargaSwitcherDropdown(); updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
             if (tipoTrazioneSelect) handleTrazioneChange();
+            // Gestione visibilità bottone Download ZIP
+             const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
+            if (downloadZipBtn && activeSectionElement && activeSectionElement.id === 'riepilogoSection' && targaSelezionataGlobalmente) {
+                downloadZipBtn.href = `https://192.168.1.154:8080/${targaSelezionataGlobalmente.toUpperCase()}.zip`;
+                downloadZipBtn.style.display = 'inline-flex';
+            } else if (downloadZipBtn) {
+                downloadZipBtn.style.display = 'none';
+            }
+
         } else if (viewName === 'history') {
             pageHeaderContainer.classList.add('fixed-header');
             historyPageSection.style.display = 'block';
@@ -2128,14 +2222,17 @@
             if (navButtonsContainer) navButtonsContainer.style.display = 'none';
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             populateSavedTargasList();
+            if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         } else if (viewName === 'gallery') { 
             pageHeaderContainer.classList.add('fixed-header');
             // La visualizzazione di galleryPageSection è gestita da showGalleryPage
+            if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         } else if (viewName !== 'camera') { 
              pageHeaderContainer.classList.remove('fixed-header');
              if (headerCirclesDiv) headerCirclesDiv.style.display = 'none'; 
              if (utilityNavButtons) utilityNavButtons.style.display = 'none';
              if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
+             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         }
         updateNavButtonColors(); 
         let bodyPaddingTopValue = '0px';
@@ -2170,6 +2267,13 @@
                  const currentActiveSectionEl = document.querySelector('#checklistContainer .category-section.active');
                  const currentActiveSectionId = currentActiveSectionEl ? currentActiveSectionEl.id.replace('Section', '') : null;
                  if (currentActiveSectionId !== targetSectionId) { showSection(targetSectionId); }
+            }
+             // Aggiorna link e visibilità bottone Download ZIP se siamo nel riepilogo
+            if (downloadZipBtn && targetSectionId === 'riepilogo') {
+                downloadZipBtn.href = `https://192.168.1.154:8080/${targaUpper.toUpperCase()}.zip`;
+                downloadZipBtn.style.display = 'inline-flex';
+            } else if (downloadZipBtn) {
+                downloadZipBtn.style.display = 'none';
             }
             return; 
         }
@@ -2481,7 +2585,18 @@
         const targetSectionElement = document.getElementById(targetId + 'Section');
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
              setTimeout(initSequentialAnimation, 100); 
-        } else if (targetId === 'riepilogo') { generateSummary(); }
+        } else if (targetId === 'riepilogo') { 
+            generateSummary(); 
+            // Gestione bottone Download ZIP
+            if (downloadZipBtn && targaSelezionataGlobalmente) {
+                downloadZipBtn.href = `https://192.168.1.154:8080/${targaSelezionataGlobalmente.toUpperCase()}.zip`;
+                downloadZipBtn.style.display = 'inline-flex';
+            } else if (downloadZipBtn) {
+                downloadZipBtn.style.display = 'none';
+            }
+        } else { // Se non è riepilogo, nascondi il bottone ZIP
+             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
+        }
          window.scrollTo(0, 0); 
     }
 
@@ -2618,7 +2733,7 @@
     function handleTouchStart(event) {
         if (imageLightbox && imageLightbox.style.display === 'flex') return;
         const targetElement = event.target;
-        if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button')) {
+        if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button') || targetElement.closest('.page-action-button')) { // Aggiunto .page-action-button
             return;
         }
         if (checklistContainer.style.display === 'block' || (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter)) {
@@ -2630,7 +2745,7 @@
     function handleTouchEnd(event) {
         if (imageLightbox && imageLightbox.style.display === 'flex') return;
         const targetElement = event.target;
-         if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button')) {
+         if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button') || targetElement.closest('.page-action-button')) { // Aggiunto .page-action-button
             return;
         }
         if (checklistContainer.style.display === 'block' || (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter)) {
@@ -2749,6 +2864,18 @@
                 }
             });
         });
+         // NUOVO: Event listener per i bottoni di reset pagina
+        document.querySelectorAll('.reset-page-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const sectionId = this.dataset.sectionid;
+                if (sectionId) {
+                    if (confirm(`Sei sicuro di voler azzerare tutti i campi in "${sectionId.replace('Section', '')}"?`)) {
+                        resetSectionFields(sectionId);
+                    }
+                }
+            });
+        });
+
         if (tipoTrazioneSelect) tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
         
         targaSwitcherDropdown.addEventListener('change', async function() {
