@@ -2051,7 +2051,7 @@
     // MODIFICA END
     // END: Lightbox Swipe Handlers
     
-    // START: Gallery Grid Pull-to-Refresh Prevention
+// START: Gallery Grid Pull-to-Refresh Prevention
     function handleGalleryGridTouchStart(event) {
         if (event.touches.length === 1) {
             galleryGridTouchStartY = event.touches[0].clientY;
@@ -2060,25 +2060,21 @@
 
     function handleGalleryGridTouchMove(event) {
         if (event.touches.length === 1 && galleryPageSection.style.display === 'block') {
-            let scrollElement = galleryPageSection; // Assumiamo che galleryPageSection sia lo scroll container principale
-            // Potrebbe essere necessario un controllo più granulare se lo scroll è gestito da photoGridContainer o document.body
-            // if (getComputedStyle(galleryPageSection).overflowY !== 'auto' && getComputedStyle(galleryPageSection).overflowY !== 'scroll') {
-            //      scrollElement = document.documentElement.scrollTop > 0 ? document.documentElement : document.body;
-            // }
+            const currentTouchY = event.touches[0].clientY;
+            const deltaY = currentTouchY - galleryGridTouchStartY;
 
-            const isAtTop = scrollElement.scrollTop === 0;
-            const deltaY = event.touches[0].clientY - galleryGridTouchStartY;
+            // MODIFICA START: Controlla se la pagina principale è in cima
+            const isPageAtTop = (document.documentElement.scrollTop || document.body.scrollTop) === 0;
 
-            if (isAtTop && deltaY > 0) { // Swiping down from the top
-                event.preventDefault(); // Previene il pull-to-refresh
-                showSwipeEndIndicator('top'); // Mostra l'indicatore
+            if (isPageAtTop && deltaY > 0) { // Swiping down dall'estrema cima della pagina
+                // Previene il pull-to-refresh del browser
+                event.preventDefault();
+                showSwipeEndIndicator('top');
             }
-            // Potresti aggiungere logica per swipe up from bottom se necessario
-            // const isAtBottom = Math.abs(scrollElement.scrollHeight - scrollElement.scrollTop - scrollElement.clientHeight) < 1;
-            // if (isAtBottom && deltaY < 0) { // Swiping up from the bottom
-            //    event.preventDefault();
-            //    showSwipeEndIndicator('bottom');
-            // }
+            // Non chiamare event.preventDefault() per swipe verso l'alto (deltaY < 0)
+            // o per swipe verso il basso quando non si è in cima alla pagina.
+            // Questo permette alla pagina di scrollare normalmente, incluso lo scroll verso l'alto dal fondo.
+            // MODIFICA END
         }
     }
     // END: Gallery Grid Pull-to-Refresh Prevention
