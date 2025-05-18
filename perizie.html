@@ -14,7 +14,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.75);
+            background-color: rgba(0, 0, 0, 0.75); 
             z-index: 99999;
             display: flex;
             justify-content: center;
@@ -95,8 +95,8 @@
         #preloader .loading-text {
             color: #00aeff;
             animation: textGlow 1.8s infinite alternate ease-in-out;
-            text-align: center;
-            width: 100%;
+            text-align: center; 
+            width: 100%; 
         }
         
         #exit-curtain .loading-text {
@@ -110,7 +110,7 @@
 
         #exit-curtain.glitching .loading-text {
             animation: glitchText 0.8s infinite steps(1, end), textGlow 1.8s infinite alternate ease-in-out;
-            color: #ff3030 !important;
+            color: #ff3030 !important; 
             position: relative;
             z-index: 10;
         }
@@ -565,18 +565,18 @@
 
         .targa-list-item.locally-deleted {
             opacity: 0.5;
-            background-color: #404040 !important;
+            background-color: #404040 !important; 
         }
         .targa-list-item.locally-deleted .targa-col-targa {
             text-decoration: line-through;
             color: #aaa !important;
         }
         .targa-list-item.locally-deleted .clickable-targa {
-            cursor: default !important;
+            cursor: default !important; 
             text-decoration: line-through !important;
         }
         .targa-list-item.locally-deleted .delete-progress-btn {
-            display: none;
+            display: none; 
         }
         .targa-list-item.locally-deleted input,
         .targa-list-item.locally-deleted select {
@@ -607,110 +607,83 @@
 
         /* START: Stili per la pagina Fotocamera */
         .camera-page-section {
-            position: fixed;
+            position: fixed; 
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #000;
-            z-index: 2000;
-            display: none;
+            background-color: #000; 
+            z-index: 2000; 
+            display: none; 
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding-top: 0;
-            margin: 0;
-            border: none;
-            border-radius: 0;
-            max-width: none;
-            box-sizing: border-box;
+            padding-top: 0; 
+            margin: 0; 
+            border: none; 
+            border-radius: 0; 
+            max-width: none; 
+            box-sizing: border-box; 
         }
         #cameraStream {
             width: 100%;
-            height: 100%;
-            object-fit: contain;
+            height: 100%; 
+            object-fit: contain; 
         }
-        #freezeFrameDisplay {
-            display: none;
+        #freezeFrameDisplay { 
+            display: none; 
             position: absolute;
-            top: 0;
+            top: 0; 
             left: 0;
             width: 100%;
-            height: 100%;
-            object-fit: contain;
-            z-index: 2015;
-            border: 8px solid #00bcd4;
-            box-sizing: border-box;
+            height: 100%; 
+            object-fit: contain; 
+            z-index: 2015; 
+            border: 8px solid #00bcd4; 
+            box-sizing: border-box; 
         }
 
         #captureBtn {
             position: absolute;
-            bottom: 40px; /* Increased distance from bottom */
+            bottom: 30px; 
             left: 50%;
             transform: translateX(-50%);
-            z-index: 2020;
-            width: 70px; /* Width of the button */
-            height: 70px; /* Height of the button */
-            background-color: #fff; /* Inner circle color */
-            border: 4px solid #fff; /* Outer circle - make it appear as a ring */
-            border-radius: 50%; /* Makes it a circle */
-            box-shadow: 0 0 0 4px #333; /* Concentric circle shadow acting as another border */
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0; /* Remove padding if any icon is inside */
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            z-index: 2020; 
+            padding: 12px 20px;
+            font-size: 1.1em;
+            background-color: #007bff;
+            border-color: #0056b3;
         }
-
-        #captureBtn::before { /* Inner solid circle */
-            content: '';
-            width: 50px; /* Size of the inner solid circle */
-            height: 50px; /* Size of the inner solid circle */
-            background-color: #333; /* Color of the inner solid circle */
-            border-radius: 50%;
-            display: block;
-        }
-
-        #captureBtn:hover {
-            background-color: #f0f0f0; /* Lighten inner circle on hover */
-            box-shadow: 0 0 0 5px #555; /* Darken outer ring on hover */
-        }
-        #captureBtn:active {
-            background-color: #e0e0e0;
-             box-shadow: 0 0 0 5px #000;
-        }
-        /* Remove icon styling if the button is purely graphical */
-         /* #captureBtn i {
+         #captureBtn i {
             margin-right: 8px;
-        } */
+        }
         
         #closeCameraBtn {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            z-index: 2020;
-            width: 45px;
-            height: 45px;
-            background-color: rgba(40, 40, 40, 0.8);
-            color: #ff4d4d;
+            bottom: 20px; 
+            right: 20px; 
+            z-index: 2020; 
+            width: 45px; 
+            height: 45px; 
+            background-color: rgba(40, 40, 40, 0.8); 
+            color: #ff4d4d; 
             border: 1px solid #ff4d4d;
-            border-radius: 4px;
-            font-size: 1.8em;
-            line-height: 43px;
+            border-radius: 4px; 
+            font-size: 1.8em; 
+            line-height: 43px; 
             text-align: center;
-            padding: 0;
+            padding: 0; 
             cursor: pointer;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
         #closeCameraBtn:hover {
-            background-color: rgba(255, 77, 77, 0.9);
-            color: #fff;
+            background-color: rgba(255, 77, 77, 0.9); 
+            color: #fff; 
             border-color: #fff;
         }
 
         #pageHeaderContainer.fixed-header {
-            z-index: 2030;
+            z-index: 2030; 
         }
         /* END: Stili per la pagina Fotocamera */
 
@@ -721,37 +694,37 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            display: none;
+            background-color: rgba(0,0,0,0.7); 
+            display: none; 
             justify-content: center;
             align-items: center;
-            z-index: 10000;
+            z-index: 10000; 
             padding: 15px;
             box-sizing: border-box;
         }
         .modal-content {
-            background-color: #333;
+            background-color: #333; 
             padding: 20px 25px;
             border-radius: 10px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.6);
             width: 90%;
             max-width: 550px;
-            color: #e0e0e0;
+            color: #e0e0e0; 
             border-top: 5px solid #007bff;
-            max-height: 80vh;
+            max-height: 80vh; 
             overflow-y: auto;
         }
         .modal-content h2 {
             margin-top: 0;
             margin-bottom: 15px;
             color: #00aeff;
-            border-bottom: 1px solid #555;
+            border-bottom: 1px solid #555; 
             padding-bottom: 10px;
             font-size: 1.5em;
         }
         .modal-content ul {
-            list-style-position: inside;
-            padding-left: 5px;
+            list-style-position: inside; 
+            padding-left: 5px; 
         }
         .modal-content ul li {
             margin-bottom: 10px;
@@ -786,38 +759,38 @@
             margin-top: 20px;
         }
         .photo-item {
-            background-color: #3c3c3c;
-            border-radius: 6px;
+            background-color: #3c3c3c; 
+            border-radius: 6px; 
             padding: 10px;
             text-align: center;
             box-shadow: 0 3px 6px rgba(0,0,0,0.35);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            position: relative;
+            position: relative; 
         }
         /* .photo-item.selected e .photo-item-checkbox sono rimossi */
         .photo-item img {
             max-width: 100%;
-            height: 120px;
+            height: 120px; 
             object-fit: cover;
-            border-radius: 4px;
+            border-radius: 4px; 
             margin-bottom: 8px;
-            cursor: pointer;
-            border: 1px solid #555;
+            cursor: pointer; 
+            border: 1px solid #555; 
         }
         .photo-item-caption {
-            font-size: 0.75em;
+            font-size: 0.75em; 
             color: #bdbdbd;
             word-wrap: break-word;
             margin-bottom: 8px;
             line-height: 1.3;
-            max-height: 3.9em;
+            max-height: 3.9em; 
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .photo-item-delete-btn {
-            background-color: #c82333;
+            background-color: #c82333; 
             color: white;
             border: none;
             padding: 4px 8px;
@@ -833,15 +806,15 @@
 
         /* START: Stili per Lightbox Immagine */
         #imageLightbox {
-            display: none;
+            display: none; 
             position: fixed;
-            z-index: 3000;
+            z-index: 3000; 
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.85);
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.85); 
             justify-content: center;
             align-items: center;
         }
@@ -850,21 +823,21 @@
             margin: auto;
             padding: 0;
             width: 90%;
-            max-width: 700px;
+            max-width: 700px; 
         }
         #lightboxImage {
             display: block;
             width: 100%;
             height: auto;
-            max-height: 80vh;
+            max-height: 80vh; 
             object-fit: contain;
             border: 3px solid #444;
             border-radius: 5px;
         }
         #closeLightboxBtn {
             position: absolute;
-            top: -5px;
-            right: -5px;
+            top: -5px; 
+            right: -5px; 
             color: #fff;
             background-color: #333;
             border: 1px solid #555;
@@ -888,16 +861,16 @@
 
         @media (max-width: 768px) {
             .content-wrapper { margin-top: 0; }
-            .circle-button { width: 45px; height: 45px; font-size: 1.2em;}
+            .circle-button { width: 45px; height: 45px; font-size: 1.2em;} 
             #navButtons button, .action-button { padding: 8px 10px; font-size: 0.85em; }
             #mainPageNavButtons { width: 100%; padding: 5px; box-sizing: border-box; }
             #mainPageNavButtons button { font-size: 0.8em; padding: 6px 8px; }
             #utilityNavButtons button { font-size: 0.85em; padding: 8px 10px; }
             input[type="text"], input[type="url"], select:not(#targaSwitcherDropdown), textarea { width: 100%; box-sizing: border-box; }
-            #targaSwitcherDropdown { min-width: 160px; font-size: 1em; }
+            #targaSwitcherDropdown { min-width: 160px; font-size: 1em; } 
             #targaDetailsDisplay { font-size: 0.75em; }
             .table-scroll-wrapper { overflow-x: auto; }
-            .targa-list-table-content { min-width: 600px; }
+            .targa-list-table-content { min-width: 600px; } 
             .targa-list-header { display: flex !important; }
             .targa-list-header .targa-col, .targa-list-item .targa-col { padding: 6px 5px; }
             .delete-progress-btn { padding: 5px 8px; }
@@ -912,8 +885,7 @@
             #sheetFilterContainer label { margin-bottom: 5px; margin-right: 0; text-align: left;}
             #sheetFilterDropdown { width: 100%; }
             .fill-defaults-btn { top: 15px; right: 15px; width: 30px; height: 30px; font-size: 1.2em; }
-            #captureBtn { bottom: 30px; width: 60px; height: 60px; border-width: 3px; box-shadow: 0 0 0 3px #333;}
-            #captureBtn::before { width: 40px; height: 40px; }
+            #captureBtn { bottom: 20px; padding: 10px 15px; font-size: 1em; }
             #closeCameraBtn { bottom: 15px; right: 15px; width: 40px; height: 40px; font-size: 1.6em; line-height: 38px;}
             #photoGridContainer { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;}
             .photo-item img { height: 100px; }
@@ -922,15 +894,12 @@
             #closeLightboxBtn { font-size: 22px; top: 0px; right: 0px; padding: 0px 8px;}
             /* #galleryActions non serve più qui */
         }
-         @media (max-width: 400px) {
+         @media (max-width: 400px) { 
             .circle-button { width: 40px; height: 40px; font-size: 1.1em;}
             .header-circles { padding: 8px 0; }
             #photoGridContainer { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
             .modal-content { width: 95%; padding: 15px; }
             .modal-content h2 {font-size: 1.3em;}
-            #captureBtn { bottom: 25px; width: 55px; height: 55px; border-width: 3px; box-shadow: 0 0 0 3px #222;}
-            #captureBtn::before { width: 35px; height: 35px; background-color: #222; }
-
         }
     </style>
 </head>
@@ -1145,7 +1114,7 @@
         <div id="cameraPageSection" class="camera-page-section" style="display: none;">
             <video id="cameraStream" autoplay playsinline></video>
             <img id="freezeFrameDisplay" src="#" alt="Foto Catturata" style="display: none;">
-            <button id="captureBtn" class="action-button"> </button> {/* Icon removed for pure CSS button */}
+            <button id="captureBtn" class="action-button"><i class="fas fa-camera"></i> Scatta Foto</button>
             <button id="closeCameraBtn" class="action-button">×</button> 
         </div>
 
@@ -1219,24 +1188,15 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    const currentAppVersion = "1.6.1"; // MODIFICA: Versione per numerazione foto e stile bottone
+    const currentAppVersion = "1.6.0"; // MODIFICA: Versione per ZIP automatico
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtnModal = document.getElementById('closeChangelogBtnModal'); 
     const changelogList = document.getElementById('changelogList');
     const changelogTitle = document.getElementById('changelogTitle');
 
     const latestChangesText = `
-        <li><strong>Nuova numerazione foto per sezione:</strong>
-            <ul>
-                <li>Remarketing: 001-099</li>
-                <li>Pneumatici: 101-150</li>
-                <li>Danni: 200-999</li>
-            </ul>
-        </li>
-        <li><strong>Nuovo stile per il pulsante di scatto foto.</strong></li>
-        <li>Pulsante scatto foto distanziato maggiormente dal bordo inferiore.</li>
-        <li>ZIP con tutte le foto della perizia scaricato automaticamente al "Salva Perizia".</li>
-        <li>Nome del file ZIP basato sulla targa.</li>
+        <li><strong>ZIP con tutte le foto della perizia scaricato automaticamente al "Salva Perizia".</strong></li>
+        <li><strong>Nome del file ZIP basato sulla targa.</strong></li>
         <li>Rimossa selezione manuale foto/checkbox dalla galleria per ZIP.</li>
         <li>Swipe per navigare tra le sezioni della galleria (per targa).</li>
         <li>Click su anteprima foto in galleria per ingrandimento (lightbox).</li>
@@ -1528,12 +1488,6 @@
             localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`);
             console.log(`Dati urgenza rimossi per ${targaUpper}.`);
 
-            // Rimuovi anche i contatori specifici per le foto di questa targa
-            const sectionPhotoCounters = [`${APP_PREFIX}photoCount_${targaUpper}_remarketing`, `${APP_PREFIX}photoCount_${targaUpper}_pneumatici`, `${APP_PREFIX}photoCount_${targaUpper}_danni`];
-            sectionPhotoCounters.forEach(counterKey => localStorage.removeItem(counterKey));
-            console.log(`Contatori foto per ${targaUpper} rimossi.`);
-
-
             getPhotosByTargaAndSezioneFromDB(targaUpper, null) 
                 .then(photos => {
                     const deletePromises = photos.map(photo => deletePhotoFromDB(photo.timestamp));
@@ -1787,76 +1741,23 @@
 
     function getFilenameSectionName() {
         let sectionNameForFile = "generale"; 
-        let currentSectionKey = null;
-
-        if (lastViewBeforeCamera === 'checklist' && lastSectionBeforeCamera) {
-            currentSectionKey = lastSectionBeforeCamera;
-        } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter) {
-            currentSectionKey = currentGallerySectionFilter;
-        }
-        
-        if (currentSectionKey) {
-            let tempSectionKey = currentSectionKey.toLowerCase();
+        if (lastSectionBeforeCamera) { 
+            let tempSectionKey = lastSectionBeforeCamera.toLowerCase();
             if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {
                 sectionNameForFile = tempSectionKey;
             } else if (tempSectionKey === 'danniverifiche') {
                 sectionNameForFile = 'danni';
             } else if (tempSectionKey === 'riepilogo') { 
-                // Se siamo nel riepilogo o in una galleria filtrata per "tutte le foto"
-                // potrebbe essere meglio usare "generale" o un nome specifico per foto non categorizzate
-                sectionNameForFile = 'generale_riepilogo'; 
+                sectionNameForFile = 'riepilogo_foto'; 
+            } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter && currentGallerySectionFilter !== 'riepilogo') {
+                 sectionNameForFile = currentGallerySectionFilter.toLowerCase() === 'danniverifiche' ? 'danni' : currentGallerySectionFilter.toLowerCase();
+            } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter === 'riepilogo') {
+                 sectionNameForFile = 'targa_completa'; 
             }
         }
-        console.log("Nome sezione per file foto:", sectionNameForFile, "da lastSectionBeforeCamera:", lastSectionBeforeCamera, "currentGallerySectionFilter:", currentGallerySectionFilter, "lastView:", lastViewBeforeCamera);
+        // console.log("Nome sezione per file foto:", sectionNameForFile, "da lastSectionBeforeCamera:", lastSectionBeforeCamera, "lastView:", lastViewBeforeCamera);
         return sectionNameForFile;
     }
-
-
-    function getNextPhotoNumber(targa, sectionName) {
-        const sectionNormalized = sectionName.toLowerCase();
-        let start, end, counterKey;
-
-        if (sectionNormalized === 'remarketing') {
-            start = 1;
-            end = 99;
-            counterKey = `${APP_PREFIX}photoCount_${targa}_remarketing`;
-        } else if (sectionNormalized === 'pneumatici') {
-            start = 101;
-            end = 150;
-            counterKey = `${APP_PREFIX}photoCount_${targa}_pneumatici`;
-        } else if (sectionNormalized === 'danni' || sectionNormalized === 'danniverifiche') {
-            start = 200;
-            end = 999;
-            counterKey = `${APP_PREFIX}photoCount_${targa}_danni`;
-        } else { // Default/generale o altre sezioni non specificate
-            console.warn(`Sezione non riconosciuta per numerazione specifica: ${sectionName}. Uso contatore generico.`);
-            // Potresti voler implementare un contatore generico o lanciare un errore
-            // Per ora, si comporta come prima per sezioni non mappate
-            const genericCounterKey = `${APP_PREFIX}photoCount_${targa}_${sectionNormalized}`;
-            let photoNumber = parseInt(localStorage.getItem(genericCounterKey) || '0') + 1;
-            localStorage.setItem(genericCounterKey, photoNumber.toString());
-            return photoNumber; // Ritorna il numero, la formattazione avverrà dopo
-        }
-
-        let currentNumber = parseInt(localStorage.getItem(counterKey) || (start - 1).toString());
-        
-        currentNumber++;
-
-        if (currentNumber < start) { // Se il contatore era a 0 o non inizializzato correttamente
-            currentNumber = start;
-        }
-        
-        if (currentNumber > end) {
-            alert(`Attenzione: Limite foto per la sezione "${sectionName}" (${start}-${end}) raggiunto. Il numero ${currentNumber} supera il limite.`);
-            // Potresti voler bloccare ulteriori scatti o resettare il contatore,
-            // ma per ora permettiamo di superare con un avviso.
-            // Se vuoi bloccare, potresti ritornare null o lanciare un errore qui.
-        }
-        
-        localStorage.setItem(counterKey, currentNumber.toString());
-        return currentNumber;
-    }
-
 
     function capturePhoto() {
         if (captureBtn.disabled) return; 
@@ -1876,17 +1777,10 @@
             captureBtn.disabled = true; 
 
             const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');
-            const sectionNameForFile = getFilenameSectionName(); // e.g., "remarketing", "pneumatici", "danni"
-            
-            const photoNumber = getNextPhotoNumber(targaForFile, sectionNameForFile);
-            if (photoNumber === null) { // Se getNextPhotoNumber ritorna null (es. limite superato e vuoi bloccare)
-                 freezeFrameDisplayElement.style.display = 'none';
-                 freezeFrameDisplayElement.src = '#'; 
-                 cameraStreamElement.style.display = 'block';
-                 captureBtn.disabled = false; 
-                return;
-            }
-
+            const sectionNameForFile = getFilenameSectionName();
+            const counterKey = `${APP_PREFIX}photoCount_${targaForFile}_${sectionNameForFile}`;
+            let photoNumber = parseInt(localStorage.getItem(counterKey) || '0') + 1;
+            localStorage.setItem(counterKey, photoNumber.toString());
             const formattedPhotoNumber = String(photoNumber).padStart(3, '0');
             const filename = `${formattedPhotoNumber} ${sectionNameForFile} ${targaForFile}.jpeg`; 
             
@@ -1906,7 +1800,7 @@
                     blobData: blob,
                     timestamp: new Date().toISOString(),
                     targa: targaForFile,
-                    sezione: sectionNameForFile 
+                    sezione: sectionNameForFile
                 };
 
                 try {
@@ -2023,12 +1917,11 @@
                 if (sectionKeyFilter && sectionKeyFilter.toLowerCase() === 'danniverifiche') {
                     effectiveSectionKey = 'danni';
                 } else if (sectionKeyFilter && sectionKeyFilter.toLowerCase() === 'riepilogo'){
-                    effectiveSectionKey = null; // Per riepilogo, mostra tutte le foto della targa
+                    effectiveSectionKey = null; 
                 }
-                // Se effectiveSectionKey è null (per riepilogo targa) o è una sezione specifica
                 photosToDisplay = await getPhotosByTargaAndSezioneFromDB(targaFilter, effectiveSectionKey);
             } else { 
-                photosToDisplay = await getAllPhotosFromDB(); // Galleria globale, senza filtri targa/sezione
+                photosToDisplay = await getAllPhotosFromDB(); 
             }
 
 
