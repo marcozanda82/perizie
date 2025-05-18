@@ -2794,38 +2794,67 @@
     }
 
 
-    document.addEventListener('DOMContentLoaded', () => {
-        syncToSheetsBtn = document.createElement('button');
-        syncToSheetsBtn.id = 'syncToSheetsBtn'; syncToSheetsBtn.classList.add('action-button');
-        syncToSheetsBtn.textContent = 'Sincronizza'; 
-        syncToSheetsBtn.style.backgroundColor = '#ffc107'; syncToSheetsBtn.style.borderColor = '#e0a800';
-        syncToSheetsBtn.style.color = '#212529';
-        const historyButton = document.getElementById('historyBtn'); 
-        if (historyButton && historyButton.parentNode === utilityNavButtons) {
-            utilityNavButtons.insertBefore(syncToSheetsBtn, historyButton.nextSibling);
-        } else if (mainExitAppBtn && mainExitAppBtn.parentNode === utilityNavButtons) { 
-             utilityNavButtons.insertBefore(syncToSheetsBtn, mainExitAppBtn); 
-        } else if (utilityNavButtons.firstChild) {
-            utilityNavButtons.insertBefore(syncToSheetsBtn, utilityNavButtons.firstChild);
-        } else { utilityNavButtons.appendChild(syncToSheetsBtn); }
-        syncToSheetsBtn.addEventListener('click', syncAllLocalDataToSheets);
-        
-        document.querySelectorAll('.fill-defaults-btn').forEach(button => {
-            button.addEventListener('click', function() { 
-                const sectionId = this.dataset.sectionid; const sectionTarget = sectionId.replace('Section', ''); 
-                if (sectionId) {
-                    fillSectionPositiveOrDefaults(sectionId); 
-                    if (saveProgress(targaSelezionataGlobalmente)) {
-                        let currentSectionIndex = -1;
-                        navButtons.forEach((nb, index) => { if (nb.dataset.target === sectionTarget) currentSectionIndex = index; });
-                        if (currentSectionIndex !== -1 && currentSectionIndex < navButtons.length - 1) { 
-                            const nextNavButton = navButtons[currentSectionIndex + 1];
-                            if (nextNavButton && nextNavButton.dataset.target) showSection(nextNavButton.dataset.target);
-                        }
-                    }
+// MODIFICA START: Event listener per il pulsante Download Triggers Riepilogo
+        downloadRiepilogoTriggerBtn = document.getElementById('downloadRiepilogoTriggerBtn');
+        if (downloadRiepilogoTriggerBtn) {
+            downloadRiepilogoTriggerBtn.addEventListener('click', async () => {
+                if (!targaSelezionataGlobalmente) {
+                    alert("Nessuna targa selezionata nel riepilogo.");
+                    return;
+                }
+                
+                const targaOriginale = targaSelezionataGlobalmente; 
+                // Qui c'era la definizione di MACRODROID_SERVER_URL, se l'hai rimossa va bene.
+                // const MACRODROID_SERVER_URL = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/server';
+                const LOCAL_ZIP_BASE_URL = 'https://192.168.1.154:8080/'; // Assicurati che sia HTTPS e IP/Porta corretti
+
+                downloadRiepilogoTriggerBtn.disabled = true;
+                downloadRiepilogoTriggerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>&nbsp;Triggers...';
+
+                try {
+                    // --------------------------------------------------------------------
+                    // PARTE RELATIVA AL TRIGGER MACRODROID "SERVER" (lasciala se la vuoi)
+                    // Se l'hai rimossa, ignora questa parte
+                    // console.log('Avvio trigger Macrodroid Server...');
+                    // await fetch(MACRODROID_SERVER_URL, { method: 'GET', mode: 'no-cors' }); 
+                    // console.log('Trigger Macrodroid Server inviato.');
+                    // --------------------------------------------------------------------
+
+                    // Attendi 1 secondo (puoi rimuovere o modificare questo ritardo se necessario)
+                    await new Promise(resolve => setTimeout(resolve, 1000)); 
+
+                    // --- INIZIO SEZIONE DA MODIFICARE ---
+                    // QUESTE RIGHE (IL FETCH PER LO ZIP) VANNO SOSTITUITE:
+                    // const zipUrl = `${LOCAL_ZIP_BASE_URL}${targaOriginale}.zip`;
+                    // console.log(`Avvio trigger download ZIP: ${zipUrl}`);
+                    // await fetch(zipUrl, { method: 'GET', mode: 'no-cors' }); 
+                    // console.log(`Trigger download ZIP per ${targaOriginale}.zip inviato.`);
+                    // --- FINE SEZIONE DA SOSTITUIRE ---
+
+                    // --- INSERISCI QUESTO CODICE AL POSTO DELLE RIGHE SOPRA ---
+                    const zipUrl = `${LOCAL_ZIP_BASE_URL}${targaOriginale}.zip`;
+                    console.log(`Tentativo di avviare il download tramite navigazione: ${zipUrl}`);
+                    window.open(zipUrl, '_blank'); // Apre l'URL in una nuova scheda
+                    // Questo dovrebbe far apparire l'avviso del certificato (se necessario) e poi avviare il download.
+                    // --- FINE CODICE DA INSERIRE ---
+                    
+                    let alertMessage = `Tentativo di avviare il download per ${targaOriginale}.zip in una nuova scheda/finestra.`;
+                    // Se avevi il trigger Macrodroid server e vuoi menzionarlo:
+                    // alertMessage = `Trigger Macrodroid Server inviato.\nTentativo di avviare il download per ${targaOriginale}.zip in una nuova scheda/finestra.`;
+                    alert(alertMessage);
+
+                } catch (error) {
+                    console.error('Errore durante i trigger:', error);
+                    // L'errore "Failed to fetch" non dovrebbe più verificarsi per lo ZIP se usi window.open,
+                    // a meno che window.open stesso non venga bloccato da un popup blocker, ma è un problema diverso.
+                    alert(`Errore durante l'operazione per ${targaOriginale}. Controlla la console per dettagli se la nuova scheda non si apre o il download non parte.`);
+                } finally {
+                    downloadRiepilogoTriggerBtn.disabled = false;
+                    downloadRiepilogoTriggerBtn.innerHTML = '<i class="fas fa-cloud-download-alt"></i>&nbsp;Triggers';
                 }
             });
-        });
+        }
+        // MODIFICA END
 
         // MODIFICA START: Event listener per i nuovi pulsanti Reset Sezione
         document.querySelectorAll('.reset-section-btn').forEach(button => {
