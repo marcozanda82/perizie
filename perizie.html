@@ -444,6 +444,36 @@
         .fill-defaults-btn:active {
              background-color: #004085;
         }
+        /* MODIFICA START: Stili per il nuovo pulsante Reset Sezione */
+        .reset-section-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px; /* Posizione speculare a fill-defaults-btn */
+            width: 35px;
+            height: 35px;
+            background-color: #dc3545; /* Colore rosso per reset/annulla */
+            color: white;
+            border: 1px solid #c82333;
+            border-radius: 4px;
+            font-size: 1.5em;
+            line-height: 1;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .reset-section-btn:hover {
+            background-color: #c82333;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .reset-section-btn:active {
+            background-color: #bd2130;
+        }
+        /* MODIFICA END */
 
 
         .summary-item { margin-bottom: 8px; padding: 8px; background-color: #333; border-radius: 3px; }
@@ -773,9 +803,7 @@
         /* START: Stili per Pagina Galleria */
         #galleryPageSection {
             text-align: center;
-            /* MODIFICA START: Aggiunto overscroll-behavior-y per prevenire pull-to-refresh */
             overscroll-behavior-y: contain;
-            /* MODIFICA END */
         }
         #photoGridContainer {
             display: grid;
@@ -894,11 +922,41 @@
         }
         #swipe-end-indicator-left { top: 0; bottom: 0; left: 0; width: 5px; }
         #swipe-end-indicator-right { top: 0; bottom: 0; right: 0; width: 5px; }
-        /* Gli indicatori top e bottom sono già barre orizzontali e verranno usati per lo swipe verticale in lightbox */
         #swipe-end-indicator-top { left: 0; right: 0; top: 0; height: 5px; }
         #swipe-end-indicator-bottom { left: 0; right: 0; bottom: 0; height: 5px; }
         /* END: Stili per Indicatore Fine Swipe */
 
+        /* MODIFICA START: Stili per il contenitore flessibile dell'header di sezione */
+        .section-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* Rimuove il bordo inferiore da qui se il titolo non lo ha più individualmente */
+            /* border-bottom: 1px solid #444444; */
+            /* padding-bottom: 5px; */
+            margin-bottom: 15px; /* Spazio prima del contenuto della sezione/riepilogo */
+        }
+        .section-header-flex .section-title {
+            margin-top: 0; /* Rimuove il margine superiore predefinito di h2 */
+            margin-bottom: 0; /* Rimuove il margine inferiore predefinito di h2 */
+            border-bottom: none; /* Rimuove il bordo se gestito da .section-header-flex */
+            padding-bottom: 0; /* Rimuove il padding se gestito da .section-header-flex */
+            text-align: left; /* Mantiene l'allineamento a sinistra */
+            flex-grow: 1; /* Permette al titolo di occupare lo spazio disponibile */
+        }
+        #downloadRiepilogoTriggerBtn {
+            padding: 6px 10px; /* Padding più piccolo per il pulsante download */
+            font-size: 0.85em;
+            margin-left: 10px; /* Spazio dal titolo */
+            flex-shrink: 0; /* Impedisce al pulsante di restringersi */
+            background-color: #17a2b8; /* Colore info */
+            border-color: #117a8b;
+        }
+        #downloadRiepilogoTriggerBtn:hover {
+            background-color: #138496;
+            border-color: #117a8b;
+        }
+        /* MODIFICA END */
 
         @media (max-width: 768px) {
             .content-wrapper { margin-top: 0; }
@@ -926,6 +984,7 @@
             #sheetFilterContainer label { margin-bottom: 5px; margin-right: 0; text-align: left;}
             #sheetFilterDropdown { width: 100%; }
             .fill-defaults-btn { top: 15px; right: 15px; width: 30px; height: 30px; font-size: 1.2em; }
+            .reset-section-btn { top: 15px; left: 15px; width: 30px; height: 30px; font-size: 1.2em; } /* Adatta per mobile */
             #captureBtn { bottom: 30px; width: 60px; height: 60px; border-width: 3px; box-shadow: 0 0 0 3px #333;}
             #captureBtn::before { width: 40px; height: 40px; }
             #closeCameraBtn { bottom: 15px; right: 15px; width: 40px; height: 40px; font-size: 1.6em; line-height: 38px;}
@@ -934,6 +993,10 @@
             #lightboxContent { width: 95%; }
             #lightboxImage { max-height: 75vh; }
             #closeLightboxBtn { font-size: 22px; top: 0px; right: 0px; padding: 0px 8px;}
+             /* Adattamento per il nuovo header flessibile del riepilogo */
+            .section-header-flex { flex-wrap: wrap; } /* Permette al pulsante di andare a capo se non c'è spazio */
+            .section-header-flex .section-title { margin-bottom: 5px; } /* Aggiunge spazio se va a capo */
+            #downloadRiepilogoTriggerBtn { font-size: 0.8em; padding: 5px 8px; }
         }
          @media (max-width: 400px) {
             .circle-button { width: 40px; height: 40px; font-size: 1.1em;}
@@ -984,7 +1047,9 @@
     
     <div id="swipe-end-indicator-left" class="swipe-end-indicator"></div>
     <div id="swipe-end-indicator-right" class="swipe-end-indicator"></div>
-   <div id="swipe-end-indicator-top" class="swipe-end-indicator"></div> <div id="swipe-end-indicator-bottom" class="swipe-end-indicator"></div>
+    <div id="swipe-end-indicator-top" class="swipe-end-indicator"></div>
+    <div id="swipe-end-indicator-bottom" class="swipe-end-indicator"></div>
+
 
     <div id="pageHeaderContainer">
         <div class="header-circles">
@@ -1041,6 +1106,7 @@
 
         <div id="checklistContainer" style="display: none;"> 
             <div id="remarketingSection" class="category-section">
+                <button class="reset-section-btn" title="Resetta Campi Sezione" data-sectionid="remarketingSection"><i class="fas fa-undo"></i></button>
                 <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection">✓</button>
                 <h2 class="section-title">1. Foto Remarketing</h2>
                 <ul>
@@ -1112,6 +1178,7 @@
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
             </div>
             <div id="pneumaticiSection" class="category-section">
+                <button class="reset-section-btn" title="Resetta Campi Sezione" data-sectionid="pneumaticiSection"><i class="fas fa-undo"></i></button>
                 <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="pneumaticiSection">✓</button>
                 <h2 class="section-title">2. Foto Pneumatici</h2>
                 <ul>
@@ -1123,6 +1190,7 @@
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
             </div>
             <div id="danniVerificheSection" class="category-section">
+                <button class="reset-section-btn" title="Resetta Campi Sezione" data-sectionid="danniVerificheSection"><i class="fas fa-undo"></i></button>
                 <button class="fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="danniVerificheSection">✓</button>
                 <h2 class="section-title">3. Foto Danni e Verifiche</h2>
                 <ul>
@@ -1137,7 +1205,12 @@
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Vai al Riepilogo</button></div>
             </div>
             <div id="riepilogoSection" class="category-section">
-                <h2 class="section-title">Riepilogo Perizia</h2>
+                <div class="section-header-flex">
+                    <h2 class="section-title">Riepilogo Perizia</h2>
+                    <button id="downloadRiepilogoTriggerBtn" class="action-button" title="Avvia Triggers Download">
+                        <i class="fas fa-cloud-download-alt"></i>&nbsp;Triggers
+                    </button>
+                </div>
                 <div id="summaryContent"><p><em>Compila le sezioni precedenti...</em></p></div>
                 <button id="saveAndReturnBtn" class="action-button" style="background-color: #28a745; border-color: #1e7e34; margin-top: 15px;">Salva Perizia e Foto</button>
             </div>
@@ -1229,6 +1302,10 @@
     let currentLightboxPhotoList = [];
     let currentLightboxPhotoIndex = -1;
 
+    // MODIFICA START: Dichiarazione del nuovo pulsante download riepilogo
+    let downloadRiepilogoTriggerBtn;
+    // MODIFICA END
+
 
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
     const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzN4bBhPi4d8i7fSpJQqCJ2CQYOtmes1yKeGeqVe053K4QkdKYH4PuQIughn_9YLEfCkA/exec'; 
@@ -1238,43 +1315,18 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    const currentAppVersion = "1.6.3"; // MODIFICA: Versione aggiornata per riflettere nuove modifiche
+    const currentAppVersion = "1.6.4"; // MODIFICA: Versione aggiornata
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtnModal = document.getElementById('closeChangelogBtnModal'); 
     const changelogList = document.getElementById('changelogList');
     const changelogTitle = document.getElementById('changelogTitle');
 
     const latestChangesText = `
-        <li><strong>Miglioramenti Interfaccia Fotocamera:</strong>
-            <ul>
-                <li>Rimosso testo superfluo vicino ai controlli della fotocamera.</li>
-            </ul>
-        </li>
-        <li><strong>Navigazione Foto Migliorata (Lightbox):</strong>
-            <ul>
-                <li>Abilitato swipe orizzontale per passare alla foto successiva/precedente nella lightbox.</li>
-                <li>Abilitato swipe verticale per passare alla foto successiva/precedente nella lightbox. (NUOVO)</li>
-                <li>Indicatore visivo (linea rossa) a fine corsa dello swipe foto (orizzontale e verticale).</li>
-            </ul>
-        </li>
-         <li><strong>Navigazione Sezioni Migliorata:</strong>
-            <ul>
-                <li>Indicatore visivo (linea rossa) a fine corsa dello swipe sezioni.</li>
-            </ul>
-        </li>
-        <li><strong>Galleria Foto:</strong>
-            <ul>
-                <li>Impedito il "pull-to-refresh" (ricarica pagina) con swipe verticale verso il basso quando si è all'inizio della griglia foto. Indicatore visivo a fine corsa. (Confermato e potenziato con CSS)</li>
-            </ul>
-        </li>
-        <li><strong>Contesto Galleria:</strong>
-            <ul>
-                <li>Navigando alla galleria da una perizia (targa/sezione), la galleria si apre filtrata per tale contesto. (Logica esistente verificata)</li>
-            </ul>
-        </li>
-        <li>Corretto bug reset contatore foto per sezioni vuote.</li>
-        <li>Pulsante "X" su lista targhe ora cancella solo dati locali.</li>
-        <li>Nuovo pulsante su Cronistoria per marcare/annullare marcatura cancellazione da server.</li>
+        <li><strong>Pulsante Reset Sezione:</strong> Aggiunto pulsante <i class="fas fa-undo"></i> in ogni pagina operativa per resettare i campi e marcare la sezione come "da compilare".</li>
+        <li><strong>Pulsante Trigger Download Riepilogo:</strong> Reinserito pulsante <i class="fas fa-cloud-download-alt"></i> nella pagina Riepilogo per avviare i trigger Macrodroid e download ZIP.</li>
+        <li>Migliorata gestione scroll galleria per prevenire blocchi.</li>
+        <li>Abilitato swipe verticale per navigazione foto in lightbox.</li>
+        <li>Contesto galleria (targa/sezione) mantenuto correttamente.</li>
     `;
 
 
@@ -1493,6 +1545,47 @@
     }
 
     function fillSectionPositiveOrDefaults(sectionId) { const section = document.getElementById(sectionId); if (!section) return; if (sectionId === 'remarketingSection') { if (tipoTrazioneSelect) tipoTrazioneSelect.value = 'endotermico'; document.getElementById('foto_angolari').checked = true; document.getElementById('foto_vano_carico').checked = true; document.getElementById('tipo_equipaggiamento').value = 'kit_gonfia_ripara'; document.getElementById('equipaggiamento_presenza').value = 'presente'; document.getElementById('foto_interni_pannelli').checked = true; document.getElementById('foto_cruscotto').checked = true; document.getElementById('stato_chilometri').value = 'rilevabili'; document.getElementById('stato_cdc').value = 'originale'; document.getElementById('foto_vano_motore').checked = true; document.getElementById('foto_cofano_tetto').checked = true; document.getElementById('chiave_telecomando').value = 'presente'; document.getElementById('seconda_chiave').value = 'presente'; handleTrazioneChange();  if (tipoTrazioneSelect && tipoTrazioneSelect.value === 'elettrico') { if (cavoRapidaSelect) cavoRapidaSelect.value = 'presente'; if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'presente'; } else {  if (cavoRapidaSelect) cavoRapidaSelect.value = 'non_applicabile';  if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'non_applicabile'; } } else if (sectionId === 'pneumaticiSection') { document.getElementById('pneumatico_as').value = 'conforme'; document.getElementById('pneumatico_ad').value = 'conforme'; document.getElementById('pneumatico_pd').value = 'conforme'; document.getElementById('pneumatico_ps').value = 'conforme'; } else if (sectionId === 'danniVerificheSection') { document.getElementById('motore_accende').value = 'ok'; document.getElementById('batteria_stato').value = 'ok'; document.getElementById('foto_danni_generiche').checked = true;  document.getElementById('note_danni_verifiche').value = 'Nessuna anomalia da segnalare.'; } updateNavButtonColors(); if (typeof initSequentialAnimation === 'function') { section.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me')); initSequentialAnimation(); }  section.querySelectorAll('input, select, textarea').forEach(el => { const event = new Event('change', { bubbles: true }); el.dispatchEvent(event); }); }
+    
+    // MODIFICA START: Nuova funzione per resettare i campi di una sezione
+    function resetSectionFields(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+
+        const inputs = section.querySelectorAll('input[type="checkbox"], input[type="text"], input[type="url"], select, textarea');
+        inputs.forEach(el => {
+            if (el.type === 'checkbox' || el.type === 'radio') {
+                el.checked = false;
+            } else if (el.tagName === 'SELECT') {
+                el.selectedIndex = 0; // Resetta alla prima opzione (es. "Seleziona...")
+            } else {
+                el.value = ''; // Svuota campi di testo e textarea
+            }
+            // Forza un evento 'change' per eventuali logiche dipendenti
+            const event = new Event('change', { bubbles: true });
+            el.dispatchEvent(event);
+        });
+
+        if (sectionId === 'remarketingSection' && tipoTrazioneSelect) {
+            handleTrazioneChange(); // Gestisce la disabilitazione dei campi cavi EV
+        }
+
+        // Rimuove l'eventuale marcatura di completamento se la perizia era stata salvata come completa
+        // unmarkTargaAsCompleted(targaSelezionataGlobalmente); // Potrebbe essere troppo aggressivo, dipende dal workflow
+                                                              // Al momento, il reset locale e il saveProgress aggiorneranno lo stato.
+
+        if (saveProgress(targaSelezionataGlobalmente)) { // Salva lo stato resettato
+            // console.log(`Sezione ${sectionId} resettata e salvata.`);
+        }
+        updateNavButtonColors(); // Aggiorna i colori dei pulsanti di navigazione
+
+        // Re-inizializza l'animazione per i campi da compilare
+        if (typeof initSequentialAnimation === 'function') {
+            section.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me'));
+            initSequentialAnimation();
+        }
+    }
+    // MODIFICA END
+
     function handleTrazioneChange() { if (!tipoTrazioneSelect || !cavoRapidaSelect || !cavoDomesticaSelect) return; const selectedTrazione = tipoTrazioneSelect.value; const isElectric = selectedTrazione === 'elettrico'; cavoRapidaSelect.disabled = !isElectric; cavoDomesticaSelect.disabled = !isElectric; if (!isElectric) { cavoRapidaSelect.value = "non_applicabile";  cavoDomesticaSelect.value = "non_applicabile"; } else { if (cavoRapidaSelect.value === "" || cavoRapidaSelect.value === "non_applicabile") cavoRapidaSelect.value = ""; if (cavoDomesticaSelect.value === "" || cavoDomesticaSelect.value === "non_applicabile") cavoDomesticaSelect.value = ""; } updateNavButtonColors();  }
     function savePosizioneForTarga(targa, posizione) { if (!targa) return; try { localStorage.setItem(`${APP_PREFIX}posizione_${targa.toUpperCase()}`, posizione); } catch (e) { console.error("Errore LS pos:", e); } }
     function loadPosizioneForTarga(targa) { if (!targa) return ""; try { return localStorage.getItem(`${APP_PREFIX}posizione_${targa.toUpperCase()}`) || ""; } catch (e) { console.error("Errore LS pos:", e); return ""; } }
@@ -1843,13 +1936,11 @@
                      sectionNameForTitle = currentGallerySectionFilter.charAt(0).toUpperCase() + currentGallerySectionFilter.slice(1);
                      if (currentGallerySectionFilter === 'danniverifiche') sectionNameForTitle = 'Danni/Verifiche'; 
                 }
-            } else if (currentGallerySectionFilter === 'riepilogo') {
+            } else if (currentGallerySectionFilter === 'riepilogo' || !currentGallerySectionFilter) { // Sezione riepilogo o nessuna sezione specificata per la targa
                  const riepilogoNavButton = mainPageNavButtons.querySelector(`button[data-target="riepilogo"]`);
                  if (riepilogoNavButton) riepilogoNavButton.classList.add('active');
-            } else { // Se non c'è sectionFilter ma c'è targaFilter, evidenzia "Riepilogo" come default.
-                 const riepilogoNavButton = mainPageNavButtons.querySelector(`button[data-target="riepilogo"]`);
-                 if (riepilogoNavButton) riepilogoNavButton.classList.add('active');
-                 sectionNameForTitle = "Tutte le foto"; // O potresti lasciare il titolo della sezione Riepilogo
+                 if (!currentGallerySectionFilter) currentGallerySectionFilter = 'riepilogo'; // Assicura che sia 'riepilogo' se nullo
+                 sectionNameForTitle = "Riepilogo Foto"; // O "Tutte le foto" se preferito
             }
             galleryTitleText = `Galleria: ${currentGalleryTargaFilter} - ${sectionNameForTitle}`;
             updateNavButtonColors(); 
@@ -1868,7 +1959,7 @@
 
     async function populatePhotoGrid(targaFilter, sectionKeyFilter) {
         photoGridContainer.innerHTML = ''; 
-        currentLightboxPhotoList = []; // Reset for new grid
+        currentLightboxPhotoList = []; 
         
         try {
             let photosToDisplay;
@@ -1876,11 +1967,11 @@
             if (targaFilter) { 
                 if (sectionKeyFilter && sectionKeyFilter.toLowerCase() === 'danniverifiche') {
                     effectiveSectionKeyForDBQuery = 'danni';
-                } else if (sectionKeyFilter && sectionKeyFilter.toLowerCase() === 'riepilogo'){ // Sezione riepilogo per una targa mostra tutte le foto della targa
+                } else if (sectionKeyFilter && sectionKeyFilter.toLowerCase() === 'riepilogo'){ 
                     effectiveSectionKeyForDBQuery = null; 
                 }
                 photosToDisplay = await getPhotosByTargaAndSezioneFromDB(targaFilter, effectiveSectionKeyForDBQuery);
-            } else { // Galleria generale, mostra tutte le foto
+            } else { 
                 photosToDisplay = await getAllPhotosFromDB(); 
             }
 
@@ -1889,7 +1980,7 @@
             }
             photosToDisplay.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)); 
             photosToDisplay.forEach((photoData) => {
-                currentLightboxPhotoList.push(photoData.timestamp); // Store timestamp for lightbox navigation
+                currentLightboxPhotoList.push(photoData.timestamp); 
                 const photoItemDiv = document.createElement('div');
                 photoItemDiv.classList.add('photo-item');
                 const img = document.createElement('img');
@@ -1907,7 +1998,6 @@
                 deleteBtn.title = "Elimina foto";
                 deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation(); 
-                    if (objectUrl) { URL.revokeObjectURL(objectUrl); } // Revoca l'URL dell'immagine specifica
                     deleteCapturedPhoto(photoData.timestamp, photoData.targa, photoData.sezione); 
                 });
                 photoItemDiv.appendChild(img); photoItemDiv.appendChild(caption);
@@ -1917,10 +2007,14 @@
     }
     
     async function deleteCapturedPhoto(timestampToDelete, targa, sezione) { 
+        const photoItemImg = photoGridContainer.querySelector(`img[data-timestamp="${timestampToDelete}"]`);
+        if (photoItemImg && photoItemImg.src.startsWith('blob:')) {
+             URL.revokeObjectURL(photoItemImg.src); // Revoca l'URL dell'immagine specifica dalla griglia
+        }
+
         if (confirm("Sei sicuro di voler eliminare questa foto?")) {
             try {
                 await deletePhotoFromDB(timestampToDelete);
-                // Rimuovi l'elemento dalla currentLightboxPhotoList se presente
                 const indexInLightboxList = currentLightboxPhotoList.indexOf(timestampToDelete);
                 if (indexInLightboxList > -1) {
                     currentLightboxPhotoList.splice(indexInLightboxList, 1);
@@ -1960,9 +2054,6 @@
                     if (currentLightboxImageObjectUrl) { URL.revokeObjectURL(currentLightboxImageObjectUrl); }
                     currentLightboxImageObjectUrl = URL.createObjectURL(photoData.blobData);
                     lightboxImage.src = currentLightboxImageObjectUrl;
-                    // Assicurati che currentLightboxPhotoList sia popolata correttamente
-                    // Se apri da una griglia filtrata, currentLightboxPhotoList dovrebbe contenere solo i timestamp di quella griglia.
-                    // La currentLightboxPhotoList viene popolata in populatePhotoGrid.
                     currentLightboxPhotoIndex = currentLightboxPhotoList.indexOf(timestamp); 
                     imageLightbox.style.display = 'flex'; 
                 } else { alert("Impossibile caricare immagine."); }
@@ -1978,80 +2069,78 @@
             currentLightboxImageObjectUrl = null;
         }
         lightboxImage.src = '#'; 
-        currentLightboxPhotoIndex = -1; // Reset index
+        currentLightboxPhotoIndex = -1;
     }
     // END: Funzioni per Pagina Galleria e Lightbox
 
     // START: Lightbox Swipe Handlers
     function handleLightboxTouchStart(event) {
-        if (event.touches.length > 1) return; // Ignora multi-touch
+        if (event.touches.length > 1) return; 
         lightboxTouchStartX = event.changedTouches[0].screenX;
         lightboxTouchStartY = event.changedTouches[0].screenY; 
     }
 
     function handleLightboxTouchEnd(event) {
-        // MODIFICA START: Assicurarsi che event.touches.length sia controllato correttamente.
-        // Se stiamo usando changedTouches per l'end, non c'è bisogno di controllare event.touches.length qui.
-        if (currentLightboxPhotoIndex === -1 || !lightboxTouchStartX || !lightboxTouchStartY) return; // Se non c'è un'immagine o un tocco iniziale
-        // MODIFICA END
+        if (currentLightboxPhotoIndex === -1 || !lightboxTouchStartX || !lightboxTouchStartY) {
+             // Resetta per sicurezza se non c'era un tocco valido
+            lightboxTouchStartX = 0;
+            lightboxTouchStartY = 0;
+            return;
+        }
 
         let lightboxTouchEndX = event.changedTouches[0].screenX;
         let lightboxTouchEndY = event.changedTouches[0].screenY;
         handleLightboxSwipe(lightboxTouchEndX, lightboxTouchEndY);
 
-        // Resetta le coordinate iniziali per il prossimo swipe
         lightboxTouchStartX = 0;
         lightboxTouchStartY = 0;
     }
 
-    // MODIFICA START: Logica swipe verticale per lightbox
     function handleLightboxSwipe(endX, endY) {
         const deltaX = endX - lightboxTouchStartX;
         const deltaY = endY - lightboxTouchStartY;
 
-        // Determina se lo swipe è prevalentemente orizzontale o verticale
-        if (Math.abs(deltaX) > Math.abs(deltaY)) { // Swipe orizzontale
+        if (Math.abs(deltaX) > Math.abs(deltaY)) { 
             if (Math.abs(deltaX) > swipeThreshold) {
-                if (deltaX > 0) { // Swipe Destra (foto precedente)
+                if (deltaX > 0) { 
                     if (currentLightboxPhotoIndex > 0) {
                         currentLightboxPhotoIndex--;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('left'); // Indicatore fine corsa sinistro
+                        showSwipeEndIndicator('left'); 
                     }
-                } else { // Swipe Sinistra (foto successiva)
+                } else { 
                     if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) {
                         currentLightboxPhotoIndex++;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('right'); // Indicatore fine corsa destro
+                        showSwipeEndIndicator('right'); 
                     }
                 }
             }
-        } else { // Swipe verticale
+        } else { 
             if (Math.abs(deltaY) > swipeThreshold) {
-                if (deltaY > 0) { // Swipe Giù (foto precedente)
+                if (deltaY > 0) { 
                     if (currentLightboxPhotoIndex > 0) {
                         currentLightboxPhotoIndex--;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('top'); // Indicatore fine corsa alto (barra orizzontale)
+                        showSwipeEndIndicator('top'); 
                     }
-                } else { // Swipe Su (foto successiva)
+                } else { 
                     if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) {
                         currentLightboxPhotoIndex++;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('bottom'); // Indicatore fine corsa basso (barra orizzontale)
+                        showSwipeEndIndicator('bottom'); 
                     }
                 }
             }
         }
     }
-    // MODIFICA END
     // END: Lightbox Swipe Handlers
     
-// START: Gallery Grid Pull-to-Refresh Prevention
+    // START: Gallery Grid Pull-to-Refresh Prevention
     function handleGalleryGridTouchStart(event) {
         if (event.touches.length === 1) {
             galleryGridTouchStartY = event.touches[0].clientY;
@@ -2062,19 +2151,12 @@
         if (event.touches.length === 1 && galleryPageSection.style.display === 'block') {
             const currentTouchY = event.touches[0].clientY;
             const deltaY = currentTouchY - galleryGridTouchStartY;
-
-            // MODIFICA START: Controlla se la pagina principale è in cima
             const isPageAtTop = (document.documentElement.scrollTop || document.body.scrollTop) === 0;
 
-            if (isPageAtTop && deltaY > 0) { // Swiping down dall'estrema cima della pagina
-                // Previene il pull-to-refresh del browser
+            if (isPageAtTop && deltaY > 0) { 
                 event.preventDefault();
                 showSwipeEndIndicator('top');
             }
-            // Non chiamare event.preventDefault() per swipe verso l'alto (deltaY < 0)
-            // o per swipe verso il basso quando non si è in cima alla pagina.
-            // Questo permette alla pagina di scrollare normalmente, incluso lo scroll verso l'alto dal fondo.
-            // MODIFICA END
         }
     }
     // END: Gallery Grid Pull-to-Refresh Prevention
@@ -2129,7 +2211,7 @@
             populateSavedTargasList();
         } else if (viewName === 'gallery') { 
             pageHeaderContainer.classList.add('fixed-header');
-            // La visualizzazione di galleryPageSection è gestita da showGalleryPage
+            // la visualizzazione è gestita da showGalleryPage
         } else if (viewName !== 'camera') { 
              pageHeaderContainer.classList.remove('fixed-header');
              if (headerCirclesDiv) headerCirclesDiv.style.display = 'none'; 
@@ -2617,7 +2699,7 @@
     function handleTouchStart(event) {
         if (imageLightbox && imageLightbox.style.display === 'flex') return;
         const targetElement = event.target;
-        if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button')) {
+        if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button') || targetElement.closest('.fill-defaults-btn') || targetElement.closest('.reset-section-btn')) { // MODIFICA: Aggiunto controllo per reset-section-btn
             return;
         }
         if (checklistContainer.style.display === 'block' || (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter)) {
@@ -2629,7 +2711,7 @@
     function handleTouchEnd(event) {
         if (imageLightbox && imageLightbox.style.display === 'flex') return;
         const targetElement = event.target;
-         if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button')) {
+         if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button') || targetElement.closest('.fill-defaults-btn') || targetElement.closest('.reset-section-btn')) { // MODIFICA: Aggiunto controllo per reset-section-btn
             return;
         }
         if (checklistContainer.style.display === 'block' || (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter)) {
@@ -2641,10 +2723,10 @@
 
     async function handleSwipeGesture() {
         const deltaX = touchendX - touchstartX;
-        const deltaY = touchendY - touchstartY; // Aggiunto per swipe sezioni/galleria verticale se necessario in futuro
+        const deltaY = touchendY - touchstartY; 
 
 
-        if (Math.abs(deltaX) < swipeThreshold && Math.abs(deltaY) < swipeThreshold) { return; } // Nessuno swipe significativo
+        if (Math.abs(deltaX) < swipeThreshold && Math.abs(deltaY) < swipeThreshold) { return; } 
 
         let currentViewElement = null;
         let sectionArray = sectionOrder;
@@ -2659,9 +2741,8 @@
             changeFunction = showSection;
         } else if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter) {
             currentViewElement = galleryPageSection;
-            // Per la galleria, lo swipe orizzontale cambia sezione, non le foto (quelle sono nel lightbox)
             const activeNavButton = mainPageNavButtons.querySelector('button.active');
-            currentSectionId = activeNavButton ? activeNavButton.dataset.target : sectionOrder[0]; // Default a riepilogo o prima sezione
+            currentSectionId = activeNavButton ? activeNavButton.dataset.target : sectionOrder[0]; 
             changeFunction = (newSection) => showGalleryPage(currentGalleryTargaFilter, newSection);
         }
         
@@ -2670,18 +2751,15 @@
         const currentIndex = sectionArray.indexOf(currentSectionId);
         if (currentIndex === -1) return;
 
-        // Priorità allo swipe orizzontale per cambio sezione
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
-            if (deltaX > 0) { // Swipe Right (previous)
+            if (deltaX > 0) { 
                 if (currentIndex > 0) { await changeFunction(sectionArray[currentIndex - 1]); } 
                 else { showSwipeEndIndicator('left'); }
-            } else { // Swipe Left (next)
+            } else { 
                 if (currentIndex < sectionArray.length - 1) { await changeFunction(sectionArray[currentIndex + 1]); } 
                 else { showSwipeEndIndicator('right'); }
             }
         }
-        // Qui potresti aggiungere logica per swipe verticale sezioni se necessario,
-        // ma al momento non è richiesto e potrebbe confliggere con lo scroll.
     }
 
     async function initializeApplicationViewAndLoadData() {
@@ -2705,7 +2783,7 @@
         showView('landing'); 
         if (changelogModal && closeChangelogBtnModal && changelogList && changelogTitle) {
             const lastVersionSeen = localStorage.getItem('appVersionSeen');
-            changelogTitle.textContent = `WebApp Perizie - Novità v${currentAppVersion}`;
+            changelogTitle.innerHTML = `WebApp Perizie - Novità v${currentAppVersion}`; // Usare innerHTML per le icone
             changelogList.innerHTML = latestChangesText;
             if (lastVersionSeen !== currentAppVersion) changelogModal.style.display = 'flex';
             closeChangelogBtnModal.onclick = () => {
@@ -2748,6 +2826,61 @@
                 }
             });
         });
+
+        // MODIFICA START: Event listener per i nuovi pulsanti Reset Sezione
+        document.querySelectorAll('.reset-section-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const sectionId = this.dataset.sectionid;
+                if (sectionId && confirm(`Resettare tutti i campi della sezione corrente (${document.querySelector('#'+sectionId+' .section-title').textContent.trim()})?`)) {
+                    resetSectionFields(sectionId);
+                }
+            });
+        });
+        // MODIFICA END
+
+        // MODIFICA START: Event listener per il pulsante Download Triggers Riepilogo
+        downloadRiepilogoTriggerBtn = document.getElementById('downloadRiepilogoTriggerBtn');
+        if (downloadRiepilogoTriggerBtn) {
+            downloadRiepilogoTriggerBtn.addEventListener('click', async () => {
+                if (!targaSelezionataGlobalmente) {
+                    alert("Nessuna targa selezionata nel riepilogo.");
+                    return;
+                }
+                
+                const targaOriginale = targaSelezionataGlobalmente; // Mantiene il formato originale per TARGA.zip
+                const MACRODROID_SERVER_URL = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/server';
+                const LOCAL_ZIP_BASE_URL = 'http://192.168.15.4:8080/'; // Corretto IP se necessario
+
+                downloadRiepilogoTriggerBtn.disabled = true;
+                downloadRiepilogoTriggerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>&nbsp;Triggers...';
+
+                try {
+                    console.log('Avvio trigger Macrodroid Server...');
+                    await fetch(MACRODROID_SERVER_URL, { method: 'GET', mode: 'no-cors' });
+                    console.log('Trigger Macrodroid Server inviato.');
+                    // Non c'è modo di sapere se è andato a buon fine con no-cors, ma inviamo.
+
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Attendi 1 secondo
+
+                    const zipUrl = `${LOCAL_ZIP_BASE_URL}${targaOriginale}.zip`;
+                    console.log(`Avvio trigger download ZIP: ${zipUrl}`);
+                    await fetch(zipUrl, { method: 'GET', mode: 'no-cors' });
+                    console.log(`Trigger download ZIP per ${targaOriginale}.zip inviato.`);
+                    
+                    alert(`Triggers inviati per ${targaOriginale}.\n1. Server Macrodroid\n2. Download ${targaOriginale}.zip`);
+
+                } catch (error) {
+                    console.error('Errore durante i trigger:', error);
+                    alert(`Errore durante l'invio dei triggers per ${targaOriginale}. Controlla la console.`);
+                } finally {
+                    downloadRiepilogoTriggerBtn.disabled = false;
+                    downloadRiepilogoTriggerBtn.innerHTML = '<i class="fas fa-cloud-download-alt"></i>&nbsp;Triggers';
+                }
+            });
+        }
+        // MODIFICA END
+
+
         if (tipoTrazioneSelect) tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
         
         targaSwitcherDropdown.addEventListener('change', async function() {
@@ -2755,12 +2888,10 @@
             if (nuovaTargaSelezionata && nuovaTargaSelezionata.toUpperCase() !== (targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase() : null)) {
                 this.disabled = true;
                 if (galleryPageSection.style.display === 'block') {
-                    // Se sono nella galleria e cambio targa dal dropdown, aggiorno la galleria per la nuova targa
-                    // mantenendo la sezione corrente se possibile, altrimenti default a 'riepilogo'
                     const currentSectionForNewTarga = currentGallerySectionFilter || 'riepilogo';
                     targaSelezionataGlobalmente = nuovaTargaSelezionata.toUpperCase(); 
                     await showGalleryPage(targaSelezionataGlobalmente, currentSectionForNewTarga); 
-                } else { // Se sono in checklist o altrove
+                } else { 
                     let currentActiveSectionId = 'remarketing'; 
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
                     if (activeSectionElement && activeSectionElement.id) {
@@ -2793,41 +2924,31 @@
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
         if (headerExitBtn) headerExitBtn.addEventListener('click', () => triggerMainExit()); 
         
-        // MODIFICA CONTESTO GALLERIA: La logica qui è cruciale per aprire la galleria con il contesto corretto.
         if (headerPhotosBtn) { 
             headerPhotosBtn.addEventListener('click', async () => {
                 let targaForGallery = null; 
                 let sectionKeyForGallery = null; 
                 
                 if (cameraPageSection.style.display === 'flex') { 
-                    // Se la fotocamera è aperta, usa il contesto precedente alla fotocamera.
-                    // E se quel contesto era la checklist o la galleria, usa targaSelezionataGlobalmente (se c'è)
-                    // e lastSectionBeforeCamera
                     if (lastViewBeforeCamera === 'checklist' || lastViewBeforeCamera === 'gallery') {
-                        targaForGallery = targaSelezionataGlobalmente; // targaSelezionataGlobalmente dovrebbe essere aggiornata
+                        targaForGallery = targaSelezionataGlobalmente; 
                         sectionKeyForGallery = lastSectionBeforeCamera;
                     }
-                    returnFromCamera(); // Chiudi la fotocamera prima
-                    // Aspetta un attimo per assicurare che la transizione della fotocamera sia completa
+                    returnFromCamera(); 
                     setTimeout(async () => await showGalleryPage(targaForGallery, sectionKeyForGallery), 50); 
                 } else if (checklistContainer.style.display === 'block' && targaSelezionataGlobalmente) {
-                    // Se siamo nella checklist, prendi la targa e la sezione attive
                     targaForGallery = targaSelezionataGlobalmente;
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
                     if (activeSectionElement) {
                         sectionKeyForGallery = activeSectionElement.id.replace('Section', ''); 
-                    } else { // Fallback se nessuna sezione è attiva, mostra tutte le foto per la targa
-                        sectionKeyForGallery = null; // o 'riepilogo'
+                    } else { 
+                        sectionKeyForGallery = 'riepilogo'; // Default a riepilogo se nessuna sezione attiva nella checklist
                     }
                     await showGalleryPage(targaForGallery, sectionKeyForGallery);
                 } else if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter){
-                    // Se siamo già in galleria, riaprirla con lo stesso filtro non cambia nulla,
-                    // ma per coerenza, potremmo voler ricaricare o semplicemente non fare nulla.
-                    // Al momento, il comportamento è di ricaricarla.
                     await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter);
                 }
                  else { 
-                    // Altrimenti (es. da landing, history), apri la galleria generale
                     await showGalleryPage(null, null); 
                 }
             });
@@ -2863,32 +2984,27 @@
         navButtons.forEach(b => b.addEventListener('click', async function() {
             const targetId = this.dataset.target;
             if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter) {
-                // Se siamo in galleria per una targa specifica, cambia la sezione visualizzata
                 currentGallerySectionFilter = targetId; 
                 await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter); 
             } else if (checklistContainer.style.display === 'block' || (!targaSelezionataGlobalmente && landingPageSection.style.display === 'block')) {
-                // Se siamo nella checklist o nella landing (in quest'ultimo caso, apre la checklist per la prima volta)
                 showSection(targetId);
             }
-            // Se siamo in galleria generale (currentGalleryTargaFilter è null), i navButtons principali non dovrebbero essere visibili.
         }));
 
         if (closeLightboxBtnElem) closeLightboxBtnElem.addEventListener('click', closeImageLightbox);
         if (imageLightbox) {
             imageLightbox.addEventListener('click', function(event) { if (event.target === imageLightbox) closeImageLightbox(); });
-            imageLightbox.addEventListener('touchstart', handleLightboxTouchStart, { passive: false }); // passive: false per poter chiamare preventDefault se necessario in futuro
+            imageLightbox.addEventListener('touchstart', handleLightboxTouchStart, { passive: false }); 
             imageLightbox.addEventListener('touchend', handleLightboxTouchEnd, { passive: true });
         }
-        // Touch listeners for section/gallery page swipe
         const mainWrapper = document.getElementById('mainContentWrapper');
         if (mainWrapper) {
             mainWrapper.addEventListener('touchstart', handleTouchStart, { passive: true });
             mainWrapper.addEventListener('touchend', handleTouchEnd, { passive: true });
         }
-        // Touch listeners for gallery grid pull-to-refresh (già associato a galleryPageSection)
         if (galleryPageSection) { 
-            galleryPageSection.addEventListener('touchstart', handleGalleryGridTouchStart, { passive: true }); // passive: true se non si usa preventDefault o è gestito altrove
-            galleryPageSection.addEventListener('touchmove', handleGalleryGridTouchMove, { passive: false }); // passive: false perché usiamo preventDefault
+            galleryPageSection.addEventListener('touchstart', handleGalleryGridTouchStart, { passive: true }); 
+            galleryPageSection.addEventListener('touchmove', handleGalleryGridTouchMove, { passive: false }); 
         }
         initializeApplicationViewAndLoadData(); 
         if (mainExitAppBtn) { 
