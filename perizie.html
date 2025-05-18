@@ -588,30 +588,30 @@
         #targheLoadingStatus { text-align: center; padding: 10px; color: #00aeff; }
         #savedTargasListContainer { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #333; border-radius: 4px; margin-bottom: 20px; }
         
-        .saved-targa-item { /* Nuovo contenitore per pulsante targa e pulsante elimina */
+        .saved-targa-item {
             display: flex;
             align-items: center;
-            gap: 8px; /* Spazio tra i pulsanti */
+            gap: 8px;
         }
         .saved-targa-button { 
-            flex-grow: 1; /* Fa espandere il pulsante della targa */
+            flex-grow: 1; 
             padding: 10px; background-color: #383838; color: #f0f0f0; border: 1px solid #555; 
             border-radius: 4px; text-align: left; cursor: pointer; font-size: 0.95em; 
         }
         .saved-targa-button:hover { background-color: #454545; }
-        .delete-from-sheets-btn { /* Nuovo stile per il pulsante di eliminazione da Sheets */
+        .delete-from-sheets-btn {
             background-color: #c82333;
             color: white;
             border: none;
-            padding: 8px 10px; /* Adatta padding per icona o testo breve */
-            font-size: 1em; /* O dimensione per icona FontAwesome */
+            padding: 8px 10px;
+            font-size: 1em; 
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.2s ease;
-            flex-shrink: 0; /* Non farlo restringere */
+            flex-shrink: 0;
         }
         .delete-from-sheets-btn:hover { background-color: #a41523; }
-        .delete-from-sheets-btn i { pointer-events: none; } /* Per icone FA */
+        .delete-from-sheets-btn i { pointer-events: none; }
 
 
         #historyPageSection .action-button { margin-right: 10px; }
@@ -668,49 +668,47 @@
             box-sizing: border-box; 
         }
 
-        /* MODIFICA STILE BOTTONE FOTOCAMERA */
         #captureBtn.camera-capture-button-style {
             position: absolute;
-            bottom: 40px; /* Aumentata distanza dal basso */
+            bottom: 40px; 
             left: 50%;
             transform: translateX(-50%);
-            width: 70px;  /* Diametro esterno */
-            height: 70px; /* Diametro esterno */
-            background-color: rgba(255, 255, 255, 0.3); /* Cerchio esterno semi-trasparente */
+            width: 70px;  
+            height: 70px; 
+            background-color: rgba(255, 255, 255, 0.3); 
             border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.5); /* Bordo per il cerchio esterno */
+            border: 2px solid rgba(255, 255, 255, 0.5); 
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
             z-index: 2020;
-            padding: 0; /* Rimuovi padding se presente da .action-button */
+            padding: 0; 
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
-        #captureBtn.camera-capture-button-style::before { /* Cerchio interno pieno */
+        #captureBtn.camera-capture-button-style::before { 
             content: '';
-            width: 50px;  /* Diametro interno */
-            height: 50px; /* Diametro interno */
-            background-color: #007bff; /* Colore del cerchio interno */
+            width: 50px;  
+            height: 50px; 
+            background-color: #007bff; 
             border-radius: 50%;
             box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
             transition: background-color 0.3s ease;
         }
         #captureBtn.camera-capture-button-style:hover::before {
-            background-color: #0056b3; /* Colore hover cerchio interno */
+            background-color: #0056b3; 
         }
         #captureBtn.camera-capture-button-style:active {
             transform: translateX(-50%) scale(0.95);
         }
-        #captureBtn.camera-capture-button-style i { /* Nascondi icona testo se usi solo cerchi */
+        #captureBtn.camera-capture-button-style i { 
             display: none; 
         }
-        /* FINE MODIFICA STILE BOTTONE FOTOCAMERA */
         
         #closeCameraBtn {
             position: absolute;
-            bottom: 30px; /* Allineato un po' più in alto */
+            bottom: 30px; 
             right: 30px; 
             z-index: 2020; 
             width: 45px; 
@@ -934,8 +932,8 @@
             #sheetFilterDropdown { width: 100%; }
             .fill-defaults-btn { top: 15px; right: 15px; width: 30px; height: 30px; font-size: 1.2em; }
             
-            #captureBtn.camera-capture-button-style { bottom: 30px; width: 65px; height: 65px; } /* Media query per captureBtn */
-            #captureBtn.camera-capture-button-style::before { width: 45px; height: 45px; } /* Media query per ::before */
+            #captureBtn.camera-capture-button-style { bottom: 30px; width: 65px; height: 65px; }
+            #captureBtn.camera-capture-button-style::before { width: 45px; height: 45px; }
 
             #closeCameraBtn { bottom: 25px; right: 25px; width: 40px; height: 40px; font-size: 1.6em; line-height: 38px;}
             #photoGridContainer { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;}
@@ -951,8 +949,8 @@
             .modal-content { width: 95%; padding: 15px; }
             .modal-content h2 {font-size: 1.3em;}
 
-            #captureBtn.camera-capture-button-style { bottom: 25px; width: 60px; height: 60px; } /* Media query per captureBtn */
-            #captureBtn.camera-capture-button-style::before { width: 40px; height: 40px; } /* Media query per ::before */
+            #captureBtn.camera-capture-button-style { bottom: 25px; width: 60px; height: 60px; }
+            #captureBtn.camera-capture-button-style::before { width: 40px; height: 40px; }
             #closeCameraBtn { bottom: 20px; right: 20px; }
         }
     </style>
@@ -1247,15 +1245,16 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    const currentAppVersion = "1.7.0"; // MODIFICA: Versione per numerazione foto e stile bottone
+    const currentAppVersion = "1.7.1"; // MODIFICA: Fix navigazione Galleria da Fotocamera
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtnModal = document.getElementById('closeChangelogBtnModal'); 
     const changelogList = document.getElementById('changelogList');
     const changelogTitle = document.getElementById('changelogTitle');
 
     const latestChangesText = `
-        <li><strong>Nuovo stile per il pulsante di scatto foto (cerchio concentrico).</strong></li>
-        <li><strong>Nuova numerazione foto per sezione:</strong>
+        <li><strong>Fix: Navigazione da Fotocamera a Galleria ora mantiene il contesto targa/sezione.</strong></li>
+        <li>Nuovo stile per il pulsante di scatto foto (cerchio concentrico).</li>
+        <li>Nuova numerazione foto per sezione:
             <ul>
                 <li>Remarketing: 001-100</li>
                 <li>Pneumatici: 101-150</li>
@@ -1280,7 +1279,7 @@
 
     // START: IndexedDB Helper Functions
     const IDB_NAME = 'PeriziePhotoDB_v1'; 
-    const IDB_VERSION = 1; // Non incrementare se non cambi la struttura degli store
+    const IDB_VERSION = 1;
     const PHOTO_STORE_NAME = 'capturedPhotosStore'; 
     let dbPromise = null;
 
@@ -1297,20 +1296,10 @@
                     store.createIndex('targaIdx', 'targa', { unique: false });
                     store.createIndex('sezioneIdx', 'sezione', { unique: false });
                     store.createIndex('targaSezioneIdx', ['targa', 'sezione'], { unique: false });
-                    console.log('Object store creato/aggiornato:', PHOTO_STORE_NAME);
                 }
             };
-
-            request.onsuccess = (event) => {
-                // console.log('Database aperto con successo');
-                resolve(event.target.result);
-            };
-
-            request.onerror = (event) => {
-                console.error("Errore apertura IndexedDB:", event.target.error);
-                dbPromise = null; 
-                reject(event.target.error);
-            };
+            request.onsuccess = (event) => { resolve(event.target.result); };
+            request.onerror = (event) => { console.error("Errore apertura IndexedDB:", event.target.error); dbPromise = null; reject(event.target.error); };
         });
         return dbPromise;
     }
@@ -1321,15 +1310,8 @@
             const transaction = db.transaction(PHOTO_STORE_NAME, 'readwrite');
             const store = transaction.objectStore(PHOTO_STORE_NAME);
             const request = store.put(photoData);
-
-            request.onsuccess = () => {
-                console.log('Foto salvata in DB:', photoData.name, photoData.timestamp);
-                resolve();
-            };
-            request.onerror = (event) => {
-                console.error('Errore salvataggio foto in IndexedDB:', event.target.error);
-                reject(event.target.error);
-            };
+            request.onsuccess = () => { console.log('Foto salvata in DB:', photoData.name, photoData.timestamp); resolve(); };
+            request.onerror = (event) => { console.error('Errore salvataggio foto in IndexedDB:', event.target.error); reject(event.target.error); };
         });
     }
 
@@ -1339,14 +1321,8 @@
             const transaction = db.transaction(PHOTO_STORE_NAME, 'readonly');
             const store = transaction.objectStore(PHOTO_STORE_NAME);
             const request = store.getAll();
-
-            request.onsuccess = (event) => {
-                resolve(event.target.result || []);
-            };
-            request.onerror = (event) => {
-                console.error('Errore recupero tutte le foto da IndexedDB:', event.target.error);
-                reject(event.target.error);
-            };
+            request.onsuccess = (event) => { resolve(event.target.result || []); };
+            request.onerror = (event) => { console.error('Errore recupero tutte le foto da IndexedDB:', event.target.error); reject(event.target.error); };
         });
     }
     
@@ -1356,13 +1332,11 @@
             const transaction = db.transaction(PHOTO_STORE_NAME, 'readonly');
             const store = transaction.objectStore(PHOTO_STORE_NAME);
             let request;
-
             const targaUpper = targaFilter ? targaFilter.toUpperCase() : null;
 
             if (targaUpper && sectionKeyFilter && sectionKeyFilter !== 'riepilogo') {
                  let effectiveSectionKey = sectionKeyFilter.toLowerCase();
                  if (effectiveSectionKey === 'danniverifiche') effectiveSectionKey = 'danni';
-                
                 const targaSezioneIndex = store.index('targaSezioneIdx');
                 request = targaSezioneIndex.getAll(IDBKeyRange.only([targaUpper, effectiveSectionKey]));
             } else if (targaUpper) { 
@@ -1371,17 +1345,10 @@
             } else { 
                 request = store.getAll();
             }
-
-            request.onsuccess = (event) => {
-                resolve(event.target.result || []);
-            };
-            request.onerror = (event) => {
-                console.error('Errore recupero foto filtrate da IndexedDB:', event.target.error);
-                reject(event.target.error);
-            };
+            request.onsuccess = (event) => { resolve(event.target.result || []); };
+            request.onerror = (event) => { console.error('Errore recupero foto filtrate da IndexedDB:', event.target.error); reject(event.target.error); };
         });
     }
-
 
     async function deletePhotoFromDB(timestampToDelete) {
         const db = await openPhotoDB();
@@ -1389,15 +1356,8 @@
             const transaction = db.transaction(PHOTO_STORE_NAME, 'readwrite');
             const store = transaction.objectStore(PHOTO_STORE_NAME);
             const request = store.delete(timestampToDelete);
-
-            request.onsuccess = () => {
-                console.log('Foto eliminata da DB con timestamp:', timestampToDelete);
-                resolve();
-            };
-            request.onerror = (event) => {
-                console.error('Errore eliminazione foto da IndexedDB:', event.target.error);
-                reject(event.target.error);
-            };
+            request.onsuccess = () => { console.log('Foto eliminata da DB con timestamp:', timestampToDelete); resolve(); };
+            request.onerror = (event) => { console.error('Errore eliminazione foto da IndexedDB:', event.target.error); reject(event.target.error); };
         });
     }
     // END: IndexedDB Helper Functions
@@ -1456,7 +1416,7 @@
     }
 
     async function inviaPeriziaSingolaASheets(periziaDaInviare) { 
-        if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') { console.error("URL della Web App Google Sheets non configurato."); return { success: false, message: "URL Web App non configurato." }; } 
+        if (!GOOGLE_SHEET_WEB_APP_URL || GOOGLE_SHEET_WEB_APP_URL === 'INCOLLA_QUI_IL_TUO_URL_APPLICAZIONE_WEB') { return { success: false, message: "URL Web App non configurato." }; } 
         try { 
             const response = await fetch(GOOGLE_SHEET_WEB_APP_URL, { method: 'POST', mode: 'cors',  cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' },  body: JSON.stringify(periziaDaInviare)  }); 
             let responseData; 
@@ -1466,49 +1426,32 @@
             } else { 
                 const textResponse = await response.text(); 
                 try { responseData = JSON.parse(textResponse); }  
-                catch (e) { responseData = { status: "error", message: "Risposta non JSON dal server: " + textResponse.substring(0,100) + "..."}; } 
+                catch (e) { responseData = { status: "error", message: "Risposta non JSON: " + textResponse.substring(0,100)}; } 
             } 
             if (response.ok && responseData.status === "success") { 
                 return { success: true, message: responseData.message, data: responseData.data }; 
             } else { 
-                console.error("Errore dall'API di Google Sheets o risposta non OK:", responseData.message || `HTTP Status ${response.status}`); 
                 return { success: false, message: responseData.message || `Errore server (HTTP ${response.status})` }; 
             } 
         } catch (error) { 
-            console.error("Errore di rete o fetch durante l'invio a Google Sheets:", error); 
             return { success: false, message: "Errore di rete: " + error.message }; 
         } 
     }
     
     async function fetchLatestPeriziaFromSheets(targa) { 
         if (!GOOGLE_SHEET_WEB_APP_URL) { return null; } 
-        if (localStorage.getItem(`${APP_PREFIX}deleted_${targa.toUpperCase()}`)) {
-            return null;
-        }
+        if (localStorage.getItem(`${APP_PREFIX}deleted_${targa.toUpperCase()}`)) { return null; }
         const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=getPerizia&targa=${encodeURIComponent(targa.toUpperCase())}&nocache=${new Date().getTime()}`; 
         try { 
             const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); 
-            if (!response.ok) { 
-                const errorText = await response.text(); 
-                console.error(`Errore HTTP ${response.status} nel fetch da Sheets: ${errorText}`); 
-                return null; 
-            } 
+            if (!response.ok) { return null; } 
             const contentType = response.headers.get("content-type"); 
             if (contentType && contentType.indexOf("application/json") !== -1) { 
                 const result = await response.json(); 
-                if (result.status === "success" && result.data) { 
-                    return result.data;  
-                } else if (result.status === "notfound") { 
-                    return null; 
-                } else { 
-                    return null; 
-                } 
-            } else { 
-                return null; 
-            } 
-        } catch (error) { 
+                if (result.status === "success" && result.data) { return result.data; }
+            }
             return null; 
-        } 
+        } catch (error) { return null; } 
     }
 
     function fillSectionPositiveOrDefaults(sectionId) { const section = document.getElementById(sectionId); if (!section) return; if (sectionId === 'remarketingSection') { if (tipoTrazioneSelect) tipoTrazioneSelect.value = 'endotermico'; document.getElementById('foto_angolari').checked = true; document.getElementById('foto_vano_carico').checked = true; document.getElementById('tipo_equipaggiamento').value = 'kit_gonfia_ripara'; document.getElementById('equipaggiamento_presenza').value = 'presente'; document.getElementById('foto_interni_pannelli').checked = true; document.getElementById('foto_cruscotto').checked = true; document.getElementById('stato_chilometri').value = 'rilevabili'; document.getElementById('stato_cdc').value = 'originale'; document.getElementById('foto_vano_motore').checked = true; document.getElementById('foto_cofano_tetto').checked = true; document.getElementById('chiave_telecomando').value = 'presente'; document.getElementById('seconda_chiave').value = 'presente'; handleTrazioneChange();  if (tipoTrazioneSelect && tipoTrazioneSelect.value === 'elettrico') { if (cavoRapidaSelect) cavoRapidaSelect.value = 'presente'; if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'presente'; } else {  if (cavoRapidaSelect) cavoRapidaSelect.value = 'non_applicabile';  if (cavoDomesticaSelect) cavoDomesticaSelect.value = 'non_applicabile'; } } else if (sectionId === 'pneumaticiSection') { document.getElementById('pneumatico_as').value = 'conforme'; document.getElementById('pneumatico_ad').value = 'conforme'; document.getElementById('pneumatico_pd').value = 'conforme'; document.getElementById('pneumatico_ps').value = 'conforme'; } else if (sectionId === 'danniVerificheSection') { document.getElementById('motore_accende').value = 'ok'; document.getElementById('batteria_stato').value = 'ok'; document.getElementById('foto_danni_generiche').checked = true;  document.getElementById('note_danni_verifiche').value = 'Nessuna anomalia da segnalare.'; } updateNavButtonColors(); if (typeof initSequentialAnimation === 'function') { section.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me')); initSequentialAnimation(); }  section.querySelectorAll('input, select, textarea').forEach(el => { const event = new Event('change', { bubbles: true }); el.dispatchEvent(event); }); }
@@ -1517,136 +1460,81 @@
     function loadPosizioneForTarga(targa) { if (!targa) return ""; try { return localStorage.getItem(`${APP_PREFIX}posizione_${targa.toUpperCase()}`) || ""; } catch (e) { console.error("Errore caricamento posizione LS:", e); return ""; } }
     function saveUrgentStatusForTarga(targa, isUrgent) {  if (!targa) return; try { localStorage.setItem(`${APP_PREFIX}urgent_${targa.toUpperCase()}`, JSON.stringify(isUrgent)); } catch (e) { console.error("Errore salvataggio stato urgenza LS:", e); } }
     function loadUrgentStatusForTarga(targa) { if (!targa) return false; try { const status = localStorage.getItem(`${APP_PREFIX}urgent_${targa.toUpperCase()}`); return status ? JSON.parse(status) : false; } catch (e) { console.error("Errore caricamento stato urgenza LS:", e); return false; } }
-    function resetChecklistForm() { const els = document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea'); els.forEach(el => { if (el.type === 'checkbox') el.checked = false; else if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = ''; }); if (tipoTrazioneSelect) {  handleTrazioneChange(); } console.log("Modulo resettato."); }
-    function saveProgress(targa) { if(!targa){console.warn("Nessuna targa attiva per il salvataggio.");return false;} const data = {}; document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => { if (el.id) { if (el.type === 'checkbox') data[el.id] = el.checked; else data[el.id] = el.value; } }); data.timestamp = new Date().toISOString();  try { localStorage.setItem(`${APP_PREFIX}data_${targa.toUpperCase()}`, JSON.stringify(data)); console.log(`Progresso salvato localmente per la targa ${targa.toUpperCase()} con timestamp ${data.timestamp}.`); updateNavButtonColors(); return true; } catch(e) { console.error("Errore durante il salvataggio in localStorage:", e); alert("Salvataggio locale fallito. Spazio esaurito o errore del browser."); return false; } }
-    function loadProgress(targa) { if(!targa) return; const targaUpper = targa.toUpperCase(); try { const json = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`); if (json) { const data = JSON.parse(json); document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => { if (el.id && data.hasOwnProperty(el.id)) { if (el.type === 'checkbox') el.checked = data[el.id]; else el.value = data[el.id]; } else if (el.id) {  if (el.type === 'checkbox') el.checked = false; else if (el.tagName === 'SELECT') el.selectedIndex = 0; } }); console.log(`Progresso caricato da localStorage per la targa ${targaUpper}. Timestamp: ${data.timestamp || 'N/A'}`); } else { console.log(`Nessun dato salvato in localStorage trovato per la targa ${targaUpper}. Reset form.`); resetChecklistForm();  } if (tipoTrazioneSelect) {   handleTrazioneChange(); } updateNavButtonColors();  } catch(e) { console.error("Errore durante il caricamento da localStorage:", e); resetChecklistForm();  updateNavButtonColors(); } }
-    function getCompletedTarghe() { try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){console.error("Errore LS getCompletedTarghe:", e); return{};}}
+    function resetChecklistForm() { const els = document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea'); els.forEach(el => { if (el.type === 'checkbox') el.checked = false; else if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = ''; }); if (tipoTrazioneSelect) {  handleTrazioneChange(); } }
+    function saveProgress(targa) { if(!targa){return false;} const data = {}; document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => { if (el.id) { if (el.type === 'checkbox') data[el.id] = el.checked; else data[el.id] = el.value; } }); data.timestamp = new Date().toISOString();  try { localStorage.setItem(`${APP_PREFIX}data_${targa.toUpperCase()}`, JSON.stringify(data)); updateNavButtonColors(); return true; } catch(e) { alert("Salvataggio locale fallito."); return false; } }
+    function loadProgress(targa) { if(!targa) return; const targaUpper = targa.toUpperCase(); try { const json = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`); if (json) { const data = JSON.parse(json); document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => { if (el.id && data.hasOwnProperty(el.id)) { if (el.type === 'checkbox') el.checked = data[el.id]; else el.value = data[el.id]; } else if (el.id) {  if (el.type === 'checkbox') el.checked = false; else if (el.tagName === 'SELECT') el.selectedIndex = 0; } }); } else { resetChecklistForm();  } if (tipoTrazioneSelect) {   handleTrazioneChange(); } updateNavButtonColors();  } catch(e) { resetChecklistForm();  updateNavButtonColors(); } }
+    function getCompletedTarghe() { try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){return{};}}
     function isTargaCompleted(targa) { if(!targa) return false; const completed = getCompletedTarghe(); return !!(completed[targa.toUpperCase()]); }
-    function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa.toUpperCase()]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));console.log(`${targa.toUpperCase()} marked complete locally.`);}catch(e){console.error("Errore LS Mark Err:",e);}}
-    function unmarkTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe(); if(completed[targa.toUpperCase()]){ delete completed[targa.toUpperCase()]; localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed)); console.log(`${targa.toUpperCase()} unmarked as complete locally.`);}}catch(e){console.error("Errore LS Unmark Err:",e);}}
+    function markTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe();completed[targa.toUpperCase()]=true;localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));}catch(e){console.error("Errore LS Mark Err:",e);}}
+    function unmarkTargaAsCompleted(targa) { if(!targa)return; try{const completed=getCompletedTarghe(); if(completed[targa.toUpperCase()]){ delete completed[targa.toUpperCase()]; localStorage.setItem(`${APP_PREFIX}completedTarghe`,JSON.stringify(completed));}}catch(e){console.error("Errore LS Unmark Err:",e);}}
     
     function clearLocalDataForTarga(targaUpper) {
         if (!targaUpper) return;
         try {
             localStorage.removeItem(`${APP_PREFIX}data_${targaUpper}`);
-            console.log(`Dati modulo rimossi per ${targaUpper}.`);
             unmarkTargaAsCompleted(targaUpper); 
             localStorage.removeItem(`${APP_PREFIX}posizione_${targaUpper}`);
-            console.log(`Dati posizione rimossi per ${targaUpper}.`);
             localStorage.removeItem(`${APP_PREFIX}urgent_${targaUpper}`);
-            console.log(`Dati urgenza rimossi per ${targaUpper}.`);
-
             getPhotosByTargaAndSezioneFromDB(targaUpper, null) 
                 .then(photos => {
                     const deletePromises = photos.map(photo => deletePhotoFromDB(photo.timestamp));
                     return Promise.all(deletePromises);
                 })
                 .then(() => {
-                    console.log(`Tutte le foto per ${targaUpper} cancellate da IndexedDB.`);
                     if (galleryPageSection.style.display === 'block' && (currentGalleryTargaFilter === targaUpper || !currentGalleryTargaFilter)) {
                          populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter); 
                     }
                 })
                 .catch(err => console.error(`Errore cancellazione foto da DB per targa ${targaUpper}:`, err));
-
         } catch (e) {
-            console.error(`Errore durante la cancellazione dei dati locali per ${targaUpper}:`, e);
             alert(`Errore cancellazione dati locali per ${targaUpper}.`);
         }
     }
 
-    function generateAndDownloadScreenshot() { return new Promise((resolve, reject) => { const riepilogoSection = document.getElementById('riepilogoSection'); if (!riepilogoSection) { alert("Errore: Sezione Riepilogo non trovata per lo screenshot."); return reject("Sezione riepilogo non trovata"); } if (typeof html2canvas === 'undefined') { alert("Errore: Libreria html2canvas non caricata."); return reject("html2canvas non caricata"); } setTimeout(() => { riepilogoSection.scrollTop = 0;  html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY, windowHeight: riepilogoSection.scrollHeight }) .then(canvas => { const link = document.createElement('a'); let targaSanitized = 'sconosciuta'; let piazzaleSanitized = 'piazzale_sconosciuto'; if (targaSelezionataGlobalmente) { targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_'); const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") { piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_'); if (!piazzaleSanitized) piazzaleSanitized = 'N_D'; } else { piazzaleSanitized = 'N_D'; } } link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`; link.href = canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); console.log(`Screenshot generato e download avviato: ${link.download}`); resolve(); }) .catch(error => { console.error("Errore durante la generazione dello screenshot:", error); alert("Si è verificato un errore durante la generazione dello screenshot."); reject(error); }); }, 100);  }); }
+    function generateAndDownloadScreenshot() { return new Promise((resolve, reject) => { const riepilogoSection = document.getElementById('riepilogoSection'); if (!riepilogoSection) { alert("Errore: Sezione Riepilogo non trovata."); return reject(); } if (typeof html2canvas === 'undefined') { alert("Errore: Libreria html2canvas non caricata."); return reject(); } setTimeout(() => { riepilogoSection.scrollTop = 0;  html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY, windowHeight: riepilogoSection.scrollHeight }) .then(canvas => { const link = document.createElement('a'); let targaSanitized = 'sconosciuta'; let piazzaleSanitized = 'piazzale_sconosciuto'; if (targaSelezionataGlobalmente) { targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_'); const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") { piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_'); if (!piazzaleSanitized) piazzaleSanitized = 'N_D'; } else { piazzaleSanitized = 'N_D'; } } link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`; link.href = canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); resolve(); }) .catch(error => { alert("Errore generazione screenshot."); reject(error); }); }, 100);  }); }
     
     async function downloadPhotosAsZip(targa) {
-        if (!targa) {
-            console.warn("Nessuna targa fornita per scaricare le foto come ZIP.");
-            return;
-        }
-        if (typeof JSZip === 'undefined') {
-            alert("Errore: Libreria JSZip non caricata. Impossibile creare ZIP.");
-            return;
-        }
-
+        if (!targa) { return; }
+        if (typeof JSZip === 'undefined') { alert("Errore: Libreria JSZip non caricata."); return; }
         const originalButtonText = saveAndReturnBtn.textContent;
         saveAndReturnBtn.textContent = 'Creazione ZIP...';
         saveAndReturnBtn.disabled = true;
-
         try {
             const photos = await getPhotosByTargaAndSezioneFromDB(targa, null);
             if (!photos || photos.length === 0) {
-                alert(`Nessuna foto trovata per la targa ${targa} da includere nello ZIP.`);
-                saveAndReturnBtn.textContent = originalButtonText;
-                saveAndReturnBtn.disabled = false;
-                return;
+                alert(`Nessuna foto trovata per ${targa}.`);
+                saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; return;
             }
-
             const zip = new JSZip();
-            photos.forEach(photoData => {
-                if (photoData.blobData instanceof Blob && photoData.name) {
-                    zip.file(photoData.name, photoData.blobData);
-                }
-            });
-
+            photos.forEach(photoData => { if (photoData.blobData instanceof Blob && photoData.name) { zip.file(photoData.name, photoData.blobData); } });
             const zipBlob = await zip.generateAsync({type:"blob", compression: "DEFLATE"});
-            
             const link = document.createElement('a');
             link.href = URL.createObjectURL(zipBlob);
-            const zipFileName = `${targa.toUpperCase().replace(/[^A-Z0-9]/g, '_')}.zip`;
-            link.download = zipFileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            link.download = `${targa.toUpperCase().replace(/[^A-Z0-9]/g, '_')}.zip`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
             URL.revokeObjectURL(link.href);
-            console.log(`File ZIP "${zipFileName}" generato e download avviato.`);
-            alert(`File ZIP "${zipFileName}" per la targa ${targa} scaricato con successo.`);
-
-        } catch (error) {
-            console.error("Errore durante la creazione o il download del file ZIP:", error);
-            alert("Si è verificato un errore durante la creazione del file ZIP delle foto.");
-        } finally {
-            saveAndReturnBtn.textContent = originalButtonText;
-            saveAndReturnBtn.disabled = false;
-        }
+            alert(`File ZIP per ${targa} scaricato.`);
+        } catch (error) { alert("Errore creazione ZIP.");
+        } finally { saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; }
     }
 
     async function handleSavePeriziaAndReturn() {  
-        if (!targaSelezionataGlobalmente) { 
-            alert("Nessuna targa attiva selezionata per il salvataggio."); 
-            return; 
-        } 
+        if (!targaSelezionataGlobalmente) { alert("Nessuna targa attiva."); return; } 
         const originalButtonText = saveAndReturnBtn.textContent; 
-        saveAndReturnBtn.textContent = 'Salvataggio perizia...'; 
-        saveAndReturnBtn.disabled = true; 
-        
+        saveAndReturnBtn.textContent = 'Salvataggio...'; saveAndReturnBtn.disabled = true; 
         if (!saveProgress(targaSelezionataGlobalmente)) {  
-            alert("Salvataggio dati nel browser fallito."); 
-            saveAndReturnBtn.textContent = originalButtonText; 
-            saveAndReturnBtn.disabled = false; 
-            return; 
+            alert("Salvataggio locale fallito."); 
+            saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; return; 
         } 
-        
-        if (document.getElementById('riepilogoSection').classList.contains('active')) { 
-            generateSummary();  
-        } 
-        
-        try { 
-            await generateAndDownloadScreenshot(); 
-            await downloadPhotosAsZip(targaSelezionataGlobalmente);
-        } catch (e) { 
-            console.warn("Generazione screenshot o ZIP fallita, ma i dati sono stati salvati localmente.", e); 
-        } 
-        
-        markTargaAsCompleted(targaSelezionataGlobalmente);  
-        updateNavButtonColors();  
-        
-        if (saveAndReturnBtn.textContent !== originalButtonText) {
-             saveAndReturnBtn.textContent = originalButtonText;
-             saveAndReturnBtn.disabled = false;
-        }
+        if (document.getElementById('riepilogoSection').classList.contains('active')) { generateSummary(); } 
+        try { await generateAndDownloadScreenshot(); await downloadPhotosAsZip(targaSelezionataGlobalmente); }
+        catch (e) { console.warn("Screenshot/ZIP fallito, dati salvati.", e); } 
+        markTargaAsCompleted(targaSelezionataGlobalmente); updateNavButtonColors();  
+        if (saveAndReturnBtn.textContent !== originalButtonText) { saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; }
         showView('landing');  
     }
 
-    function handleSaveAndNext() { if(!targaSelezionataGlobalmente){alert("No targa.");return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
+    function handleSaveAndNext() { if(!targaSelezionataGlobalmente){return;} if(saveProgress(targaSelezionataGlobalmente)){const oT=this.textContent;this.textContent='Salvato!';this.disabled=true;setTimeout(()=>{this.textContent=oT;this.disabled=false;},1500);}else return; let curIdx=-1; navButtons.forEach((nb,i)=>{if(nb.classList.contains('active'))curIdx=i;}); if(curIdx!==-1&&curIdx<navButtons.length-1){const nextNB=navButtons[curIdx+1];if(nextNB)showSection(nextNB.dataset.target);}}
     function isInputDefault(inputElement) { if (!inputElement) return true; if (inputElement.type === 'checkbox') return !inputElement.checked; if (inputElement.tagName === 'SELECT') return inputElement.value === "" || inputElement.selectedIndex === 0; if (inputElement.type === 'text' || inputElement.type === 'url' || inputElement.tagName === 'TEXTAREA') return inputElement.value.trim() === ""; return true; }
     function getSectionInputs(sectionElementId) { const sectionDiv = document.getElementById(sectionElementId); if (!sectionDiv) return []; return Array.from(sectionDiv.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)')); }
     function getSectionStatus(sectionElementId, targaData) { const inputs = getSectionInputs(sectionElementId); if (inputs.length === 0) return 'completed';  let allDefaultOrNA = true;  let allNonDefaultAndApplicable = true;  let hasAtLeastOneNonDefaultAndApplicable = false; inputs.forEach(input => { let isEffectivelyDefault = false; const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined; let currentValue = savedValue; if (savedValue === undefined) {  if (input.type === 'checkbox') currentValue = input.checked; else currentValue = input.value; } if (input.type === 'checkbox') { isEffectivelyDefault = !currentValue; } else if (input.tagName === 'SELECT') { isEffectivelyDefault = (currentValue === "" || (input.options.length > 0 && currentValue === input.options[0].value)); if ((input.id === 'cavo_ricarica_rapida' || input.id === 'cavo_ricarica_domestica') && currentValue === 'non_applicabile') { isEffectivelyDefault = true; } } else {  isEffectivelyDefault = (currentValue === ""); } if (!isEffectivelyDefault) { allDefaultOrNA = false; hasAtLeastOneNonDefaultAndApplicable = true; } else {  allNonDefaultAndApplicable = false; } }); if (allDefaultOrNA) return 'untouched'; if (allNonDefaultAndApplicable) return 'completed'; if (hasAtLeastOneNonDefaultAndApplicable) return 'partial';  return 'untouched';  }
@@ -1668,7 +1556,6 @@
             lastViewBeforeCamera = 'landing';
             lastSectionBeforeCamera = null;
         }
-        console.log(`Prima della fotocamera: vista='${lastViewBeforeCamera}', sezione='${lastSectionBeforeCamera}'`);
 
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
@@ -1696,133 +1583,73 @@
             cameraPageSection.style.height = `100vh`;
         }
 
-
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            const constraints = { 
-                video: {
-                    facingMode: "environment",
-                    width: { ideal: 1920, min: 1280 },
-                    height: { ideal: 1080, min: 720 },
-                    advanced: [{ focusMode: "continuous" }]
-                },
-                audio: false
-            };
-
+            const constraints = { video: { facingMode: "environment", width: { ideal: 1920, min: 1280 }, height: { ideal: 1080, min: 720 }, advanced: [{ focusMode: "continuous" }] }, audio: false };
             try {
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                cameraStreamElement.srcObject = stream;
-                currentCameraStream = stream;
+                cameraStreamElement.srcObject = stream; currentCameraStream = stream;
                 const videoTrack = stream.getVideoTracks()[0];
                 if (videoTrack && typeof videoTrack.applyConstraints === 'function') {
                     try { await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); } 
                     catch (e) { try { await videoTrack.applyConstraints({ advanced: [{ focusMode: 'auto' }] }); } 
-                    catch (e2) { console.warn("Impossibile applicare focusMode 'auto':", e2.name, e2.message);}}
+                    catch (e2) { console.warn("Impossibile focusMode 'auto':", e2.name);}}
                 }
             } catch (err) {
-                console.error("Errore accesso fotocamera:", err.name, err.message);
                 try {
                     const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-                    cameraStreamElement.srcObject = fallbackStream;
-                    currentCameraStream = fallbackStream;
-                } catch (fallbackErr) {
-                    alert("Impossibile accedere alla fotocamera: " + fallbackErr.message);
-                    returnFromCamera();
-                }
+                    cameraStreamElement.srcObject = fallbackStream; currentCameraStream = fallbackStream;
+                } catch (fallbackErr) { alert("Impossibile accedere fotocamera: " + fallbackErr.message); returnFromCamera(); }
             }
-        } else {
-            alert("Il tuo browser non supporta l'accesso alla fotocamera.");
-            returnFromCamera();
-        }
+        } else { alert("Browser non supporta accesso fotocamera."); returnFromCamera(); }
         window.scrollTo(0, 0);
     }
 
     function returnFromCamera() {
-        if (currentCameraStream) {
-            currentCameraStream.getTracks().forEach(track => track.stop());
-            currentCameraStream = null;
-            cameraStreamElement.srcObject = null;
-        }
-        cameraPageSection.style.display = 'none';
-        cameraStreamElement.style.display = 'block'; 
-        freezeFrameDisplayElement.style.display = 'none'; 
-        cameraPageSection.style.paddingTop = ''; 
-        cameraPageSection.style.height = '';    
+        if (currentCameraStream) { currentCameraStream.getTracks().forEach(track => track.stop()); currentCameraStream = null; cameraStreamElement.srcObject = null; }
+        cameraPageSection.style.display = 'none'; cameraStreamElement.style.display = 'block'; freezeFrameDisplayElement.style.display = 'none'; 
+        cameraPageSection.style.paddingTop = ''; cameraPageSection.style.height = '';    
 
-        if (lastViewBeforeCamera === 'gallery') { 
-            showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter);
-        } else if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
-            showView('checklist'); 
-            showSection(lastSectionBeforeCamera);
-        } else if (lastViewBeforeCamera === 'history') {
-            showView('history');
-        } else { 
-            showView('landing');
-        }
+        if (lastViewBeforeCamera === 'gallery') { showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter); }
+        else if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) { showView('checklist'); showSection(lastSectionBeforeCamera); }
+        else if (lastViewBeforeCamera === 'history') { showView('history'); }
+        else { showView('landing'); }
     }
 
-    // MODIFICA QUI: Logica Numerazione Foto
     async function getNextPhotoNumberForSection(targa, sectionKey) {
         const targaUpper = targa.toUpperCase();
-        let baseNumber = 1; // Default per sezioni generiche
-        let maxNumberInSection = Infinity; // Default: nessun limite superiore
+        let baseNumber = 1; 
+        let maxNumberInSection = Infinity; 
+        let effectiveSectionKeyForDB = sectionKey.toLowerCase();
 
         switch (sectionKey.toLowerCase()) {
-            case 'remarketing':
-                baseNumber = 1;
-                maxNumberInSection = 100; // Foto da 001 a 100
-                break;
-            case 'pneumatici':
-                baseNumber = 101;
-                maxNumberInSection = 150; // Foto da 101 a 150
-                break;
-            case 'danni': // 'danniVerifiche' viene mappato a 'danni'
-                baseNumber = 200;
-                // maxNumberInSection rimane Infinity (o un numero alto come 999 se si vuole un limite teorico)
-                break;
-            // Altre sezioni come 'riepilogo_foto', 'targa_completa', 'generale'
-            // useranno baseNumber = 1 e conteranno le foto esistenti in quella targa/sezione specifica
-            // senza un range predefinito.
+            case 'remarketing': baseNumber = 1; maxNumberInSection = 100; break;
+            case 'pneumatici': baseNumber = 101; maxNumberInSection = 150; break;
+            case 'danni': case 'danniverifiche': baseNumber = 200; effectiveSectionKeyForDB = 'danni'; break;
+            default: effectiveSectionKeyForDB = sectionKey.toLowerCase(); break; 
         }
 
-        const photosInSection = await getPhotosByTargaAndSezioneFromDB(targaUpper, sectionKey);
-        
+        const photosInSection = await getPhotosByTargaAndSezioneFromDB(targaUpper, effectiveSectionKeyForDB);
         let nextNumber = baseNumber;
         if (photosInSection && photosInSection.length > 0) {
-            // Trova il numero più alto esistente in questa sezione specifica
-            // basandosi sul prefisso numerico del nome file
-            let highestExistingNumberInBaseRange = baseNumber -1; // Inizia prima della base
-            
+            let highestExistingNumberInBaseRange = baseNumber -1; 
             photosInSection.forEach(photo => {
-                const match = photo.name.match(/^(\d+)/); // Estrae il numero all'inizio del nome
+                const match = photo.name.match(/^(\d+)/); 
                 if (match) {
                     const num = parseInt(match[1], 10);
-                    // Considera solo i numeri che rientrano nel range teorico della sezione
-                    // Per remarketing (1-100), pneumatici (101-150), danni (200+)
-                    // Per sezioni generiche, tutti i numeri sono validi per il conteggio
                     let isInTheoreticalRange = true;
                     if (sectionKey.toLowerCase() === 'remarketing' && (num < 1 || num > 100)) isInTheoreticalRange = false;
                     else if (sectionKey.toLowerCase() === 'pneumatici' && (num < 101 || num > 150)) isInTheoreticalRange = false;
-                    else if (sectionKey.toLowerCase() === 'danni' && num < 200) isInTheoreticalRange = false;
-                    // Per sezioni senza range definiti (es. 'generale'), ogni numero è considerato per trovare il max.
-
-                    if (isInTheoreticalRange && num > highestExistingNumberInBaseRange && num < (baseNumber + 500) /* Evita salti enormi se ci sono nomi strani */) {
+                    else if ((sectionKey.toLowerCase() === 'danni' || sectionKey.toLowerCase() === 'danniverifiche') && num < 200) isInTheoreticalRange = false;
+                    
+                    if (isInTheoreticalRange && num > highestExistingNumberInBaseRange && num < (baseNumber + 800) ) { // Increased safe upper bound for danni
                          highestExistingNumberInBaseRange = num;
                     }
                 }
             });
             nextNumber = highestExistingNumberInBaseRange + 1;
         }
-        
-        // Assicura che il numero non superi il massimo per la sezione (se definito e non infinito)
-        if (nextNumber > maxNumberInSection && maxNumberInSection !== Infinity) {
-            console.warn(`Raggiunto numero massimo (${maxNumberInSection}) per la sezione ${sectionKey} della targa ${targaUpper}. La foto sarà numerata come ${maxNumberInSection}.`);
-            return maxNumberInSection; // Restituisce l'ultimo numero valido o gestisci diversamente
-        }
-        // Assicura che il numero sia almeno il baseNumber
-        if (nextNumber < baseNumber) {
-            nextNumber = baseNumber;
-        }
-
+        if (nextNumber > maxNumberInSection && maxNumberInSection !== Infinity) { return maxNumberInSection; }
+        if (nextNumber < baseNumber) { nextNumber = baseNumber; }
         return nextNumber;
     }
 
@@ -1830,13 +1657,10 @@
         let sectionNameForFile = "generale"; 
         if (lastSectionBeforeCamera) { 
             let tempSectionKey = lastSectionBeforeCamera.toLowerCase();
-            if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {
-                sectionNameForFile = tempSectionKey;
-            } else if (tempSectionKey === 'danniverifiche') {
-                sectionNameForFile = 'danni'; // Normalizza a 'danni'
-            } else if (tempSectionKey === 'riepilogo') { 
-                sectionNameForFile = 'riepilogo_foto'; 
-            } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter && currentGallerySectionFilter !== 'riepilogo') {
+            if (['remarketing', 'pneumatici'].includes(tempSectionKey)) { sectionNameForFile = tempSectionKey; }
+            else if (tempSectionKey === 'danniverifiche') { sectionNameForFile = 'danni'; }
+            else if (tempSectionKey === 'riepilogo') { sectionNameForFile = 'riepilogo_foto';  }
+            else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter && currentGallerySectionFilter !== 'riepilogo') {
                  sectionNameForFile = currentGallerySectionFilter.toLowerCase() === 'danniverifiche' ? 'danni' : currentGallerySectionFilter.toLowerCase();
             } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter === 'riepilogo') {
                  sectionNameForFile = 'targa_completa'; 
@@ -1845,81 +1669,36 @@
         return sectionNameForFile;
     }
 
-    async function capturePhoto() { // Modificata per usare la nuova numerazione
+    async function capturePhoto() {
         if (captureBtn.disabled) return; 
-
         if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
             const canvas = document.createElement('canvas');
-            canvas.width = cameraStreamElement.videoWidth; 
-            canvas.height = cameraStreamElement.videoHeight;
-            
+            canvas.width = cameraStreamElement.videoWidth; canvas.height = cameraStreamElement.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
-            
             freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7); 
-            freezeFrameDisplayElement.style.display = 'block';
-            cameraStreamElement.style.display = 'none'; 
-            captureBtn.disabled = true; 
+            freezeFrameDisplayElement.style.display = 'block'; cameraStreamElement.style.display = 'none'; captureBtn.disabled = true; 
 
             const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');
             const sectionNameForFile = getFilenameSectionName();
-            
-            // Nuova logica per ottenere il numero foto
             const photoNumber = await getNextPhotoNumberForSection(targaForFile, sectionNameForFile);
             const formattedPhotoNumber = String(photoNumber).padStart(3, '0');
             const filename = `${formattedPhotoNumber} ${sectionNameForFile} ${targaForFile}.jpeg`; 
             
             canvas.toBlob(async function(blob) {
-                if (!blob) {
-                    console.error("Errore: canvas.toBlob ha restituito null.");
-                    alert("Errore nella conversione della foto. Riprova.");
-                    freezeFrameDisplayElement.style.display = 'none';
-                    freezeFrameDisplayElement.src = '#'; 
-                    cameraStreamElement.style.display = 'block';
-                    captureBtn.disabled = false; 
-                    return;
-                }
-
-                const photoObjectToSave = {
-                    name: filename,
-                    blobData: blob,
-                    timestamp: new Date().toISOString(),
-                    targa: targaForFile,
-                    sezione: sectionNameForFile // 'sezione' qui è il nome normalizzato come 'remarketing', 'pneumatici', 'danni', ecc.
-                };
-
+                if (!blob) { alert("Errore conversione foto."); freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#'; cameraStreamElement.style.display = 'block'; captureBtn.disabled = false; return; }
+                const photoObjectToSave = { name: filename, blobData: blob, timestamp: new Date().toISOString(), targa: targaForFile, sezione: sectionNameForFile };
                 try {
                     await savePhotoToDB(photoObjectToSave);
-                    console.log(`Foto "${filename}" salvata in IndexedDB.`);
-
                     const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob); 
-                    link.download = filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    link.href = URL.createObjectURL(blob); link.download = filename;
+                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
                     URL.revokeObjectURL(link.href); 
-                    console.log(`Foto "${filename}" scaricata.`);
-
-                } catch (error) {
-                    console.error("Errore salvataggio foto in IndexedDB o download:", error);
-                    alert("Errore durante il salvataggio della foto nel database locale (IndexedDB).");
-                } finally {
-                    setTimeout(() => {
-                        freezeFrameDisplayElement.style.display = 'none';
-                        freezeFrameDisplayElement.src = '#'; 
-                        cameraStreamElement.style.display = 'block';
-                        captureBtn.disabled = false; 
-                    }, 500); 
-                }
+                } catch (error) { alert("Errore salvataggio foto DB.");
+                } finally { setTimeout(() => { freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#'; cameraStreamElement.style.display = 'block'; captureBtn.disabled = false; }, 500); }
             }, 'image/jpeg', 0.7); 
-
-        } else {
-            console.warn("Stream fotocamera non pronto o dimensioni video non disponibili per la cattura.");
         }
     }
-    // FINE MODIFICA NUMERAZIONE FOTO
-
 
     // START: Funzioni per Pagina Galleria e Lightbox
     async function showGalleryPage(targaToFilter = null, sectionToFilter = null) {
@@ -1928,20 +1707,16 @@
             const activeSectionEl = document.querySelector('#checklistContainer .category-section.active');
             lastSectionBeforeGallery = activeSectionEl ? activeSectionEl.id.replace('Section', '') : null;
         } else if (landingPageSection.style.display === 'block') {
-            lastViewBeforeGallery = 'landing';
-            lastSectionBeforeGallery = null;
+            lastViewBeforeGallery = 'landing'; lastSectionBeforeGallery = null;
         } else if (historyPageSection.style.display === 'block') {
-            lastViewBeforeGallery = 'history';
-            lastSectionBeforeGallery = null;
+            lastViewBeforeGallery = 'history'; lastSectionBeforeGallery = null;
         } 
 
         currentGalleryTargaFilter = targaToFilter ? targaToFilter.toUpperCase() : null;
         currentGallerySectionFilter = sectionToFilter; 
 
-        landingPageSection.style.display = 'none';
-        checklistContainer.style.display = 'none';
-        historyPageSection.style.display = 'none';
-        cameraPageSection.style.display = 'none';
+        landingPageSection.style.display = 'none'; checklistContainer.style.display = 'none';
+        historyPageSection.style.display = 'none'; cameraPageSection.style.display = 'none';
         galleryPageSection.style.display = 'block';
         
         const galleryTitleElement = galleryPageSection.querySelector('h2.section-title');
@@ -1949,16 +1724,11 @@
 
         if (currentGalleryTargaFilter) {
             targaSelezionataGlobalmente = currentGalleryTargaFilter; 
-            mainTitleGlobal.style.display = 'none';
-            targaDropdownContainer.style.display = 'flex';
+            mainTitleGlobal.style.display = 'none'; targaDropdownContainer.style.display = 'flex';
             populateTargaSwitcherDropdown(); 
-            if(targaSwitcherDropdown.value.toUpperCase() !== currentGalleryTargaFilter) {
-                targaSwitcherDropdown.value = currentGalleryTargaFilter;
-            }
+            if(targaSwitcherDropdown.value.toUpperCase() !== currentGalleryTargaFilter) { targaSwitcherDropdown.value = currentGalleryTargaFilter; }
             updateTargaDetailsDisplay(currentGalleryTargaFilter);
-            navButtonsContainer.style.display = 'flex';
-            mainPageNavButtons.style.display = 'flex';
-            utilityNavButtons.style.display = 'flex'; 
+            navButtonsContainer.style.display = 'flex'; mainPageNavButtons.style.display = 'flex'; utilityNavButtons.style.display = 'flex'; 
 
             navButtons.forEach(b => b.classList.remove('active'));
             let sectionNameForTitle = "Tutte le foto"; 
@@ -1978,105 +1748,56 @@
             galleryTitleText = `Galleria: ${currentGalleryTargaFilter} - ${sectionNameForTitle}`;
             updateNavButtonColors(); 
         } else { 
-            mainTitleGlobal.style.display = 'block';
-            mainTitleGlobal.innerHTML = "Galleria Foto Catturate"; 
-            targaDropdownContainer.style.display = 'none';
-            navButtonsContainer.style.display = 'none'; 
-            utilityNavButtons.style.display = 'flex'; 
+            mainTitleGlobal.style.display = 'block'; mainTitleGlobal.innerHTML = "Galleria Foto Catturate"; 
+            targaDropdownContainer.style.display = 'none'; navButtonsContainer.style.display = 'none'; utilityNavButtons.style.display = 'flex'; 
         }
         if(galleryTitleElement) galleryTitleElement.textContent = galleryTitleText;
 
         await populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter);
-        if (pageHeaderContainer.classList.contains('fixed-header')) {
-            document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight + 10}px`;
-        }
+        if (pageHeaderContainer.classList.contains('fixed-header')) { document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight + 10}px`; }
         window.scrollTo(0,0);
     }
 
-    async function populatePhotoGrid(targaFilter, sectionKeyFilter) {
+    async function populatePhotoGrid(targaFilter, sectionKeyFilterUi) { // sectionKeyFilterUi è il 'data-target' (es. 'danniVerifiche')
         photoGridContainer.innerHTML = ''; 
-        
         try {
             let photosToDisplay;
-            let effectiveSectionKey = sectionKeyFilter; // Questo è il 'data-target' del bottone di navigazione
-            let dbSectionKey = sectionKeyFilter; // Questo è la chiave usata per DB
-            
+            let dbSectionKey = sectionKeyFilterUi; // Chiave per DB
             if (targaFilter) { 
-                if (sectionKeyFilter) {
-                    if (sectionKeyFilter.toLowerCase() === 'danniverifiche') {
-                        dbSectionKey = 'danni'; // Chiave DB per 'danniVerifiche'
-                    } else if (sectionKeyFilter.toLowerCase() === 'riepilogo'){
-                        dbSectionKey = null; // null per DB significa tutte le sezioni per la targa
-                    }
-                } // Se sectionKeyFilter è null, dbSectionKey rimane null, prendendo tutte le foto per la targa
+                if (sectionKeyFilterUi) {
+                    if (sectionKeyFilterUi.toLowerCase() === 'danniverifiche') dbSectionKey = 'danni';
+                    else if (sectionKeyFilterUi.toLowerCase() === 'riepilogo') dbSectionKey = null; 
+                    else dbSectionKey = sectionKeyFilterUi.toLowerCase();
+                } // Se sectionKeyFilterUi è null (es. da gallery globale per targa), dbSectionKey rimane null per DB
                 photosToDisplay = await getPhotosByTargaAndSezioneFromDB(targaFilter, dbSectionKey);
             } else { 
                 photosToDisplay = await getAllPhotosFromDB(); 
             }
 
-
-            if (photosToDisplay.length === 0) {
-                photoGridContainer.innerHTML = '<p>Nessuna foto trovata per i filtri applicati.</p>';
-                return;
-            }
-
+            if (photosToDisplay.length === 0) { photoGridContainer.innerHTML = '<p>Nessuna foto trovata.</p>'; return; }
             photosToDisplay.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)); 
 
             photosToDisplay.forEach((photoData) => {
-                const photoItemDiv = document.createElement('div');
-                photoItemDiv.classList.add('photo-item');
-                const img = document.createElement('img');
-                let objectUrl = null; 
-                
-                if (photoData.blobData instanceof Blob) {
-                    objectUrl = URL.createObjectURL(photoData.blobData);
-                    img.src = objectUrl;
-                } else {
-                    img.alt = `Dati non validi ${photoData.name}`;
-                }
-                
-                img.alt = photoData.name;
-                img.dataset.timestamp = photoData.timestamp; 
-
-                img.addEventListener('click', function() {
-                    openImageLightbox(this.dataset.timestamp);
-                });
-
-                const caption = document.createElement('div');
-                caption.classList.add('photo-item-caption');
-                caption.textContent = photoData.name;
-                const deleteBtn = document.createElement('button');
-                deleteBtn.classList.add('photo-item-delete-btn');
-                deleteBtn.innerHTML = '&times;'; 
-                deleteBtn.title = "Elimina foto dal dispositivo";
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation(); 
-                    if (objectUrl) { 
-                        URL.revokeObjectURL(objectUrl);
-                    }
-                    deleteCapturedPhoto(photoData.timestamp); 
-                });
-                photoItemDiv.appendChild(img);
-                photoItemDiv.appendChild(caption);
-                photoItemDiv.appendChild(deleteBtn);
+                const photoItemDiv = document.createElement('div'); photoItemDiv.classList.add('photo-item');
+                const img = document.createElement('img'); let objectUrl = null; 
+                if (photoData.blobData instanceof Blob) { objectUrl = URL.createObjectURL(photoData.blobData); img.src = objectUrl; }
+                else { img.alt = `Dati non validi ${photoData.name}`; }
+                img.alt = photoData.name; img.dataset.timestamp = photoData.timestamp; 
+                img.addEventListener('click', function() { openImageLightbox(this.dataset.timestamp); });
+                const caption = document.createElement('div'); caption.classList.add('photo-item-caption'); caption.textContent = photoData.name;
+                const deleteBtn = document.createElement('button'); deleteBtn.classList.add('photo-item-delete-btn');
+                deleteBtn.innerHTML = '&times;'; deleteBtn.title = "Elimina foto dispositivo";
+                deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); if (objectUrl) { URL.revokeObjectURL(objectUrl); } deleteCapturedPhoto(photoData.timestamp); });
+                photoItemDiv.appendChild(img); photoItemDiv.appendChild(caption); photoItemDiv.appendChild(deleteBtn);
                 photoGridContainer.appendChild(photoItemDiv);
             });
-
-        } catch (e) {
-            console.error("Errore nel recupero delle foto da IndexedDB:", e);
-            photoGridContainer.innerHTML = '<p>Errore nel caricare le foto dal database.</p>';
-        }
+        } catch (e) { photoGridContainer.innerHTML = '<p>Errore caricamento foto.</p>'; }
     }
     
     async function deleteCapturedPhoto(timestampToDelete) { 
-        if (confirm("Sei sicuro di voler eliminare questa foto solo dal dispositivo?")) {
-            try {
-                await deletePhotoFromDB(timestampToDelete);
-                await populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter); 
-            } catch (e) {
-                console.error("Errore durante l'eliminazione della foto da IndexedDB:", e);
-                alert("Errore durante l'eliminazione della foto.");
-            }
+        if (confirm("Eliminare questa foto solo dal dispositivo?")) {
+            try { await deletePhotoFromDB(timestampToDelete); await populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter); }
+            catch (e) { alert("Errore eliminazione foto."); }
         }
     }
 
@@ -2086,44 +1807,28 @@
             const transaction = db.transaction(PHOTO_STORE_NAME, 'readonly');
             const store = transaction.objectStore(PHOTO_STORE_NAME);
             const request = store.get(timestamp);
-
             request.onsuccess = (event) => {
                 const photoData = event.target.result;
                 if (photoData && photoData.blobData instanceof Blob) {
-                    if (currentLightboxImageObjectUrl) {
-                        URL.revokeObjectURL(currentLightboxImageObjectUrl); 
-                    }
+                    if (currentLightboxImageObjectUrl) { URL.revokeObjectURL(currentLightboxImageObjectUrl); }
                     currentLightboxImageObjectUrl = URL.createObjectURL(photoData.blobData);
-                    lightboxImage.src = currentLightboxImageObjectUrl;
-                    imageLightbox.style.display = 'flex'; 
-                } else {
-                    alert("Impossibile caricare l'immagine ingrandita.");
-                }
+                    lightboxImage.src = currentLightboxImageObjectUrl; imageLightbox.style.display = 'flex'; 
+                } else { alert("Impossibile caricare immagine."); }
             };
-            request.onerror = (event) => {
-                alert("Errore nel caricamento dell'immagine per l'ingrandimento.");
-            };
-        } catch (error) {
-            alert("Errore database per visualizzare l'immagine.");
-        }
+            request.onerror = (event) => { alert("Errore caricamento immagine."); };
+        } catch (error) { alert("Errore DB per visualizzare immagine."); }
     }
 
     function closeImageLightbox() {
         imageLightbox.style.display = 'none';
-        if (currentLightboxImageObjectUrl) {
-            URL.revokeObjectURL(currentLightboxImageObjectUrl);
-            currentLightboxImageObjectUrl = null;
-        }
+        if (currentLightboxImageObjectUrl) { URL.revokeObjectURL(currentLightboxImageObjectUrl); currentLightboxImageObjectUrl = null; }
         lightboxImage.src = '#'; 
     }
-
     // END: Funzioni per Pagina Galleria e Lightbox
 
 
     function showView(viewName) {
-        landingPageSection.style.display = 'none';
-        checklistContainer.style.display = 'none';
-        historyPageSection.style.display = 'none';
+        landingPageSection.style.display = 'none'; checklistContainer.style.display = 'none'; historyPageSection.style.display = 'none';
         if(cameraPageSection) cameraPageSection.style.display = 'none';
         if(galleryPageSection) galleryPageSection.style.display = 'none'; 
         if(imageLightbox) imageLightbox.style.display = 'none'; 
@@ -2135,46 +1840,32 @@
         }
 
         if (viewName === 'landing') {
-            landingPageSection.style.display = 'block';
-            pageHeaderContainer.classList.add('fixed-header');
+            landingPageSection.style.display = 'block'; pageHeaderContainer.classList.add('fixed-header');
             if (mainTitleGlobal) { mainTitleGlobal.innerHTML = "Elenco Veicoli"; mainTitleGlobal.style.display = 'block';}
             if (navButtonsContainer) navButtonsContainer.style.display = 'none'; 
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-            if (listaTargheCompleta.length > 0 &&
-                (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
-                typeof popolaTargheFiltrate === 'function') {
+            if (listaTargheCompleta.length > 0 && (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) && typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
             }
         } else if (viewName === 'checklist') {
             pageHeaderContainer.classList.add('fixed-header');
             if (navButtonsContainer) navButtonsContainer.style.display = 'flex'; 
             if (mainPageNavButtons) mainPageNavButtons.style.display = 'flex';
-            if (!targaSelezionataGlobalmente) { 
-                showView('landing'); 
-                return;
-            }
-            if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente.toUpperCase()}`)) {
-                showView('landing');
-                alert(`La perizia per ${targaSelezionataGlobalmente} è stata cancellata e non può essere modificata.`);
-                return;
-            }
-
+            if (!targaSelezionataGlobalmente) { showView('landing'); return; }
+            if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente.toUpperCase()}`)) { showView('landing'); alert(`Perizia ${targaSelezionataGlobalmente} cancellata.`); return; }
             checklistContainer.style.display = 'block';
             if (mainTitleGlobal) mainTitleGlobal.style.display = 'none'; 
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex'; 
-            populateTargaSwitcherDropdown(); 
-            updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
+            populateTargaSwitcherDropdown(); updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
             if (tipoTrazioneSelect) handleTrazioneChange();
         } else if (viewName === 'history') {
-            pageHeaderContainer.classList.add('fixed-header');
-            historyPageSection.style.display = 'block';
+            pageHeaderContainer.classList.add('fixed-header'); historyPageSection.style.display = 'block';
             if (mainTitleGlobal) { mainTitleGlobal.innerHTML = "Cronistoria Salvataggi"; mainTitleGlobal.style.display = 'block'; }
             if (navButtonsContainer) navButtonsContainer.style.display = 'none';
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             populateSavedTargasList();
         } else if (viewName === 'gallery') { 
-            pageHeaderContainer.classList.add('fixed-header');
-            galleryPageSection.style.display = 'block'; 
+            pageHeaderContainer.classList.add('fixed-header'); galleryPageSection.style.display = 'block'; 
         } else if (viewName !== 'camera') { 
              pageHeaderContainer.classList.remove('fixed-header');
              if (headerCirclesDiv) headerCirclesDiv.style.display = 'none'; 
@@ -2182,454 +1873,208 @@
              if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
         }
         updateNavButtonColors(); 
-
         let bodyPaddingTopValue = '0px';
-        if (viewName !== 'camera') {
-            if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
-                bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
-            } else {
-                let nonFixedHeaderHeight = 0;
-                if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {
-                    nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
-                }
-                bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
-            }
-            document.body.style.paddingTop = bodyPaddingTopValue;
+        if (viewName !== 'camera' && pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
+            bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
         }
+        document.body.style.paddingTop = bodyPaddingTopValue;
         window.scrollTo(0, 0);
     }
 
     async function handleTargaSelectionAndSync(selectedTarga, targetSectionId = null) {
         const targaUpper = selectedTarga.toUpperCase();
-
         if (localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`)) {
-            if (targheLoadingStatus && landingPageSection.style.display === 'block') {
-                targheLoadingStatus.textContent = `Targa ${targaUpper} cancellata. Selezionane un'altra.`;
-            }
-            if (targaSelezionataGlobalmente === targaUpper && checklistContainer.style.display === 'block') {
-                showView('landing'); 
-            }
+            if (targheLoadingStatus && landingPageSection.style.display === 'block') { targheLoadingStatus.textContent = `Targa ${targaUpper} cancellata.`; }
+            if (targaSelezionataGlobalmente === targaUpper && checklistContainer.style.display === 'block') { showView('landing'); }
             return; 
         }
-
         if (targaSelezionataGlobalmente === targaUpper && checklistContainer.style.display === 'block') {
-            if (targaSwitcherDropdown.value !== targaUpper) {
-                targaSwitcherDropdown.value = targaUpper;
-            }
+            if (targaSwitcherDropdown.value !== targaUpper) { targaSwitcherDropdown.value = targaUpper; }
             updateTargaDetailsDisplay(targaUpper);
             if (targetSectionId) {
                  const currentActiveSectionEl = document.querySelector('#checklistContainer .category-section.active');
                  const currentActiveSectionId = currentActiveSectionEl ? currentActiveSectionEl.id.replace('Section', '') : null;
-                 if (currentActiveSectionId !== targetSectionId) {
-                    showSection(targetSectionId);
-                 }
+                 if (currentActiveSectionId !== targetSectionId) { showSection(targetSectionId); }
             }
             return; 
         }
-
         targaSelezionataGlobalmente = targaUpper;
-        if (targheLoadingStatus && landingPageSection.style.display === 'block') {
-            targheLoadingStatus.textContent = `Caricamento dati per ${targaSelezionataGlobalmente}...`;
-        }
-
-        let localData = null;
-        let localDatiPeriziaTimestamp = null; 
+        if (targheLoadingStatus && landingPageSection.style.display === 'block') { targheLoadingStatus.textContent = `Caricamento ${targaSelezionataGlobalmente}...`;}
+        let localData = null; let localDatiPeriziaTimestamp = null; 
         const localJson = localStorage.getItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`);
-        if (localJson) {
-            try {
-                localData = JSON.parse(localJson); 
-                localDatiPeriziaTimestamp = localData.timestamp ? new Date(localData.timestamp) : null;
-            } catch (e) { localData = null; }
-        }
-
+        if (localJson) { try { localData = JSON.parse(localJson); localDatiPeriziaTimestamp = localData.timestamp ? new Date(localData.timestamp) : null; } catch (e) { localData = null; }}
         const sheetsPeriziaData = await fetchLatestPeriziaFromSheets(targaSelezionataGlobalmente); 
-        let sheetsRecordTimestamp = null; 
-        let sheetsDatiPerizia = null;
-        let isSheetsDataCompleted = false;
-
+        let sheetsRecordTimestamp = null; let sheetsDatiPerizia = null; let isSheetsDataCompleted = false;
         if (sheetsPeriziaData && sheetsPeriziaData.timestamp && sheetsPeriziaData.datiPerizia) {
-            sheetsRecordTimestamp = new Date(sheetsPeriziaData.timestamp);
-            sheetsDatiPerizia = sheetsPeriziaData.datiPerizia;
-            isSheetsDataCompleted = sheetsPeriziaData.completata || false;
+            sheetsRecordTimestamp = new Date(sheetsPeriziaData.timestamp); sheetsDatiPerizia = sheetsPeriziaData.datiPerizia; isSheetsDataCompleted = sheetsPeriziaData.completata || false;
         }
-        
         if (sheetsPeriziaData && sheetsRecordTimestamp && (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp)) {
             try {
                 if (!localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente}`)) {
                     localStorage.setItem(`${APP_PREFIX}data_${targaSelezionataGlobalmente}`, JSON.stringify(sheetsDatiPerizia));
                     savePosizioneForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.posizione || "");
                     saveUrgentStatusForTarga(targaSelezionataGlobalmente, sheetsPeriziaData.urgente || false);
-                    if (isSheetsDataCompleted) markTargaAsCompleted(targaSelezionataGlobalmente);
-                    else unmarkTargaAsCompleted(targaSelezionataGlobalmente);
+                    if (isSheetsDataCompleted) markTargaAsCompleted(targaSelezionataGlobalmente); else unmarkTargaAsCompleted(targaSelezionataGlobalmente);
                 }
-            } catch (e) { console.error("Errore salvataggio dati da Sheets in LS:", e); }
+            } catch (e) { console.error("Errore LS:", e); }
         }
-        
-        if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente}`)) {
-             showView('landing');
-             return;
-        }
-
+        if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente}`)) { showView('landing'); return; }
         loadProgress(targaSelezionataGlobalmente); 
-        
-        if (targheLoadingStatus && landingPageSection.style.display === 'block') {
-            targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
-        }
-        
+        if (targheLoadingStatus && landingPageSection.style.display === 'block') { targheLoadingStatus.textContent = "Clicca targa per iniziare:"; }
         showView('checklist'); 
-
-        if (targetSectionId && document.getElementById(targetSectionId + 'Section')) {
-            showSection(targetSectionId);
-        } else {
-            const firstNav = Array.from(navButtons).find(b => b.dataset.target && !['backToListBtn', 'historyBtn', 'mainExitAppBtn'].includes(b.id));
-            if (firstNav && firstNav.dataset.target) {
-                showSection(firstNav.dataset.target);
-            } else if (navButtons.length > 0 && navButtons[0].dataset.target) {
-                showSection(navButtons[0].dataset.target);
-            } else { 
-                showSection('remarketing'); 
-            }
-        }
+        if (targetSectionId && document.getElementById(targetSectionId + 'Section')) { showSection(targetSectionId); }
+        else { const firstNav = Array.from(navButtons).find(b => b.dataset.target && !['backToListBtn', 'historyBtn', 'mainExitAppBtn'].includes(b.id)); if (firstNav && firstNav.dataset.target) showSection(firstNav.dataset.target); else if (navButtons.length > 0 && navButtons[0].dataset.target) showSection(navButtons[0].dataset.target); else showSection('remarketing'); }
     }
     
-    // MODIFICA QUI: populateSavedTargasList con bottone per marcare cancellazione da Sheets
     function populateSavedTargasList() {
-        savedTargasListContainer.innerHTML = '';
-        let hasSaves = false;
-        const tempSavedTargas = [];
+        savedTargasListContainer.innerHTML = ''; let hasSaves = false; const tempSavedTargas = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             if (key.startsWith(`${APP_PREFIX}data_`)) {
                 const targa = key.substring(`${APP_PREFIX}data_`.length);
-                // Mostra solo se non è già marcata per la cancellazione da Sheets
-                if (targa && !localStorage.getItem(`${APP_PREFIX}deleted_${targa}`) && !tempSavedTargas.includes(targa)) {
-                    tempSavedTargas.push(targa);
-                }
+                if (targa && !localStorage.getItem(`${APP_PREFIX}deleted_${targa}`) && !tempSavedTargas.includes(targa)) { tempSavedTargas.push(targa); }
             }
         }
         if (tempSavedTargas.length > 0) hasSaves = true;
         tempSavedTargas.sort();
-
         tempSavedTargas.forEach(targa => {
             const vehicleDetails = listaTargheCompleta.find(v => v.targa === targa) || { marca: '', modello: '', piazzale: '' };
-            let displayText = targa;
-            let details = [];
-            if (vehicleDetails.marca) details.push(vehicleDetails.marca);
-            if (vehicleDetails.modello) details.push(vehicleDetails.modello);
-            if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`);
-            if (details.length > 0) {
-                displayText += ` - ${details.join(' ')}`;
-            }
-
-            const itemContainer = document.createElement('div'); // Contenitore per i due pulsanti
-            itemContainer.classList.add('saved-targa-item');
-
-            const loadButton = document.createElement('button');
-            loadButton.classList.add('saved-targa-button');
-            loadButton.textContent = displayText;
-            loadButton.dataset.targa = targa;
-            loadButton.title = `Carica perizia per ${targa}`;
-            loadButton.addEventListener('click', async function() { 
-                await handleTargaSelectionAndSync(this.dataset.targa);
-            });
-
-            const deleteFromSheetsBtn = document.createElement('button');
-            deleteFromSheetsBtn.classList.add('delete-from-sheets-btn');
-            deleteFromSheetsBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i>'; // Icona per "upload della cancellazione"
-            deleteFromSheetsBtn.dataset.targa = targa;
-            deleteFromSheetsBtn.title = `Marca ${targa} per la cancellazione da Google Sheets`;
+            let displayText = targa; let details = [];
+            if (vehicleDetails.marca) details.push(vehicleDetails.marca); if (vehicleDetails.modello) details.push(vehicleDetails.modello); if (vehicleDetails.piazzale) details.push(`(Piazzale: ${vehicleDetails.piazzale})`);
+            if (details.length > 0) { displayText += ` - ${details.join(' ')}`; }
+            const itemContainer = document.createElement('div'); itemContainer.classList.add('saved-targa-item');
+            const loadButton = document.createElement('button'); loadButton.classList.add('saved-targa-button');
+            loadButton.textContent = displayText; loadButton.dataset.targa = targa; loadButton.title = `Carica perizia per ${targa}`;
+            loadButton.addEventListener('click', async function() { await handleTargaSelectionAndSync(this.dataset.targa); });
+            const deleteFromSheetsBtn = document.createElement('button'); deleteFromSheetsBtn.classList.add('delete-from-sheets-btn');
+            deleteFromSheetsBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i>'; deleteFromSheetsBtn.dataset.targa = targa;
+            deleteFromSheetsBtn.title = `Marca ${targa} per cancellazione da Google Sheets`;
             deleteFromSheetsBtn.addEventListener('click', function(event) {
-                event.stopPropagation();
-                const targaToDelete = this.dataset.targa;
-                if (confirm(`Sei sicuro di voler marcare la targa ${targaToDelete} per la CANCELLAZIONE DEFINITIVA da Google Sheets alla prossima sincronizzazione?\n\nATTENZIONE: I dati locali e le foto per questa targa dovrebbero essere già stati rimossi tramite il tasto 'X' nell'elenco principale. Questa azione prepara solo la cancellazione dal server.`)) {
+                event.stopPropagation(); const targaToDelete = this.dataset.targa;
+                if (confirm(`Marcare ${targaToDelete} per CANCELLAZIONE da Google Sheets alla prossima sincronizzazione?\n(Dati locali e foto sono già stati rimossi con 'X'.)`)) {
                     try {
                         localStorage.setItem(`${APP_PREFIX}deleted_${targaToDelete}`, new Date().toISOString());
-                        console.log(`Targa ${targaToDelete} contrassegnata per la cancellazione da Sheets.`);
-                        alert(`Targa ${targaToDelete} marcata per la cancellazione da Google Sheets.\nLa cancellazione effettiva avverrà con la prossima sincronizzazione.`);
-                        // Rimuovi l'elemento dalla lista della cronistoria o segnalo come "da cancellare"
+                        alert(`${targaToDelete} marcata per cancellazione da Sheets.`);
                         this.parentElement.remove(); 
-                        if (typeof popolaTargheFiltrate === 'function') { // Aggiorna anche la lista principale
-                             popolaTargheFiltrate();
-                        }
-                        if (savedTargasListContainer.children.length === 0) {
-                             savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio valido trovato.</p>';
-                        }
-
-                    } catch (e) {
-                        console.error(`Errore nel marcare ${targaToDelete} come cancellata per Sheets:`, e);
-                        alert(`Errore nel marcare ${targaToDelete} per la cancellazione da Sheets.`);
-                    }
+                        if (typeof popolaTargheFiltrate === 'function') { popolaTargheFiltrate(); }
+                        if (savedTargasListContainer.children.length === 0) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio valido.</p>';}
+                    } catch (e) { alert(`Errore marcatura ${targaToDelete} per cancellazione.`); }
                 }
             });
-
-            itemContainer.appendChild(loadButton);
-            itemContainer.appendChild(deleteFromSheetsBtn);
+            itemContainer.appendChild(loadButton); itemContainer.appendChild(deleteFromSheetsBtn);
             savedTargasListContainer.appendChild(itemContainer);
         });
-
-        if (!hasSaves) {
-            savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio valido trovato da gestire per la cancellazione da Sheets.</p>';
-        }
+        if (!hasSaves) { savedTargasListContainer.innerHTML = '<p style="text-align:center; color: #aaa;">Nessun salvataggio valido.</p>'; }
     }
-    // FINE MODIFICA
-
 
     function clearAllSavedData() { 
-        if (confirm("ATTENZIONE!\n\nCancellare TUTTI i dati salvati (incluse perizie, posizioni, urgenze, foto, flag di cancellazione e filtro piazzale)?\n\nAzione irreversibile.")) { 
-            let c = 0; 
-            const keysToRemove = []; 
-            for (let i=localStorage.length-1;i>=0;i--) { 
-                const k=localStorage.key(i); 
-                if (k.startsWith(APP_PREFIX)) { 
-                    keysToRemove.push(k); 
-                } 
-            } 
+        if (confirm("ATTENZIONE! Cancellare TUTTI i dati salvati? Azione irreversibile.")) { 
+            let c = 0; const keysToRemove = []; 
+            for (let i=localStorage.length-1;i>=0;i--) { const k=localStorage.key(i); if (k.startsWith(APP_PREFIX)) { keysToRemove.push(k); } } 
             keysToRemove.forEach(k => { localStorage.removeItem(k); c++; }); 
-            
             openPhotoDB().then(db => {
                 const transaction = db.transaction(PHOTO_STORE_NAME, 'readwrite');
                 const store = transaction.objectStore(PHOTO_STORE_NAME);
                 const request = store.clear(); 
-                request.onsuccess = () => {
-                    console.log(`Tutte le foto cancellate da IndexedDB (${PHOTO_STORE_NAME}).`);
-                    alert(`${c} elementi di localStorage e tutte le foto da IndexedDB cancellati.`); 
-                    if(sheetFilterDropdown) sheetFilterDropdown.value = 'all'; 
-                    localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');  
-                    populateSavedTargasList(); 
-                    if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe();  
-                    if (typeof showView === 'function') showView('landing'); 
-                    if (galleryPageSection.style.display === 'block') { 
-                        populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter);
-                    }
+                request.onsuccess = () => { alert(`${c} elementi LS e foto DB cancellati.`); 
+                    if(sheetFilterDropdown) sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');  
+                    populateSavedTargasList(); if (typeof caricaEPopolaTarghe === 'function') caricaEPopolaTarghe(); if (typeof showView === 'function') showView('landing'); 
+                    if (galleryPageSection.style.display === 'block') { populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter); }
                 };
-                request.onerror = (event) => {
-                    alert(`Errore durante la cancellazione delle foto da IndexedDB. ${c} elementi di localStorage cancellati.`);
-                };
-            }).catch(err => {
-                alert("Errore apertura DB per cancellare le foto. Solo i dati di localStorage sono stati cancellati.");
-            });
+                request.onerror = (event) => { alert(`Errore cancellazione foto DB. ${c} elementi LS cancellati.`); };
+            }).catch(err => { alert("Errore DB per cancellare foto. Solo dati LS cancellati."); });
         } 
     }
     function setupSheetFilterDropdown() { if (!sheetFilterDropdown) return; const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== '').sort())]; sheetFilterDropdown.innerHTML = ''; sources.forEach(source => { const option = document.createElement('option'); option.value = source; option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source; sheetFilterDropdown.appendChild(option); }); const savedPiazzaleFilter = localStorage.getItem(`${APP_PREFIX}selectedPiazzaleFilter`); if (savedPiazzaleFilter && sources.includes(savedPiazzaleFilter)) { sheetFilterDropdown.value = savedPiazzaleFilter; } else { sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); } sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange); sheetFilterDropdown.addEventListener('change', handleSheetFilterChange); }
     function handleSheetFilterChange() { if (sheetFilterDropdown) { localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, sheetFilterDropdown.value); } popolaTargheFiltrate(); targaSelezionataGlobalmente = null; }
     
-    // MODIFICA QUI: popolaTargheFiltrate per comportamento DEL button
     function popolaTargheFiltrate() {
-        const tEl = document.getElementById('targaListContainer');
-        if (!tEl) return;
-        tEl.innerHTML = '';
+        const tEl = document.getElementById('targaListContainer'); if (!tEl) return; tEl.innerHTML = '';
         const selectedSource = sheetFilterDropdown ? sheetFilterDropdown.value : 'all';
-        
-        let preliminaryFilteredList = selectedSource === 'all' 
-            ? [...listaTargheCompleta] 
-            : listaTargheCompleta.filter(item => item.piazzale === selectedSource);
-
+        let preliminaryFilteredList = selectedSource === 'all' ? [...listaTargheCompleta] : listaTargheCompleta.filter(item => item.piazzale === selectedSource);
         function getItemRank(item) {
-            const targaUpper = item.targa.toUpperCase();
-            const isLocallyDeleted = !!localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`);
+            const targaUpper = item.targa.toUpperCase(); const isLocallyDeleted = !!localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`);
             if (isLocallyDeleted) return 0; 
-            
-            const isUrgent = loadUrgentStatusForTarga(targaUpper); 
-            const isCompleted = isTargaCompleted(targaUpper);
-            const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`);
-            let hasData = false;
-            if (localDataJson) {
-                try {
-                    const parsedData = JSON.parse(localDataJson);
-                    hasData = Object.keys(parsedData).some(key => key !== 'timestamp' && parsedData[key] !== "" && parsedData[key] !== false && (!Array.isArray(parsedData[key]) || parsedData[key].length > 0) );
-                } catch (e) { /* ignore */ }
-            }
-            if (isUrgent && !isCompleted) return 1; 
-            if (!isUrgent && !isCompleted && hasData) return 2; 
-            if (!isUrgent && !isCompleted && !hasData) return 3; 
-            if (!isUrgent && isCompleted) return 4; 
-            if (isUrgent && isCompleted) return 5;  
-            return 6; 
+            const isUrgent = loadUrgentStatusForTarga(targaUpper); const isCompleted = isTargaCompleted(targaUpper);
+            const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`); let hasData = false;
+            if (localDataJson) { try { const parsedData = JSON.parse(localDataJson); hasData = Object.keys(parsedData).some(key => key !== 'timestamp' && parsedData[key] !== "" && parsedData[key] !== false && (!Array.isArray(parsedData[key]) || parsedData[key].length > 0) ); } catch (e) {} }
+            if (isUrgent && !isCompleted) return 1; if (!isUrgent && !isCompleted && hasData) return 2; 
+            if (!isUrgent && !isCompleted && !hasData) return 3; if (!isUrgent && isCompleted) return 4; 
+            if (isUrgent && isCompleted) return 5; return 6; 
         }
-
-        preliminaryFilteredList.sort((a, b) => {
-            const rankA = getItemRank(a);
-            const rankB = getItemRank(b);
-            if (rankA !== rankB) return rankA - rankB;
-            return a.targa.localeCompare(b.targa); 
-        });
-
+        preliminaryFilteredList.sort((a, b) => { const rankA = getItemRank(a); const rankB = getItemRank(b); if (rankA !== rankB) return rankA - rankB; return a.targa.localeCompare(b.targa); });
         const filteredList = preliminaryFilteredList;
-
-        if (filteredList.length === 0) {
-            tEl.innerHTML = '<p style="text-align:center; padding:10px; color: #aaa;">Nessuna targa trovata per questo filtro.</p>';
-            if(targheLoadingStatus) targheLoadingStatus.textContent = selectedSource === 'all' ? "Nessuna targa nel CSV." : `Nessuna targa per l'elenco: ${selectedSource}.`;
-            return;
-        }
-
+        if (filteredList.length === 0) { tEl.innerHTML = '<p style="text-align:center; padding:10px; color: #aaa;">Nessuna targa per filtro.</p>'; if(targheLoadingStatus) targheLoadingStatus.textContent = selectedSource === 'all' ? "Nessuna targa nel CSV." : `Nessuna targa per: ${selectedSource}.`; return; }
         filteredList.forEach((item, idx) => {
-            const targaUpper = item.targa.toUpperCase();
-            const li = document.createElement('div');
-            li.classList.add('targa-list-item');
-
-            const isLocallyDeletedFlag = !!localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`);
-            if (isLocallyDeletedFlag) {
-                li.classList.add('locally-deleted');
-            }
-
-            const itemCompleted = isTargaCompleted(targaUpper);
-            const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`);
-            let hasData = false;
+            const targaUpper = item.targa.toUpperCase(); const li = document.createElement('div'); li.classList.add('targa-list-item');
+            const isLocallyDeletedFlag = !!localStorage.getItem(`${APP_PREFIX}deleted_${targaUpper}`); if (isLocallyDeletedFlag) { li.classList.add('locally-deleted'); }
+            const itemCompleted = isTargaCompleted(targaUpper); const localDataJson = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`); let hasData = false;
             if (localDataJson) { try { const parsed = JSON.parse(localDataJson); hasData = Object.keys(parsed).some(k => k !== 'timestamp' && parsed[k] !== "" && parsed[k] !== false ); } catch (e) {} }
             const isItemUrgent = loadUrgentStatusForTarga(targaUpper); 
-
             if (!isLocallyDeletedFlag) { 
                 if (isItemUrgent) {  li.classList.add('urgent-item'); if (itemCompleted) li.classList.add('completed'); } 
                 else if (itemCompleted) { li.classList.add('status-visto', 'completed'); } 
                 else if (hasData) { li.classList.add('status-parziale'); } 
                 else { li.classList.add('status-da-vedere'); }
             }
-
-            const targaCol = document.createElement('span');
-            targaCol.classList.add('targa-col', 'targa-col-targa');
-            if (!isLocallyDeletedFlag) { 
-                 targaCol.classList.add('clickable-targa');
-                 targaCol.addEventListener('click', async function() { 
-                    const selectedTargaFromClick = this.dataset.targaValue; 
-                    if (selectedTargaFromClick) { await handleTargaSelectionAndSync(selectedTargaFromClick); } 
-                });
-            }
-            targaCol.textContent = item.targa || 'N/D'; 
-            targaCol.dataset.targaValue = targaUpper; 
-            li.appendChild(targaCol);
-
-            const posizioneCol = document.createElement('span'); 
-            posizioneCol.classList.add('targa-col', 'targa-col-posizione'); 
-            const posizioneInput = document.createElement('input'); 
-            posizioneInput.type = 'text'; 
-            posizioneInput.classList.add('posizione-input'); 
-            posizioneInput.dataset.targa = targaUpper; 
-            posizioneInput.placeholder = 'Pos.'; 
-            posizioneInput.maxLength = 5; 
-            posizioneInput.value = loadPosizioneForTarga(targaUpper); 
-            posizioneInput.disabled = isLocallyDeletedFlag; 
-            posizioneInput.addEventListener('mousedown', (e) => e.stopPropagation()); 
-            posizioneInput.addEventListener('click', (e) => e.stopPropagation()); 
-            posizioneInput.addEventListener('focus', (e) => e.stopPropagation()); 
+            const targaCol = document.createElement('span'); targaCol.classList.add('targa-col', 'targa-col-targa');
+            if (!isLocallyDeletedFlag) { targaCol.classList.add('clickable-targa'); targaCol.addEventListener('click', async function() { const selectedTargaFromClick = this.dataset.targaValue; if (selectedTargaFromClick) { await handleTargaSelectionAndSync(selectedTargaFromClick); } }); }
+            targaCol.textContent = item.targa || 'N/D'; targaCol.dataset.targaValue = targaUpper; li.appendChild(targaCol);
+            const posizioneCol = document.createElement('span'); posizioneCol.classList.add('targa-col', 'targa-col-posizione'); 
+            const posizioneInput = document.createElement('input'); posizioneInput.type = 'text'; posizioneInput.classList.add('posizione-input'); posizioneInput.dataset.targa = targaUpper; posizioneInput.placeholder = 'Pos.'; posizioneInput.maxLength = 5; posizioneInput.value = loadPosizioneForTarga(targaUpper); posizioneInput.disabled = isLocallyDeletedFlag; 
+            posizioneInput.addEventListener('mousedown', (e) => e.stopPropagation()); posizioneInput.addEventListener('click', (e) => e.stopPropagation()); posizioneInput.addEventListener('focus', (e) => e.stopPropagation()); 
             posizioneInput.addEventListener('blur', function() { const newPosition = this.value.trim().toUpperCase(); if (newPosition !== loadPosizioneForTarga(this.dataset.targa)) { savePosizioneForTarga(this.dataset.targa, newPosition); this.style.transition = 'background-color 0.3s ease'; this.style.backgroundColor = 'rgba(76, 175, 80, 0.2)'; setTimeout(() => { this.style.backgroundColor = ''; }, 1000); } }); 
             posizioneInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { event.preventDefault(); this.blur(); }}); 
-            posizioneCol.appendChild(posizioneInput); 
-            li.appendChild(posizioneCol); 
-
-            const urgenzaCol = document.createElement('span'); 
-            urgenzaCol.classList.add('targa-col', 'targa-col-urgenza'); 
-            const urgenzaCheckbox = document.createElement('input'); 
-            urgenzaCheckbox.type = 'checkbox'; 
-            urgenzaCheckbox.checked = isItemUrgent; 
-            urgenzaCheckbox.title = isItemUrgent ? "Togli urgenza" : "Marca come urgente"; 
-            urgenzaCheckbox.disabled = isLocallyDeletedFlag; 
-            urgenzaCheckbox.addEventListener('mousedown', (e) => e.stopPropagation()); 
-            urgenzaCheckbox.addEventListener('click', (e) => e.stopPropagation()); 
-            urgenzaCheckbox.addEventListener('change', function() { saveUrgentStatusForTarga(targaUpper, this.checked);  this.title = this.checked ? "Togli urgenza" : "Marca come urgente"; popolaTargheFiltrate();  }); 
-            urgenzaCol.appendChild(urgenzaCheckbox); 
-            li.appendChild(urgenzaCol); 
-
+            posizioneCol.appendChild(posizioneInput); li.appendChild(posizioneCol); 
+            const urgenzaCol = document.createElement('span'); urgenzaCol.classList.add('targa-col', 'targa-col-urgenza'); 
+            const urgenzaCheckbox = document.createElement('input'); urgenzaCheckbox.type = 'checkbox'; urgenzaCheckbox.checked = isItemUrgent; urgenzaCheckbox.title = isItemUrgent ? "Togli urgenza" : "Marca urgente"; urgenzaCheckbox.disabled = isLocallyDeletedFlag; 
+            urgenzaCheckbox.addEventListener('mousedown', (e) => e.stopPropagation()); urgenzaCheckbox.addEventListener('click', (e) => e.stopPropagation()); 
+            urgenzaCheckbox.addEventListener('change', function() { saveUrgentStatusForTarga(targaUpper, this.checked);  this.title = this.checked ? "Togli urgenza" : "Marca urgente"; popolaTargheFiltrate();  }); 
+            urgenzaCol.appendChild(urgenzaCheckbox); li.appendChild(urgenzaCol); 
             const marcaCol = document.createElement('span'); marcaCol.classList.add('targa-col', 'targa-col-marca'); marcaCol.textContent = item.marca || 'N/D'; li.appendChild(marcaCol); 
             const modelloCol = document.createElement('span'); modelloCol.classList.add('targa-col', 'targa-col-modello'); modelloCol.textContent = item.modello || 'N/D'; li.appendChild(modelloCol); 
             const piazzaleCol = document.createElement('span'); piazzaleCol.classList.add('targa-col', 'targa-col-piazzale'); piazzaleCol.textContent = item.piazzale || 'N/D'; li.appendChild(piazzaleCol); 
-            
-            const actionsCol = document.createElement('span'); 
-            actionsCol.classList.add('targa-col', 'targa-col-actions'); 
+            const actionsCol = document.createElement('span'); actionsCol.classList.add('targa-col', 'targa-col-actions'); 
             if (!isLocallyDeletedFlag) { 
-                const delB = document.createElement('button'); 
-                delB.classList.add('action-button', 'delete-progress-btn'); 
-                delB.dataset.targa = targaUpper;  
-                delB.title = `Cancella progressi e foto locali per ${item.targa}`; 
-                delB.textContent = 'X'; 
-
+                const delB = document.createElement('button'); delB.classList.add('action-button', 'delete-progress-btn'); delB.dataset.targa = targaUpper;  
+                delB.title = `Cancella dati locali per ${item.targa}`; delB.textContent = 'X'; 
                 delB.addEventListener('click', function(event) { 
-                    event.stopPropagation(); 
-                    const tDelUpper = this.dataset.targa; 
-                    if (confirm(`Sei sicuro di voler cancellare TUTTI i dati locali (perizia, foto, posizione, urgenza) per la targa ${item.targa}?\nQuesta azione NON la marcherà per la cancellazione da Google Sheets.`)) {
-                        clearLocalDataForTarga(tDelUpper); 
-                        alert(`Dati locali e foto per ${item.targa} cancellati.`);
-                        if (typeof popolaTargheFiltrate === 'function') {
-                            popolaTargheFiltrate();
-                        }
-                        if (targaSelezionataGlobalmente && targaSelezionataGlobalmente.toUpperCase() === tDelUpper) {
-                            targaSelezionataGlobalmente = null;
-                            showView('landing');
-                        }
+                    event.stopPropagation(); const tDelUpper = this.dataset.targa; 
+                    if (confirm(`Cancellare TUTTI i dati locali (perizia, foto, posizione, urgenza) per ${item.targa}?\nNON sarà marcata per cancellazione da Sheets.`)) {
+                        clearLocalDataForTarga(tDelUpper); alert(`Dati locali e foto per ${item.targa} cancellati.`);
+                        if (typeof popolaTargheFiltrate === 'function') popolaTargheFiltrate();
+                        if (targaSelezionataGlobalmente && targaSelezionataGlobalmente.toUpperCase() === tDelUpper) { targaSelezionataGlobalmente = null; showView('landing'); }
                     }
-                }); 
-                actionsCol.appendChild(delB); 
-            } else {
-                actionsCol.textContent = 'DEL'; 
-                actionsCol.title = 'Marcata per cancellazione da Sheets (gestisci da Cronistoria)';
-            }
-            li.appendChild(actionsCol); 
-            tEl.appendChild(li); 
+                }); actionsCol.appendChild(delB); 
+            } else { actionsCol.textContent = 'DEL'; actionsCol.title = 'Marcata per cancellazione da Sheets'; }
+            li.appendChild(actionsCol); tEl.appendChild(li); 
         });
-        if(targheLoadingStatus) targheLoadingStatus.textContent = "Clicca su una targa per iniziare la perizia:";
+        if(targheLoadingStatus) targheLoadingStatus.textContent = "Clicca targa per iniziare:";
     }
-    // FINE MODIFICA
 
     async function caricaEPopolaTarghe() { 
-        if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati dal server..."; 
+        if (targheLoadingStatus) targheLoadingStatus.textContent = "Caricamento dati..."; 
         try { 
             const r = await fetch(GOOGLE_SHEET_CSV_URL + `&nocache=${new Date().getTime()}`); 
-            if (!r.ok) { 
-                let e = `HTTP ${r.status}.`; 
-                if (r.status === 0) e = "Errore di rete o CORS."; 
-                else if (r.status === 404) e = "File CSV non trovato (404)."; 
-                else if (r.status === 403) e = "Accesso al file CSV negato (403)."; 
-                throw new Error(e); 
-            } 
-            const csv = await r.text(); 
-            const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== ''); 
-            if (lines.length === 0) { 
-                if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato nel file CSV."; 
-                listaTargheCompleta = []; 
-                if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; 
-                if (targaListContainer) targaListContainer.innerHTML = ''; 
-                return; 
-            } 
-            listaTargheCompleta = lines.map(l => { 
-                const p = l.split(','); 
-                return {  
-                    targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(), 
-                    marca: (p[1] || '').trim().replace(/^"|"$/g, ''), 
-                    modello: (p[2] || '').trim().replace(/^"|"$/g, ''), 
-                    piazzale: (p[3] || '').trim().replace(/^"|"$/g, '') 
-                }; 
-            }).filter(i => i.targa && i.targa.length > 3);  
-            if (listaTargheCompleta.length === 0) { 
-                if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file CSV.";  
-                if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; 
-                if (targaListContainer) targaListContainer.innerHTML = ''; 
-                return; 
-            } 
-            setupSheetFilterDropdown(); 
-            popolaTargheFiltrate(); 
-        } catch (e) { 
-            console.error("Errore caricamento/popolamento targhe:", e); 
-            if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore caricamento: ${e.message}. Riprova.`; 
-            if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti gli Elenchi</option>'; 
-            if (targaListContainer) targaListContainer.innerHTML = '';  
-            listaTargheCompleta = []; 
-        } 
+            if (!r.ok) { throw new Error(`HTTP ${r.status}.`); } 
+            const csv = await r.text(); const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== ''); 
+            if (lines.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessun dato CSV."; listaTargheCompleta = []; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } 
+            listaTargheCompleta = lines.map(l => { const p = l.split(','); return { targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(), marca: (p[1] || '').trim().replace(/^"|"$/g, ''), modello: (p[2] || '').trim().replace(/^"|"$/g, ''), piazzale: (p[3] || '').trim().replace(/^"|"$/g, '') }; }).filter(i => i.targa && i.targa.length > 3);  
+            if (listaTargheCompleta.length === 0) { if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida CSV."; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti</option>'; if (targaListContainer) targaListContainer.innerHTML = ''; return; } 
+            setupSheetFilterDropdown(); popolaTargheFiltrate(); 
+        } catch (e) { if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore: ${e.message}.`; if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Tutti</option>'; if (targaListContainer) targaListContainer.innerHTML = '';  listaTargheCompleta = []; } 
     }
     function initSequentialAnimation() { const checklistContainerDiv = document.getElementById('checklistContainer'); if (!checklistContainerDiv || checklistContainerDiv.style.display === 'none') return; const activeSection = checklistContainerDiv.querySelector('.category-section.active'); if (!activeSection) return; activeSection.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me')); const allVisibleElementsInSection = Array.from( activeSection.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled), textarea:not(:disabled)') ).filter(el => { let current = el; while (current && current !== activeSection.parentElement) {  if (getComputedStyle(current).display === 'none' || getComputedStyle(current).visibility === 'hidden') return false; current = current.parentElement; } return el.offsetParent !== null;  }); const startIndex = allVisibleElementsInSection.findIndex(el => isInputDefault(el)); if (startIndex === -1 && allVisibleElementsInSection.length > 0) {  return; } if (allVisibleElementsInSection.length === 0) {   return; } const elementsToAnimate = allVisibleElementsInSection.slice(startIndex >= 0 ? startIndex : 0); if (elementsToAnimate.length === 0) return; let currentIndex = 0; let activeListeners = [];  function clearAllActiveAnimationListeners() { activeListeners.forEach(({element, type, handler}) => { element.removeEventListener(type, handler); element.classList.remove('animate-me');  }); activeListeners = []; } clearAllActiveAnimationListeners(); function animateNextElement() { if (currentIndex >= elementsToAnimate.length) { clearAllActiveAnimationListeners(); return; } const currentElement = elementsToAnimate[currentIndex]; if (!isInputDefault(currentElement)) {  currentIndex++; animateNextElement(); return; } currentElement.classList.add('animate-me'); currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); const onValueChange = (event) => { let processChange = false; if (event.type === 'change') { processChange = true; } else if (event.type === 'blur' && currentElement.tagName !== 'SELECT') {  processChange = true; }  if (processChange && !isInputDefault(currentElement)) {  currentElement.classList.remove('animate-me'); activeListeners = activeListeners.filter(listener => { if (listener.element === currentElement) { listener.element.removeEventListener(listener.type, listener.handler); return false;  } return true;  }); currentIndex++; setTimeout(animateNextElement, 50);  } }; currentElement.addEventListener('change', onValueChange); activeListeners.push({element: currentElement, type: 'change', handler: onValueChange}); if (currentElement.tagName === 'TEXTAREA' || currentElement.type === 'text') { currentElement.addEventListener('blur', onValueChange);  activeListeners.push({element: currentElement, type: 'blur', handler: onValueChange}); } } animateNextElement(); }
 
     function showSection(targetId) {
-        document.querySelectorAll('#checklistContainer .animate-me').forEach(el => {
-            el.classList.remove('animate-me');
-        });
+        document.querySelectorAll('#checklistContainer .animate-me').forEach(el => el.classList.remove('animate-me'));
         sections.forEach(s => s.classList.toggle('active', s.id === targetId + 'Section'));
-        navButtons.forEach(b => { 
-            b.classList.toggle('active', b.dataset.target === targetId);
-        });
+        navButtons.forEach(b => { b.classList.toggle('active', b.dataset.target === targetId); });
         updateNavButtonColors(); 
         if (checklistContainer.style.display === 'block') { 
             if (mainTitleGlobal) mainTitleGlobal.style.display = 'none';
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
-            populateTargaSwitcherDropdown(); 
-            updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
+            populateTargaSwitcherDropdown(); updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
             localStorage.setItem(LAST_ACTIVE_PERIZIA_PAGE_KEY, targetId);
         } else {
             if (mainTitleGlobal) mainTitleGlobal.style.display = 'block';
@@ -2639,113 +2084,69 @@
         const targetSectionElement = document.getElementById(targetId + 'Section');
         if (targetSectionElement && Array.from(sections).includes(targetSectionElement) && targetId !== 'riepilogo') {
              setTimeout(initSequentialAnimation, 100); 
-        } else if (targetId === 'riepilogo') {
-            generateSummary();
-        }
+        } else if (targetId === 'riepilogo') { generateSummary(); }
          window.scrollTo(0, 0); 
     }
 
     function getSelectText(selectElementOrId) { const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId; if (el && el.tagName === 'SELECT' && el.value !== "") { if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) { return el.options[el.selectedIndex].text; } return el.value;  } return "N/S";  }
     
     function generateSummary() { 
-        summaryContent.innerHTML = ''; 
-        let targa = targaSelezionataGlobalmente || "N/D"; 
-        
-        function createSummaryItem(label, value, isAnomaly = false) { 
-            const itemDiv = document.createElement('div'); 
-            itemDiv.classList.add('summary-item'); 
-            if (isAnomaly) itemDiv.classList.add('summary-anomaly'); 
-            itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; 
-            return itemDiv; 
-        } 
+        summaryContent.innerHTML = ''; let targa = targaSelezionataGlobalmente || "N/D"; 
+        function createSummaryItem(label, value, isAnomaly = false) { const itemDiv = document.createElement('div'); itemDiv.classList.add('summary-item'); if (isAnomaly) itemDiv.classList.add('summary-anomaly'); itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; return itemDiv; } 
         summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase())); 
         if (targaSelezionataGlobalmente) { 
             const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); 
             let marcaVeicolo = "N/D", modelloVeicolo = "N/D"; 
-            if (veicoloAttuale) { 
-                marcaVeicolo = veicoloAttuale.marca || "N/D"; 
-                modelloVeicolo = veicoloAttuale.modello || "N/D"; 
-            } 
-            summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); 
-            summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); 
+            if (veicoloAttuale) { marcaVeicolo = veicoloAttuale.marca || "N/D"; modelloVeicolo = veicoloAttuale.modello || "N/D"; } 
+            summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); 
             summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D")); 
             const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente); 
             summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary)); 
-        } else {  
-            summaryContent.appendChild(createSummaryItem("Marca", "N/D")); 
-            summaryContent.appendChild(createSummaryItem("Modello", "N/D")); 
-            summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); 
-            summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); 
-        } 
+        } else {  summaryContent.appendChild(createSummaryItem("Marca", "N/D")); summaryContent.appendChild(createSummaryItem("Modello", "N/D")); summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); } 
         summaryContent.innerHTML += `<h3>Remarketing:</h3>`; 
-        const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; 
-        const isEV = tipoTrazioneValue === 'elettrico'; 
+        const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; const isEV = tipoTrazioneValue === 'elettrico'; 
         summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect))); 
         let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza'); 
         let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante"); 
         summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante")); 
         summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia)); 
-        let kmStato = getSelectText('stato_chilometri'); 
-        summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); 
-        let cdcStato = getSelectText('stato_cdc'); 
-        summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); 
+        let kmStato = getSelectText('stato_chilometri'); summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); 
+        let cdcStato = getSelectText('stato_cdc'); summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); 
         summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente")); 
         summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente")); 
         if (isEV) { 
             summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`; 
-            let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); 
-            let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); 
+            let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); 
             summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente")); 
             summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente")); 
         } 
         summaryContent.innerHTML += `<h3>Pneumatici:</h3>`; 
-        const pneumaticiFields = [ 
-            { id: 'pneumatico_as', label: 'Ant. Sinistro' }, 
-            { id: 'pneumatico_ad', label: 'Ant. Destro' }, 
-            { id: 'pneumatico_pd', label: 'Post. Destro' }, 
-            { id: 'pneumatico_ps', label: 'Post. Sinistro' }
-        ]; 
-        pneumaticiFields.forEach(pneu => { 
-            summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); 
-        }); 
+        const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }]; 
+        pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); }); 
         summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`; 
         summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK')); 
         summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK')); 
         const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : ""; 
         if (noteDanniValue) { 
-            const noteDiv = document.createElement('div'); 
-            noteDiv.classList.add('summary-item', 'summary-notes'); 
-            const strongNode = document.createElement('strong'); 
-            strongNode.textContent = "Note Danni/Verifiche: "; 
-            const contentDiv = document.createElement('div'); 
-            contentDiv.style.whiteSpace = 'pre-wrap'; 
-            contentDiv.style.paddingLeft = '10px'; 
-            contentDiv.textContent = noteDanniValue; 
-            noteDiv.appendChild(strongNode); 
-            noteDiv.appendChild(contentDiv); 
-            summaryContent.appendChild(noteDiv); 
+            const noteDiv = document.createElement('div'); noteDiv.classList.add('summary-item', 'summary-notes'); 
+            const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: "; 
+            const contentDiv = document.createElement('div'); contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue; 
+            noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv); summaryContent.appendChild(noteDiv); 
         }
-
         if (targaSelezionataGlobalmente && downloadPhotosBtn) {
             const targaCompleted = isTargaCompleted(targaSelezionataGlobalmente);
             if (targaCompleted) {
                 downloadPhotosBtn.href = `http://192.168.1.154:8080/${targaSelezionataGlobalmente.toUpperCase()}.zip`;
-                downloadPhotosBtn.style.display = 'inline-block';
-                downloadPhotosBtn.removeAttribute('disabled');
-                downloadPhotosBtn.style.opacity = '1';
-                downloadPhotosBtn.style.cursor = 'pointer';
+                downloadPhotosBtn.style.display = 'inline-block'; downloadPhotosBtn.removeAttribute('disabled');
+                downloadPhotosBtn.style.opacity = '1'; downloadPhotosBtn.style.cursor = 'pointer';
                 downloadPhotosBtn.title = `Scarica ZIP foto per ${targaSelezionataGlobalmente.toUpperCase()}`;
             } else {
-                downloadPhotosBtn.style.display = 'inline-block'; 
-                downloadPhotosBtn.href = '#'; 
-                downloadPhotosBtn.setAttribute('disabled', 'disabled');
-                downloadPhotosBtn.style.opacity = '0.5';
+                downloadPhotosBtn.style.display = 'inline-block'; downloadPhotosBtn.href = '#'; 
+                downloadPhotosBtn.setAttribute('disabled', 'disabled'); downloadPhotosBtn.style.opacity = '0.5';
                 downloadPhotosBtn.style.cursor = 'not-allowed';
-                downloadPhotosBtn.title = `La perizia per ${targaSelezionataGlobalmente.toUpperCase()} deve essere conclusa per scaricare le foto.`;
+                downloadPhotosBtn.title = `Perizia ${targaSelezionataGlobalmente.toUpperCase()} non conclusa.`;
             }
-        } else if (downloadPhotosBtn) {
-            downloadPhotosBtn.style.display = 'none';
-        }
+        } else if (downloadPhotosBtn) { downloadPhotosBtn.style.display = 'none'; }
     }
     
     async function fetchAllDataFromSheets() { 
@@ -2753,360 +2154,155 @@
         const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?nocache=${new Date().getTime()}`;  
         try { 
             const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' }); 
-            if (!response.ok) { 
-                const errorText = await response.text(); 
-                return { success: false, message: `Errore Sheets (${response.status}) nel recupero globale.`, data: [] }; 
-            } 
+            if (!response.ok) { return { success: false, message: `Errore Sheets (${response.status}).`, data: [] }; } 
             const contentType = response.headers.get("content-type"); 
             if (contentType && contentType.indexOf("application/json") !== -1) { 
                 const result = await response.json(); 
-                if (Array.isArray(result)) {  
-                    return { success: true, data: result, message: "Dati recuperati con successo." }; 
-                } else if (result && result.status === "success" && Array.isArray(result.data)) {  
-                    return { success: true, data: result.data, message: result.message || "Dati recuperati con successo."}; 
-                } else if (result && result.status === "notfound") {   
-                    return { success: true, data: [], message: result.message || "Nessuna perizia trovata."}; 
-                } else { 
-                    return { success: false, message: "Formato risposta globale non valido.", data: [] }; 
-                } 
-            } else { 
-                return { success: false, message: "Errore formato risposta globale Sheets (non JSON).", data: [] }; 
-            } 
-        } catch (error) { 
-            return { success: false, message: "Errore di rete recupero globale: " + error.message, data: [] }; 
-        } 
+                if (Array.isArray(result)) { return { success: true, data: result, message: "Dati recuperati." }; }
+                else if (result && result.status === "success" && Array.isArray(result.data)) { return { success: true, data: result.data, message: result.message || "Dati recuperati."}; }
+                else if (result && result.status === "notfound") { return { success: true, data: [], message: result.message || "Nessuna perizia."}; }
+                else { return { success: false, message: "Formato risposta non valido.", data: [] }; } 
+            } else { return { success: false, message: "Risposta non JSON.", data: [] }; } 
+        } catch (error) { return { success: false, message: "Errore di rete: " + error.message, data: [] }; } 
     }
 
     async function syncAllLocalDataToSheets() {
-        const originalSyncButtonText = syncToSheetsBtn.textContent;
-        syncToSheetsBtn.disabled = true;
-        let updatedFromSheetsCount = 0;
-        let localUpdatesFailedCount = 0;
-        let sheetsDeletionsSuccessCount = 0;
-        let sheetsDeletionsFailedCount = 0;
-        let localToSheetsSuccessCount = 0;
-        let localToSheetsErrorCount = 0;
+        const originalSyncButtonText = syncToSheetsBtn.textContent; syncToSheetsBtn.disabled = true;
+        let updatedFromSheetsCount = 0, localUpdatesFailedCount = 0, sheetsDeletionsSuccessCount = 0, sheetsDeletionsFailedCount = 0, localToSheetsSuccessCount = 0, localToSheetsErrorCount = 0;
         let errorMessages = [];
-
         syncToSheetsBtn.textContent = "Sinc (0/4 DelSheets)...";
         let deletionRequests = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key.startsWith(`${APP_PREFIX}deleted_`)) {
-                const targaToDelete = key.substring(`${APP_PREFIX}deleted_`.length);
-                deletionRequests.push(targaToDelete);
-            }
-        }
+        for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}deleted_`)) { deletionRequests.push(key.substring(`${APP_PREFIX}deleted_`.length)); }}
         if (deletionRequests.length > 0) {
             for (const targa of deletionRequests) {
                 const deleteUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=deletePerizia&targa=${encodeURIComponent(targa)}`;
                 try {
                     const response = await fetch(deleteUrl, { method: 'POST', mode: 'cors', body: JSON.stringify({targa: targa})}); 
                     const result = await response.json();
-                    if (response.ok && result.status === "success") {
-                        localStorage.removeItem(`${APP_PREFIX}deleted_${targa}`); 
-                        sheetsDeletionsSuccessCount++;
-                    } else {
-                        sheetsDeletionsFailedCount++;
-                        errorMessages.push(`Targa ${targa} (Cancellazione Sheets): ${result.message || 'Errore sconosciuto'}`);
-                    }
-                } catch (error) {
-                    sheetsDeletionsFailedCount++;
-                    errorMessages.push(`Targa ${targa} (Cancellazione Sheets): Errore di rete - ${error.message}`);
-                }
+                    if (response.ok && result.status === "success") { localStorage.removeItem(`${APP_PREFIX}deleted_${targa}`); sheetsDeletionsSuccessCount++; }
+                    else { sheetsDeletionsFailedCount++; errorMessages.push(`Targa ${targa} (Del Sheets): ${result.message || 'Errore'}`); }
+                } catch (error) { sheetsDeletionsFailedCount++; errorMessages.push(`Targa ${targa} (Del Sheets Net): ${error.message}`); }
             }
         }
-
         syncToSheetsBtn.textContent = "Sinc (1/4 RecSheets)...";
         const sheetsResponse = await fetchAllDataFromSheets();
-        if (!sheetsResponse.success) {
-            alert(`Errore nel recupero dei dati da Sheets:\n${sheetsResponse.message}\nLa sincronizzazione potrebbe essere incompleta.`);
-        }
+        if (!sheetsResponse.success) { alert(`Errore recupero dati Sheets:\n${sheetsResponse.message}`); }
         const allSheetsData = sheetsResponse.data || []; 
-
         syncToSheetsBtn.textContent = "Sinc (2/4 AggLoc)...";
         if (allSheetsData.length > 0) {
             for (const sheetPerizia of allSheetsData) {
-                if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) {
-                    continue;
-                }
+                if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) { continue; }
                 const targa = sheetPerizia.targa.toUpperCase();
-
-                if (localStorage.getItem(`${APP_PREFIX}deleted_${targa}`)) {
-                    continue; 
-                }
-
-                const localDataKey = `${APP_PREFIX}data_${targa}`;
-                const localDataJSON = localStorage.getItem(localDataKey);
+                if (localStorage.getItem(`${APP_PREFIX}deleted_${targa}`)) { continue; }
+                const localDataKey = `${APP_PREFIX}data_${targa}`; const localDataJSON = localStorage.getItem(localDataKey);
                 let localDatiPeriziaTimestamp = null;
-                if (localDataJSON) {
-                    try {
-                        const localDatiPeriziaObject = JSON.parse(localDataJSON);
-                        localDatiPeriziaTimestamp = localDatiPeriziaObject.timestamp ? new Date(localDatiPeriziaObject.timestamp) : null;
-                    } catch (e) { console.error(`SYNC - Errore parsing dati locali per targa ${targa}:`, e); }
-                } 
+                if (localDataJSON) { try { const localDatiPeriziaObject = JSON.parse(localDataJSON); localDatiPeriziaTimestamp = localDatiPeriziaObject.timestamp ? new Date(localDatiPeriziaObject.timestamp) : null; } catch (e) {} } 
                 const sheetsRecordTimestamp = new Date(sheetPerizia.timestamp); 
-                
                 if (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp) {
                     try {
                         localStorage.setItem(localDataKey, JSON.stringify(sheetPerizia.datiPerizia)); 
                         if (sheetPerizia.hasOwnProperty('posizione')) { savePosizioneForTarga(targa, sheetPerizia.posizione); }
                         if (sheetPerizia.hasOwnProperty('urgente')) { saveUrgentStatusForTarga(targa, sheetPerizia.urgente); }
-                        if (sheetPerizia.hasOwnProperty('completata')) {
-                            if (sheetPerizia.completata) { markTargaAsCompleted(targa); } else { unmarkTargaAsCompleted(targa); }
-                        }
+                        if (sheetPerizia.hasOwnProperty('completata')) { if (sheetPerizia.completata) markTargaAsCompleted(targa); else unmarkTargaAsCompleted(targa); }
                         updatedFromSheetsCount++;
-                    } catch (e) {
-                        localUpdatesFailedCount++;
-                    }
+                    } catch (e) { localUpdatesFailedCount++; }
                 }
             }
         }
-
         syncToSheetsBtn.textContent = "Sinc (3/4 InvioSheets)...";
         let perizieLocaliKeys = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key.startsWith(`${APP_PREFIX}data_`)) {
-                 const targaFromKey = key.substring(`${APP_PREFIX}data_`.length);
-                 if (!localStorage.getItem(`${APP_PREFIX}deleted_${targaFromKey}`)) {
-                    perizieLocaliKeys.push(key);
-                 }
-            }
-        }
-
+        for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith(`${APP_PREFIX}data_`)) { const targaFromKey = key.substring(`${APP_PREFIX}data_`.length); if (!localStorage.getItem(`${APP_PREFIX}deleted_${targaFromKey}`)) { perizieLocaliKeys.push(key); }}}
         if (perizieLocaliKeys.length === 0 && updatedFromSheetsCount === 0 && localUpdatesFailedCount === 0 && deletionRequests.length === 0) {
-            alert("Nessuna operazione di sincronizzazione da eseguire.");
-            syncToSheetsBtn.textContent = originalSyncButtonText; 
-            syncToSheetsBtn.disabled = false;
-            return;
+            alert("Nessuna operazione di sincronizzazione."); syncToSheetsBtn.textContent = originalSyncButtonText; syncToSheetsBtn.disabled = false; return;
         }
-
         for (const key of perizieLocaliKeys) {
-            const targa = key.substring(`${APP_PREFIX}data_`.length); 
-            let datiPeriziaSalvatiLocalmente; 
-            try {
-                datiPeriziaSalvatiLocalmente = JSON.parse(localStorage.getItem(key));
-            } catch (e) {
-                localToSheetsErrorCount++;
-                errorMessages.push(`Targa ${targa} (Invio Sheets): Errore lettura dati locali.`);
-                continue;
-            }
-            if (!datiPeriziaSalvatiLocalmente || !datiPeriziaSalvatiLocalmente.timestamp) { 
-                localToSheetsErrorCount++; 
-                errorMessages.push(`Targa ${targa} (Invio Sheets): Dati locali incompleti o timestamp mancante.`); 
-                continue;
-            }
-            const periziaDaInviare = {
-                targa: targa,
-                posizione: loadPosizioneForTarga(targa) || "",
-                urgente: loadUrgentStatusForTarga(targa) || false,
-                completata: isTargaCompleted(targa),
-                datiPerizia: datiPeriziaSalvatiLocalmente, 
-                timestamp: datiPeriziaSalvatiLocalmente.timestamp 
-            };
+            const targa = key.substring(`${APP_PREFIX}data_`.length); let datiPeriziaSalvatiLocalmente; 
+            try { datiPeriziaSalvatiLocalmente = JSON.parse(localStorage.getItem(key)); }
+            catch (e) { localToSheetsErrorCount++; errorMessages.push(`Targa ${targa} (Invio): Errore dati locali.`); continue; }
+            if (!datiPeriziaSalvatiLocalmente || !datiPeriziaSalvatiLocalmente.timestamp) { localToSheetsErrorCount++; errorMessages.push(`Targa ${targa} (Invio): Dati locali incompleti.`); continue; }
+            const periziaDaInviare = { targa: targa, posizione: loadPosizioneForTarga(targa) || "", urgente: loadUrgentStatusForTarga(targa) || false, completata: isTargaCompleted(targa), datiPerizia: datiPeriziaSalvatiLocalmente, timestamp: datiPeriziaSalvatiLocalmente.timestamp };
             const result = await inviaPeriziaSingolaASheets(periziaDaInviare);
-            if (result.success) {
-                localToSheetsSuccessCount++;
-                if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) {
-                    datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp; 
-                    try { localStorage.setItem(key, JSON.stringify(datiPeriziaSalvatiLocalmente)); } catch (e) { console.error(`SYNC - Errore salvataggio timestamp aggiornato da server per ${targa}:`,e); }
-                }
-            } else {
-                localToSheetsErrorCount++;
-                errorMessages.push(`Targa ${targa} (Invio Sheets): ${result.message || 'Errore sconosciuto'}`);
-            }
+            if (result.success) { localToSheetsSuccessCount++; if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) { datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp; try { localStorage.setItem(key, JSON.stringify(datiPeriziaSalvatiLocalmente)); } catch (e) {} }}
+            else { localToSheetsErrorCount++; errorMessages.push(`Targa ${targa} (Invio): ${result.message || 'Errore'}`); }
         }
-
         syncToSheetsBtn.textContent = "Sinc (4/4 Fine)";
-        let finalMessage = `Sincronizzazione completata.\n\n`;
-        finalMessage += `CANCELLAZIONI (Locale -> Sheets):\n`;
-        finalMessage += `- ${sheetsDeletionsSuccessCount} perizie cancellate da Sheets.\n`;
-        if (sheetsDeletionsFailedCount > 0) finalMessage += `- ${sheetsDeletionsFailedCount} errori durante la cancellazione da Sheets.\n`;
-
-        finalMessage += `\nAGGIORNAMENTI (Sheets -> Locale):\n`;
-        finalMessage += `- ${updatedFromSheetsCount} perizie locali aggiornate/create da Sheets.\n`;
-        if (localUpdatesFailedCount > 0) finalMessage += `- Errori durante aggiornamento locale: ${localUpdatesFailedCount}.\n`; 
-
-        finalMessage += `\nINVIO DATI (Locale -> Sheets):\n`;
-        finalMessage += `- ${localToSheetsSuccessCount} perizie inviate/aggiornate con successo su Sheets.\n`;
-        if (localToSheetsErrorCount > 0) finalMessage += `- ${localToSheetsErrorCount} perizie con errori durante l'invio.\n`;
-        
-        if (errorMessages.length > 0) {
-            finalMessage += "\n\nDETTAGLIO ERRORI (controllare console per info complete):\n" + errorMessages.join("\n");
-        }
-        alert(finalMessage);
-        syncToSheetsBtn.textContent = originalSyncButtonText; 
-        syncToSheetsBtn.disabled = false;
-        if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') { 
-            popolaTargheFiltrate(); 
-        }
-         if (typeof populateSavedTargasList === 'function' && historyPageSection.style.display === 'block') {
-            populateSavedTargasList();
-        }
+        let finalMessage = `Sincronizzazione completata.\n\nCANCELLAZIONI (Locale -> Sheets):\n- ${sheetsDeletionsSuccessCount} successi.\n`;
+        if (sheetsDeletionsFailedCount > 0) finalMessage += `- ${sheetsDeletionsFailedCount} fallimenti.\n`;
+        finalMessage += `\nAGGIORNAMENTI (Sheets -> Locale):\n- ${updatedFromSheetsCount} successi.\n`;
+        if (localUpdatesFailedCount > 0) finalMessage += `- Errori locali: ${localUpdatesFailedCount}.\n`; 
+        finalMessage += `\nINVIO DATI (Locale -> Sheets):\n- ${localToSheetsSuccessCount} successi.\n`;
+        if (localToSheetsErrorCount > 0) finalMessage += `- ${localToSheetsErrorCount} fallimenti.\n`;
+        if (errorMessages.length > 0) { finalMessage += "\n\nDETTAGLIO ERRORI:\n" + errorMessages.join("\n"); }
+        alert(finalMessage); syncToSheetsBtn.textContent = originalSyncButtonText; syncToSheetsBtn.disabled = false;
+        if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') { popolaTargheFiltrate(); }
+        if (typeof populateSavedTargasList === 'function' && historyPageSection.style.display === 'block') { populateSavedTargasList(); }
     }
 
-    function triggerMainExit() {
-        if (mainExitAppBtn) {
-            mainExitAppBtn.click();
-        }
-    }
-
+    function triggerMainExit() { if (mainExitAppBtn) mainExitAppBtn.click(); }
     function handleTouchStart(event) {
         if (imageLightbox && imageLightbox.style.display === 'flex') return;
         const targetElement = event.target;
-        if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button')) {
-            return;
-        }
-        
-        if (checklistContainer.style.display === 'block' || (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter)) {
-             touchstartX = event.changedTouches[0].screenX;
-        }
+        if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button')) return;
+        if (checklistContainer.style.display === 'block' || (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter)) touchstartX = event.changedTouches[0].screenX;
     }
-
     function handleTouchEnd(event) {
         if (imageLightbox && imageLightbox.style.display === 'flex') return;
         const targetElement = event.target;
-         if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button')) {
-            return;
-        }
-
-        if (checklistContainer.style.display === 'block' || (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter)) {
-            touchendX = event.changedTouches[0].screenX;
-            handleSwipeGesture();
-        }
+        if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button')) return;
+        if (checklistContainer.style.display === 'block' || (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter)) { touchendX = event.changedTouches[0].screenX; handleSwipeGesture(); }
     }
-
     async function handleSwipeGesture() {
-        const deltaX = touchendX - touchstartX;
-        if (Math.abs(deltaX) < swipeThreshold) {
-            return; 
-        }
-
+        const deltaX = touchendX - touchstartX; if (Math.abs(deltaX) < swipeThreshold) return; 
         if (checklistContainer.style.display === 'block') {
-            const activeSectionElement = checklistContainer.querySelector('.category-section.active');
-            if (!activeSectionElement) return;
-            const currentSectionId = activeSectionElement.id.replace('Section', '');
-            const currentIndex = sectionOrder.indexOf(currentSectionId);
-            if (currentIndex === -1) return;
-
-            if (deltaX > 0 && currentIndex > 0) { 
-                showSection(sectionOrder[currentIndex - 1]);
-            } else if (deltaX < 0 && currentIndex < sectionOrder.length - 1) { 
-                showSection(sectionOrder[currentIndex + 1]);
-            }
+            const activeSectionElement = checklistContainer.querySelector('.category-section.active'); if (!activeSectionElement) return;
+            const currentSectionId = activeSectionElement.id.replace('Section', ''); const currentIndex = sectionOrder.indexOf(currentSectionId); if (currentIndex === -1) return;
+            if (deltaX > 0 && currentIndex > 0) showSection(sectionOrder[currentIndex - 1]);
+            else if (deltaX < 0 && currentIndex < sectionOrder.length - 1) showSection(sectionOrder[currentIndex + 1]);
         } else if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter) {
-            let currentGallerySectionId = currentGallerySectionFilter || 'riepilogo'; 
-            const currentIndex = sectionOrder.indexOf(currentGallerySectionId);
-            if (currentIndex === -1) {
-                return;
-            }
-
-            if (deltaX > 0 && currentIndex > 0) { 
-                await showGalleryPage(currentGalleryTargaFilter, sectionOrder[currentIndex - 1]);
-            } else if (deltaX < 0 && currentIndex < sectionOrder.length - 1) { 
-                await showGalleryPage(currentGalleryTargaFilter, sectionOrder[currentIndex + 1]);
-            }
+            let currentGallerySectionId = currentGallerySectionFilter || 'riepilogo'; const currentIndex = sectionOrder.indexOf(currentGallerySectionId); if (currentIndex === -1) return;
+            if (deltaX > 0 && currentIndex > 0) await showGalleryPage(currentGalleryTargaFilter, sectionOrder[currentIndex - 1]);
+            else if (deltaX < 0 && currentIndex < sectionOrder.length - 1) await showGalleryPage(currentGalleryTargaFilter, sectionOrder[currentIndex + 1]);
         }
     }
-
     async function initializeApplicationViewAndLoadData() {
         const preloader = document.getElementById('preloader');
-        
-        if (preloader) {
-            preloader.style.display = 'flex';
-            preloader.classList.remove('hidden');
-            preloader.style.opacity = '1';
-            preloader.style.visibility = 'visible';
-            const loadingText = preloader.querySelector('.loading-text');
-            if (loadingText) loadingText.textContent = 'CARICAMENTO ELENCO TARGHE...';
-        }
-        
-        try {
-            await openPhotoDB(); 
-        } catch (error) {
-            if (preloader) {
-                const loadingText = preloader.querySelector('.loading-text');
-                if (loadingText) loadingText.textContent = 'ERRORE DATABASE FOTO!';
-            }
-            alert("Errore critico nell'inizializzazione del database delle foto. L'app potrebbe non funzionare correttamente.");
-            return; 
-        }
-
-
+        if (preloader) { preloader.style.display = 'flex'; preloader.classList.remove('hidden'); preloader.style.opacity = '1'; preloader.style.visibility = 'visible'; const loadingText = preloader.querySelector('.loading-text'); if (loadingText) loadingText.textContent = 'CARICAMENTO...'; }
+        try { await openPhotoDB(); } catch (error) { if (preloader) { const loadingText = preloader.querySelector('.loading-text'); if (loadingText) loadingText.textContent = 'ERRORE DB!'; } alert("Errore DB foto."); return; }
         await caricaEPopolaTarghe(); 
-
-        if (preloader) {
-            preloader.classList.add('hidden');
-            setTimeout(() => { if (preloader) preloader.style.display = 'none'; }, 700);
-        }
-        
+        if (preloader) { preloader.classList.add('hidden'); setTimeout(() => { if (preloader) preloader.style.display = 'none'; }, 700); }
         showView('landing'); 
-
         if (changelogModal && closeChangelogBtnModal && changelogList && changelogTitle) {
             const lastVersionSeen = localStorage.getItem('appVersionSeen');
-            changelogTitle.textContent = `WebApp Perizie - Novità v${currentAppVersion}`;
-            changelogList.innerHTML = latestChangesText;
-
-            if (lastVersionSeen !== currentAppVersion) {
-                changelogModal.style.display = 'flex';
-            }
-            closeChangelogBtnModal.onclick = () => {
-                changelogModal.style.display = 'none';
-                localStorage.setItem('appVersionSeen', currentAppVersion);
-            };
-            // Aggiungi gestione click sull'overlay per chiudere il modal
-            changelogModal.addEventListener('click', function(event) {
-                if (event.target === changelogModal) { // Se il click è sull'overlay stesso
-                    changelogModal.style.display = 'none';
-                    localStorage.setItem('appVersionSeen', currentAppVersion);
-                }
-            });
+            changelogTitle.textContent = `WebApp Perizie - Novità v${currentAppVersion}`; changelogList.innerHTML = latestChangesText;
+            if (lastVersionSeen !== currentAppVersion) changelogModal.style.display = 'flex';
+            closeChangelogBtnModal.onclick = () => { changelogModal.style.display = 'none'; localStorage.setItem('appVersionSeen', currentAppVersion); };
+            changelogModal.addEventListener('click', function(event) { if (event.target === changelogModal) { changelogModal.style.display = 'none'; localStorage.setItem('appVersionSeen', currentAppVersion); }});
         }
     }
 
-
     document.addEventListener('DOMContentLoaded', () => {
-        syncToSheetsBtn = document.createElement('button');
-        syncToSheetsBtn.id = 'syncToSheetsBtn';
-        syncToSheetsBtn.classList.add('action-button');
-        syncToSheetsBtn.textContent = 'Sincronizza'; 
-        syncToSheetsBtn.style.backgroundColor = '#ffc107'; 
-        syncToSheetsBtn.style.borderColor = '#e0a800';
-        syncToSheetsBtn.style.color = '#212529';
+        syncToSheetsBtn = document.createElement('button'); syncToSheetsBtn.id = 'syncToSheetsBtn'; syncToSheetsBtn.classList.add('action-button');
+        syncToSheetsBtn.textContent = 'Sincronizza'; syncToSheetsBtn.style.backgroundColor = '#ffc107'; syncToSheetsBtn.style.borderColor = '#e0a800'; syncToSheetsBtn.style.color = '#212529';
         const historyButton = document.getElementById('historyBtn'); 
-        if (historyButton && historyButton.parentNode === utilityNavButtons) {
-            utilityNavButtons.insertBefore(syncToSheetsBtn, historyButton.nextSibling);
-        } else if (mainExitAppBtn && mainExitAppBtn.parentNode === utilityNavButtons) { 
-             utilityNavButtons.insertBefore(syncToSheetsBtn, mainExitAppBtn); 
-        } else if (utilityNavButtons.firstChild) {
-            utilityNavButtons.insertBefore(syncToSheetsBtn, utilityNavButtons.firstChild);
-        } else {
-            utilityNavButtons.appendChild(syncToSheetsBtn);
-        }
+        if (historyButton && historyButton.parentNode === utilityNavButtons) utilityNavButtons.insertBefore(syncToSheetsBtn, historyButton.nextSibling);
+        else if (mainExitAppBtn && mainExitAppBtn.parentNode === utilityNavButtons) utilityNavButtons.insertBefore(syncToSheetsBtn, mainExitAppBtn); 
+        else if (utilityNavButtons.firstChild) utilityNavButtons.insertBefore(syncToSheetsBtn, utilityNavButtons.firstChild);
+        else utilityNavButtons.appendChild(syncToSheetsBtn);
         syncToSheetsBtn.addEventListener('click', syncAllLocalDataToSheets);
         
         document.querySelectorAll('.fill-defaults-btn').forEach(button => {
             button.addEventListener('click', function() { 
-                const sectionId = this.dataset.sectionid; 
-                const sectionTarget = sectionId.replace('Section', ''); 
+                const sectionId = this.dataset.sectionid; const sectionTarget = sectionId.replace('Section', ''); 
                 if (sectionId) {
                     fillSectionPositiveOrDefaults(sectionId); 
                     if (saveProgress(targaSelezionataGlobalmente)) {
-                        let currentSectionIndex = -1;
-                        navButtons.forEach((nb, index) => { 
-                            if (nb.dataset.target === sectionTarget) currentSectionIndex = index;
-                        });
-                        if (currentSectionIndex !== -1 && currentSectionIndex < navButtons.length - 1) { 
-                            const nextNavButton = navButtons[currentSectionIndex + 1];
-                            if (nextNavButton && nextNavButton.dataset.target) showSection(nextNavButton.dataset.target);
-                        }
+                        let currentSectionIndex = -1; navButtons.forEach((nb, index) => { if (nb.dataset.target === sectionTarget) currentSectionIndex = index; });
+                        if (currentSectionIndex !== -1 && currentSectionIndex < navButtons.length - 1) { const nextNavButton = navButtons[currentSectionIndex + 1]; if (nextNavButton && nextNavButton.dataset.target) showSection(nextNavButton.dataset.target); }
                     }
                 }
             });
         });
         if (tipoTrazioneSelect) tipoTrazioneSelect.addEventListener('change', handleTrazioneChange);
-        
         targaSwitcherDropdown.addEventListener('change', async function() {
             const nuovaTargaSelezionata = this.value;
             if (nuovaTargaSelezionata && nuovaTargaSelezionata.toUpperCase() !== (targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase() : null)) {
@@ -3117,170 +2313,127 @@
                 } else {
                     let currentActiveSectionId = 'remarketing'; 
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
-                    if (activeSectionElement && activeSectionElement.id) {
-                        currentActiveSectionId = activeSectionElement.id.replace('Section', '');
-                    }
+                    if (activeSectionElement && activeSectionElement.id) currentActiveSectionId = activeSectionElement.id.replace('Section', '');
                     await handleTargaSelectionAndSync(nuovaTargaSelezionata, currentActiveSectionId);
                 }
                 this.disabled = false;
-            } else if (nuovaTargaSelezionata) {
-                updateTargaDetailsDisplay(nuovaTargaSelezionata);
-            }
+            } else if (nuovaTargaSelezionata) { updateTargaDetailsDisplay(nuovaTargaSelezionata); }
         });
 
         if(backToListBtn) backToListBtn.addEventListener('click', () => showView('landing'));
         if(historyBtn) historyBtn.addEventListener('click', () => showView('history'));
         if(clearAllProgressBtn) clearAllProgressBtn.addEventListener('click', clearAllSavedData);
         if(backToLandingFromHistoryBtn) backToLandingFromHistoryBtn.addEventListener('click', () => showView('landing'));
-        
         if(backToMainFromGalleryBtn) {
              backToMainFromGalleryBtn.addEventListener('click', () => {
                 if (lastViewBeforeGallery === 'checklist' && currentGalleryTargaFilter && lastSectionBeforeGallery) {
-                    if (targaSelezionataGlobalmente !== currentGalleryTargaFilter) {
-                         targaSelezionataGlobalmente = currentGalleryTargaFilter;
-                         loadProgress(targaSelezionataGlobalmente); 
-                    }
-                    showView('checklist');
-                    showSection(lastSectionBeforeGallery);
-                } else {
-                    showView('landing'); 
-                }
+                    if (targaSelezionataGlobalmente !== currentGalleryTargaFilter) { targaSelezionataGlobalmente = currentGalleryTargaFilter; loadProgress(targaSelezionataGlobalmente); }
+                    showView('checklist'); showSection(lastSectionBeforeGallery);
+                } else { showView('landing'); }
             });
         }
-
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
+        if (headerExitBtn) headerExitBtn.addEventListener('click', () => { triggerMainExit(); });
 
-        if (headerExitBtn) {
-            headerExitBtn.addEventListener('click', () => {
-                triggerMainExit(); 
-            });
-        }
-
+        // MODIFICA QUI: Logica headerPhotosBtn per gestire contesto da fotocamera
         if (headerPhotosBtn) { 
             headerPhotosBtn.addEventListener('click', async () => {
                 let targaForGallery = null;
                 let sectionKeyForGallery = null; 
 
-                if (checklistContainer.style.display === 'block' && targaSelezionataGlobalmente) {
+                if (cameraPageSection.style.display === 'flex') { // Se la fotocamera è attiva
+                    // Usa il contesto di QUANDO la fotocamera è stata aperta
+                    if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
+                        targaForGallery = targaSelezionataGlobalmente;
+                        sectionKeyForGallery = lastSectionBeforeCamera;
+                        console.log(`Galleria da Fotocamera (contesto checklist): Targa=${targaForGallery}, Sezione=${sectionKeyForGallery}`);
+                    } else if (lastViewBeforeCamera === 'gallery' && currentGalleryTargaFilter) {
+                        // Se la fotocamera è stata aperta dalla galleria, mantieni quei filtri
+                        targaForGallery = currentGalleryTargaFilter;
+                        sectionKeyForGallery = currentGallerySectionFilter;
+                        console.log(`Galleria da Fotocamera (contesto galleria): Targa=${targaForGallery}, Sezione=${sectionKeyForGallery}`);
+                    } else {
+                        // Fallback a galleria globale se il contesto non è chiaro
+                        console.log("Galleria da Fotocamera (contesto non chiaro): Globale");
+                        targaForGallery = null;
+                        sectionKeyForGallery = null;
+                    }
+                    returnFromCamera(); // Chiudi la fotocamera
+                    // Aspetta un attimo che la UI di returnFromCamera si aggiorni
+                    setTimeout(async () => {
+                        await showGalleryPage(targaForGallery, sectionKeyForGallery);
+                    }, 50);
+
+                } else if (checklistContainer.style.display === 'block' && targaSelezionataGlobalmente) {
+                    // Se si è nella checklist, usa la targa e sezione attive
                     targaForGallery = targaSelezionataGlobalmente;
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
                     if (activeSectionElement) {
-                        sectionKeyForGallery = activeSectionElement.id.replace('Section', ''); 
+                        sectionKeyForGallery = activeSectionElement.id.replace('Section', '');
                     }
-                } 
-
-                if (cameraPageSection.style.display === 'flex') { 
-                    returnFromCamera(); 
-                     setTimeout(async () => await showGalleryPage(targaForGallery, sectionKeyForGallery), 50); 
-                } else {
+                    console.log(`Galleria da Checklist: Targa=${targaForGallery}, Sezione=${sectionKeyForGallery}`);
                     await showGalleryPage(targaForGallery, sectionKeyForGallery);
+                } else {
+                    // Altrimenti, mostra la galleria globale
+                    console.log("Galleria da altro contesto: Globale");
+                    await showGalleryPage(null, null); // Galleria globale
                 }
             });
         }
+        // FINE MODIFICA
 
         if (headerPeriziaBtn) {
             headerPeriziaBtn.addEventListener('click', async () => {
-                if (cameraPageSection.style.display === 'flex') { 
-                    returnFromCamera(); 
-                } else if (galleryPageSection.style.display === 'block') { 
+                if (cameraPageSection.style.display === 'flex') { returnFromCamera(); }
+                else if (galleryPageSection.style.display === 'block') { 
                     if (currentGalleryTargaFilter && lastViewBeforeGallery === 'checklist' && lastSectionBeforeGallery) {
-                        if (targaSelezionataGlobalmente !== currentGalleryTargaFilter) {
-                            targaSelezionataGlobalmente = currentGalleryTargaFilter;
-                            loadProgress(targaSelezionataGlobalmente);
-                        }
-                        showView('checklist');
-                        showSection(lastSectionBeforeGallery);
-                    } else { 
-                        showView('landing');
-                    }
+                        if (targaSelezionataGlobalmente !== currentGalleryTargaFilter) { targaSelezionataGlobalmente = currentGalleryTargaFilter; loadProgress(targaSelezionataGlobalmente); }
+                        showView('checklist'); showSection(lastSectionBeforeGallery);
+                    } else { showView('landing'); }
                 } else if (targaSelezionataGlobalmente) { 
                     const lastActivePage = localStorage.getItem(LAST_ACTIVE_PERIZIA_PAGE_KEY);
                     const targetSection = (lastActivePage && document.getElementById(lastActivePage + 'Section')) ? lastActivePage : 'riepilogo';
                     if (checklistContainer.style.display !== 'block' || targaSwitcherDropdown.value.toUpperCase() !== targaSelezionataGlobalmente.toUpperCase()) {
                         await handleTargaSelectionAndSync(targaSelezionataGlobalmente, targetSection);
-                    } else {
-                        showSection(targetSection);
-                    }
-                } else { 
-                    showView('landing');
-                }
+                    } else { showSection(targetSection); }
+                } else { showView('landing'); }
             });
         }
-        
         if (headerCameraBtn) {
             headerCameraBtn.addEventListener('click', () => {
-                if (cameraPageSection.style.display === 'flex') {
-                    returnFromCamera(); 
-                } else {
-                    showCameraPage(); 
-                }
+                if (cameraPageSection.style.display === 'flex') { returnFromCamera(); } else { showCameraPage(); }
             });
         }
-
-        if (captureBtn) {
-            captureBtn.classList.add('camera-capture-button-style'); // Assicura che la classe sia aggiunta
-            captureBtn.addEventListener('click', capturePhoto);
-        }
+        if (captureBtn) { captureBtn.classList.add('camera-capture-button-style'); captureBtn.addEventListener('click', capturePhoto); }
         if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera); 
-
         navButtons.forEach(b => b.addEventListener('click', async function() {
             const targetId = this.dataset.target;
             if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter) {
-                currentGallerySectionFilter = targetId; 
-                await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter); 
+                currentGallerySectionFilter = targetId; await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter); 
             } else if (checklistContainer.style.display === 'block' || (!targaSelezionataGlobalmente && landingPageSection.style.display === 'block')) {
                 showSection(targetId);
             }
         }));
-
-        if (closeLightboxBtnElem) {
-            closeLightboxBtnElem.addEventListener('click', closeImageLightbox);
-        }
-        if (imageLightbox) {
-            imageLightbox.addEventListener('click', function(event) {
-                if (event.target === imageLightbox) { 
-                    closeImageLightbox();
-                }
-            });
-        }
-
-        if (checklistContainer) {
-            checklistContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
-            checklistContainer.addEventListener('touchend', handleTouchEnd, { passive: true });
-        }
-        if (galleryPageSection) {
-            galleryPageSection.addEventListener('touchstart', handleTouchStart, { passive: true });
-            galleryPageSection.addEventListener('touchend', handleTouchEnd, { passive: true });
-        }
-        
+        if (closeLightboxBtnElem) closeLightboxBtnElem.addEventListener('click', closeImageLightbox);
+        if (imageLightbox) imageLightbox.addEventListener('click', function(event) { if (event.target === imageLightbox) closeImageLightbox(); });
+        if (checklistContainer) { checklistContainer.addEventListener('touchstart', handleTouchStart, { passive: true }); checklistContainer.addEventListener('touchend', handleTouchEnd, { passive: true }); }
+        if (galleryPageSection) { galleryPageSection.addEventListener('touchstart', handleTouchStart, { passive: true }); galleryPageSection.addEventListener('touchend', handleTouchEnd, { passive: true }); }
         initializeApplicationViewAndLoadData(); 
-        
         if (mainExitAppBtn) { 
             mainExitAppBtn.addEventListener('click', () => { 
-                const exitCurtain = document.getElementById('exit-curtain'); 
-                const mainContentWrapper = document.getElementById('mainContentWrapper'); 
-                const pageHeader = document.getElementById('pageHeaderContainer'); 
+                const exitCurtain = document.getElementById('exit-curtain'); const mainContentWrapper = document.getElementById('mainContentWrapper'); const pageHeader = document.getElementById('pageHeaderContainer'); 
                 if (exitCurtain) { 
-                    if (mainContentWrapper) mainContentWrapper.style.display = 'none'; 
-                    if (pageHeader) pageHeader.style.display = 'none'; 
-                    if (cameraPageSection) cameraPageSection.style.display = 'none'; 
-                    if (currentCameraStream) { 
-                         currentCameraStream.getTracks().forEach(track => track.stop());
-                         currentCameraStream = null;
-                         if(cameraStreamElement) cameraStreamElement.srcObject = null;
-                    }
+                    if (mainContentWrapper) mainContentWrapper.style.display = 'none'; if (pageHeader) pageHeader.style.display = 'none'; if (cameraPageSection) cameraPageSection.style.display = 'none'; 
+                    if (currentCameraStream) { currentCameraStream.getTracks().forEach(track => track.stop()); currentCameraStream = null; if(cameraStreamElement) cameraStreamElement.srcObject = null; }
                     document.body.style.paddingTop = '0px'; 
-                    const exitLoadingText = exitCurtain.querySelector('.loading-text'); 
-                    const barContainer = exitCurtain.querySelector('.loader-bar-container'); 
-                    const defaultCloseText = "CHIUSURA IN CORSO..."; 
-                    const glitchText = "ERRORE DI SISTEMA..."; 
+                    const exitLoadingText = exitCurtain.querySelector('.loading-text'); const barContainer = exitCurtain.querySelector('.loader-bar-container'); 
+                    const defaultCloseText = "CHIUSURA IN CORSO..."; const glitchText = "ERRORE DI SISTEMA..."; 
                     exitCurtain.classList.remove('glitching', 'flash-out-effect');  
                     if (exitLoadingText) { exitLoadingText.textContent = defaultCloseText; exitLoadingText.style.animation = 'textGlow 1.8s infinite alternate ease-in-out'; exitLoadingText.style.color = '#ff8787'; exitLoadingText.style.textShadow = ''; } 
                     exitCurtain.setAttribute('data-text', defaultCloseText); 
                     if (barContainer) barContainer.style.display = 'flex'; 
-                    exitCurtain.classList.add('visible-no-transition'); 
-                    exitCurtain.style.display = 'flex';  
+                    exitCurtain.classList.add('visible-no-transition'); exitCurtain.style.display = 'flex';  
                     setTimeout(() => { 
                         exitCurtain.classList.add('glitching'); 
                         if (exitLoadingText) { exitLoadingText.textContent = glitchText; exitLoadingText.style.animation = '';  } 
@@ -3293,9 +2446,7 @@
                                 exitCurtain.classList.add('flash-out-effect');  
                                 setTimeout(() => { 
                                     const macrodroidUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/chiudi'; 
-                                    fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' })  
-                                    .then(response => console.log('Macrodroid trigger request sent.')) 
-                                    .catch(error => console.error('Error sending Macrodroid trigger:', error)); 
+                                    fetch(macrodroidUrl, { method: 'GET', mode: 'no-cors' }).catch(error => console.error('Error Macrodroid:', error)); 
                                 }, 500);  
                             }, 700);  
                         }, 800);  
