@@ -628,8 +628,7 @@
         #cameraStream {
             width: 100%;
             height: 100%; 
-            object-fit: contain;
-            cursor: pointer; /* NUOVO: Indica che l'elemento è cliccabile per la messa a fuoco */
+            object-fit: contain; 
         }
         #freezeFrameDisplay { 
             display: none; 
@@ -1114,7 +1113,6 @@
 
         <div id="cameraPageSection" class="camera-page-section" style="display: none;">
             <video id="cameraStream" autoplay playsinline></video>
-            <div id="focusReticle" style="display: none; position: absolute; width: 50px; height: 50px; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.5); pointer-events: none; transform: translate(-50%, -50%); transition: opacity 0.4s ease-out;"></div>
             <img id="freezeFrameDisplay" src="#" alt="Foto Catturata" style="display: none;">
             <button id="captureBtn" class="action-button"><i class="fas fa-camera"></i> Scatta Foto</button>
             <button id="closeCameraBtn" class="action-button">×</button> 
@@ -1135,7 +1133,6 @@
     const freezeFrameDisplayElement = document.getElementById('freezeFrameDisplay');
     const captureBtn = document.getElementById('captureBtn');
     const closeCameraBtn = document.getElementById('closeCameraBtn');
-    const focusReticleElement = document.getElementById('focusReticle'); // NUOVA VARIABILE PER IL MIRINO
     let currentCameraStream = null;
     let lastViewBeforeCamera = 'landing'; 
     let lastSectionBeforeCamera = null; 
@@ -1664,7 +1661,7 @@
                     facingMode: "environment",
                     width: { ideal: 1920, min: 1280 },
                     height: { ideal: 1080, min: 720 },
-                    advanced: [{ focusMode: "continuous" }] // Richiesta iniziale di autofocus continuo
+                    advanced: [{ focusMode: "continuous" }]
                 },
                 audio: false
             };
@@ -1674,42 +1671,35 @@
                 cameraStreamElement.srcObject = stream;
                 currentCameraStream = stream;
 
-                // NUOVO: Aggiungi listener per tap-to-focus
-                cameraStreamElement.removeEventListener('click', handleCameraTap);
-                cameraStreamElement.addEventListener('click', handleCameraTap);
-
                 const videoTrack = stream.getVideoTracks()[0];
+                const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
                 // console.log("Capacità traccia video:", JSON.stringify(capabilities, null, 2));
 
-                // Il codice esistente per applicare focusMode: 'continuous' è già buono qui
-                // come impostazione iniziale. handleCameraTap lo riapplicherà o tenterà
-                // pointsOfInterest al tocco.
                 if (videoTrack && typeof videoTrack.applyConstraints === 'function') {
                     try {
                         await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
-                         console.log("Vincolo focusMode 'continuous' applicato all'avvio della fotocamera.");
+                        // console.log("Vincolo focusMode 'continuous' applicato.");
                     } catch (e) {
-                        console.warn("Impossibile applicare focusMode 'continuous' via applyConstraints all'avvio:", e.name, e.message);
+                        console.warn("Impossibile applicare focusMode 'continuous' via applyConstraints:", e.name, e.message);
                         try {
                              await videoTrack.applyConstraints({ advanced: [{ focusMode: 'auto' }] });
-                             console.log("Vincolo focusMode 'auto' applicato come fallback all'avvio.");
+                             // console.log("Vincolo focusMode 'auto' applicato come fallback.");
                         } catch (e2) {
-                            console.warn("Impossibile applicare focusMode 'auto' via applyConstraints all'avvio:", e2.name, e2.message);
+                            console.warn("Impossibile applicare focusMode 'auto' via applyConstraints:", e2.name, e2.message);
                         }
                     }
+                } else {
+                     // console.log("Autofocus (focusMode: continuous) richiesto in initial constraints.");
                 }
 
             } catch (err) {
                 console.error("Errore accesso fotocamera con constraints iniziali:", err.name, err.message);
                 try {
-                    console.log("Tentativo di fallback con constraints minimi (solo facingMode)...");
+                    // console.log("Tentativo di fallback con constraints minimi (solo facingMode)...");
                     const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
                     cameraStreamElement.srcObject = fallbackStream;
                     currentCameraStream = fallbackStream;
-                     // NUOVO: Aggiungi listener anche in fallback
-                    cameraStreamElement.removeEventListener('click', handleCameraTap);
-                    cameraStreamElement.addEventListener('click', handleCameraTap);
-                    console.log("Accesso fotocamera riuscito in fallback (constraints minimi).");
+                    // console.log("Accesso fotocamera riuscito in fallback (constraints minimi).");
                 } catch (fallbackErr) {
                     console.error("Errore accesso fotocamera anche in fallback:", fallbackErr.name, fallbackErr.message);
                     alert("Impossibile accedere alla fotocamera: " + fallbackErr.message);
@@ -1723,98 +1713,15 @@
         window.scrollTo(0, 0);
     }
 
-    // NUOVA FUNZIONE per gestire il tocco sulla fotocamera e la messa a fuoco
-    async function handleCameraTap(event) {
-        if (!currentCameraStream || !cameraStreamElement || !focusReticleElement) return;
-
-        const videoTrack = currentCameraStream.getVideoTracks()[0];
-        if (!videoTrack || !videoTrack.getCapabilities) {
-            console.warn("Controllo della messa a fuoco non disponibile: traccia video o capacità mancanti.");
-            return;
-        }
-
-        const capabilities = videoTrack.getCapabilities();
-        const settings = videoTrack.getSettings(); // Utile per le coordinate normalizzate
-
-        // --- Visualizza il Mirino ---
-        const rect = cameraStreamElement.getBoundingClientRect();
-        // Calcola le coordinate del tocco relative all'elemento video
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-
-        focusReticleElement.style.left = `${x}px`; // La trasformazione CSS (-50%, -50%) si occuperà del centraggio
-        focusReticleElement.style.top = `${y}px`;
-        focusReticleElement.style.display = 'block';
-        focusReticleElement.style.opacity = '1';
-
-        // Nascondi il mirino dopo un breve periodo
-        setTimeout(() => {
-            focusReticleElement.style.opacity = '0';
-            setTimeout(() => { // Attendi la fine della transizione di opacità
-                if (focusReticleElement) focusReticleElement.style.display = 'none';
-            }, 400); // Deve corrispondere alla durata della transizione CSS (0.4s)
-        }, 800); // Durata visualizzazione mirino (0.8 secondi)
-
-        // --- Tentativo di Messa a Fuoco ---
-        if (capabilities.focusMode && capabilities.focusMode.includes("continuous")) {
-            try {
-                let advancedConstraintsToApply = [{ focusMode: "continuous" }];
-
-                // Tentativo di usare pointsOfInterest se supportato
-                if (capabilities.pointsOfInterest && settings.width && settings.height && cameraStreamElement.videoWidth > 0 && cameraStreamElement.videoHeight > 0) {
-                    const videoWidth = cameraStreamElement.videoWidth;
-                    const videoHeight = cameraStreamElement.videoHeight;
-
-                    const normalizedX = x / videoWidth; // Usa la larghezza reale del video stream
-                    const normalizedY = y / videoHeight; // Usa l'altezza reale del video stream
-                    
-                    const poiX = Math.max(0, Math.min(1, normalizedX));
-                    const poiY = Math.max(0, Math.min(1, normalizedY));
-                    
-                    advancedConstraintsToApply.push({ pointsOfInterest: [{ x: poiX, y: poiY }] });
-                    console.log("Tentativo di impostare pointsOfInterest a:", poiX, poiY);
-                } else {
-                    console.warn("pointsOfInterest non supportato o dimensioni video (settings/videoWidth/videoHeight) non disponibili per normalizzazione.");
-                }
-                
-                if (capabilities.exposureMode && capabilities.exposureMode.includes("continuous")) {
-                    advancedConstraintsToApply.push({ exposureMode: "continuous" });
-                }
-                if (capabilities.whiteBalanceMode && capabilities.whiteBalanceMode.includes("continuous")) {
-                    advancedConstraintsToApply.push({ whiteBalanceMode: "continuous" });
-                }
-
-                await videoTrack.applyConstraints({ advanced: advancedConstraintsToApply });
-                console.log("Applicati vincoli di messa a fuoco/esposizione/bilanciamento del bianco continui, con tentativo di pointsOfInterest.");
-
-            } catch (e) {
-                console.warn(`Errore nell'applicare i vincoli di messa a fuoco: ${e.name}, ${e.message}`);
-                try {
-                    await videoTrack.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
-                    console.log("Fallback: Applicato focusMode: continuous.");
-                } catch (e2) {
-                    console.warn(`Anche il fallback a focusMode continuous è fallito: ${e2.name}, ${e2.message}`);
-                }
-            }
-        } else {
-            console.warn("La modalità di messa a fuoco 'continuous' non è supportata.");
-        }
-    }
-
-
     function returnFromCamera() {
         if (currentCameraStream) {
             currentCameraStream.getTracks().forEach(track => track.stop());
             currentCameraStream = null;
             cameraStreamElement.srcObject = null;
         }
-        // Rimuovi il listener quando la fotocamera viene chiusa per evitare memory leak o comportamenti imprevisti
-        cameraStreamElement.removeEventListener('click', handleCameraTap);
-
         cameraPageSection.style.display = 'none';
         cameraStreamElement.style.display = 'block'; 
         freezeFrameDisplayElement.style.display = 'none'; 
-        if(focusReticleElement) focusReticleElement.style.display = 'none'; // Assicurati che il mirino sia nascosto
         cameraPageSection.style.paddingTop = ''; 
         cameraPageSection.style.height = '';    
 
@@ -1854,13 +1761,6 @@
 
     function capturePhoto() {
         if (captureBtn.disabled) return; 
-
-        // Assicurati che il mirino sia nascosto prima di catturare la foto,
-        // sebbene essendo un elemento DOM separato non dovrebbe essere catturato dal canvas.
-        // Questa è una precauzione extra.
-        if (focusReticleElement) {
-            focusReticleElement.style.display = 'none';
-        }
 
         if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
             const canvas = document.createElement('canvas');
