@@ -216,19 +216,19 @@
         }
 
 .circle-button {
-    width: 65px; /* Originale 50px * 1.3 */
-    height: 65px; /* Originale 50px * 1.3 */
+    width: 75px;   /* Originale 50px * 1.5 */
+    height: 75px;  /* Originale 50px * 1.5 */
     background-color: #383838;
     color: #e0e0e0;
     border: 1px solid #555;
-    border-radius: 6px; /* Modificato da 50% per renderlo quadrato con angoli arrotondati */
+    border-radius: 6px; /* Mantenuto per angoli arrotondati */
     flex-shrink: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease, color 0.3s ease;
-    font-size: 1.8em; /* Originale 1.4em * ~1.3, aggiustare se necessario */
+    font-size: 2.1em;  /* Originale 1.4em * 1.5 */
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
         .circle-button:hover {
@@ -976,13 +976,13 @@
         }
 
 
-   @media (max-width: 768px) {
+  @media (max-width: 768px) {
     /* ... altri stili ... */
     .circle-button {
-        width: 58px; /* Originale 45px * ~1.3 (58.5px) */
-        height: 58px; /* Originale 45px * ~1.3 (58.5px) */
-        font-size: 1.5em; /* Originale 1.2em * ~1.3, aggiustare se necessario */
-        border-radius: 6px; /* Assicurati che sia anche qui se non ereditato correttamente */
+        width: 68px;   /* Originale 45px * 1.5 (67.5px arrotondato) */
+        height: 68px;  /* Originale 45px * 1.5 (67.5px arrotondato) */
+        font-size: 1.8em;  /* Originale 1.2em * 1.5 */
+        border-radius: 6px; /* Coerenza con lo stile base */
     }
     /* ... altri stili ... */
 }
@@ -1024,13 +1024,13 @@
             #closeLightboxBtn { font-size: 22px; top: 0px; right: 0px; padding: 0px 8px;}
              #downloadZipBtn { padding: 6px 10px; font-size: 0.85em; }
         }
- @media (max-width: 400px) {
+  @media (max-width: 400px) {
     /* ... altri stili ... */
     .circle-button {
-        width: 52px; /* Originale 40px * 1.3 */
-        height: 52px; /* Originale 40px * 1.3 */
-        font-size: 1.4em; /* Originale 1.1em * ~1.3, aggiustare se necessario */
-        border-radius: 6px; /* Assicurati che sia anche qui */
+        width: 60px;   /* Originale 40px * 1.5 */
+        height: 60px;  /* Originale 40px * 1.5 */
+        font-size: 1.7em;  /* Originale 1.1em * 1.5 (1.65em arrotondato) */
+        border-radius: 6px; /* Coerenza con lo stile base */
     }
     /* ... altri stili ... */
 }
