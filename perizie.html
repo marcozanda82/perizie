@@ -203,16 +203,18 @@
             }
         }
         
+        /* Original .header-circles styles, slightly modified if needed */
         .header-circles { 
             display: flex; 
             justify-content: space-around; 
             align-items: center; 
             width: 100%; 
-            padding: 10px 0; 
+            /* padding: 10px 0; /* Padding will be on parent #bottomNavCircles */
             box-sizing: border-box; 
-            background-color: #2a2a2a; 
-            border-bottom: 1px solid #444;
+            /* background-color: #2a2a2a; /* Background on parent */
+            /* border-bottom: 1px solid #444; /* Border on parent as border-top */
         }
+
         .circle-button {
             width: 50px; 
             height: 50px; 
@@ -254,9 +256,32 @@
             color: #ffffff; 
         }
 
+        /* Styles for the new Bottom Navigation Bar */
+        #bottomNavCircles {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0;
+            box-sizing: border-box;
+            background-color: #2a2a2a;
+            border-top: 1px solid #444;
+            z-index: 2025; /* Ensure it's above most content, but camera page might be higher */
+        }
 
-        body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; transition: padding-top 0.3s ease; }
-        .content-wrapper { padding: 20px; }
+
+        body { 
+            font-family: sans-serif; 
+            line-height: 1.6; margin: 0; 
+            background-color: #1e1e1e; 
+            color: #f0f0f0; 
+            transition: padding-top 0.3s ease, padding-bottom 0.3s ease; /* Added padding-bottom */
+            padding-bottom: 70px; /* Initial padding for the bottom bar, adjust based on #bottomNavCircles height */
+        }
+        .content-wrapper { padding: 20px; } /* This might need padding-bottom if body doesn't cover it */
         h1, h2 { text-align: center; color: #ffffff; }
         h1#mainTitleGlobal { line-height: 1.2; margin-bottom: 10px; margin-top: 5px; font-size: 1.6em;}
         
@@ -339,15 +364,16 @@
 
         #pageHeaderContainer {
             background-color: #1e1e1e;
-            z-index: 1000;
+            z-index: 1000; /* Was 1000, bottom bar is 2025, camera related is 2030 for pageHeaderContainer.fixed-header */
             width: 100%;
         }
         #pageHeaderContainer.fixed-header {
             position: fixed;
             top: 0;
             left: 0;
-            padding-bottom: 5px;
+            padding-bottom: 5px; /* This padding might be for content below the header bar itself */
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 2030; /* Keep high if it overlays camera elements, but camera page is full screen */
         }
 
         #navButtons { 
@@ -625,19 +651,19 @@
         input[type="checkbox"].animate-me, select.animate-me { position: relative; z-index: 1; }
 
         /* START: Stili per la pagina Fotocamera */
-        .camera-page-section {
+        .camera-page-section { /* This is the main camera container */
             position: fixed;
-            top: 0;
+            top: 0; /* Will be adjusted by JS if top header exists */
             left: 0;
             width: 100%;
-            height: 100%;
+            height: 100%; /* Will be adjusted by JS if top header exists */
             background-color: #000;
-            z-index: 2000;
-            display: none;
+            z-index: 2000; /* Below pageHeaderContainer.fixed-header (2030) and bottomNavCircles (2025) if they were to overlap */
+            display: none; /* Managed by JS */
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding-top: 0;
+            padding-top: 0; /* Adjusted by JS */
             margin: 0;
             border: none;
             border-radius: 0;
@@ -646,65 +672,65 @@
         }
         #cameraStream {
             width: 100%;
-            height: 100%;
+            height: 100%; /* Takes full height of its parent .camera-page-section */
             object-fit: contain;
         }
         #freezeFrameDisplay {
             display: none;
             position: absolute;
-            top: 0;
+            top: 0; /* Relative to .camera-page-section padding */
             left: 0;
             width: 100%;
-            height: 100%;
+            height: 100%; /* Relative to .camera-page-section padding */
             object-fit: contain;
-            z-index: 2015;
+            z-index: 2015; /* Above cameraStream, below capture buttons */
             border: 8px solid #00bcd4;
             box-sizing: border-box;
         }
 
-        #captureBtn {
+        #captureBtn { /* Capture button itself, inside camera-page-section */
             position: absolute;
-            bottom: 40px; /* Increased distance from bottom */
+            bottom: 40px; 
             left: 50%;
             transform: translateX(-50%);
-            z-index: 2020;
-            width: 70px; /* Width of the button */
-            height: 70px; /* Height of the button */
-            background-color: #fff; /* Inner circle color */
-            border: 4px solid #fff; /* Outer circle - make it appear as a ring */
-            border-radius: 50%; /* Makes it a circle */
-            box-shadow: 0 0 0 4px #333; /* Concentric circle shadow acting as another border */
+            z-index: 2020; /* Above freeze frame, stream */
+            width: 70px; 
+            height: 70px; 
+            background-color: #fff; 
+            border: 4px solid #fff; 
+            border-radius: 50%; 
+            box-shadow: 0 0 0 4px #333; 
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 0; /* Remove padding if any icon is inside */
+            padding: 0; 
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        #captureBtn::before { /* Inner solid circle */
+        #captureBtn::before { 
             content: '';
-            width: 50px; /* Size of the inner solid circle */
-            height: 50px; /* Size of the inner solid circle */
-            background-color: #333; /* Color of the inner solid circle */
+            width: 50px; 
+            height: 50px; 
+            background-color: #333; 
             border-radius: 50%;
             display: block;
         }
 
         #captureBtn:hover {
-            background-color: #f0f0f0; /* Lighten inner circle on hover */
-            box-shadow: 0 0 0 5px #555; /* Darken outer ring on hover */
+            background-color: #f0f0f0; 
+            box-shadow: 0 0 0 5px #555; 
         }
         #captureBtn:active {
             background-color: #e0e0e0;
              box-shadow: 0 0 0 5px #000;
         }
        
-        #closeCameraBtn {
+        #closeCameraBtn { /* Close button for camera, inside camera-page-section */
             position: absolute;
-            bottom: 20px;
+            bottom: 20px; /* Should be above bottomNavCircles if that bar was visible */
             right: 20px;
-            z-index: 2020;
+            z-index: 2020; /* Same level as capture button */
             width: 45px;
             height: 45px;
             background-color: rgba(40, 40, 40, 0.8);
@@ -712,7 +738,7 @@
             border: 1px solid #ff4d4d;
             border-radius: 4px;
             font-size: 1.8em;
-            line-height: 43px; /* Ensure X is centered */
+            line-height: 43px; 
             text-align: center;
             padding: 0;
             cursor: pointer;
@@ -724,9 +750,13 @@
             border-color: #fff;
         }
 
-        #pageHeaderContainer.fixed-header {
-            z-index: 2030;
-        }
+        /* pageHeaderContainer.fixed-header z-index is 2030, it would be on top of camera.
+           However, JS will hide most of its content or the container itself during camera view.
+           The bottomNavCircles is 2025. The cameraPageSection is 2000.
+           Capture buttons are 2020.
+           This means if bottomNavCircles was visible, capture buttons would be on top.
+           But JS will hide bottomNavCircles.
+        */
         /* END: Stili per la pagina Fotocamera */
 
         /* START: Stili per Changelog Modal */
@@ -792,9 +822,7 @@
         /* START: Stili per Pagina Galleria */
         #galleryPageSection {
             text-align: center;
-            /* MODIFICA START: Aggiunto overscroll-behavior-y per prevenire pull-to-refresh */
             overscroll-behavior-y: contain;
-            /* MODIFICA END */
         }
         #photoGridContainer {
             display: grid;
@@ -851,16 +879,16 @@
         #imageLightbox {
             display: none;
             position: fixed;
-            z-index: 3000;
+            z-index: 3000; /* Above bottomNavCircles (2025) and pageHeaderContainer.fixed-header (2030) */
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden; /* Prevent body scroll when lightbox is open */
+            overflow: hidden; 
             background-color: rgba(0,0,0,0.85);
             justify-content: center;
             align-items: center;
-            -webkit-tap-highlight-color: transparent; /* Remove tap highlight for swipe */
+            -webkit-tap-highlight-color: transparent; 
         }
         #lightboxContent {
             position: relative;
@@ -892,7 +920,7 @@
             border-radius: 50%;
             cursor: pointer;
             transition: color 0.3s, background-color 0.3s;
-            z-index: 3010;
+            z-index: 3010; /* Above lightboxContent */
         }
         #closeLightboxBtn:hover,
         #closeLightboxBtn:focus {
@@ -905,15 +933,14 @@
         /* START: Stili per Indicatore Fine Swipe */
         .swipe-end-indicator {
             position: fixed;
-            background-color: rgba(255, 0, 0, 0.6); /* Red, slightly transparent */
-            z-index: 10001; 
+            background-color: rgba(255, 0, 0, 0.6); 
+            z-index: 10001; /* Above modals */
             opacity: 0;
             transition: opacity 0.15s ease-out;
             pointer-events: none; 
         }
         #swipe-end-indicator-left { top: 0; bottom: 0; left: 0; width: 5px; }
         #swipe-end-indicator-right { top: 0; bottom: 0; right: 0; width: 5px; }
-        /* Gli indicatori top e bottom sono già barre orizzontali e verranno usati per lo swipe verticale in lightbox */
         #swipe-end-indicator-top { left: 0; right: 0; top: 0; height: 5px; }
         #swipe-end-indicator-bottom { left: 0; right: 0; bottom: 0; height: 5px; }
         /* END: Stili per Indicatore Fine Swipe */
@@ -923,35 +950,41 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%; /* Assicura che occupi tutta la larghezza della section */
+            width: 100%; 
         }
 
         /* Stile per il bottone Download ZIP */
         #downloadZipBtn {
             padding: 8px 12px;
-            background-color: #17a2b8; /* Un colore diverso per distinguerlo */
+            background-color: #17a2b8; 
             color: white;
             border: 1px solid #117a8b;
             border-radius: 4px;
             font-size: 0.9em;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            text-decoration: none; /* Rimuove sottolineatura se usato come <a> */
-            display: inline-flex; /* Per allineare icona e testo */
+            text-decoration: none; 
+            display: inline-flex; 
             align-items: center;
-            gap: 5px; /* Spazio tra icona e testo */
+            gap: 5px; 
         }
         #downloadZipBtn:hover {
             background-color: #117a8b;
         }
         #downloadZipBtn i {
-            font-size: 1.1em; /* Icona leggermente più grande del testo */
+            font-size: 1.1em; 
         }
 
 
         @media (max-width: 768px) {
+            /* Adjust body padding for bottom bar on smaller screens */
+            body {
+                padding-bottom: 65px; /* If bottom bar is slightly smaller */
+            }
             .content-wrapper { margin-top: 0; }
-            .circle-button { width: 45px; height: 45px; font-size: 1.2em;}
+            .circle-button { width: 45px; height: 45px; font-size: 1.2em;} /* These are now in #bottomNavCircles */
+            #bottomNavCircles { padding: 8px 0; } /* Adjust padding for the bottom bar */
+
             #navButtons button, .action-button { padding: 8px 10px; font-size: 0.85em; }
             #mainPageNavButtons { width: 100%; padding: 5px; box-sizing: border-box; }
             #mainPageNavButtons button { font-size: 0.8em; padding: 6px 8px; }
@@ -987,18 +1020,21 @@
              #downloadZipBtn { padding: 6px 10px; font-size: 0.85em; }
         }
          @media (max-width: 400px) {
+            body {
+                padding-bottom: 60px; /* Further adjust if bottom bar changes size */
+            }
             .circle-button { width: 40px; height: 40px; font-size: 1.1em;}
-            .header-circles { padding: 8px 0; }
+            #bottomNavCircles { padding: 6px 0; } /* Adjust padding for the bottom bar */
+            /* .header-circles { padding: 8px 0; } /* This class is now a child, parent has padding */
+            
             #photoGridContainer { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
             .modal-content { width: 95%; padding: 15px; }
             .modal-content h2 {font-size: 1.3em;}
             #captureBtn { bottom: 25px; width: 55px; height: 55px; border-width: 3px; box-shadow: 0 0 0 3px #222;}
             #captureBtn::before { width: 35px; height: 35px; background-color: #222; }
             .riepilogo-header { flex-direction: column; align-items: flex-start; gap: 10px;}
-            .riepilogo-header .section-title { width: 100%; text-align: center; } /* Titolo centrato sopra */
-            #downloadZipBtn { width: 100%; justify-content: center;} /* Bottone a tutta larghezza */
-
-
+            .riepilogo-header .section-title { width: 100%; text-align: center; } 
+            #downloadZipBtn { width: 100%; justify-content: center;} 
         }
     </style>
 </head>
@@ -1039,16 +1075,10 @@
     
     <div id="swipe-end-indicator-left" class="swipe-end-indicator"></div>
     <div id="swipe-end-indicator-right" class="swipe-end-indicator"></div>
-     <div id="swipe-end-indicator-top" class="swipe-end-indicator"></div> <div id="swipe-end-indicator-bottom" class="swipe-end-indicator"></div>
+    <div id="swipe-end-indicator-top" class="swipe-end-indicator"></div> <div id="swipe-end-indicator-bottom" class="swipe-end-indicator"></div>
 
 
     <div id="pageHeaderContainer">
-        <div class="header-circles">
-            <button id="headerExitBtn" class="circle-button" title="Esci dall'applicazione"><i class="fas fa-power-off"></i></button>
-            <button id="headerPhotosBtn" class="circle-button" title="Galleria Foto App"><i class="fas fa-images"></i></button>
-            <button id="headerPeriziaBtn" class="circle-button" title="Vai all'ultima perizia/sezione"><i class="fas fa-clipboard-list"></i></button>
-            <button id="headerCameraBtn" class="circle-button" title="Fotocamera"><i class="fas fa-camera-retro"></i></button>
-        </div>
         <div id="utilityNavButtons">
             <button id="backToListBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe</button>
             <button id="historyBtn" class="action-button" style="background-color: #17a2b8; border-color: #117a8b;">Salvataggi</button>
@@ -1235,7 +1265,15 @@
             <button id="closeCameraBtn" class="action-button">×</button> 
         </div>
 
+    </div> <div id="bottomNavCircles">
+        <div class="header-circles">
+            <button id="headerExitBtn" class="circle-button" title="Esci dall'applicazione"><i class="fas fa-power-off"></i></button>
+            <button id="headerPhotosBtn" class="circle-button" title="Galleria Foto App"><i class="fas fa-images"></i></button>
+            <button id="headerPeriziaBtn" class="circle-button" title="Vai all'ultima perizia/sezione"><i class="fas fa-clipboard-list"></i></button>
+            <button id="headerCameraBtn" class="circle-button" title="Fotocamera"><i class="fas fa-camera-retro"></i></button>
+        </div>
     </div>
+
 <script>
     // Variabili globali
     const landingPageSection = document.getElementById('landingPageSection');
@@ -1254,11 +1292,12 @@
     let lastViewBeforeCamera = 'landing'; 
     let lastSectionBeforeCamera = null; 
 
+    const bottomNavCircles = document.getElementById('bottomNavCircles'); // New global for bottom bar
 
     const targaListContainer = document.getElementById('targaListContainer');
     const savedTargasListContainer = document.getElementById('savedTargasListContainer');
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
-    const pageHeaderContainer = document.getElementById('pageHeaderContainer');
+    const pageHeaderContainer = document.getElementById('pageHeaderContainer'); // This is the TOP bar container
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const targaDropdownContainer = document.getElementById('targaDropdownContainer');
     const targaSwitcherDropdown = document.getElementById('targaSwitcherDropdown');
@@ -1275,6 +1314,7 @@
     const mainExitAppBtn = utilityNavButtons.querySelector('#exitAppBtn'); 
     let syncToSheetsBtn; 
     
+    // These buttons are now in #bottomNavCircles, but their IDs are the same
     const headerExitBtn = document.getElementById('headerExitBtn');
     const headerPhotosBtn = document.getElementById('headerPhotosBtn');
     const headerPeriziaBtn = document.getElementById('headerPeriziaBtn');
@@ -1298,7 +1338,7 @@
     let currentLightboxPhotoList = [];
     let currentLightboxPhotoIndex = -1;
 
-    const downloadZipBtn = document.getElementById('downloadZipBtn'); // NUOVO: Riferimento al bottone Download
+    const downloadZipBtn = document.getElementById('downloadZipBtn'); 
 
 
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
@@ -1309,7 +1349,7 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    const currentAppVersion = "1.6.4"; // MODIFICA: Versione aggiornata
+    const currentAppVersion = "1.6.4"; 
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtnModal = document.getElementById('closeChangelogBtnModal'); 
     const changelogList = document.getElementById('changelogList');
@@ -1333,7 +1373,7 @@
     `;
 
 
-    let touchstartX = 0, touchstartY = 0; // For section/gallery swipe
+    let touchstartX = 0, touchstartY = 0; 
     let touchendX = 0, touchendY = 0;
     const swipeThreshold = 50; 
     const sectionOrder = ['remarketing', 'pneumatici', 'danniVerifiche', 'riepilogo'];
@@ -1343,15 +1383,12 @@
     let lastViewBeforeGallery = 'landing';
     let lastSectionBeforeGallery = null;
     
-    // For lightbox swipe
     let lightboxTouchStartX = 0;
     let lightboxTouchStartY = 0; 
 
-    // For gallery grid pull-to-refresh prevention
     let galleryGridTouchStartY = 0;
 
 
-    // START: IndexedDB Helper Functions
     const IDB_NAME = 'PeriziePhotoDB_v1'; 
     const IDB_VERSION = 1;
     const PHOTO_STORE_NAME = 'capturedPhotosStore'; 
@@ -1450,21 +1487,17 @@
             };
         });
     }
-    // END: IndexedDB Helper Functions
     
-    // START: Swipe End Indicator Function
-    function showSwipeEndIndicator(side) { // side can be 'left', 'right', 'top', 'bottom'
+    function showSwipeEndIndicator(side) { 
         const indicator = document.getElementById(`swipe-end-indicator-${side}`);
         if (indicator) {
             indicator.style.opacity = '1';
             setTimeout(() => {
                 indicator.style.opacity = '0';
-            }, 300); // Duration of visibility
+            }, 300); 
         }
     }
-    // END: Swipe End Indicator Function
-
-    // NUOVO: Funzione per azzerare i campi di una sezione
+    
     function resetSectionFields(sectionId) {
         const section = document.getElementById(sectionId);
         if (!section) return;
@@ -1474,19 +1507,15 @@
         section.querySelectorAll('textarea').forEach(ta => ta.value = '');
         section.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
         
-        // Gestione specifica per i select dei cavi EV se la logica di disabilitazione è attiva
         if (sectionId === 'remarketingSection') {
-            handleTrazioneChange(); // Riesegue per sistemare i select dei cavi EV
+            handleTrazioneChange(); 
         }
 
-        updateNavButtonColors(); // Aggiorna i colori dei bottoni di navigazione
-        // Potrebbe essere utile un feedback visivo o salvare automaticamente dopo il reset
+        updateNavButtonColors(); 
         if (targaSelezionataGlobalmente) {
-            saveProgress(targaSelezionataGlobalmente); // Salva lo stato resettato
+            saveProgress(targaSelezionataGlobalmente); 
         }
-        // Se presente, rimuove l'animazione "animate-me" dai campi
         section.querySelectorAll('.animate-me').forEach(el => el.classList.remove('animate-me'));
-        // Se è attiva l'animazione sequenziale, la fa ripartire
         if (typeof initSequentialAnimation === 'function' && section.classList.contains('active')) {
             setTimeout(initSequentialAnimation, 50);
         }
@@ -1663,8 +1692,6 @@
         if (document.getElementById('riepilogoSection').classList.contains('active')) { generateSummary(); } 
         try { 
             await generateAndDownloadScreenshot(); 
-            // Non chiamare più downloadPhotosAsZip qui, verrà gestito dal nuovo bottone
-            // await downloadPhotosAsZip(targaSelezionataGlobalmente);
         } catch (e) { console.warn("Generazione screenshot fallita, dati salvati localmente.", e); } 
         markTargaAsCompleted(targaSelezionataGlobalmente); updateNavButtonColors();  
         if (saveAndReturnBtn.textContent !== originalButtonText) {
@@ -1679,7 +1706,6 @@
     function getSectionStatus(sectionElementId, targaData) { const inputs = getSectionInputs(sectionElementId); if (inputs.length === 0) return 'completed';  let allDefaultOrNA = true;  let allNonDefaultAndApplicable = true;  let hasAtLeastOneNonDefaultAndApplicable = false; inputs.forEach(input => { let isEffectivelyDefault = false; const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined; let currentValue = savedValue; if (savedValue === undefined) {  if (input.type === 'checkbox') currentValue = input.checked; else currentValue = input.value; } if (input.type === 'checkbox') { isEffectivelyDefault = !currentValue; } else if (input.tagName === 'SELECT') { isEffectivelyDefault = (currentValue === "" || (input.options.length > 0 && currentValue === input.options[0].value)); if ((input.id === 'cavo_ricarica_rapida' || input.id === 'cavo_ricarica_domestica') && currentValue === 'non_applicabile') { isEffectivelyDefault = true; } } else {  isEffectivelyDefault = (currentValue === ""); } if (!isEffectivelyDefault) { allDefaultOrNA = false; hasAtLeastOneNonDefaultAndApplicable = true; } else {  allNonDefaultAndApplicable = false; } }); if (allDefaultOrNA) return 'untouched'; if (allNonDefaultAndApplicable) return 'completed'; if (hasAtLeastOneNonDefaultAndApplicable) return 'partial';  return 'untouched';  }
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none' && galleryPageSection.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${(targaSelezionataGlobalmente || currentGalleryTargaFilter || "").toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; const activeTargaForStatus = targaSelezionataGlobalmente || currentGalleryTargaFilter; if (targetSection === 'riepilogo') { if (isTargaCompleted(activeTargaForStatus)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
-    // START: Funzioni per la pagina Fotocamera
     async function showCameraPage() {
         if (galleryPageSection.style.display === 'block') {
             lastViewBeforeCamera = 'gallery';
@@ -1704,23 +1730,29 @@
         freezeFrameDisplayElement.style.display = 'none'; 
         cameraPageSection.style.display = 'flex'; 
         
+        if(bottomNavCircles) bottomNavCircles.style.display = 'none'; // Hide bottom nav
+        
+        // Top bar (pageHeaderContainer) elements visibility
         if(utilityNavButtons) utilityNavButtons.style.display = 'none';
         if(mainTitleGlobal) mainTitleGlobal.style.display = 'none';
         if(targaDropdownContainer) targaDropdownContainer.style.display = 'none';
         if(navButtonsContainer) navButtonsContainer.style.display = 'none'; 
 
-        pageHeaderContainer.classList.add('fixed-header'); 
-        const headerCirclesDiv = document.querySelector('.header-circles');
-        if (headerCirclesDiv) {
-             headerCirclesDiv.style.display = 'flex';
-             document.body.style.paddingTop = `${headerCirclesDiv.offsetHeight}px`;
-             cameraPageSection.style.paddingTop = `${headerCirclesDiv.offsetHeight}px`;
-             cameraPageSection.style.height = `calc(100vh - ${headerCirclesDiv.offsetHeight}px)`; 
-        } else {
-            document.body.style.paddingTop = '0px'; 
-            cameraPageSection.style.paddingTop = `0px`; 
-            cameraPageSection.style.height = `100vh`;
+        let topBarHeight = 0;
+        if (pageHeaderContainer && getComputedStyle(pageHeaderContainer).position === 'fixed') {
+            // Check if pageHeaderContainer *itself* or any of its *intended top children* are visible
+            // For this example, we assume pageHeaderContainer might still be fixed for other reasons,
+            // but its main content (utility buttons, title) are hidden above.
+            // If pageHeaderContainer IS MEANT to be visible WITH some content, calculate its height.
+            // For simplicity now, assuming the top bar (pageHeaderContainer) itself might be hidden or empty
+            // by the above lines. If it *was* to be visible, this is where you'd get its height.
+            // pageHeaderContainer.classList.add('fixed-header'); // It's already fixed if class is there.
+            // topBarHeight = pageHeaderContainer.offsetHeight;
         }
+        
+        document.body.style.paddingTop = `${topBarHeight}px`;
+        cameraPageSection.style.paddingTop = `${topBarHeight}px`;
+        cameraPageSection.style.height = `calc(100vh - ${topBarHeight}px)`;
 
 
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -1771,6 +1803,8 @@
         freezeFrameDisplayElement.style.display = 'none'; 
         cameraPageSection.style.paddingTop = ''; 
         cameraPageSection.style.height = '';    
+
+        if(bottomNavCircles) bottomNavCircles.style.display = 'flex'; // Show bottom nav again
 
         if (lastViewBeforeCamera === 'gallery') { 
             showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter);
@@ -1883,9 +1917,7 @@
             }, 'image/jpeg', 0.7); 
         }
     }
-    // END: Funzioni per la pagina Fotocamera
-
-    // START: Funzioni per Pagina Galleria e Lightbox
+    
     async function showGalleryPage(targaToFilter = null, sectionToFilter = null) {
         if (checklistContainer.style.display === 'block') {
             lastViewBeforeGallery = 'checklist';
@@ -1916,7 +1948,7 @@
             }
             updateTargaDetailsDisplay(currentGalleryTargaFilter);
             navButtonsContainer.style.display = 'flex'; mainPageNavButtons.style.display = 'flex';
-            utilityNavButtons.style.display = 'flex'; 
+            utilityNavButtons.style.display = 'flex'; // Top utility buttons
             navButtons.forEach(b => b.classList.remove('active'));
             let sectionNameForTitle = "Tutte le foto"; 
             if (currentGallerySectionFilter && currentGallerySectionFilter !== 'riepilogo') {
@@ -1931,10 +1963,10 @@
             } else if (currentGallerySectionFilter === 'riepilogo') {
                  const riepilogoNavButton = mainPageNavButtons.querySelector(`button[data-target="riepilogo"]`);
                  if (riepilogoNavButton) riepilogoNavButton.classList.add('active');
-            } else { // Se non c'è sectionFilter ma c'è targaFilter, evidenzia "Riepilogo" come default.
+            } else { 
                  const riepilogoNavButton = mainPageNavButtons.querySelector(`button[data-target="riepilogo"]`);
                  if (riepilogoNavButton) riepilogoNavButton.classList.add('active');
-                 sectionNameForTitle = "Tutte le foto"; // O potresti lasciare il titolo della sezione Riepilogo
+                 sectionNameForTitle = "Tutte le foto"; 
             }
             galleryTitleText = `Galleria: ${currentGalleryTargaFilter} - ${sectionNameForTitle}`;
             updateNavButtonColors(); 
@@ -1945,15 +1977,14 @@
         }
         if(galleryTitleElement) galleryTitleElement.textContent = galleryTitleText;
         await populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter);
-        if (pageHeaderContainer.classList.contains('fixed-header')) {
-            document.body.style.paddingTop = `${pageHeaderContainer.offsetHeight + 10}px`;
-        }
+        
+        // Body padding is handled by showView now
         window.scrollTo(0,0);
     }
 
     async function populatePhotoGrid(targaFilter, sectionKeyFilter) {
         photoGridContainer.innerHTML = ''; 
-        currentLightboxPhotoList = []; // Reset for new grid
+        currentLightboxPhotoList = []; 
         
         try {
             let photosToDisplay;
@@ -1961,11 +1992,11 @@
             if (targaFilter) { 
                 if (sectionKeyFilter && sectionKeyFilter.toLowerCase() === 'danniverifiche') {
                     effectiveSectionKeyForDBQuery = 'danni';
-                } else if (sectionKeyFilter && sectionKeyFilter.toLowerCase() === 'riepilogo'){ // Sezione riepilogo per una targa mostra tutte le foto della targa
+                } else if (sectionKeyFilter && sectionKeyFilter.toLowerCase() === 'riepilogo'){ 
                     effectiveSectionKeyForDBQuery = null; 
                 }
                 photosToDisplay = await getPhotosByTargaAndSezioneFromDB(targaFilter, effectiveSectionKeyForDBQuery);
-            } else { // Galleria generale, mostra tutte le foto
+            } else { 
                 photosToDisplay = await getAllPhotosFromDB(); 
             }
 
@@ -1974,7 +2005,7 @@
             }
             photosToDisplay.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)); 
             photosToDisplay.forEach((photoData) => {
-                currentLightboxPhotoList.push(photoData.timestamp); // Store timestamp for lightbox navigation
+                currentLightboxPhotoList.push(photoData.timestamp); 
                 const photoItemDiv = document.createElement('div');
                 photoItemDiv.classList.add('photo-item');
                 const img = document.createElement('img');
@@ -1992,7 +2023,7 @@
                 deleteBtn.title = "Elimina foto";
                 deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation(); 
-                    if (objectUrl) { URL.revokeObjectURL(objectUrl); } // Revoca l'URL dell'immagine specifica
+                    if (objectUrl) { URL.revokeObjectURL(objectUrl); } 
                     deleteCapturedPhoto(photoData.timestamp, photoData.targa, photoData.sezione); 
                 });
                 photoItemDiv.appendChild(img); photoItemDiv.appendChild(caption);
@@ -2005,7 +2036,6 @@
         if (confirm("Sei sicuro di voler eliminare questa foto?")) {
             try {
                 await deletePhotoFromDB(timestampToDelete);
-                // Rimuovi l'elemento dalla currentLightboxPhotoList se presente
                 const indexInLightboxList = currentLightboxPhotoList.indexOf(timestampToDelete);
                 if (indexInLightboxList > -1) {
                     currentLightboxPhotoList.splice(indexInLightboxList, 1);
@@ -2045,9 +2075,6 @@
                     if (currentLightboxImageObjectUrl) { URL.revokeObjectURL(currentLightboxImageObjectUrl); }
                     currentLightboxImageObjectUrl = URL.createObjectURL(photoData.blobData);
                     lightboxImage.src = currentLightboxImageObjectUrl;
-                    // Assicurati che currentLightboxPhotoList sia popolata correttamente
-                    // Se apri da una griglia filtrata, currentLightboxPhotoList dovrebbe contenere solo i timestamp di quella griglia.
-                    // La currentLightboxPhotoList viene popolata in populatePhotoGrid.
                     currentLightboxPhotoIndex = currentLightboxPhotoList.indexOf(timestamp); 
                     imageLightbox.style.display = 'flex'; 
                 } else { alert("Impossibile caricare immagine."); }
@@ -2063,80 +2090,69 @@
             currentLightboxImageObjectUrl = null;
         }
         lightboxImage.src = '#'; 
-        currentLightboxPhotoIndex = -1; // Reset index
+        currentLightboxPhotoIndex = -1; 
     }
-    // END: Funzioni per Pagina Galleria e Lightbox
 
-    // START: Lightbox Swipe Handlers
     function handleLightboxTouchStart(event) {
-        if (event.touches.length > 1) return; // Ignora multi-touch
+        if (event.touches.length > 1) return; 
         lightboxTouchStartX = event.changedTouches[0].screenX;
         lightboxTouchStartY = event.changedTouches[0].screenY; 
     }
 
     function handleLightboxTouchEnd(event) {
-        // MODIFICA START: Assicurarsi che event.touches.length sia controllato correttamente.
-        // Se stiamo usando changedTouches per l'end, non c'è bisogno di controllare event.touches.length qui.
-        if (currentLightboxPhotoIndex === -1 || !lightboxTouchStartX || !lightboxTouchStartY) return; // Se non c'è un'immagine o un tocco iniziale
-        // MODIFICA END
+        if (currentLightboxPhotoIndex === -1 || !lightboxTouchStartX || !lightboxTouchStartY) return; 
 
         let lightboxTouchEndX = event.changedTouches[0].screenX;
         let lightboxTouchEndY = event.changedTouches[0].screenY;
         handleLightboxSwipe(lightboxTouchEndX, lightboxTouchEndY);
 
-        // Resetta le coordinate iniziali per il prossimo swipe
         lightboxTouchStartX = 0;
         lightboxTouchStartY = 0;
     }
 
-    // MODIFICA START: Logica swipe verticale per lightbox
     function handleLightboxSwipe(endX, endY) {
         const deltaX = endX - lightboxTouchStartX;
         const deltaY = endY - lightboxTouchStartY;
 
-        // Determina se lo swipe è prevalentemente orizzontale o verticale
-        if (Math.abs(deltaX) > Math.abs(deltaY)) { // Swipe orizzontale
+        if (Math.abs(deltaX) > Math.abs(deltaY)) { 
             if (Math.abs(deltaX) > swipeThreshold) {
-                if (deltaX > 0) { // Swipe Destra (foto precedente)
+                if (deltaX > 0) { 
                     if (currentLightboxPhotoIndex > 0) {
                         currentLightboxPhotoIndex--;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('left'); // Indicatore fine corsa sinistro
+                        showSwipeEndIndicator('left'); 
                     }
-                } else { // Swipe Sinistra (foto successiva)
+                } else { 
                     if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) {
                         currentLightboxPhotoIndex++;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('right'); // Indicatore fine corsa destro
+                        showSwipeEndIndicator('right'); 
                     }
                 }
             }
-        } else { // Swipe verticale
+        } else { 
             if (Math.abs(deltaY) > swipeThreshold) {
-                if (deltaY > 0) { // Swipe Giù (foto precedente)
+                if (deltaY > 0) { 
                     if (currentLightboxPhotoIndex > 0) {
                         currentLightboxPhotoIndex--;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('top'); // Indicatore fine corsa alto (barra orizzontale)
+                        showSwipeEndIndicator('top'); 
                     }
-                } else { // Swipe Su (foto successiva)
+                } else { 
                     if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) {
                         currentLightboxPhotoIndex++;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('bottom'); // Indicatore fine corsa basso (barra orizzontale)
+                        showSwipeEndIndicator('bottom'); 
                     }
                 }
             }
         }
     }
-    // MODIFICA END
-    // END: Lightbox Swipe Handlers
     
-    // START: Gallery Grid Pull-to-Refresh Prevention
     function handleGalleryGridTouchStart(event) {
         if (event.touches.length === 1) {
             galleryGridTouchStartY = event.touches[0].clientY;
@@ -2147,23 +2163,14 @@
         if (event.touches.length === 1 && galleryPageSection.style.display === 'block') {
             const currentTouchY = event.touches[0].clientY;
             const deltaY = currentTouchY - galleryGridTouchStartY;
-
-            // MODIFICA START: Controlla se la pagina principale è in cima
             const isPageAtTop = (document.documentElement.scrollTop || document.body.scrollTop) === 0;
 
-            if (isPageAtTop && deltaY > 0) { // Swiping down dall'estrema cima della pagina
-                // Previene il pull-to-refresh del browser
+            if (isPageAtTop && deltaY > 0) { 
                 event.preventDefault();
                 showSwipeEndIndicator('top');
             }
-            // Non chiamare event.preventDefault() per swipe verso l'alto (deltaY < 0)
-            // o per swipe verso il basso quando non si è in cima alla pagina.
-            // Questo permette alla pagina di scrollare normalmente, incluso lo scroll verso l'alto dal fondo.
-            // MODIFICA END
         }
     }
-    // END: Gallery Grid Pull-to-Refresh Prevention
-
 
 
     function showView(viewName) {
@@ -2174,16 +2181,24 @@
         if(galleryPageSection) galleryPageSection.style.display = 'none'; 
         if(imageLightbox) imageLightbox.style.display = 'none'; 
         
-        const headerCirclesDiv = document.querySelector('.header-circles');
-        if (viewName !== 'camera') { 
-            if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
-            if(headerCirclesDiv) headerCirclesDiv.style.display = 'flex';
+        if (bottomNavCircles) { // Manage bottom bar visibility
+            if (viewName === 'camera') {
+                bottomNavCircles.style.display = 'none';
+            } else {
+                bottomNavCircles.style.display = 'flex';
+            }
         }
+        
+        // Default visibility for top header elements
+        if(pageHeaderContainer) pageHeaderContainer.style.display = 'block'; // Assume top bar is generally visible
+        if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
+        if(mainTitleGlobal) mainTitleGlobal.style.display = 'block'; // Default to block
+        if(navButtonsContainer) navButtonsContainer.style.display = 'flex'; // Default to flex
 
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
-            pageHeaderContainer.classList.add('fixed-header');
-            if (mainTitleGlobal) { mainTitleGlobal.innerHTML = "Elenco Veicoli"; mainTitleGlobal.style.display = 'block';}
+            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
+            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
             if (navButtonsContainer) navButtonsContainer.style.display = 'none'; 
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             if (listaTargheCompleta.length > 0 &&
@@ -2191,11 +2206,9 @@
                 typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
             }
-            if (downloadZipBtn) downloadZipBtn.style.display = 'none'; // Nasconde il bottone ZIP se non siamo in riepilogo
+            if (downloadZipBtn) downloadZipBtn.style.display = 'none'; 
         } else if (viewName === 'checklist') {
-            pageHeaderContainer.classList.add('fixed-header');
-            if (navButtonsContainer) navButtonsContainer.style.display = 'flex'; 
-            if (mainPageNavButtons) mainPageNavButtons.style.display = 'flex';
+            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
             if (!targaSelezionataGlobalmente) { showView('landing'); return; }
             if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente.toUpperCase()}`)) {
                 showView('landing');
@@ -2206,50 +2219,63 @@
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex'; 
             populateTargaSwitcherDropdown(); updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
             if (tipoTrazioneSelect) handleTrazioneChange();
-            // Gestione visibilità bottone Download ZIP
-             const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
+            const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
             if (downloadZipBtn && activeSectionElement && activeSectionElement.id === 'riepilogoSection' && targaSelezionataGlobalmente) {
                 downloadZipBtn.href = `https://192.168.1.154:8080/${targaSelezionataGlobalmente.toUpperCase()}.zip`;
                 downloadZipBtn.style.display = 'inline-flex';
             } else if (downloadZipBtn) {
                 downloadZipBtn.style.display = 'none';
             }
-
         } else if (viewName === 'history') {
-            pageHeaderContainer.classList.add('fixed-header');
+            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
             historyPageSection.style.display = 'block';
-            if (mainTitleGlobal) { mainTitleGlobal.innerHTML = "Cronistoria Salvataggi"; mainTitleGlobal.style.display = 'block'; }
+            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
             if (navButtonsContainer) navButtonsContainer.style.display = 'none';
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             populateSavedTargasList();
             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         } else if (viewName === 'gallery') { 
-            pageHeaderContainer.classList.add('fixed-header');
-            // La visualizzazione di galleryPageSection è gestita da showGalleryPage
+            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
+            // galleryPageSection display is handled by showGalleryPage
             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
-        } else if (viewName !== 'camera') { 
-             pageHeaderContainer.classList.remove('fixed-header');
-             if (headerCirclesDiv) headerCirclesDiv.style.display = 'none'; 
-             if (utilityNavButtons) utilityNavButtons.style.display = 'none';
-             if (mainTitleGlobal) mainTitleGlobal.innerHTML = "";
+        } else if (viewName === 'camera') {
+            if (pageHeaderContainer) pageHeaderContainer.style.display = 'none'; // Hide top bar for camera
+            // bottomNavCircles is already handled above for camera view
+        } else { // Should not happen, but default for unknown views
+             if (pageHeaderContainer) pageHeaderContainer.classList.remove('fixed-header');
              if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         }
+        
         updateNavButtonColors(); 
+        
         let bodyPaddingTopValue = '0px';
-        if (viewName !== 'camera') {
-            if (pageHeaderContainer.classList.contains('fixed-header') && getComputedStyle(pageHeaderContainer).display !== 'none') {
-                bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
-            } else {
-                let nonFixedHeaderHeight = 0;
-                if (mainTitleGlobal && getComputedStyle(mainTitleGlobal).display !== 'none' && !pageHeaderContainer.classList.contains('fixed-header')) {
-                    nonFixedHeaderHeight = mainTitleGlobal.offsetHeight;
+        let bodyPaddingBottomValue = '0px';
+
+        if (viewName !== 'camera') { // For all views except camera
+            if (pageHeaderContainer && getComputedStyle(pageHeaderContainer).display !== 'none' && pageHeaderContainer.classList.contains('fixed-header')) {
+                let hasVisibleTopContent = false;
+                const topElements = [utilityNavButtons, mainTitleGlobal, navButtonsContainer, targaDropdownContainer];
+                for(let el of topElements) {
+                    if (el && getComputedStyle(el).display !== 'none') {
+                        hasVisibleTopContent = true;
+                        break;
+                    }
                 }
-                bodyPaddingTopValue = `${nonFixedHeaderHeight + 20}px`;
+                if(hasVisibleTopContent) {
+                    bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
+                }
             }
-            document.body.style.paddingTop = bodyPaddingTopValue;
+
+            if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') {
+                bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
+            }
         }
+        document.body.style.paddingTop = bodyPaddingTopValue;
+        document.body.style.paddingBottom = bodyPaddingBottomValue;
+        
         window.scrollTo(0, 0);
     }
+
 
     async function handleTargaSelectionAndSync(selectedTarga, targetSectionId = null) {
         const targaUpper = selectedTarga.toUpperCase();
@@ -2268,7 +2294,6 @@
                  const currentActiveSectionId = currentActiveSectionEl ? currentActiveSectionEl.id.replace('Section', '') : null;
                  if (currentActiveSectionId !== targetSectionId) { showSection(targetSectionId); }
             }
-             // Aggiorna link e visibilità bottone Download ZIP se siamo nel riepilogo
             if (downloadZipBtn && targetSectionId === 'riepilogo') {
                 downloadZipBtn.href = `https://192.168.1.154:8080/${targaUpper.toUpperCase()}.zip`;
                 downloadZipBtn.style.display = 'inline-flex';
@@ -2577,7 +2602,7 @@
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
             populateTargaSwitcherDropdown(); updateTargaDetailsDisplay(targaSelezionataGlobalmente); 
             localStorage.setItem(LAST_ACTIVE_PERIZIA_PAGE_KEY, targetId);
-        } else {
+        } else { // This case might not be relevant if showSection is only called when checklistContainer is visible
             if (mainTitleGlobal) mainTitleGlobal.style.display = 'block';
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
             if (targaDetailsDisplay) targaDetailsDisplay.textContent = '';
@@ -2587,14 +2612,13 @@
              setTimeout(initSequentialAnimation, 100); 
         } else if (targetId === 'riepilogo') { 
             generateSummary(); 
-            // Gestione bottone Download ZIP
             if (downloadZipBtn && targaSelezionataGlobalmente) {
                 downloadZipBtn.href = `https://192.168.1.154:8080/${targaSelezionataGlobalmente.toUpperCase()}.zip`;
                 downloadZipBtn.style.display = 'inline-flex';
             } else if (downloadZipBtn) {
                 downloadZipBtn.style.display = 'none';
             }
-        } else { // Se non è riepilogo, nascondi il bottone ZIP
+        } else { 
              if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         }
          window.scrollTo(0, 0); 
@@ -2733,7 +2757,7 @@
     function handleTouchStart(event) {
         if (imageLightbox && imageLightbox.style.display === 'flex') return;
         const targetElement = event.target;
-        if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button') || targetElement.closest('.page-action-button')) { // Aggiunto .page-action-button
+        if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button') || targetElement.closest('.page-action-button')) { 
             return;
         }
         if (checklistContainer.style.display === 'block' || (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter)) {
@@ -2745,7 +2769,7 @@
     function handleTouchEnd(event) {
         if (imageLightbox && imageLightbox.style.display === 'flex') return;
         const targetElement = event.target;
-         if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button') || targetElement.closest('.page-action-button')) { // Aggiunto .page-action-button
+         if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT' || targetElement.tagName === 'TEXTAREA' || targetElement.closest('.action-button') || targetElement.closest('.circle-button') || targetElement.closest('.page-action-button')) { 
             return;
         }
         if (checklistContainer.style.display === 'block' || (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter)) {
@@ -2757,10 +2781,10 @@
 
     async function handleSwipeGesture() {
         const deltaX = touchendX - touchstartX;
-        const deltaY = touchendY - touchstartY; // Aggiunto per swipe sezioni/galleria verticale se necessario in futuro
+        const deltaY = touchendY - touchstartY; 
 
 
-        if (Math.abs(deltaX) < swipeThreshold && Math.abs(deltaY) < swipeThreshold) { return; } // Nessuno swipe significativo
+        if (Math.abs(deltaX) < swipeThreshold && Math.abs(deltaY) < swipeThreshold) { return; } 
 
         let currentViewElement = null;
         let sectionArray = sectionOrder;
@@ -2775,9 +2799,8 @@
             changeFunction = showSection;
         } else if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter) {
             currentViewElement = galleryPageSection;
-            // Per la galleria, lo swipe orizzontale cambia sezione, non le foto (quelle sono nel lightbox)
             const activeNavButton = mainPageNavButtons.querySelector('button.active');
-            currentSectionId = activeNavButton ? activeNavButton.dataset.target : sectionOrder[0]; // Default a riepilogo o prima sezione
+            currentSectionId = activeNavButton ? activeNavButton.dataset.target : sectionOrder[0]; 
             changeFunction = (newSection) => showGalleryPage(currentGalleryTargaFilter, newSection);
         }
         
@@ -2786,18 +2809,15 @@
         const currentIndex = sectionArray.indexOf(currentSectionId);
         if (currentIndex === -1) return;
 
-        // Priorità allo swipe orizzontale per cambio sezione
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
-            if (deltaX > 0) { // Swipe Right (previous)
+            if (deltaX > 0) { 
                 if (currentIndex > 0) { await changeFunction(sectionArray[currentIndex - 1]); } 
                 else { showSwipeEndIndicator('left'); }
-            } else { // Swipe Left (next)
+            } else { 
                 if (currentIndex < sectionArray.length - 1) { await changeFunction(sectionArray[currentIndex + 1]); } 
                 else { showSwipeEndIndicator('right'); }
             }
         }
-        // Qui potresti aggiungere logica per swipe verticale sezioni se necessario,
-        // ma al momento non è richiesto e potrebbe confliggere con lo scroll.
     }
 
     async function initializeApplicationViewAndLoadData() {
@@ -2864,7 +2884,6 @@
                 }
             });
         });
-         // NUOVO: Event listener per i bottoni di reset pagina
         document.querySelectorAll('.reset-page-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const sectionId = this.dataset.sectionid;
@@ -2883,12 +2902,10 @@
             if (nuovaTargaSelezionata && nuovaTargaSelezionata.toUpperCase() !== (targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase() : null)) {
                 this.disabled = true;
                 if (galleryPageSection.style.display === 'block') {
-                    // Se sono nella galleria e cambio targa dal dropdown, aggiorno la galleria per la nuova targa
-                    // mantenendo la sezione corrente se possibile, altrimenti default a 'riepilogo'
                     const currentSectionForNewTarga = currentGallerySectionFilter || 'riepilogo';
                     targaSelezionataGlobalmente = nuovaTargaSelezionata.toUpperCase(); 
                     await showGalleryPage(targaSelezionataGlobalmente, currentSectionForNewTarga); 
-                } else { // Se sono in checklist o altrove
+                } else { 
                     let currentActiveSectionId = 'remarketing'; 
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
                     if (activeSectionElement && activeSectionElement.id) {
@@ -2919,43 +2936,34 @@
 
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
-        if (headerExitBtn) headerExitBtn.addEventListener('click', () => triggerMainExit()); 
         
-        // MODIFICA CONTESTO GALLERIA: La logica qui è cruciale per aprire la galleria con il contesto corretto.
+        // Event listeners for the buttons now in #bottomNavCircles
+        if (headerExitBtn) headerExitBtn.addEventListener('click', () => triggerMainExit()); 
         if (headerPhotosBtn) { 
             headerPhotosBtn.addEventListener('click', async () => {
                 let targaForGallery = null; 
                 let sectionKeyForGallery = null; 
                 
                 if (cameraPageSection.style.display === 'flex') { 
-                    // Se la fotocamera è aperta, usa il contesto precedente alla fotocamera.
-                    // E se quel contesto era la checklist o la galleria, usa targaSelezionataGlobalmente (se c'è)
-                    // e lastSectionBeforeCamera
                     if (lastViewBeforeCamera === 'checklist' || lastViewBeforeCamera === 'gallery') {
-                        targaForGallery = targaSelezionataGlobalmente; // targaSelezionataGlobalmente dovrebbe essere aggiornata
+                        targaForGallery = targaSelezionataGlobalmente; 
                         sectionKeyForGallery = lastSectionBeforeCamera;
                     }
-                    returnFromCamera(); // Chiudi la fotocamera prima
-                    // Aspetta un attimo per assicurare che la transizione della fotocamera sia completa
+                    returnFromCamera(); 
                     setTimeout(async () => await showGalleryPage(targaForGallery, sectionKeyForGallery), 50); 
                 } else if (checklistContainer.style.display === 'block' && targaSelezionataGlobalmente) {
-                    // Se siamo nella checklist, prendi la targa e la sezione attive
                     targaForGallery = targaSelezionataGlobalmente;
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
                     if (activeSectionElement) {
                         sectionKeyForGallery = activeSectionElement.id.replace('Section', ''); 
-                    } else { // Fallback se nessuna sezione è attiva, mostra tutte le foto per la targa
-                        sectionKeyForGallery = null; // o 'riepilogo'
+                    } else { 
+                        sectionKeyForGallery = null; 
                     }
                     await showGalleryPage(targaForGallery, sectionKeyForGallery);
                 } else if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter){
-                    // Se siamo già in galleria, riaprirla con lo stesso filtro non cambia nulla,
-                    // ma per coerenza, potremmo voler ricaricare o semplicemente non fare nulla.
-                    // Al momento, il comportamento è di ricaricarla.
                     await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter);
                 }
                  else { 
-                    // Altrimenti (es. da landing, history), apri la galleria generale
                     await showGalleryPage(null, null); 
                 }
             });
@@ -2985,38 +2993,34 @@
                 else { showCameraPage(); }
             });
         }
+
         if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
         if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera); 
         
         navButtons.forEach(b => b.addEventListener('click', async function() {
             const targetId = this.dataset.target;
             if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter) {
-                // Se siamo in galleria per una targa specifica, cambia la sezione visualizzata
                 currentGallerySectionFilter = targetId; 
                 await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter); 
             } else if (checklistContainer.style.display === 'block' || (!targaSelezionataGlobalmente && landingPageSection.style.display === 'block')) {
-                // Se siamo nella checklist o nella landing (in quest'ultimo caso, apre la checklist per la prima volta)
                 showSection(targetId);
             }
-            // Se siamo in galleria generale (currentGalleryTargaFilter è null), i navButtons principali non dovrebbero essere visibili.
         }));
 
         if (closeLightboxBtnElem) closeLightboxBtnElem.addEventListener('click', closeImageLightbox);
         if (imageLightbox) {
             imageLightbox.addEventListener('click', function(event) { if (event.target === imageLightbox) closeImageLightbox(); });
-            imageLightbox.addEventListener('touchstart', handleLightboxTouchStart, { passive: false }); // passive: false per poter chiamare preventDefault se necessario in futuro
+            imageLightbox.addEventListener('touchstart', handleLightboxTouchStart, { passive: false }); 
             imageLightbox.addEventListener('touchend', handleLightboxTouchEnd, { passive: true });
         }
-        // Touch listeners for section/gallery page swipe
         const mainWrapper = document.getElementById('mainContentWrapper');
         if (mainWrapper) {
             mainWrapper.addEventListener('touchstart', handleTouchStart, { passive: true });
             mainWrapper.addEventListener('touchend', handleTouchEnd, { passive: true });
         }
-        // Touch listeners for gallery grid pull-to-refresh (già associato a galleryPageSection)
         if (galleryPageSection) { 
-            galleryPageSection.addEventListener('touchstart', handleGalleryGridTouchStart, { passive: true }); // passive: true se non si usa preventDefault o è gestito altrove
-            galleryPageSection.addEventListener('touchmove', handleGalleryGridTouchMove, { passive: false }); // passive: false perché usiamo preventDefault
+            galleryPageSection.addEventListener('touchstart', handleGalleryGridTouchStart, { passive: true }); 
+            galleryPageSection.addEventListener('touchmove', handleGalleryGridTouchMove, { passive: false }); 
         }
         initializeApplicationViewAndLoadData(); 
         if (mainExitAppBtn) { 
@@ -3024,12 +3028,15 @@
                 const exitCurtain = document.getElementById('exit-curtain'); 
                 const mainContentWrapper = document.getElementById('mainContentWrapper'); 
                 const pageHeader = document.getElementById('pageHeaderContainer'); 
+                const bottomNav = document.getElementById('bottomNavCircles');
                 if (exitCurtain) { 
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none'; 
                     if (pageHeader) pageHeader.style.display = 'none'; 
+                    if (bottomNav) bottomNav.style.display = 'none';
                     if (cameraPageSection) cameraPageSection.style.display = 'none'; 
                     if (currentCameraStream) { currentCameraStream.getTracks().forEach(track => track.stop()); currentCameraStream = null; if(cameraStreamElement) cameraStreamElement.srcObject = null; }
                     document.body.style.paddingTop = '0px'; 
+                    document.body.style.paddingBottom = '0px';
                     const exitLoadingText = exitCurtain.querySelector('.loading-text'); 
                     const barContainer = exitCurtain.querySelector('.loader-bar-container'); 
                     const defaultCloseText = "CHIUSURA IN CORSO..."; const glitchText = "ERRORE DI SISTEMA..."; 
