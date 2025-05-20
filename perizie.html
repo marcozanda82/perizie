@@ -688,25 +688,25 @@
             box-sizing: border-box;
         }
 
-        #captureBtn { /* Capture button itself, inside camera-page-section */
-            position: absolute;
-            bottom: 40px; 
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2020; /* Above freeze frame, stream */
-            width: 70px; 
-            height: 70px; 
-            background-color: #fff; 
-            border: 4px solid #fff; 
-            border-radius: 50%; 
-            box-shadow: 0 0 0 4px #333; 
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0; 
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        }
+  #captureBtn {
+    position: absolute;
+    bottom: 78px; /* Originale 40px + 38px (circa 1cm) */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2020;
+    width: 70px;
+    height: 70px;
+    background-color: #fff;
+    border: 4px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px #333;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
 
         #captureBtn::before { 
             content: '';
@@ -976,15 +976,16 @@
         }
 
 
-  @media (max-width: 768px) {
-    /* ... altri stili ... */
-    .circle-button {
-        width: 68px;   /* Originale 45px * 1.5 (67.5px arrotondato) */
-        height: 68px;  /* Originale 45px * 1.5 (67.5px arrotondato) */
-        font-size: 1.8em;  /* Originale 1.2em * 1.5 */
-        border-radius: 6px; /* Coerenza con lo stile base */
+@media (max-width: 768px) {
+    /* ... */
+    #captureBtn {
+        bottom: 68px; /* Originale 30px + 38px */
+        width: 60px;
+        height: 60px;
+        border-width: 3px;
+        box-shadow: 0 0 0 3px #333;
     }
-    /* ... altri stili ... */
+    /* ... */
 }
             .content-wrapper { margin-top: 0; }
             .circle-button { width: 45px; height: 45px; font-size: 1.2em;} /* These are now in #bottomNavCircles */
@@ -1024,15 +1025,16 @@
             #closeLightboxBtn { font-size: 22px; top: 0px; right: 0px; padding: 0px 8px;}
              #downloadZipBtn { padding: 6px 10px; font-size: 0.85em; }
         }
-  @media (max-width: 400px) {
-    /* ... altri stili ... */
-    .circle-button {
-        width: 60px;   /* Originale 40px * 1.5 */
-        height: 60px;  /* Originale 40px * 1.5 */
-        font-size: 1.7em;  /* Originale 1.1em * 1.5 (1.65em arrotondato) */
-        border-radius: 6px; /* Coerenza con lo stile base */
+@media (max-width: 400px) {
+    /* ... */
+    #captureBtn {
+        bottom: 63px; /* Originale 25px + 38px */
+        width: 55px;
+        height: 55px;
+        border-width: 3px;
+        box-shadow: 0 0 0 3px #222;
     }
-    /* ... altri stili ... */
+    /* ... */
 }
             .circle-button { width: 40px; height: 40px; font-size: 1.1em;}
             #bottomNavCircles { padding: 6px 0; } /* Adjust padding for the bottom bar */
@@ -1971,28 +1973,52 @@
     }
 
 
-    function getFilenameSectionName() {
-        let sectionNameForFile = "generale";
-        let currentSectionKey = null;
+function getFilenameSectionName() {
+    let sectionNameForFile = "generale"; // Impostazione predefinita
+    let determinedKey = null;
 
-        if (lastViewBeforeCamera === 'checklist' && lastSectionBeforeCamera) {
-            currentSectionKey = lastSectionBeforeCamera;
-        } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter) {
-            currentSectionKey = currentGallerySectionFilter;
-        }
-
-        if (currentSectionKey) {
-            let tempSectionKey = currentSectionKey.toLowerCase();
-            if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {
-                sectionNameForFile = tempSectionKey;
-            } else if (tempSectionKey === 'danniverifiche') {
-                sectionNameForFile = 'danni';
-            } else if (tempSectionKey === 'riepilogo') {
-                sectionNameForFile = 'generale_riepilogo';
-            }
-        }
-        return sectionNameForFile;
+    // Priorità 1: Contesto diretto quando la fotocamera è stata aperta
+    if (lastViewBeforeCamera === 'checklist' && lastSectionBeforeCamera) {
+        determinedKey = lastSectionBeforeCamera;
+    } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter) {
+        determinedKey = currentGallerySectionFilter; // Questo è il data-target del nav button attivo
     }
+    // Priorità 2: Se la fotocamera è stata aperta globalmente (es. dal bottone della bottom bar),
+    // cerca di capire la sezione attiva nella checklist o nella galleria, se visibili.
+    else if (checklistContainer.style.display === 'block') {
+        const activeChecklistSection = checklistContainer.querySelector('.category-section.active');
+        if (activeChecklistSection) {
+            determinedKey = activeChecklistSection.id.replace('Section', '');
+        }
+    } else if (galleryPageSection.style.display === 'block') {
+         const activeNavButton = mainPageNavButtons.querySelector('button.active[data-target]');
+         if (activeNavButton) {
+            determinedKey = activeNavButton.dataset.target;
+         }
+    }
+    // Se ancora nessun determinedKey, ma esiste un lastSectionBeforeCamera valido (es. utente era su una sezione,
+    // poi è andato in landing e ha aperto camera), usa quello se non è riepilogo.
+    else if (lastSectionBeforeCamera && lastSectionBeforeCamera !== 'riepilogo' && lastSectionBeforeCamera !== 'generale_riepilogo') {
+        determinedKey = lastSectionBeforeCamera;
+    }
+
+
+    if (determinedKey) {
+        const tempKey = determinedKey.toLowerCase();
+        if (tempKey === 'remarketing') {
+            sectionNameForFile = 'remarketing';
+        } else if (tempKey === 'pneumatici') {
+            sectionNameForFile = 'pneumatici';
+        } else if (tempKey === 'danniverifiche' || tempKey === 'danni') { // Accetta entrambi i nomi per 'danni'
+            sectionNameForFile = 'danni';
+        }
+        // Se tempKey è 'riepilogo' o qualsiasi altra cosa non specificata sopra,
+        // sectionNameForFile rimarrà "generale", come inizializzato.
+    }
+
+    // console.log("Determined section for photo:", sectionNameForFile, " (from determinedKey:", determinedKey, ", lastView:", lastViewBeforeCamera, ", lastSection:", lastSectionBeforeCamera, ", galleryFilter:", currentGallerySectionFilter, ")");
+    return sectionNameForFile;
+}
 
 
     function getNextPhotoNumber(targa, sectionName) {
