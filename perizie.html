@@ -2227,45 +2227,56 @@
         lightboxTouchStartY = 0;
     }
 
-    function handleLightboxSwipe(endX, endY) {
+function handleLightboxSwipe(endX, endY) {
         const deltaX = endX - lightboxTouchStartX;
         const deltaY = endY - lightboxTouchStartY;
 
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            if (Math.abs(deltaX) > swipeThreshold) {
-                if (deltaX > 0) {
+        const horizontalSwipeStrength = Math.abs(deltaX);
+        const verticalSwipeStrength = Math.abs(deltaY);
+
+        // Verifica se lo swipe supera la soglia minima per essere considerato un gesto
+        if (horizontalSwipeStrength > swipeThreshold || verticalSwipeStrength > swipeThreshold) {
+            
+            // Determina se lo swipe è prevalentemente orizzontale o verticale
+            if (horizontalSwipeStrength > verticalSwipeStrength) {
+                // Gesto prevalentemente orizzontale
+                if (deltaX > 0) { // Swipe verso destra (foto precedente)
                     if (currentLightboxPhotoIndex > 0) {
                         currentLightboxPhotoIndex--;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('left');
+                        showSwipeEndIndicator('left'); // Inizio della lista
                     }
-                } else {
+                } else { // Swipe verso sinistra (foto successiva)
                     if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) {
                         currentLightboxPhotoIndex++;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('right');
+                        showSwipeEndIndicator('right'); // Fine della lista
                     }
                 }
-            }
-        } else {
-            if (Math.abs(deltaY) > swipeThreshold) {
-                if (deltaY > 0) { // Swipe down
-                    if (currentLightboxPhotoIndex > 0) { 
-                         showSwipeEndIndicator('top'); 
+            } else {
+                // Gesto prevalentemente verticale
+                if (deltaY > 0) { // Swipe verso il basso (foto precedente)
+                    if (currentLightboxPhotoIndex > 0) {
+                        currentLightboxPhotoIndex--;
+                        openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('top');
+                        showSwipeEndIndicator('top'); // Inizio della lista (swipe verso il basso all'inizio)
                     }
-                } else { // Swipe up
-                    if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) { 
-                        showSwipeEndIndicator('bottom'); 
+                } else { // Swipe verso l'alto (foto successiva)
+                    if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) {
+                        currentLightboxPhotoIndex++;
+                        openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('bottom');
+                        showSwipeEndIndicator('bottom'); // Fine della lista (swipe verso l'alto alla fine)
                     }
                 }
             }
         }
+        // Resetta le coordinate di inizio per il prossimo swipe
+        lightboxTouchStartX = 0;
+        lightboxTouchStartY = 0;
     }
 
     function handleGalleryGridTouchStart(event) {
