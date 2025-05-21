@@ -1671,22 +1671,85 @@
         }
     }
 
-    async function handleSavePeriziaAndReturn() {
-        if (!targaSelezionataGlobalmente) { alert("Nessuna targa attiva."); return; }
-        const originalButtonText = saveAndReturnBtn.textContent;
-        saveAndReturnBtn.textContent = 'Salvataggio...'; saveAndReturnBtn.disabled = true;
-        if (!saveProgress(targaSelezionataGlobalmente)) {
-            alert("Salvataggio dati browser fallito.");
-            saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false; return;
+async function handleSavePeriziaAndReturn() {
+        if (!targaSelezionataGlobalmente) {
+            alert("Nessuna targa attiva."); // Mantenuto in italiano
+            return;
         }
-        if (document.getElementById('riepilogoSection').classList.contains('active')) { generateSummary(); }
+        const originalButtonText = saveAndReturnBtn.textContent; // Memorizza il testo iniziale del pulsante
+        saveAndReturnBtn.disabled = true; // Disabilita il pulsante durante l'elaborazione
+
+        // 1. Salva i progressi
+        saveAndReturnBtn.textContent = 'Salvataggio Dati...';
+        if (!saveProgress(targaSelezionataGlobalmente)) {
+            alert("Salvataggio dati browser fallito."); // Mantenuto in italiano
+            saveAndReturnBtn.textContent = originalButtonText; // Ripristina il testo del pulsante
+            saveAndReturnBtn.disabled = false; // Riabilita il pulsante
+            return;
+        }
+
+        // 2. Genera il riepilogo se si è nella sezione riepilogo
+        if (document.getElementById('riepilogoSection').classList.contains('active')) {
+            generateSummary();
+        }
+
+        // 3. Scarica lo screenshot (comportamento esistente)
+        saveAndReturnBtn.textContent = 'Generazione Screenshot...';
         try {
             await generateAndDownloadScreenshot();
-        } catch (e) { console.warn("Generazione screenshot fallita, dati salvati localmente.", e); }
-        markTargaAsCompleted(targaSelezionataGlobalmente); updateNavButtonColors();
-        if (saveAndReturnBtn.textContent !== originalButtonText) {
-             saveAndReturnBtn.textContent = originalButtonText; saveAndReturnBtn.disabled = false;
+        } catch (e) {
+            console.warn("Generazione screenshot fallita, dati salvati localmente.", e);
+            // Opzionalmente, informa l'utente che lo screenshot è fallito ma la perizia è stata salvata.
+            // alert("Attenzione: la generazione dello screenshot è fallita, ma la perizia è stata salvata localmente.");
         }
+
+        // 4. Contrassegna come completata
+        markTargaAsCompleted(targaSelezionataGlobalmente);
+        updateNavButtonColors(); // Aggiorna i colori dei pulsanti di navigazione
+
+        // 5. Crea e scarica il file ZIP con le foto
+        if (typeof JSZip === 'undefined') {
+            alert("Errore: Libreria JSZip non caricata. Impossibile scaricare il file ZIP delle foto."); // Mantenuto in italiano
+        } else {
+            saveAndReturnBtn.textContent = 'Creazione ZIP Foto...';
+            try {
+                const photos = await getPhotosByTargaAndSezioneFromDB(targaSelezionataGlobalmente, null); // Ottieni tutte le foto per la targa
+
+                if (!photos || photos.length === 0) {
+                    console.log(`Nessuna foto trovata per la targa ${targaSelezionataGlobalmente} da includere nel file ZIP.`);
+                    // Nessun avviso per l'assenza di foto, per mantenere il flusso regolare. L'utente potrebbe non aver scattato foto.
+                } else {
+                    const zip = new JSZip();
+                    photos.forEach(photoData => {
+                        if (photoData.blobData instanceof Blob && photoData.name) {
+                            zip.file(photoData.name, photoData.blobData);
+                        }
+                    });
+
+                    const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(zipBlob);
+
+                    // Usa il nome della targa per il file ZIP come richiesto, es., AA000BB.zip
+                    const zipFileName = `${targaSelezionataGlobalmente.toUpperCase().replace(/[^A-Z0-9.-]/g, '_')}.zip`;
+                    link.download = zipFileName;
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                    // Potresti voler aggiungere un avviso di conferma qui se necessario:
+                    // alert(`File ZIP "${zipFileName}" per la targa ${targaSelezionataGlobalmente} scaricato.`);
+                }
+            } catch (error) {
+                alert(`Errore durante la creazione del file ZIP per la targa ${targaSelezionataGlobalmente}. La perizia è stata comunque salvata.`); // Mantenuto in italiano
+                console.error("Errore durante la creazione del file ZIP in handleSavePeriziaAndReturn:", error);
+            }
+        }
+
+        // 6. Ripristina lo stato del pulsante e naviga alla pagina iniziale
+        saveAndReturnBtn.textContent = originalButtonText; // Ripristina il testo originale del pulsante
+        saveAndReturnBtn.disabled = false; // Riabilita il pulsante
         showView('landing');
     }
 
