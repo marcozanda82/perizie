@@ -685,25 +685,25 @@
             box-sizing: border-box;
         }
 
-        #captureBtn {
-            position: absolute;
-            bottom: 90px; /* Ulteriormente modificato */
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2020;
-            width: 70px;
-            height: 70px;
-            background-color: #fff;
-            border: 4px solid #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 0 4px #333;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        }
+#captureBtn {
+    position: absolute;
+    bottom: 90px; /* Ulteriormente modificato */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2020;
+    width: 70px;
+    height: 70px;
+    background-color: #fff;
+    border: 4px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px #333;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
 
         #captureBtn::before { 
             content: '';
@@ -1339,42 +1339,27 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    const currentAppVersion = "1.6.5"; // Versione aggiornata per tracciare questa modifica
+    const currentAppVersion = "1.6.4";
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtnModal = document.getElementById('closeChangelogBtnModal');
     const changelogList = document.getElementById('changelogList');
     const changelogTitle = document.getElementById('changelogTitle');
 
-    // NUOVE VARIABILI GLOBALI PER L'AUDIO TRIGGER
-    let audioContext = null;
-    let analyserNode = null;
-    let microphoneSource = null;
-    let audioDataArray = null;
-    let isAudioMonitoring = false;
-    let lastVolumeLevel = 0;
-    const PEAK_THRESHOLD = 180; // Soglia per considerare un suono "forte" (0-255). Da calibrare.
-    const VOLUME_CHANGE_THRESHOLD = 50; // Variazione minima dal lastVolumeLevel per triggerare. Da calibrare.
-    let isAudioCaptureCooldownActive = false;
-    const AUDIO_CAPTURE_COOLDOWN_MS = 2500; // Cooldown in ms dopo uno scatto audio.
-
     const latestChangesText = `
-        <li><strong>Scatto Automatico con Suono:</strong>
-            <ul>
-                <li>In modalità fotocamera, un suono forte (rilevato dal microfono) può ora attivare automaticamente lo scatto di una foto.</li>
-                <li>Richiede il permesso per il microfono. La sensibilità potrebbe necessitare di calibrazione.</li>
-            </ul>
-        </li>
-        <li><strong>Nuovi Pulsanti Azione Pagina (v1.6.4):</strong>
+        <li><strong>Nuovi Pulsanti Azione Pagina:</strong>
             <ul>
                 <li>Aggiunto pulsante "Azzera Campi" (<i class="fas fa-undo"></i>) per le sezioni Remarketing, Pneumatici e Danni/Verifiche.</li>
                 <li>I pulsanti "Azzera" e "Compila Default" sono ora affiancati in alto a destra di ogni sezione operativa.</li>
             </ul>
         </li>
-        <li><strong>Download Perizia ZIP (v1.6.4):</strong>
+        <li><strong>Download Perizia ZIP:</strong>
             <ul>
-                <li>Aggiunto pulsante "Download ZIP" (<i class="fas fa-file-archive"></i>) nella sezione Riepilogo.</li>
+                <li>Aggiunto pulsante "Download ZIP" (<i class="fas fa-file-archive"></i>) nella sezione Riepilogo, a destra del titolo.</li>
+                <li>Il link punta a <code>https://192.168.1.154:8080/TARGA.zip</code>, sostituendo TARGA con la targa attiva.</li>
+                <li>Il pulsante è visibile solo quando una targa è selezionata e si è nella sezione Riepilogo.</li>
             </ul>
         </li>
+        <li>Miglioramenti Interfaccia Fotocamera e Navigazione Foto (come da v1.6.3).</li>
     `;
 
 
@@ -1524,8 +1509,7 @@
         if (typeof initSequentialAnimation === 'function' && section.classList.contains('active')) {
             setTimeout(initSequentialAnimation, 50);
         }
-         // Rimosso alert per coerenza con altre modifiche silenziose
-         console.log(`Campi della sezione ${section.querySelector('h2.section-title')?.textContent.trim() || sectionId} azzerati.`);
+         alert(`Campi della sezione ${section.querySelector('h2.section-title')?.textContent.trim() || sectionId} azzerati.`);
     }
 
 
@@ -1618,7 +1602,7 @@
     function saveUrgentStatusForTarga(targa, isUrgent) {  if (!targa) return; try { localStorage.setItem(`${APP_PREFIX}urgent_${targa.toUpperCase()}`, JSON.stringify(isUrgent)); } catch (e) { console.error("Errore LS urg:", e); } }
     function loadUrgentStatusForTarga(targa) { if (!targa) return false; try { const status = localStorage.getItem(`${APP_PREFIX}urgent_${targa.toUpperCase()}`); return status ? JSON.parse(status) : false; } catch (e) { console.error("Errore LS urg:", e); return false; } }
     function resetChecklistForm() { const els = document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea'); els.forEach(el => { if (el.type === 'checkbox') el.checked = false; else if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = ''; }); if (tipoTrazioneSelect) {  handleTrazioneChange(); } }
-    function saveProgress(targa) { if(!targa){return false;} const data = {}; document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => { if (el.id) { if (el.type === 'checkbox') data[el.id] = el.checked; else data[el.id] = el.value; } }); data.timestamp = new Date().toISOString();  try { localStorage.setItem(`${APP_PREFIX}data_${targa.toUpperCase()}`, JSON.stringify(data)); updateNavButtonColors(); return true; } catch(e) { console.warn("Salvataggio locale fallito per targa:", targa, e); return false; } }
+    function saveProgress(targa) { if(!targa){return false;} const data = {}; document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => { if (el.id) { if (el.type === 'checkbox') data[el.id] = el.checked; else data[el.id] = el.value; } }); data.timestamp = new Date().toISOString();  try { localStorage.setItem(`${APP_PREFIX}data_${targa.toUpperCase()}`, JSON.stringify(data)); updateNavButtonColors(); return true; } catch(e) { alert("Salvataggio locale fallito."); return false; } }
     function loadProgress(targa) { if(!targa) return; const targaUpper = targa.toUpperCase(); try { const json = localStorage.getItem(`${APP_PREFIX}data_${targaUpper}`); if (json) { const data = JSON.parse(json); document.querySelectorAll('#checklistContainer input[type="checkbox"], #checklistContainer select, #checklistContainer textarea').forEach(el => { if (el.id && data.hasOwnProperty(el.id)) { if (el.type === 'checkbox') el.checked = data[el.id]; else el.value = data[el.id]; } else if (el.id) {  if (el.type === 'checkbox') el.checked = false; else if (el.tagName === 'SELECT') el.selectedIndex = 0; } }); } else { resetChecklistForm();  } if (tipoTrazioneSelect) {   handleTrazioneChange(); } updateNavButtonColors();  } catch(e) { resetChecklistForm();  updateNavButtonColors(); } }
     function getCompletedTarghe() { try{const json=localStorage.getItem(`${APP_PREFIX}completedTarghe`);return json?JSON.parse(json):{};}catch(e){return{};}}
     function isTargaCompleted(targa) { if(!targa) return false; const completed = getCompletedTarghe(); return !!(completed[targa.toUpperCase()]); }
@@ -1645,21 +1629,21 @@
                     }
                 })
                 .catch(err => console.error(`Errore cancellazione foto DB per ${targaUpper}:`, err));
-        } catch (e) { console.warn(`Errore cancellazione dati locali per ${targaUpper}.`, e); }
+        } catch (e) { alert(`Errore cancellazione dati locali per ${targaUpper}.`); }
     }
 
-    function generateAndDownloadScreenshot() { return new Promise((resolve, reject) => { const riepilogoSection = document.getElementById('riepilogoSection'); if (!riepilogoSection) { console.warn("Errore: Sezione Riepilogo non trovata."); return reject("Sezione riepilogo non trovata"); } if (typeof html2canvas === 'undefined') { console.warn("Errore: Libreria html2canvas non caricata."); return reject("html2canvas non caricata"); } setTimeout(() => { riepilogoSection.scrollTop = 0;  html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY, windowHeight: riepilogoSection.scrollHeight }) .then(canvas => { const link = document.createElement('a'); let targaSanitized = 'sconosciuta'; let piazzaleSanitized = 'piazzale_sconosciuto'; if (targaSelezionataGlobalmente) { targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_'); const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") { piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_'); if (!piazzaleSanitized) piazzaleSanitized = 'N_D'; } else { piazzaleSanitized = 'N_D'; } } link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`; link.href = canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); resolve(); }) .catch(error => { console.warn("Errore generazione screenshot.", error); reject(error); }); }, 100);  }); }
+    function generateAndDownloadScreenshot() { return new Promise((resolve, reject) => { const riepilogoSection = document.getElementById('riepilogoSection'); if (!riepilogoSection) { alert("Errore: Sezione Riepilogo non trovata."); return reject("Sezione riepilogo non trovata"); } if (typeof html2canvas === 'undefined') { alert("Errore: Libreria html2canvas non caricata."); return reject("html2canvas non caricata"); } setTimeout(() => { riepilogoSection.scrollTop = 0;  html2canvas(riepilogoSection, { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY, windowHeight: riepilogoSection.scrollHeight }) .then(canvas => { const link = document.createElement('a'); let targaSanitized = 'sconosciuta'; let piazzaleSanitized = 'piazzale_sconosciuto'; if (targaSelezionataGlobalmente) { targaSanitized = targaSelezionataGlobalmente.replace(/[^a-zA-Z0-9.-]/g, '_'); const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); if (veicoloAttuale && veicoloAttuale.piazzale && veicoloAttuale.piazzale.trim() !== "") { piazzaleSanitized = veicoloAttuale.piazzale.trim().replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_'); if (!piazzaleSanitized) piazzaleSanitized = 'N_D'; } else { piazzaleSanitized = 'N_D'; } } link.download = `perizia_${targaSanitized}_${piazzaleSanitized}.png`; link.href = canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); resolve(); }) .catch(error => { alert("Errore generazione screenshot."); reject(error); }); }, 100);  }); }
 
     async function downloadPhotosAsZip(targa) {
         if (!targa) { return; }
-        if (typeof JSZip === 'undefined') { console.warn("Errore: Libreria JSZip non caricata."); return; }
+        if (typeof JSZip === 'undefined') { alert("Errore: Libreria JSZip non caricata."); return; }
         const originalButtonText = saveAndReturnBtn.textContent;
         saveAndReturnBtn.textContent = 'Creazione ZIP...';
         saveAndReturnBtn.disabled = true;
         try {
             const photos = await getPhotosByTargaAndSezioneFromDB(targa, null);
             if (!photos || photos.length === 0) {
-                console.log(`Nessuna foto per ${targa} da includere.`);
+                alert(`Nessuna foto per ${targa} da includere.`);
                 saveAndReturnBtn.textContent = originalButtonText;
                 saveAndReturnBtn.disabled = false;
                 return;
@@ -1679,8 +1663,8 @@
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(link.href);
-            console.log(`File ZIP "${zipFileName}" per ${targa} scaricato.`);
-        } catch (error) { console.warn("Errore creazione ZIP.", error);
+            alert(`File ZIP "${zipFileName}" per ${targa} scaricato.`);
+        } catch (error) { alert("Errore creazione ZIP.");
         } finally {
             saveAndReturnBtn.textContent = originalButtonText;
             saveAndReturnBtn.disabled = false;
@@ -1689,43 +1673,51 @@
 
 async function handleSavePeriziaAndReturn() {
         if (!targaSelezionataGlobalmente) {
-            console.warn("Nessuna targa attiva.");
+            alert("Nessuna targa attiva."); // Mantenuto in italiano
             return;
         }
-        const originalButtonText = saveAndReturnBtn.textContent; 
-        saveAndReturnBtn.disabled = true; 
+        const originalButtonText = saveAndReturnBtn.textContent; // Memorizza il testo iniziale del pulsante
+        saveAndReturnBtn.disabled = true; // Disabilita il pulsante durante l'elaborazione
 
+        // 1. Salva i progressi
         saveAndReturnBtn.textContent = 'Salvataggio Dati...';
         if (!saveProgress(targaSelezionataGlobalmente)) {
-            console.warn("Salvataggio dati browser fallito."); 
-            saveAndReturnBtn.textContent = originalButtonText; 
-            saveAndReturnBtn.disabled = false; 
+            alert("Salvataggio dati browser fallito."); // Mantenuto in italiano
+            saveAndReturnBtn.textContent = originalButtonText; // Ripristina il testo del pulsante
+            saveAndReturnBtn.disabled = false; // Riabilita il pulsante
             return;
         }
 
+        // 2. Genera il riepilogo se si è nella sezione riepilogo
         if (document.getElementById('riepilogoSection').classList.contains('active')) {
             generateSummary();
         }
 
+        // 3. Scarica lo screenshot (comportamento esistente)
         saveAndReturnBtn.textContent = 'Generazione Screenshot...';
         try {
             await generateAndDownloadScreenshot();
         } catch (e) {
             console.warn("Generazione screenshot fallita, dati salvati localmente.", e);
+            // Opzionalmente, informa l'utente che lo screenshot è fallito ma la perizia è stata salvata.
+            // alert("Attenzione: la generazione dello screenshot è fallita, ma la perizia è stata salvata localmente.");
         }
 
+        // 4. Contrassegna come completata
         markTargaAsCompleted(targaSelezionataGlobalmente);
-        updateNavButtonColors(); 
+        updateNavButtonColors(); // Aggiorna i colori dei pulsanti di navigazione
 
+        // 5. Crea e scarica il file ZIP con le foto
         if (typeof JSZip === 'undefined') {
-            console.warn("Errore: Libreria JSZip non caricata. Impossibile scaricare il file ZIP delle foto.");
+            alert("Errore: Libreria JSZip non caricata. Impossibile scaricare il file ZIP delle foto."); // Mantenuto in italiano
         } else {
             saveAndReturnBtn.textContent = 'Creazione ZIP Foto...';
             try {
-                const photos = await getPhotosByTargaAndSezioneFromDB(targaSelezionataGlobalmente, null); 
+                const photos = await getPhotosByTargaAndSezioneFromDB(targaSelezionataGlobalmente, null); // Ottieni tutte le foto per la targa
 
                 if (!photos || photos.length === 0) {
                     console.log(`Nessuna foto trovata per la targa ${targaSelezionataGlobalmente} da includere nel file ZIP.`);
+                    // Nessun avviso per l'assenza di foto, per mantenere il flusso regolare. L'utente potrebbe non aver scattato foto.
                 } else {
                     const zip = new JSZip();
                     photos.forEach(photoData => {
@@ -1737,6 +1729,8 @@ async function handleSavePeriziaAndReturn() {
                     const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(zipBlob);
+
+                    // Usa il nome della targa per il file ZIP come richiesto, es., AA000BB.zip
                     const zipFileName = `${targaSelezionataGlobalmente.toUpperCase().replace(/[^A-Z0-9.-]/g, '_')}.zip`;
                     link.download = zipFileName;
 
@@ -1744,13 +1738,18 @@ async function handleSavePeriziaAndReturn() {
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(link.href);
+                    // Potresti voler aggiungere un avviso di conferma qui se necessario:
+                    // alert(`File ZIP "${zipFileName}" per la targa ${targaSelezionataGlobalmente} scaricato.`);
                 }
             } catch (error) {
-                console.warn(`Errore durante la creazione del file ZIP per la targa ${targaSelezionataGlobalmente}. La perizia è stata comunque salvata.`, error);
+                alert(`Errore durante la creazione del file ZIP per la targa ${targaSelezionataGlobalmente}. La perizia è stata comunque salvata.`); // Mantenuto in italiano
+                console.error("Errore durante la creazione del file ZIP in handleSavePeriziaAndReturn:", error);
             }
         }
-        saveAndReturnBtn.textContent = originalButtonText; 
-        saveAndReturnBtn.disabled = false; 
+
+        // 6. Ripristina lo stato del pulsante e naviga alla pagina iniziale
+        saveAndReturnBtn.textContent = originalButtonText; // Ripristina il testo originale del pulsante
+        saveAndReturnBtn.disabled = false; // Riabilita il pulsante
         showView('landing');
     }
 
@@ -1841,7 +1840,7 @@ async function handleSavePeriziaAndReturn() {
             if (!targaSelezionataGlobalmente) { showView('landing'); return; }
             if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente.toUpperCase()}`)) {
                 showView('landing');
-                console.warn(`Perizia per ${targaSelezionataGlobalmente} cancellata.`); return;
+                alert(`Perizia per ${targaSelezionataGlobalmente} cancellata.`); return;
             }
             checklistContainer.style.display = 'block';
             if (mainTitleGlobal) mainTitleGlobal.style.display = 'none';
@@ -1882,22 +1881,41 @@ async function handleSavePeriziaAndReturn() {
     }
 
     // ----------------------------------------------------------------------------------
-    // Funzione showCameraPage MODIFICATA per includere gestione audio
+    // Funzione showCameraPage MODIFICATA
     // ----------------------------------------------------------------------------------
     async function showCameraPage() {
+        // The logic for setting lastViewBeforeCamera and lastSectionBeforeCamera
+        // has been moved to the headerCameraBtn click listener.
+        // These globals will be used directly by getFilenameSectionName() and returnFromCamera().
+
+        // Ensure other main sections are hidden (showView('camera') already handles this)
+        // landingPageSection.style.display = 'none';
+        // checklistContainer.style.display = 'none';
+        // historyPageSection.style.display = 'none';
+        // galleryPageSection.style.display = 'none';
+
+        // Configure camera view
         cameraStreamElement.style.display = 'block';
         freezeFrameDisplayElement.style.display = 'none';
-        cameraPageSection.style.display = 'flex'; 
+        cameraPageSection.style.display = 'flex'; // Make the camera container visible
 
-        let topBarHeight = 0; 
+        // Bottom navigation bar (bottomNavCircles) is handled by showView('camera')
+        // Top header elements (utilityNavButtons, mainTitleGlobal, etc.) are hidden by showView('camera')
+
+        let topBarHeight = 0; // Since pageHeaderContainer is display: none
         let bottomNavHeight = 0;
 
         if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') {
             bottomNavHeight = bottomNavCircles.offsetHeight;
         }
-        cameraPageSection.style.paddingTop = `${topBarHeight}px`; 
+
+        // Body padding (paddingTop and paddingBottom) is handled by showView('camera')
+
+        // Adjust cameraPageSection height to accommodate bottomNavCircles
+        cameraPageSection.style.paddingTop = `${topBarHeight}px`; // Will be '0px'
         cameraPageSection.style.height = `calc(100vh - ${topBarHeight}px - ${bottomNavHeight}px)`;
 
+        // Start camera stream
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             const constraints = {
                 video: {
@@ -1906,175 +1924,62 @@ async function handleSavePeriziaAndReturn() {
                     height: { ideal: 1080, min: 720 },
                     advanced: [{ focusMode: "continuous" }]
                 },
-                audio: true // Richiedi audio
+                audio: false
             };
 
             try {
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 cameraStreamElement.srcObject = stream;
-                currentCameraStream = stream; // Contiene sia video che audio
-                
-                // Setup focus per video
+                currentCameraStream = stream;
                 const videoTrack = stream.getVideoTracks()[0];
                 if (videoTrack && typeof videoTrack.applyConstraints === 'function') {
                     try { await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); }
                     catch (e) { try { await videoTrack.applyConstraints({ advanced: [{ focusMode: 'auto' }] }); } catch (e2) { console.warn("Focus auto fallito:", e2); } }
                 }
-
-                // Setup analisi audio
-                if (stream.getAudioTracks().length > 0) {
-                    setupAudioAnalysis(stream); // Passa lo stream combinato
-                } else {
-                    console.warn("Nessuna traccia audio disponibile per l'analisi del volume.");
-                }
-
             } catch (err) {
-                console.error("Errore getUserMedia principale (video+audio):", err);
-                try { // Fallback a solo video se video+audio fallisce
+                console.error("Errore getUserMedia principale:", err);
+                try {
                     const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
                     cameraStreamElement.srcObject = fallbackStream;
-                    currentCameraStream = fallbackStream; // Solo video
-                    console.warn("Fallback a solo video. Monitoraggio volume disabilitato.");
+                    currentCameraStream = fallbackStream;
                 } catch (fallbackErr) {
-                    console.error("Errore getUserMedia di fallback (solo video):", fallbackErr);
-                    // alert("Impossibile accedere alla fotocamera: " + fallbackErr.message); // Commentato per evitare alert multipli
+                    console.error("Errore getUserMedia di fallback:", fallbackErr);
+                    alert("Impossibile accedere alla fotocamera: " + fallbackErr.message);
                     returnFromCamera(); 
                     return; 
                 }
             }
         } else {
-            console.warn("Browser non supporta accesso fotocamera (navigator.mediaDevices non disponibile).");
+            alert("Browser non supporta accesso fotocamera (navigator.mediaDevices non disponibile).");
             returnFromCamera(); 
             return; 
         }
         window.scrollTo(0, 0);
     }
-    
-    // ----------------------------------------------------------------------------------
-    // NUOVE FUNZIONI PER L'AUDIO TRIGGER
-    // ----------------------------------------------------------------------------------
-
-    /**
-     * Configura l'analisi dell'audio dal microfono.
-     * NOTA: Questa è un'interpretazione di "variazione volume" usando l'input del microfono,
-     * poiché l'accesso diretto ai tasti volume del dispositivo non è possibile.
-     * @param {MediaStream} stream - Lo stream multimediale che include una traccia audio.
-     */
-    function setupAudioAnalysis(stream) {
-        if (!stream.getAudioTracks().length) {
-            console.warn("Nessuna traccia audio nello stream per l'analisi.");
-            return;
-        }
-        try {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyserNode = audioContext.createAnalyser();
-            analyserNode.fftSize = 512; // Valore più piccolo per meno dettaglio ma più performance
-            analyserNode.smoothingTimeConstant = 0.5; // Smussamento
-
-            microphoneSource = audioContext.createMediaStreamSource(stream);
-            microphoneSource.connect(analyserNode);
-            // Non colleghiamo analyserNode a audioContext.destination per non sentire il microfono
-
-            audioDataArray = new Uint8Array(analyserNode.frequencyBinCount);
-            lastVolumeLevel = 0;
-            isAudioMonitoring = true;
-            isAudioCaptureCooldownActive = false; // Resetta il cooldown
-            
-            console.log("Monitoraggio audio avviato.");
-            monitorAudioVolume();
-        } catch (e) {
-            console.error("Errore durante il setup dell'analisi audio:", e);
-            stopAudioAnalysis(); // Pulisci in caso di errore
-        }
-    }
-
-    /**
-     * Loop di monitoraggio del volume audio.
-     * Cattura una foto se viene rilevato un picco di volume significativo.
-     */
-    function monitorAudioVolume() {
-        if (!isAudioMonitoring || !analyserNode || !audioDataArray || cameraPageSection.style.display !== 'flex') {
-            isAudioMonitoring = false; // Assicura che si fermi se le condizioni non sono più valide
-            return;
-        }
-
-        analyserNode.getByteFrequencyData(audioDataArray);
-        
-        let currentMaxVolume = 0;
-        for (let i = 0; i < audioDataArray.length; i++) {
-            if (audioDataArray[i] > currentMaxVolume) {
-                currentMaxVolume = audioDataArray[i];
-            }
-        }
-
-        // Condizioni per lo scatto:
-        // 1. Il volume attuale supera una soglia di picco.
-        // 2. La differenza tra il volume attuale e l'ultimo volume registrato supera una soglia di variazione.
-        // 3. Non c'è un cooldown attivo per lo scatto audio.
-        // 4. Il pulsante di scatto manuale non è disabilitato (per evitare conflitti se `capturePhoto` ha la sua logica di disabilitazione).
-        if (currentMaxVolume > PEAK_THRESHOLD && 
-            Math.abs(currentMaxVolume - lastVolumeLevel) > VOLUME_CHANGE_THRESHOLD &&
-            !isAudioCaptureCooldownActive && 
-            !captureBtn.disabled) {
-            
-            console.log(`Picco volume rilevato: ${currentMaxVolume}. Scatto foto.`);
-            isAudioCaptureCooldownActive = true;
-            capturePhoto(); // Chiama la funzione di scatto esistente
-
-            setTimeout(() => {
-                isAudioCaptureCooldownActive = false;
-                console.log("Cooldown scatto audio terminato.");
-            }, AUDIO_CAPTURE_COOLDOWN_MS);
-        }
-
-        lastVolumeLevel = currentMaxVolume;
-        requestAnimationFrame(monitorAudioVolume);
-    }
-
-    /**
-     * Interrompe l'analisi dell'audio e rilascia le risorse.
-     */
-    function stopAudioAnalysis() {
-        console.log("Interruzione monitoraggio audio.");
-        isAudioMonitoring = false;
-        if (microphoneSource) {
-            microphoneSource.disconnect();
-            microphoneSource = null;
-        }
-        if (analyserNode) {
-            analyserNode.disconnect();
-            analyserNode = null;
-        }
-        if (audioContext && audioContext.state !== 'closed') {
-            audioContext.close().catch(e => console.warn("Errore chiusura AudioContext:", e));
-            audioContext = null;
-        }
-        audioDataArray = null;
-    }
-
 
     // ----------------------------------------------------------------------------------
-    // Funzione returnFromCamera MODIFICATA per fermare l'audio
+    // Funzione returnFromCamera MODIFICATA (no changes needed for this specific problem)
     // ----------------------------------------------------------------------------------
     function returnFromCamera() {
-        // Ferma lo stream della fotocamera (video e audio)
+        // Ferma lo stream della fotocamera
         if (currentCameraStream) {
             currentCameraStream.getTracks().forEach(track => track.stop());
             currentCameraStream = null;
             if (cameraStreamElement) cameraStreamElement.srcObject = null;
         }
 
-        stopAudioAnalysis(); // Interrompi il monitoraggio audio
-
+        // Nascondi la sezione della fotocamera e resetta gli elementi visivi
         if (cameraPageSection) cameraPageSection.style.display = 'none';
-        if (cameraStreamElement) cameraStreamElement.style.display = 'block'; 
+        if (cameraStreamElement) cameraStreamElement.style.display = 'block'; // Pronto per la prossima volta
         if (freezeFrameDisplayElement) freezeFrameDisplayElement.style.display = 'none';
 
+        // Resetta gli stili specifici della cameraPageSection che potrebbero essere stati modificati
         if (cameraPageSection) {
             cameraPageSection.style.paddingTop = '';
-            cameraPageSection.style.height = ''; 
+            cameraPageSection.style.height = ''; // Torna al valore CSS di default (es. 100%)
         }
 
+        // Ripristina la vista precedente (uses the globally set lastViewBeforeCamera and lastSectionBeforeCamera)
         if (lastViewBeforeCamera === 'gallery') {
             showGalleryPage(currentGalleryTargaFilter, lastSectionBeforeCamera);
         } else if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
@@ -2082,16 +1987,17 @@ async function handleSavePeriziaAndReturn() {
             showSection(lastSectionBeforeCamera); 
         } else if (lastViewBeforeCamera === 'history') {
             showView('history');
-        } else { 
+        } else { // Default a 'landing'
             showView('landing');
         }
     }
 
 
     function getFilenameSectionName() {
-        let sectionNameForFile = "generale"; 
+        let sectionNameForFile = "generale"; // Default value
         let currentSectionKey = null;
 
+        // Uses the globally set lastViewBeforeCamera and lastSectionBeforeCamera
         if (lastViewBeforeCamera === 'checklist' && lastSectionBeforeCamera) {
             currentSectionKey = lastSectionBeforeCamera;
         } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter) {
@@ -2102,11 +2008,13 @@ async function handleSavePeriziaAndReturn() {
             let tempSectionKey = currentSectionKey.toLowerCase();
             if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {
                 sectionNameForFile = tempSectionKey;
-            } else if (tempSectionKey === 'danniverifiche') { 
+            } else if (tempSectionKey === 'danniverifiche') { // This corresponds to 'danniVerificheSection'
                 sectionNameForFile = 'danni';
             } else if (tempSectionKey === 'riepilogo') {
                 sectionNameForFile = 'generale_riepilogo';
             }
+            // If currentSectionKey is something else, it will retain the default "generale"
+            // or "generale_riepilogo" if from 'riepilogo'.
         }
         return sectionNameForFile;
     }
@@ -2133,7 +2041,7 @@ async function handleSavePeriziaAndReturn() {
         currentNumber++;
         if (currentNumber < start) currentNumber = start;
         if (currentNumber > end) {
-            // console.warn(`Attenzione: Limite foto per "${sectionName}" (${start}-${end}) raggiunto. N.${currentNumber}.`);
+            // alert(`Attenzione: Limite foto per "${sectionName}" (${start}-${end}) raggiunto. N.${currentNumber}.`);
         }
         localStorage.setItem(counterKey, currentNumber.toString());
         return currentNumber;
@@ -2141,30 +2049,19 @@ async function handleSavePeriziaAndReturn() {
 
 
     function capturePhoto() {
-        if (captureBtn.disabled && !isAudioCaptureCooldownActive) return; // Se disabilitato da UI E non è un trigger audio in cooldown
-        if (isAudioCaptureCooldownActive && !captureBtn.disabled) { /* Permetti se è un trigger audio e il bottone è abilitato */ }
-        else if (captureBtn.disabled) return;
-
-
+        if (captureBtn.disabled) return;
         if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
             const canvas = document.createElement('canvas');
             canvas.width = cameraStreamElement.videoWidth;
             canvas.height = cameraStreamElement.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
-            
-            // Mostra il freeze frame solo se non è già uno scatto audio (per evitare flash visivo doppio)
-            if (!isAudioCaptureCooldownActive || (isAudioCaptureCooldownActive && freezeFrameDisplayElement.style.display === 'none')) {
-                freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7);
-                freezeFrameDisplayElement.style.display = 'block';
-                cameraStreamElement.style.display = 'none';
-            }
-            
-            // Disabilita il pulsante UI, ma non necessariamente blocca la logica se è un trigger audio
-            captureBtn.disabled = true; 
-
+            freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7);
+            freezeFrameDisplayElement.style.display = 'block';
+            cameraStreamElement.style.display = 'none';
+            captureBtn.disabled = true;
             const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');
-            const sectionNameForFile = getFilenameSectionName(); 
+            const sectionNameForFile = getFilenameSectionName(); // Crucial call using updated globals
             const photoNumber = getNextPhotoNumber(targaForFile, sectionNameForFile);
             if (photoNumber === null) {
                  freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#';
@@ -2174,7 +2071,7 @@ async function handleSavePeriziaAndReturn() {
             const filename = `${formattedPhotoNumber} ${sectionNameForFile} ${targaForFile}.jpeg`;
             canvas.toBlob(async function(blob) {
                 if (!blob) {
-                    console.warn("Errore conversione foto.");
+                    alert("Errore conversione foto.");
                     freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#';
                     cameraStreamElement.style.display = 'block'; captureBtn.disabled = false; return;
                 }
@@ -2188,22 +2085,14 @@ async function handleSavePeriziaAndReturn() {
                     link.href = URL.createObjectURL(blob); link.download = filename;
                     document.body.appendChild(link); link.click(); document.body.removeChild(link);
                     URL.revokeObjectURL(link.href);
-                } catch (error) { console.warn("Errore salvataggio foto DB.", error);
+                } catch (error) { alert("Errore salvataggio foto DB.");
                 } finally {
-                    // Ritarda il ripristino della UI per dare tempo di vedere il freeze frame
-                    // e per il cooldown dello scatto audio
-                    const uiResetDelay = isAudioCaptureCooldownActive ? Math.min(500, AUDIO_CAPTURE_COOLDOWN_MS - 100) : 500;
                     setTimeout(() => {
                         freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#';
-                        cameraStreamElement.style.display = 'block'; 
-                        if (!isAudioCaptureCooldownActive) { // Riabilita il pulsante solo se non è in cooldown audio
-                           captureBtn.disabled = false;
-                        }
-                    }, uiResetDelay);
+                        cameraStreamElement.style.display = 'block'; captureBtn.disabled = false;
+                    }, 500);
                 }
             }, 'image/jpeg', 0.7);
-        } else {
-            if (!isAudioCaptureCooldownActive) captureBtn.disabled = false; // Assicura che il bottone si riabiliti se lo stream non era pronto
         }
     }
 
@@ -2350,7 +2239,7 @@ async function handleSavePeriziaAndReturn() {
                     }
                 }
                 await populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter);
-            } catch (e) { console.warn("Errore eliminazione foto.", e); }
+            } catch (e) { alert("Errore eliminazione foto."); }
         }
     }
 
@@ -2368,10 +2257,10 @@ async function handleSavePeriziaAndReturn() {
                     lightboxImage.src = currentLightboxImageObjectUrl;
                     currentLightboxPhotoIndex = currentLightboxPhotoList.indexOf(timestamp);
                     imageLightbox.style.display = 'flex';
-                } else { console.warn("Impossibile caricare immagine."); }
+                } else { alert("Impossibile caricare immagine."); }
             };
-            request.onerror = (event) => { console.warn("Errore caricamento immagine."); };
-        } catch (error) { console.warn("Errore DB visualizzazione immagine.", error); }
+            request.onerror = (event) => { alert("Errore caricamento immagine."); };
+        } catch (error) { alert("Errore DB visualizzazione immagine."); }
     }
 
     function closeImageLightbox() {
@@ -2579,7 +2468,7 @@ function handleLightboxSwipe(endX, endY) {
             mainTargaButton.dataset.targa = targa;
             mainTargaButton.addEventListener('click', async function() {
                 if (localStorage.getItem(`${APP_PREFIX}deleted_${this.dataset.targa}`)) {
-                    console.warn(`Targa ${this.dataset.targa} marcata per cancellazione server. Annulla marcatura per modificare.`); return;
+                    alert(`Targa ${this.dataset.targa} marcata per cancellazione server. Annulla marcatura per modificare.`); return;
                 }
                 await handleTargaSelectionAndSync(this.dataset.targa);
             });
@@ -2610,7 +2499,7 @@ function handleLightboxSwipe(endX, endY) {
                 if (currentlyMarked) {
                     if (confirm(`Annullare marcatura cancellazione Sheets per ${targaToHandle}?`)) {
                         localStorage.removeItem(`${APP_PREFIX}deleted_${targaToHandle}`);
-                        console.log(`Marcatura cancellazione Sheets annullata per ${targaToHandle}.`);
+                        alert(`Marcatura cancellazione Sheets annullata per ${targaToHandle}.`);
                         populateSavedTargasList();
                         if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') popolaTargheFiltrate();
                     }
@@ -2618,10 +2507,10 @@ function handleLightboxSwipe(endX, endY) {
                     if (confirm(`Marcare ${targaToHandle} per cancellazione da Sheets?\nDati locali non modificati.`)) {
                         try {
                             localStorage.setItem(`${APP_PREFIX}deleted_${targaToHandle}`, new Date().toISOString());
-                            console.log(`${targaToHandle} marcata per cancellazione Sheets.`);
+                            alert(`${targaToHandle} marcata per cancellazione Sheets.`);
                             populateSavedTargasList();
                             if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') popolaTargheFiltrate();
-                        } catch (e) { console.warn(`Errore marcatura ${targaToHandle} per cancellazione.`, e); }
+                        } catch (e) { alert(`Errore marcatura ${targaToHandle} per cancellazione.`); }
                     }
                 }
             });
@@ -2641,14 +2530,14 @@ function handleLightboxSwipe(endX, endY) {
             keysToRemove.forEach(k => { localStorage.removeItem(k); c++; });
             openPhotoDB().then(db => {
                 if (!db) { 
-                    console.warn(`Errore: DB non inizializzato. ${c} elementi LS cancellati.`);
+                    alert(`Errore: DB non inizializzato. ${c} elementi LS cancellati.`);
                     return;
                 }
                 const transaction = db.transaction(PHOTO_STORE_NAME, 'readwrite');
                 const store = transaction.objectStore(PHOTO_STORE_NAME);
                 const request = store.clear();
                 request.onsuccess = () => {
-                    console.log(`${c} elementi LS e tutte le foto DB cancellati.`);
+                    alert(`${c} elementi LS e tutte le foto DB cancellati.`);
                     if(sheetFilterDropdown) sheetFilterDropdown.value = 'all';
                     localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all');
                     populateSavedTargasList();
@@ -2656,8 +2545,8 @@ function handleLightboxSwipe(endX, endY) {
                     if (typeof showView === 'function') showView('landing');
                     if (galleryPageSection.style.display === 'block') populatePhotoGrid(currentGalleryTargaFilter, currentGallerySectionFilter);
                 };
-                request.onerror = (event) => console.warn(`Errore cancellazione foto DB. ${c} elem LS cancellati.`);
-            }).catch(err => console.warn("Errore DB per cancellazione foto. Solo dati LS cancellati. Dettagli: " + err));
+                request.onerror = (event) => alert(`Errore cancellazione foto DB. ${c} elem LS cancellati.`);
+            }).catch(err => alert("Errore DB per cancellazione foto. Solo dati LS cancellati. Dettagli: " + err));
         }
     }
     function setupSheetFilterDropdown() { if (!sheetFilterDropdown) return; const sources = ['all', ...new Set(listaTargheCompleta.map(item => item.piazzale).filter(p => p && p.trim() !== '').sort())]; sheetFilterDropdown.innerHTML = ''; sources.forEach(source => { const option = document.createElement('option'); option.value = source; option.textContent = source === 'all' ? 'Tutti gli Elenchi' : source; sheetFilterDropdown.appendChild(option); }); const savedPiazzaleFilter = localStorage.getItem(`${APP_PREFIX}selectedPiazzaleFilter`); if (savedPiazzaleFilter && sources.includes(savedPiazzaleFilter)) { sheetFilterDropdown.value = savedPiazzaleFilter; } else { sheetFilterDropdown.value = 'all'; localStorage.setItem(`${APP_PREFIX}selectedPiazzaleFilter`, 'all'); } sheetFilterDropdown.removeEventListener('change', handleSheetFilterChange); sheetFilterDropdown.addEventListener('change', handleSheetFilterChange); }
@@ -2877,7 +2766,7 @@ function handleLightboxSwipe(endX, endY) {
 
         syncToSheetsBtn.textContent = "Sinc (1/4 RecSheets)...";
         const sheetsResponse = await fetchAllDataFromSheets();
-        if (!sheetsResponse.success) console.warn(`Errore recupero dati Sheets:\n${sheetsResponse.message}\nSinc incompleta.`);
+        if (!sheetsResponse.success) alert(`Errore recupero dati Sheets:\n${sheetsResponse.message}\nSinc incompleta.`);
         const allSheetsData = sheetsResponse.data || [];
 
         syncToSheetsBtn.textContent = "Sinc (2/4 AggLoc)...";
@@ -2914,7 +2803,7 @@ function handleLightboxSwipe(endX, endY) {
             }
         }
         if (perizieLocaliKeys.length === 0 && updatedFromSheetsCount === 0 && localUpdatesFailedCount === 0 && deletionRequests.length === 0) {
-            console.log("Nessuna operazione di sincronizzazione da eseguire.");
+            alert("Nessuna operazione di sincronizzazione da eseguire.");
             syncToSheetsBtn.textContent = originalSyncButtonText; syncToSheetsBtn.disabled = false; return;
         }
         for (const key of perizieLocaliKeys) {
@@ -2946,7 +2835,7 @@ function handleLightboxSwipe(endX, endY) {
         finalMessage += `\nINVIO DATI (Locale -> Sheets):\n- ${localToSheetsSuccessCount} inviate/aggiornate con successo su Sheets.\n`;
         if (localToSheetsErrorCount > 0) finalMessage += `- ${localToSheetsErrorCount} errori durante invio.\n`;
         if (errorMessages.length > 0) finalMessage += "\n\nDETTAGLIO ERRORI:\n" + errorMessages.join("\n");
-        console.log(finalMessage); // Log to console instead of alert
+        alert(finalMessage);
         syncToSheetsBtn.textContent = originalSyncButtonText; syncToSheetsBtn.disabled = false;
         if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') popolaTargheFiltrate();
         if (typeof populateSavedTargasList === 'function' && historyPageSection.style.display === 'block') populateSavedTargasList();
@@ -3039,7 +2928,7 @@ function handleLightboxSwipe(endX, endY) {
         try { await openPhotoDB(); }
         catch (error) {
             if (preloader) { const lt = preloader.querySelector('.loading-text'); if(lt) lt.textContent = 'ERRORE DB FOTO!';}
-            console.warn("Errore inizializzazione DB foto.", error); return;
+            alert("Errore inizializzazione DB foto."); return;
         }
         await caricaEPopolaTarghe();
         if (preloader) {
@@ -3277,7 +3166,6 @@ function handleLightboxSwipe(endX, endY) {
                     if (cameraPageSection && cameraPageSection.style.display === 'flex') { 
                         if (currentCameraStream) { currentCameraStream.getTracks().forEach(track => track.stop()); currentCameraStream = null; if(cameraStreamElement) cameraStreamElement.srcObject = null; }
                         cameraPageSection.style.display = 'none';
-                        stopAudioAnalysis(); // Assicurati di fermare l'audio anche qui
                     }
                     document.body.style.paddingTop = '0px';
                     document.body.style.paddingBottom = '0px';
@@ -3338,6 +3226,11 @@ document.addEventListener('keydown', function(event) {
             // ... (il resto del codice)
         }
     });
+
+
+
+
+
         
     });
 </script>
