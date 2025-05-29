@@ -2964,7 +2964,19 @@ function handleLightboxSwipe(endX, endY) {
             utilityNavButtons.insertBefore(syncToSheetsBtn, utilityNavButtons.firstChild);
         } else { utilityNavButtons.appendChild(syncToSheetsBtn); }
         syncToSheetsBtn.addEventListener('click', syncAllLocalDataToSheets);
-
+        // <<< INIZIO: AGGIUNTO LISTENER KEYDOWN PER TASTO INVIO >>>
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                // Controlla se la visualizzazione della fotocamera è attiva e il pulsante di scatto non è disabilitato
+                if (cameraPageSection && cameraPageSection.style.display === 'flex' &&
+                    captureBtn && !captureBtn.disabled) {
+                    
+                    event.preventDefault(); // Previene qualsiasi azione predefinita del tasto 'Invio'
+                    capturePhoto();       // Chiama la funzione di scatto esistente
+                }
+            }
+        });
+        // <<< FINE: AGGIUNTO LISTENER KEYDOWN PER TASTO INVIO >>>
         document.querySelectorAll('.fill-defaults-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const sectionId = this.dataset.sectionid; const sectionTarget = sectionId.replace('Section', '');
@@ -2999,11 +3011,11 @@ function handleLightboxSwipe(endX, endY) {
             if (nuovaTargaSelezionata && nuovaTargaSelezionata.toUpperCase() !== (targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase() : null)) {
                 this.disabled = true;
                 if (galleryPageSection.style.display === 'block') {
-                    const currentSectionForNewTarga = currentGallerySectionFilter || 'riepilogo';
+                    const currentSectionForNewTarga = currentGallerySectionFilter || 'riepilogo'; 
                     targaSelezionataGlobalmente = nuovaTargaSelezionata.toUpperCase();
                     await showGalleryPage(targaSelezionataGlobalmente, currentSectionForNewTarga);
                 } else {
-                    let currentActiveSectionId = 'remarketing';
+                    let currentActiveSectionId = 'remarketing'; 
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
                     if (activeSectionElement && activeSectionElement.id) {
                         currentActiveSectionId = activeSectionElement.id.replace('Section', '');
@@ -3043,7 +3055,7 @@ function handleLightboxSwipe(endX, endY) {
                 if (cameraPageSection.style.display === 'flex') {
                     targaForGallery = (lastViewBeforeCamera === 'checklist' || lastViewBeforeCamera === 'gallery') ? targaSelezionataGlobalmente : null;
                     sectionKeyForGallery = (lastViewBeforeCamera === 'checklist' || lastViewBeforeCamera === 'gallery') ? lastSectionBeforeCamera : null;
-                    returnFromCamera();
+                    returnFromCamera(); 
                     setTimeout(async () => await showGalleryPage(targaForGallery, sectionKeyForGallery || 'riepilogo'), 50);
                 } else if (checklistContainer.style.display === 'block' && targaSelezionataGlobalmente) {
                     targaForGallery = targaSelezionataGlobalmente;
@@ -3052,7 +3064,7 @@ function handleLightboxSwipe(endX, endY) {
                     await showGalleryPage(targaForGallery, sectionKeyForGallery);
                 } else if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter){
                     await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter || 'riepilogo');
-                } else {
+                } else { 
                     await showGalleryPage(null, null);
                 }
             });
@@ -3062,7 +3074,7 @@ function handleLightboxSwipe(endX, endY) {
                 if (cameraPageSection.style.display === 'flex') {
                     returnFromCamera();
                     if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
-                         setTimeout(() => {
+                         setTimeout(() => { 
                             showView('checklist');
                             showSection(lastSectionBeforeCamera);
                         }, 50);
@@ -3080,7 +3092,7 @@ function handleLightboxSwipe(endX, endY) {
                             targaSelezionataGlobalmente = currentGalleryTargaFilter; loadProgress(targaSelezionataGlobalmente);
                         }
                         showView('checklist'); showSection(lastSectionBeforeGallery);
-                    } else if (targaSelezionataGlobalmente){
+                    } else if (targaSelezionataGlobalmente){ 
                         const lastActivePage = localStorage.getItem(LAST_ACTIVE_PERIZIA_PAGE_KEY) || 'riepilogo';
                         await handleTargaSelectionAndSync(targaSelezionataGlobalmente, lastActivePage);
                     }
@@ -3131,7 +3143,7 @@ function handleLightboxSwipe(endX, endY) {
                 await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter);
             } else if (checklistContainer.style.display === 'block' || (!targaSelezionataGlobalmente && landingPageSection.style.display === 'block')) {
                 showSection(targetId);
-            } else if (targaSelezionataGlobalmente) {
+            } else if (targaSelezionataGlobalmente) { 
                 await handleTargaSelectionAndSync(targaSelezionataGlobalmente, targetId);
             }
         }));
@@ -3152,17 +3164,6 @@ function handleLightboxSwipe(endX, endY) {
             galleryPageSection.addEventListener('touchstart', handleGalleryGridTouchStart, { passive: true });
             galleryPageSection.addEventListener('touchmove', handleGalleryGridTouchMove, { passive: false });
         }
-
-        // << INIZIO CODICE AGGIUNTO >>
-        document.addEventListener('keydown', function(event) {
-            // Controlla se la sezione della fotocamera è visibile e se il tasto premuto è "Invio"
-            if (cameraPageSection && cameraPageSection.style.display === 'flex' && event.key === 'Enter') {
-                event.preventDefault(); // Previene eventuali azioni di default del tasto Invio
-                capturePhoto(); // Chiama la funzione di scatto foto
-            }
-        });
-        // << FINE CODICE AGGIUNTO >>
-
         initializeApplicationViewAndLoadData();
         if (mainExitAppBtn) {
             mainExitAppBtn.addEventListener('click', () => {
@@ -3174,7 +3175,7 @@ function handleLightboxSwipe(endX, endY) {
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none';
                     if (pageHeader) pageHeader.style.display = 'none';
                     if (bottomNav) bottomNav.style.display = 'none';
-                    if (cameraPageSection && cameraPageSection.style.display === 'flex') {
+                    if (cameraPageSection && cameraPageSection.style.display === 'flex') { 
                         if (currentCameraStream) { currentCameraStream.getTracks().forEach(track => track.stop()); currentCameraStream = null; if(cameraStreamElement) cameraStreamElement.srcObject = null; }
                         cameraPageSection.style.display = 'none';
                     }
