@@ -3309,6 +3309,36 @@ function handleLightboxSwipe(endX, endY) {
                 }
             });
         }
+document.addEventListener('keydown', function(event) {
+    // Controlla se la sezione della fotocamera è visibile e se il tasto premuto è "Invio"
+    if (cameraPageSection.style.display === 'flex' && event.key === 'Enter') {
+        // Previene il comportamento predefinito del tasto "Invio" (es. submit di un form)
+        event.preventDefault();
+        
+        // Esegue la funzione per scattare la foto, se il pulsante non è disabilitato
+        if (!captureBtn.disabled) {
+            capturePhoto();
+        }
+    }
+});
+
+        document.addEventListener('DOMContentLoaded', () => {
+        // ... (tutto il codice di inizializzazione esistente)
+
+        document.addEventListener('keydown', function(event) {
+            if (cameraPageSection.style.display === 'flex' && event.key === 'Enter') {
+                event.preventDefault();
+                if (!captureBtn.disabled) {
+                    capturePhoto();
+                }
+            }
+        });
+
+        if (mainExitAppBtn) {
+            // ... (il resto del codice)
+        }
+    });
+        
     });
 </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
