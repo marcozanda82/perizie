@@ -2048,53 +2048,52 @@ async function handleSavePeriziaAndReturn() {
     }
 
 
-    function capturePhoto() {
-        if (captureBtn.disabled) return;
-        if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
-            const canvas = document.createElement('canvas');
-            canvas.width = cameraStreamElement.videoWidth;
-            canvas.height = cameraStreamElement.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
-            freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7);
-            freezeFrameDisplayElement.style.display = 'block';
-            cameraStreamElement.style.display = 'none';
-            captureBtn.disabled = true;
-            const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');
-            const sectionNameForFile = getFilenameSectionName(); // Crucial call using updated globals
-            const photoNumber = getNextPhotoNumber(targaForFile, sectionNameForFile);
-            if (photoNumber === null) {
-                 freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#';
-                 cameraStreamElement.style.display = 'block'; captureBtn.disabled = false; return;
-            }
-            const formattedPhotoNumber = String(photoNumber).padStart(3, '0');
-            const filename = `${formattedPhotoNumber} ${sectionNameForFile} ${targaForFile}.jpeg`;
-            canvas.toBlob(async function(blob) {
-                if (!blob) {
-                    alert("Errore conversione foto.");
-                    freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#';
-                    cameraStreamElement.style.display = 'block'; captureBtn.disabled = false; return;
-                }
-                const photoObjectToSave = {
-                    name: filename, blobData: blob, timestamp: new Date().toISOString(),
-                    targa: targaForFile, sezione: sectionNameForFile
-                };
-                try {
-                    await savePhotoToDB(photoObjectToSave);
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob); link.download = filename;
-                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
-                    URL.revokeObjectURL(link.href);
-                } catch (error) { alert("Errore salvataggio foto DB.");
-                } finally {
-                    setTimeout(() => {
-                        freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#';
-                        cameraStreamElement.style.display = 'block'; captureBtn.disabled = false;
-                    }, 500);
-                }
-            }, 'image/jpeg', 0.7);
-        }
+function capturePhoto() {
+    // ... (altri controlli e log come suggerito in precedenza)
+
+    if (captureBtn.disabled) {
+        return;
     }
+
+    if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
+        // ... (creazione canvas, disegno immagine) ...
+
+        freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7);
+        freezeFrameDisplayElement.style.display = 'block'; // Mostra il freeze frame
+        // NON NASCONDERE cameraStreamElement: La riga "cameraStreamElement.style.display = 'none';" DEVE ESSERE RIMOSSA O COMMENTATA
+
+        captureBtn.disabled = true;
+
+        // ... (resto della logica per il blob e il salvataggio) ...
+        canvas.toBlob(async function(blob) {
+            // ... (gestione blob) ...
+            try {
+                // ... (salvataggio) ...
+            } catch (error) {
+                // ... (gestione errore) ...
+            } finally {
+                setTimeout(() => {
+                    freezeFrameDisplayElement.style.display = 'none'; // Nascondi il freeze frame
+                    freezeFrameDisplayElement.src = '#';
+                    // NON C'E' BISOGNO DI RIMETTERE cameraStreamElement.style.display = 'block'; perché non è mai stato nascosto
+
+                    captureBtn.disabled = false;
+                }, 500);
+            }
+        }, 'image/jpeg', 0.7);
+    } else {
+        // Questa sezione è importante per il debug se la condizione fallisce
+        console.error('[capturePhoto] CONDIZIONE PER SCATTARE NON SODDISFATTA:', {
+            streamAttivo: !!currentCameraStream,
+            readyState: cameraStreamElement.readyState,
+            videoWidth: cameraStreamElement.videoWidth,
+            isPaused: cameraStreamElement.paused
+        });
+        // Anche se la condizione fallisce, captureBtn non viene disabilitato qui,
+        // quindi un tentativo successivo dovrebbe essere possibile se lo stream si riprende.
+        // Se il problema è persistente, lo stream non si sta riprendendo.
+    }
+}
 
     async function showGalleryPage(targaToFilter = null, sectionToFilter = null) {
         if (checklistContainer.style.display === 'block') {
