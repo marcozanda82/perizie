@@ -1,3 +1,1269 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Perizia Veicolo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        /* Preloader & Exit Curtain Styles */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            opacity: 1;
+            visibility: visible;
+        }
+        #preloader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.7s ease-out, visibility 0.7s ease-out;
+        }
+
+        #exit-curtain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in, visibility 0.5s ease-in;
+        }
+
+        #exit-curtain.hidden {
+             opacity: 0;
+             visibility: hidden;
+             transition: opacity 0.7s ease-out, visibility 0.7s ease-out;
+        }
+
+        #exit-curtain.visible-no-transition {
+            opacity: 1;
+            visibility: visible;
+            transition: none;
+        }
+
+        .loader-bar-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .loader-bar {
+            width: 15px;
+            height: 70px;
+            background-color: #007bff;
+            animation: barPulse 1.2s infinite ease-in-out;
+            box-shadow: 0 0 8px #007bff, 0 0 15px #00aeff;
+            border-radius: 3px;
+        }
+        .loader-bar:nth-child(2) { animation-delay: 0.2s; }
+        .loader-bar:nth-child(3) { animation-delay: 0.4s; }
+
+        #exit-curtain:not(.glitching):not(.flash-out-effect) .loader-bar {
+            animation-direction: reverse;
+        }
+        #exit-curtain.glitching:not(.flash-out-effect) .loader-bar {
+            animation-direction: normal;
+        }
+        
+        @keyframes barPulse {
+            0%, 100% { transform: scaleY(0.3); opacity: 0.6; }
+            50% { transform: scaleY(1); opacity: 1; }
+        }
+
+        #preloader .loading-text,
+        #exit-curtain .loading-text {
+            font-size: 1.6em;
+            letter-spacing: 1px;
+        }
+
+        #preloader .loading-text {
+            color: #00aeff;
+            animation: textGlow 1.8s infinite alternate ease-in-out;
+            text-align: center;
+            width: 100%;
+        }
+        
+        #exit-curtain .loading-text {
+             color: #ff8787;
+        }
+
+        @keyframes textGlow {
+          from { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; opacity: 0.8;}
+          to   { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; opacity: 1;}
+        }
+
+        #exit-curtain.glitching .loading-text {
+            animation: glitchText 0.8s infinite steps(1, end), textGlow 1.8s infinite alternate ease-in-out;
+            color: #ff3030 !important;
+            position: relative;
+            z-index: 10;
+        }
+
+        #exit-curtain.glitching::before,
+        #exit-curtain.glitching::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: auto;
+            padding: 0 20px;
+            text-align: center;
+            font-size: 1.6em;
+            letter-spacing: 1px;
+            background: #000000;
+            overflow: hidden;
+            clip-path: inset(50% 50% 50% 50%);
+            z-index: 5;
+        }
+
+        #exit-curtain.glitching::before {
+            color: #00ffff;
+            animation: glitchEffect 0.3s infinite linear alternate-reverse;
+        }
+
+        #exit-curtain.glitching::after {
+            color: #ff00ff;
+            animation: glitchEffect 0.2s infinite linear alternate-reverse, glitchSkew 0.5s infinite linear alternate;
+            animation-delay: -0.1s;
+        }
+
+        @keyframes glitchEffect {
+            0%    { clip-path: inset(40% 0 30% 0); transform: translate(-50.5%, -50.1%) skewX(5deg); opacity: 0.8; }
+            10%   { clip-path: inset(20% 0 70% 0); transform: translate(-50%, -50%) skewX(0deg); opacity: 0.7; }
+            20%   { clip-path: inset(10% 0 55% 0); transform: translate(-49.8%, -50.2%) skewX(-3deg); opacity: 0.9; }
+            30%   { clip-path: inset(50% 0 50% 0); transform: translate(-50%, -50%) skewX(0deg); opacity: 0.6; }
+            40%   { clip-path: inset(60% 0 10% 0); transform: translate(-50.2%, -49.9%) skewY(2deg); opacity: 1; }
+            50%   { clip-path: inset(80% 0  5% 0); transform: translate(-50%, -50%) skewX(0deg); opacity: 0.75; }
+            60%   { clip-path: inset(25% 0 40% 0); transform: translate(-50.1%, -50.3%) skewX(4deg); opacity: 0.85; }
+            70%   { clip-path: inset(15% 0 75% 0); transform: translate(-50%, -50%) skewX(0deg); opacity: 0.9; }
+            80%   { clip-path: inset(50% 0 20% 0); transform: translate(-49.9%, -49.8%) skewY(-3deg); opacity: 1; }
+            90%   { clip-path: inset(70% 0 10% 0); transform: translate(-50%, -50%) skewX(0deg); opacity: 0.6; }
+            100%  { clip-path: inset(35% 0 45% 0); transform: translate(-50.3%, -50.0%) skewX(-2deg); opacity: 0.8; }
+        }
+
+        @keyframes glitchSkew {
+            0%   { transform: translate(-50%, -50%) skew(-5deg, -2deg); }
+            100% { transform: translate(-50%, -50%) skew(5deg, 2deg); }
+        }
+
+        @keyframes glitchText {
+            0%, 100% { text-shadow: 0 0 3px red, 0 0 5px blue, 0 0 1px white; transform: translateX(0) translateY(0) skewX(0deg); opacity: 1;}
+            10% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-2px) translateY(1px) skewX(5deg); opacity: 0.8;}
+            90% { text-shadow: 1px 1px 3px red, -1px -1px 5px blue, 0 0 1px white; transform: translateX(-1px) translateY(1px) skewX(1deg); opacity: 0.9;}
+        }
+
+        #exit-curtain.flash-out-effect .loading-text {
+            color: #FFFFFF !important;
+            text-shadow: none !important;
+            animation: textFlashOut 0.5s forwards ease-out;
+            transform-origin: center center;
+        }
+
+        @keyframes textFlashOut {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+                text-shadow: 0 0 5px rgba(255,255,255,0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+                color: #FFFFE0 !important;
+                text-shadow: 0 0 15px #FFFFFF,
+                             0 0 25px #FFFFFF,
+                             0 0 35px #FFFFE0,
+                             0 0 50px #FFFF99;
+            }
+            99% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.8);
+                text-shadow: none;
+                color: transparent !important;
+            }
+        }
+        
+        /* Original .header-circles styles, slightly modified if needed */
+        .header-circles { 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+
+        .circle-button {
+            width: 75px;   
+            height: 75px;  
+            background-color: #383838;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 6px; 
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease, color 0.3s ease;
+            font-size: 2.1em;  
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .circle-button:hover {
+            background-color: #4a4a4a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .circle-button:active {
+            background-color: #555;
+            transform: translateY(0px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .circle-button i { 
+            line-height: 1; 
+        }
+        #headerExitBtn i { color: #dc3545; } 
+        #headerPhotosBtn i { color: #007bff; } 
+        #headerPeriziaBtn i { color: #ffc107; } 
+        #headerCameraBtn i { color: #28a745; } 
+
+        #headerExitBtn:hover i,
+        #headerPhotosBtn:hover i,
+        #headerPeriziaBtn:hover i,
+        #headerCameraBtn:hover i {
+            color: #ffffff; 
+        }
+
+        /* Styles for the new Bottom Navigation Bar */
+        #bottomNavCircles {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0;
+            box-sizing: border-box;
+            background-color: #2a2a2a;
+            border-top: 1px solid #444;
+            z-index: 2025; 
+        }
+
+
+        body { 
+            font-family: sans-serif; 
+            line-height: 1.6; margin: 0; 
+            background-color: #1e1e1e; 
+            color: #f0f0f0; 
+            transition: padding-top 0.3s ease, padding-bottom 0.3s ease; 
+            padding-bottom: 70px; 
+        }
+        .content-wrapper { padding: 20px; } 
+        h1, h2 { text-align: center; color: #ffffff; }
+        h1#mainTitleGlobal { line-height: 1.2; margin-bottom: 10px; margin-top: 5px; font-size: 1.6em;}
+        
+        #targaDropdownContainer {
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 5px; 
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        #targaSwitcherDropdown {
+            padding: 8px 12px; 
+            background-color: #383838; 
+            color: #f0f0f0;
+            border: 1px solid #555;
+            border-radius: 4px;
+            min-width: 180px; 
+            max-width: 220px;
+            font-size: 1.1em; 
+            font-family: sans-serif;
+            cursor: pointer;
+            text-align: center; 
+        }
+        #targaSwitcherDropdown:hover {
+            background-color: #454545;
+            border-color: #666;
+        }
+        #targaSwitcherDropdown option {
+            padding: 5px; 
+            background-color: #383838;
+            color: #f0f0f0;
+            text-align: left; 
+        }
+        #targaDetailsDisplay {
+            font-size: 0.8em;
+            color: #cccccc;
+            margin-top: 3px; 
+            text-align: center;
+            min-height: 1.2em; 
+            line-height: 1.3; 
+        }
+        
+        @media (min-width: 480px) { 
+            #targaDropdownContainer {
+                flex-direction: row; 
+                align-items: center; 
+            }
+            #targaDetailsDisplay {
+                margin-top: 0;
+                margin-left: 10px;
+                text-align: left;
+            }
+        }
+        
+
+        h2.section-title { color: #cccccc; border-bottom: 1px solid #444444; padding-bottom: 5px; margin-top: 30px; text-align: left; }
+        #galleryPageSection h2.section-title { margin-top: 10px; text-align: center; } 
+        h3, h4 { color: #bbbbbb; margin-top: 20px; margin-bottom: 10px; }
+        h4 {font-size: 1.1em; color: #c0c0c0; margin-top: 15px; margin-bottom: 8px;}
+        ul { list-style-type: none; padding-left: 0; }
+        li { margin-bottom: 15px; }
+        input[type="checkbox"], input[type="text"], input[type="url"], select, input[type="radio"], textarea { margin-right: 8px; vertical-align: middle; padding: 8px; background-color: #333; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; margin-bottom: 5px; font-family: sans-serif;}
+        input[type="text"], input[type="url"], textarea { width: calc(100% - 20px); box-sizing: border-box; }
+        input[type="radio"] { margin-left: 5px; }
+        select:not(#targaSwitcherDropdown) { min-width: 220px; } 
+        label { vertical-align: middle; display: block; margin-bottom: 5px; color: #e0e0e0; }
+        textarea {resize: vertical;}
+
+        .category-section ul li > input[type="checkbox"] {
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+        .category-section ul li > input[type="checkbox"] + label {
+            display: inline-block;
+            vertical-align: middle;
+            margin-bottom: 0;
+        }
+
+        #pageHeaderContainer {
+            background-color: #1e1e1e;
+            z-index: 1000; 
+            width: 100%;
+        }
+        #pageHeaderContainer.fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-bottom: 5px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 2030; 
+        }
+
+        #navButtons { 
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            width: 100%;
+        }
+        #mainPageNavButtons { 
+            display: flex;
+            justify-content: center;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 5px 0;
+            width: calc(100% - 20px);
+            max-width: 700px;
+        }
+        #mainPageNavButtons button {
+            margin: 3px;
+            flex-shrink: 0;
+        }
+        #utilityNavButtons { 
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 5px; 
+            margin-bottom: 5px; 
+        }
+        #utilityNavButtons button {
+            margin: 3px 5px;
+        }
+
+        #navButtons button, .action-button { 
+             padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-size: 0.9em;
+        }
+        .save-and-next-btn { background-color: #0069d9 !important; border-color: #005cbf !important; }
+        .save-and-next-btn:hover { background-color: #0056b3 !important; border-color: #004085 !important; }
+        #navButtons button:hover, .action-button:hover { background-color: #0056b3; border-color: #004085; }
+
+        @keyframes activeButtonGlow {
+            0% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
+            50% { box-shadow: 0 0 10px rgba(0, 150, 255, 1), 0 0 15px rgba(0, 150, 255, 0.7) inset; }
+            100% { box-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 6px rgba(0, 123, 255, 0.5) inset; }
+        }
+
+        #navButtons button.active { 
+            background-color: #0056b3 !important; border-color: #004085 !important; color: white !important;
+            animation-name: activeButtonGlow; animation-duration: 1.8s;
+            animation-iteration-count: infinite; animation-timing-function: ease-in-out;
+            animation-direction: alternate;
+        }
+        #navButtons button.nav-btn-completed { background-color: #28a745 !important; border-color: #1e7e34 !important; color: white !important; }
+        #navButtons button.nav-btn-partial { background-color: #ffc107 !important; border-color: #e0a800 !important; color: #212529 !important; }
+        #navButtons button.nav-btn-untouched { background-color: #dc3545 !important; border-color: #c82333 !important; color: white !important; }
+
+        #landingPageSection, .category-section, #historyPageSection, #galleryPageSection, .camera-page-section { 
+            padding: 20px; border: 1px solid #444; border-radius: 8px; 
+            margin-top: 20px; background-color: #2a2a2a; 
+            max-width: 850px; margin-left: auto; margin-right: auto; 
+        }
+
+        .category-section, #historyPageSection, #galleryPageSection, .camera-page-section { display: none; } 
+        #landingPageSection { display: block; }
+        .category-section.active { display: block; }
+
+        .category-section {
+            position: relative; 
+        }
+        .page-action-buttons-container {
+            position: absolute;
+            top: 20px; 
+            right: 20px;
+            display: flex;
+            gap: 10px; 
+            z-index: 10;
+        }
+        .page-action-button { 
+            width: 35px;
+            height: 35px;
+            color: white;
+            border: 1px solid;
+            border-radius: 4px;
+            font-size: 1.5em; 
+            line-height: 1; 
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .fill-defaults-btn { 
+            background-color: #007bff; 
+            border-color: #0056b3;
+        }
+        .fill-defaults-btn:hover {
+            background-color: #0056b3;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .fill-defaults-btn:active {
+             background-color: #004085;
+        }
+        .reset-page-btn { 
+            background-color: #ffc107; 
+            border-color: #e0a800;
+            color: #212529; 
+        }
+        .reset-page-btn:hover {
+            background-color: #e0a800;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .reset-page-btn:active {
+            background-color: #c69500;
+        }
+
+
+        .summary-item { margin-bottom: 8px; padding: 8px; background-color: #333; border-radius: 3px; }
+        .summary-item strong { color: #00aeff; }
+        .summary-anomaly {
+            background-color: #5d3d3d !important; color: #ffdddd !important;
+            border-left: 3px solid #ff8888; padding-left: 10px !important;
+        }
+        .summary-anomaly strong { color: #ffc0c0 !important; }
+        .summary-notes {
+            background-color: #3a3a4a !important; color: #e0e0ff !important;
+            border-left: 3px solid #8888ff; padding-left: 10px !important;
+        }
+        .summary-notes strong { color: #c0c0ff !important; }
+
+        .table-scroll-wrapper { overflow-x: auto; width: 100%; margin-bottom: 10px; border: 1px solid #444; border-radius: 4px; }
+        .targa-list-table-content { min-width: 650px; } 
+        .targa-list-header { display: flex; font-weight: bold; padding: 0 10px 0 10px; border-bottom: 2px solid #777; color: #ddd; background-color: #3a3a3a; }
+        .targa-list-header .targa-col { padding: 6px 8px; border-right: 1px solid #555; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1;}
+        .targa-list-header .targa-col:last-child { border-right: none; }
+        .targa-list-header .targa-col-actions { flex-basis: 60px; text-align: center; flex-grow: 0; }
+        .targa-list-header .targa-col-urgenza { flex-basis: 70px; text-align: center; flex-grow: 0; } 
+
+
+        #targaListContainer { margin-top: 0; max-height: 350px; overflow-y: auto; overflow-x: visible; padding: 0; }
+        .targa-list-item { display: flex; align-items: center; border-bottom: 1px solid #444; padding: 0 10px 0 10px; }
+        .targa-list-item:last-child { border-bottom: none; }
+        .targa-list-item .targa-col {
+            padding: 8px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            border-right: 1px solid #444; text-align: left; flex-grow: 1; display: flex; align-items: center;
+        }
+        .targa-list-item .targa-col:last-child { border-right: none; }
+
+        .targa-col-targa    { flex-basis: 13%; min-width: 75px;} 
+        .targa-col-targa.clickable-targa {
+            cursor: pointer;
+            color: #8ab4f8;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .targa-list-item:hover .targa-col-targa.clickable-targa {
+            color: #a1c5ff;
+            text-decoration: underline;
+        }
+
+        .targa-col-posizione{ flex-basis: 12%; min-width: 60px; padding: 4px !important; } 
+        .targa-col-urgenza  { flex-basis: 10%; min-width: 50px; text-align: center; justify-content: center;} 
+        .targa-col-urgenza input[type="checkbox"] { margin: 0 auto; } 
+        .targa-col-marca    { flex-basis: 18%; min-width: 90px;} 
+        .targa-col-modello  { flex-basis: 22%; min-width: 100px;}
+        .targa-col-piazzale { flex-basis: 18%; min-width: 70px;} 
+        .targa-col-actions  { flex-basis: 7%; min-width: 50px; flex-grow: 0; text-align: center; } 
+
+
+        .targa-col-posizione input.posizione-input {
+            width: 100%; padding: 6px 4px; margin: 0; box-sizing: border-box;
+            background-color: #404040; color: #f0f0f0;
+            border: 1px solid #5a5a5a; border-radius: 3px;
+            font-size: 0.9em; text-align: center;
+        }
+        .targa-col-posizione input.posizione-input:focus {
+            background-color: #484848; border-color: #777; outline: none;
+        }
+
+        .delete-progress-btn { background-color: #dc3545; border-color: #c82333; color: white; padding: 3px 7px; font-size: 0.8em; line-height: 1; flex-shrink: 0; border-radius: 3px; }
+        .delete-progress-btn:hover { background-color: #c82333; border-color: #bd2130; }
+
+        .targa-list-item.status-da-vedere { background-color: #383838 !important; }
+        .targa-list-item.status-da-vedere:hover { background-color: #454545 !important; }
+        .targa-list-item.status-da-vedere .targa-col { color: #f0f0f0 !important; }
+        .targa-list-item.status-da-vedere .targa-col-targa.clickable-targa { color: #8ab4f8 !important; }
+        .targa-list-item.status-da-vedere:hover .targa-col-targa.clickable-targa { color: #a1c5ff !important; }
+        .targa-list-item.status-da-vedere .targa-col-posizione input.posizione-input { background-color: #4f4f4f; color: #f0f0f0; border-color: #5a5a5a; }
+
+        .targa-list-item.status-visto { background-color: #2E4B35 !important; }
+        .targa-list-item.status-visto:hover { background-color: #395c40 !important; }
+        .targa-list-item.status-visto .targa-col-targa,
+        .targa-list-item.status-visto .targa-col-marca,
+        .targa-list-item.status-visto .targa-col-modello,
+        .targa-list-item.status-visto .targa-col-piazzale { color: #a3cca3 !important; }
+        .targa-list-item.status-visto .targa-col-targa.clickable-targa { color: #81c784 !important; }
+        .targa-list-item.status-visto:hover .targa-col-targa.clickable-targa { color: #9ccc65 !important; }
+        .targa-list-item.status-visto .targa-col-posizione input.posizione-input { background-color: #384c3d; color: #d0e0d0; }
+
+        .targa-list-item.urgent-item { background-color: #4d3232 !important; border-left: 3px solid #ff6b6b; }
+        .targa-list-item.urgent-item:hover { background-color: #5e3f3f !important; }
+        .targa-list-item.urgent-item:not(.completed) .targa-col { color: #ffc0c0 !important; }
+        .targa-list-item.urgent-item:not(.completed) .targa-col-targa.clickable-targa { color: #ff8a80 !important; }
+        .targa-list-item.urgent-item:not(.completed):hover .targa-col-targa.clickable-targa { color: #ff5252 !important; }
+        .targa-list-item.urgent-item:not(.completed) .targa-col-posizione input.posizione-input { background-color: #5a3e3e; color: #ffc0c0; }
+        .targa-list-item.urgent-item:not(.completed) .targa-col-urgenza input[type="checkbox"] { accent-color: #ff8a80; }
+
+
+        .targa-list-item.completed .targa-col-targa,
+        .targa-list-item.completed .targa-col-marca,
+        .targa-list-item.completed .targa-col-modello,
+        .targa-list-item.completed .targa-col-piazzale { color: #888 !important; }
+        .targa-list-item.status-visto.completed .targa-col-targa,
+        .targa-list-item.status-visto.completed .targa-col-marca,
+        .targa-list-item.status-visto.completed .targa-col-modello,
+        .targa-list-item.status-visto.completed .targa-col-piazzale { color: #a3cca3 !important; }
+        .targa-list-item.status-visto.completed .targa-col-targa.clickable-targa { color: #81c784 !important; }
+        .targa-list-item.urgent-item.completed .targa-col-targa,
+        .targa-list-item.urgent-item.completed .targa-col-marca,
+        .targa-list-item.urgent-item.completed .targa-col-modello,
+        .targa-list-item.urgent-item.completed .targa-col-piazzale { color: #a07c7c !important; }
+        .targa-list-item.urgent-item.completed .targa-col-targa.clickable-targa { color: #ff8a80 !important; }
+        .targa-list-item.urgent-item.completed .targa-col-posizione input.posizione-input { background-color: #4a2e2e; color: #a07c7c; }
+        .targa-list-item.urgent-item.completed .targa-col-urgenza input[type="checkbox"] { accent-color: #a07c7c; }
+
+
+        .targa-list-item.status-parziale { background-color: #ffc107 !important; }
+        .targa-list-item.status-parziale:hover { background-color: #e0a800 !important; }
+        .targa-list-item.status-parziale .targa-col { color: #212529 !important; }
+        .targa-list-item.status-parziale .targa-col-targa.clickable-targa { color: #b8860b !important; }
+        .targa-list-item.status-parziale:hover .targa-col-targa.clickable-targa { color: #8B4513 !important; }
+        .targa-list-item.status-parziale .targa-col-posizione input.posizione-input { background-color: #ffe082; color: #212529; border-color: #ffc107; }
+        .targa-list-item.status-parziale .targa-col-urgenza input[type="checkbox"] { accent-color: #b8860b; }
+
+        .targa-list-item.locally-deleted {
+            opacity: 0.5;
+            background-color: #404040 !important;
+        }
+        .targa-list-item.locally-deleted .targa-col-targa {
+            text-decoration: line-through;
+            color: #aaa !important;
+        }
+        .targa-list-item.locally-deleted .clickable-targa {
+            cursor: default !important;
+            text-decoration: line-through !important;
+        }
+        .targa-list-item.locally-deleted .delete-progress-btn {
+            display: none;
+        }
+        .targa-list-item.locally-deleted input,
+        .targa-list-item.locally-deleted select {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+
+        #targheLoadingStatus { text-align: center; padding: 10px; color: #00aeff; }
+        #savedTargasListContainer { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #333; border-radius: 4px; margin-bottom: 20px; }
+        .saved-targa-button { display: block; width: 100%; padding: 10px; background-color: #383838; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; text-align: left; cursor: pointer; font-size: 0.95em; }
+        .saved-targa-button:hover { background-color: #454545; }
+        #historyPageSection .action-button { margin-right: 10px; }
+        #sheetFilterContainer { margin-bottom: 15px; text-align: center; }
+        #sheetFilterContainer label { margin-right: 10px; color: #ccc; display: inline-block; }
+        #sheetFilterDropdown { padding: 8px; background-color: #333; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; min-width: 250px; vertical-align: middle; }
+
+        .animate-me {
+            animation: pulseHighlight 1.5s infinite alternate;
+            outline: 2px solid rgba(0, 123, 255, 0.0);
+            transition: outline 0.3s ease, box-shadow 0.3s ease;
+        }
+        @keyframes pulseHighlight {
+            from { outline: 2px solid rgba(0, 123, 255, 0.7); box-shadow: 0 0 5px rgba(0, 123, 255, 0.5), 0 0 8px rgba(0, 123, 255, 0.3) inset; }
+            to   { outline: 3px solid rgba(0, 150, 255, 1); box-shadow: 0 0 10px rgba(0, 150, 255, 0.8), 0 0 12px rgba(0, 150, 255, 0.5) inset; }
+        }
+        input[type="checkbox"].animate-me, select.animate-me { position: relative; z-index: 1; }
+
+        /* START: Stili per la pagina Fotocamera */
+        .camera-page-section { 
+            position: fixed;
+            top: 0; 
+            left: 0;
+            width: 100%;
+            height: 100%; 
+            background-color: #000;
+            z-index: 2000; 
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 0; 
+            margin: 0;
+            border: none;
+            border-radius: 0;
+            max-width: none;
+            box-sizing: border-box;
+        }
+        #cameraStream {
+            width: 100%;
+            height: 100%; 
+            object-fit: contain;
+        }
+        #freezeFrameDisplay {
+            display: none;
+            position: absolute;
+            top: 0; 
+            left: 0;
+            width: 100%;
+            height: 100%; 
+            object-fit: contain;
+            z-index: 2015; 
+            border: 8px solid #00bcd4;
+            box-sizing: border-box;
+        }
+
+#captureBtn {
+    position: absolute;
+    bottom: 90px; /* Ulteriormente modificato */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2020;
+    width: 70px;
+    height: 70px;
+    background-color: #fff;
+    border: 4px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px #333;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+        #captureBtn::before { 
+            content: '';
+            width: 50px; 
+            height: 50px; 
+            background-color: #333; 
+            border-radius: 50%;
+            display: block;
+        }
+
+        #captureBtn:hover {
+            background-color: #f0f0f0; 
+            box-shadow: 0 0 0 5px #555; 
+        }
+        #captureBtn:active {
+            background-color: #e0e0e0;
+             box-shadow: 0 0 0 5px #000;
+        }
+       
+        #closeCameraBtn { 
+            position: absolute;
+            bottom: 20px; 
+            right: 20px;
+            z-index: 2020; 
+            width: 45px;
+            height: 45px;
+            background-color: rgba(40, 40, 40, 0.8);
+            color: #ff4d4d;
+            border: 1px solid #ff4d4d;
+            border-radius: 4px;
+            font-size: 1.8em;
+            line-height: 43px; 
+            text-align: center;
+            padding: 0;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        #closeCameraBtn:hover {
+            background-color: rgba(255, 77, 77, 0.9);
+            color: #fff;
+            border-color: #fff;
+        }
+        /* END: Stili per la pagina Fotocamera */
+
+        /* START: Stili per Changelog Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background-color: #333;
+            padding: 20px 25px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+            width: 90%;
+            max-width: 550px;
+            color: #e0e0e0;
+            border-top: 5px solid #007bff;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-content h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #00aeff;
+            border-bottom: 1px solid #555;
+            padding-bottom: 10px;
+            font-size: 1.5em;
+        }
+        .modal-content ul {
+            list-style-position: inside;
+            padding-left: 5px;
+        }
+        .modal-content ul li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .modal-close-btn {
+            display: block;
+            margin: 25px auto 0 auto;
+            padding: 10px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease;
+        }
+        .modal-close-btn:hover {
+            background-color: #0056b3;
+        }
+        /* END: Stili per Changelog Modal */
+
+        /* START: Stili per Pagina Galleria */
+        #galleryPageSection {
+            text-align: center;
+            overscroll-behavior-y: contain;
+        }
+        #photoGridContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .photo-item {
+            background-color: #3c3c3c;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.35);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        .photo-item img {
+            max-width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            border: 1px solid #555;
+        }
+        .photo-item-caption {
+            font-size: 0.75em;
+            color: #bdbdbd;
+            word-wrap: break-word;
+            margin-bottom: 8px;
+            line-height: 1.3;
+            max-height: 3.9em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .photo-item-delete-btn {
+            background-color: #c82333;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            font-size: 0.9em;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+         .photo-item-delete-btn:hover {
+            background-color: #a41523;
+        }
+        /* END: Stili per Pagina Galleria */
+
+        /* START: Stili per Lightbox Immagine */
+        #imageLightbox {
+            display: none;
+            position: fixed;
+            z-index: 3000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; 
+            background-color: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            -webkit-tap-highlight-color: transparent; 
+        }
+        #lightboxContent {
+            position: relative;
+            margin: auto;
+            padding: 0;
+            width: 90%;
+            max-width: 700px;
+        }
+        #lightboxImage {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 80vh;
+            object-fit: contain;
+            border: 3px solid #444;
+            border-radius: 5px;
+        }
+        #closeLightboxBtn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            color: #fff;
+            background-color: #333;
+            border: 1px solid #555;
+            font-size: 28px;
+            font-weight: bold;
+            padding: 0px 10px;
+            line-height: 1.2;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: color 0.3s, background-color 0.3s;
+            z-index: 3010; 
+        }
+        #closeLightboxBtn:hover,
+        #closeLightboxBtn:focus {
+            background-color: #c82333;
+            color: #fff;
+            text-decoration: none;
+        }
+        /* END: Stili per Lightbox Immagine */
+        
+        /* START: Stili per Indicatore Fine Swipe */
+        .swipe-end-indicator {
+            position: fixed;
+            background-color: rgba(255, 0, 0, 0.6); 
+            z-index: 10001; 
+            opacity: 0;
+            transition: opacity 0.15s ease-out;
+            pointer-events: none; 
+        }
+        #swipe-end-indicator-left { top: 0; bottom: 0; left: 0; width: 5px; }
+        #swipe-end-indicator-right { top: 0; bottom: 0; right: 0; width: 5px; }
+        #swipe-end-indicator-top { left: 0; right: 0; top: 0; height: 5px; }
+        #swipe-end-indicator-bottom { left: 0; right: 0; bottom: 0; height: 5px; }
+        /* END: Stili per Indicatore Fine Swipe */
+
+        /* Riepilogo Header Flex Container */
+        .riepilogo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%; 
+        }
+
+        /* Stile per il bottone Download ZIP */
+        #downloadZipBtn {
+            padding: 8px 12px;
+            background-color: #17a2b8; 
+            color: white;
+            border: 1px solid #117a8b;
+            border-radius: 4px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none; 
+            display: inline-flex; 
+            align-items: center;
+            gap: 5px; 
+        }
+        #downloadZipBtn:hover {
+            background-color: #117a8b;
+        }
+        #downloadZipBtn i {
+            font-size: 1.1em; 
+        }
+
+
+  @media (max-width: 768px) {
+    .circle-button {
+        width: 68px;   
+        height: 68px;  
+        font-size: 1.8em;  
+        border-radius: 6px; 
+    }
+    .content-wrapper { margin-top: 0; }
+    #bottomNavCircles { padding: 8px 0; } 
+
+    #navButtons button, .action-button { padding: 8px 10px; font-size: 0.85em; }
+    #mainPageNavButtons { width: 100%; padding: 5px; box-sizing: border-box; }
+    #mainPageNavButtons button { font-size: 0.8em; padding: 6px 8px; }
+    #utilityNavButtons button { font-size: 0.85em; padding: 8px 10px; }
+    input[type="text"], input[type="url"], select:not(#targaSwitcherDropdown), textarea { width: 100%; box-sizing: border-box; }
+    #targaSwitcherDropdown { min-width: 160px; font-size: 1em; }
+    #targaDetailsDisplay { font-size: 0.75em; }
+    .table-scroll-wrapper { overflow-x: auto; }
+    .targa-list-table-content { min-width: 600px; }
+    .targa-list-header { display: flex !important; }
+    .targa-list-header .targa-col, .targa-list-item .targa-col { padding: 6px 5px; }
+    .delete-progress-btn { padding: 5px 8px; }
+    .targa-col-targa    { min-width: 65px;}
+    .targa-col-posizione{ min-width: 50px;}
+    .targa-col-urgenza  { min-width: 45px;}
+    .targa-col-marca    { min-width: 70px;}
+    .targa-col-modello  { min-width: 80px;}
+    .targa-col-piazzale { min-width: 60px;}
+    .targa-col-actions  { min-width: 40px;}
+    #sheetFilterContainer { display: flex; flex-direction: column; align-items: stretch; }
+    #sheetFilterContainer label { margin-bottom: 5px; margin-right: 0; text-align: left;}
+    #sheetFilterDropdown { width: 100%; }
+    .page-action-buttons-container { top: 15px; right: 15px; gap: 8px;}
+    .page-action-button { width: 30px; height: 30px; font-size: 1.2em; }
+    #captureBtn { bottom: 80px; width: 60px; height: 60px; border-width: 3px; box-shadow: 0 0 0 3px #333;}
+    #captureBtn::before { width: 40px; height: 40px; }
+    #closeCameraBtn { bottom: 15px; right: 15px; width: 40px; height: 40px; font-size: 1.6em; line-height: 38px;}
+    #photoGridContainer { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;}
+    .photo-item img { height: 100px; }
+    #lightboxContent { width: 95%; }
+    #lightboxImage { max-height: 75vh; }
+    #closeLightboxBtn { font-size: 22px; top: 0px; right: 0px; padding: 0px 8px;}
+    #downloadZipBtn { padding: 6px 10px; font-size: 0.85em; }
+}
+  @media (max-width: 400px) {
+    .circle-button {
+        width: 60px;   
+        height: 60px;  
+        font-size: 1.7em;  
+        border-radius: 6px; 
+    }
+    #bottomNavCircles { padding: 6px 0; } 
+    
+    #photoGridContainer { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+    .modal-content { width: 95%; padding: 15px; }
+    .modal-content h2 {font-size: 1.3em;}
+    #captureBtn { bottom: 75px; width: 55px; height: 55px; border-width: 3px; box-shadow: 0 0 0 3px #222;}
+    #captureBtn::before { width: 35px; height: 35px; background-color: #222; }
+    .riepilogo-header { flex-direction: column; align-items: flex-start; gap: 10px;}
+    .riepilogo-header .section-title { width: 100%; text-align: center; } 
+    #downloadZipBtn { width: 100%; justify-content: center;} 
+}
+    </style>
+</head>
+<body>
+    <div id="preloader">
+        <div class="loader-bar-container">
+            <div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+        </div>
+        <div class="loading-text">AVVIO IN CORSO...</div>
+    </div>
+
+    <div id="changelogModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="changelogTitle">WebApp Perizie - Novità</h2>
+            <ul id="changelogList">
+                </ul>
+            <button id="closeChangelogBtnModal" class="modal-close-btn">Chiudi</button>
+        </div>
+    </div>
+
+    <div id="exit-curtain" data-text="CHIUSURA IN CORSO...">
+        <div class="loader-bar-container">
+            <div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+        </div>
+        <div class="loading-text">CHIUSURA IN CORSO...</div>
+    </div>
+
+    <div id="imageLightbox">
+        <span id="closeLightboxBtn">&times;</span>
+        <div id="lightboxContent">
+            <img id="lightboxImage" src="#" alt="Immagine Ingrandita">
+        </div>
+    </div>
+    
+    <div id="swipe-end-indicator-left" class="swipe-end-indicator"></div>
+    <div id="swipe-end-indicator-right" class="swipe-end-indicator"></div>
+    <div id="swipe-end-indicator-top" class="swipe-end-indicator"></div> <div id="swipe-end-indicator-bottom" class="swipe-end-indicator"></div>
+
+
+    <div id="pageHeaderContainer">
+        <div id="utilityNavButtons">
+            <button id="backToListBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe</button>
+            <button id="historyBtn" class="action-button" style="background-color: #17a2b8; border-color: #117a8b;">Salvataggi</button>
+            <button id="exitAppBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Esci</button>
+            </div>
+        <h1 id="mainTitleGlobal">Checklist Perizia Veicolo</h1>
+        <div id="targaDropdownContainer" style="display: none;">
+            <select id="targaSwitcherDropdown"></select>
+            <span id="targaDetailsDisplay"></span>
+        </div>
+        <div id="navButtons">
+            <div id="mainPageNavButtons">
+                <button data-target="remarketing">1. Remarketing</button>
+                <button data-target="pneumatici">2. Pneumatici</button>
+                <button data-target="danniVerifiche">3. Danni/Verifiche</button>
+                <button data-target="riepilogo">Riepilogo</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-wrapper" id="mainContentWrapper">
+        <div id="landingPageSection" style="display: block;">
+            <h2 style="margin-top: 10px;">Seleziona Veicolo da Periziare</h2>
+            <div id="sheetFilterContainer">
+                <label for="sheetFilterDropdown">Filtra per Elenco:</label>
+                <select id="sheetFilterDropdown">
+                    <option value="all">Tutti gli Elenchi</option>
+                </select>
+            </div>
+            <div id="targheLoadingStatus">Caricamento targhe in corso...</div>
+            <div class="table-scroll-wrapper">
+                <div class="targa-list-table-content">
+                    <div class="targa-list-header">
+                        <span class="targa-col targa-col-targa">Targa</span>
+                        <span class="targa-col targa-col-posizione">Posizione</span>
+                        <span class="targa-col targa-col-urgenza">Urgenza</span>
+                        <span class="targa-col targa-col-marca">Marca</span>
+                        <span class="targa-col targa-col-modello">Modello</span>
+                        <span class="targa-col targa-col-piazzale">Piazzale</span>
+                        <span class="targa-col targa-col-actions">Azioni</span>
+                    </div>
+                    <div id="targaListContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="checklistContainer" style="display: none;"> 
+            <div id="remarketingSection" class="category-section">
+                <div class="page-action-buttons-container">
+                    <button class="page-action-button reset-page-btn" title="Azzera Campi Pagina" data-sectionid="remarketingSection"><i class="fas fa-undo"></i></button>
+                    <button class="page-action-button fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection"><i class="fas fa-check"></i></button>
+                </div>
+                <h2 class="section-title">1. Foto Remarketing</h2>
+                <ul>
+                    <li>
+                        <label for="tipo_trazione">Trazione veicolo:</label>
+                        <select id="tipo_trazione">
+                            <option value="">Seleziona...</option>
+                            <option value="endotermico">Endotermico</option>
+                            <option value="elettrico">Elettrico</option>
+                        </select>
+                    </li>
+                    <li><input type="checkbox" id="foto_angolari"><label for="foto_angolari">Foto angolari (3/4)</label></li>
+                    <li>
+                        <input type="checkbox" id="foto_vano_carico">
+                        <label for="foto_vano_carico">Vano Carico</label>
+                    </li>
+                    <li>
+                        <label for="tipo_equipaggiamento">Equipaggiamento:</label>
+                        <select id="tipo_equipaggiamento">
+                            <option value="">Seleziona...</option>
+                            <option value="kit_gonfia_ripara">Kit</option>
+                            <option value="ruota">Ruota</option>
+                            <option value="ruotino">Ruotino</option>
+                            <option value="runflat">Runflat</option>
+                        </select>
+                    </li>
+                    <li><label for="equipaggiamento_presenza">Presenza equip.:</label><select id="equipaggiamento_presenza"><option value="">Seleziona...</option><option value="presente">Presente</option><option value="mancante">Mancante</option></select></li>
+                    <li><input type="checkbox" id="foto_interni_pannelli"><label for="foto_interni_pannelli">Interni/pannelli</label></li>
+                    <li><input type="checkbox" id="foto_cruscotto"><label for="foto_cruscotto">Cruscotto</label></li>
+                    <li><label for="stato_chilometri">Chilometri - Stato:</label><select id="stato_chilometri"><option value="">Seleziona...</option><option value="rilevabili">Rilevabili</option><option value="non_rilevabili">Non rilevabili</option></select></li>
+                    <li><label for="stato_cdc">CDC - Stato:</label><select id="stato_cdc"><option value="">Seleziona...</option><option value="originale">Originale</option><option value="copia_conforme">Copia conforme</option><option value="mancante">Mancante</option></select></li>
+                    <li><input type="checkbox" id="foto_vano_motore"><label for="foto_vano_motore">Vano motore</label></li>
+                    <li><input type="checkbox" id="foto_cofano_tetto"><label for="foto_cofano_tetto">Cofano e tetto</label></li>
+                    <li>
+                        <label for="chiave_telecomando">Chiave con telecomando:</label>
+                        <select id="chiave_telecomando">
+                            <option value="">Seleziona...</option>
+                            <option value="presente">Presente</option>
+                            <option value="non_presente">Non Presente</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label for="seconda_chiave">Seconda chiave:</label>
+                        <select id="seconda_chiave">
+                            <option value="">Seleziona...</option>
+                            <option value="presente">Presente</option>
+                            <option value="non_presente">Non Presente</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label for="cavo_ricarica_rapida">Cavo ricarica rapida:</label>
+                        <select id="cavo_ricarica_rapida" disabled>
+                            <option value="">Seleziona...</option>
+                            <option value="presente">Presente</option>
+                            <option value="non_presente">Non Presente</option>
+                            <option value="non_applicabile">Non Applicabile</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label for="cavo_ricarica_domestica">Cavo ricarica domestica:</label>
+                        <select id="cavo_ricarica_domestica" disabled>
+                            <option value="">Seleziona...</option>
+                            <option value="presente">Presente</option>
+                            <option value="non_presente">Non Presente</option>
+                            <option value="non_applicabile">Non Applicabile</option>
+                        </select>
+                    </li>
+                </ul>
+                <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
+            </div>
+            <div id="pneumaticiSection" class="category-section">
+                <div class="page-action-buttons-container">
+                    <button class="page-action-button reset-page-btn" title="Azzera Campi Pagina" data-sectionid="pneumaticiSection"><i class="fas fa-undo"></i></button>
+                    <button class="page-action-button fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="pneumaticiSection"><i class="fas fa-check"></i></button>
+                </div>
+                <h2 class="section-title">2. Foto Pneumatici</h2>
+                <ul>
+                    <li><label for="pneumatico_as">Ant. sinistro:</label><select id="pneumatico_as"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
+                    <li><label for="pneumatico_ad">Ant. destro:</label><select id="pneumatico_ad"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
+                    <li><label for="pneumatico_pd">Post. destro:</label><select id="pneumatico_pd"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
+                    <li><label for="pneumatico_ps">Post. sinistro:</label><select id="pneumatico_ps"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
+                </ul>
+                <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
+            </div>
+            <div id="danniVerificheSection" class="category-section">
+                <div class="page-action-buttons-container">
+                     <button class="page-action-button reset-page-btn" title="Azzera Campi Pagina" data-sectionid="danniVerificheSection"><i class="fas fa-undo"></i></button>
+                    <button class="page-action-button fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="danniVerificheSection"><i class="fas fa-check"></i></button>
+                </div>
+                <h2 class="section-title">3. Foto Danni e Verifiche</h2>
+                <ul>
+                    <li><label for="motore_accende">Motore si accende:</label><select id="motore_accende"><option value="">Seleziona...</option><option value="ok">OK</option><option value="non_ok">Non OK</option></select></li>
+                    <li><label for="batteria_stato">Batteria:</label><select id="batteria_stato"><option value="">Seleziona...</option><option value="ok">OK</option><option value="non_ok">Non OK</option></select></li>
+                    <li><input type="checkbox" id="foto_danni_generiche"><label for="foto_danni_generiche">Altre foto danni</label></li>
+                    <li>
+                        <label for="note_danni_verifiche">Note Danni/Verifiche:</label>
+                        <textarea id="note_danni_verifiche" rows="4"></textarea>
+                    </li>
+                </ul>
+                <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Vai al Riepilogo</button></div>
+            </div>
+            <div id="riepilogoSection" class="category-section">
+                <div class="riepilogo-header">
+                    <h2 class="section-title" style="margin-bottom: 0; border-bottom: none;">Riepilogo Perizia</h2>
+                    <a href="#" id="downloadZipBtn" class="action-button" title="Download ZIP Perizia" target="_blank" style="display: none;"> <i class="fas fa-file-archive"></i> Download ZIP
+                    </a>
+                </div>
+                <div id="summaryContent" style="margin-top: 15px;"><p><em>Compila le sezioni precedenti...</em></p></div>
+                <button id="saveAndReturnBtn" class="action-button" style="background-color: #28a745; border-color: #1e7e34; margin-top: 15px;">Salva Perizia e Foto</button>
+            </div>
+        </div>
+
+        <div id="historyPageSection" style="display: none;">
+            <h2 class="section-title" style="text-align: center;">Cronistoria Salvataggi</h2>
+            <div id="savedTargasListContainer"><p>Nessun salvataggio trovato.</p></div>
+            <div style="margin-top: 20px; text-align: center;">
+                <button id="clearAllProgressBtn" class="action-button" style="background-color: #dc3545; border-color: #c82333;">Cancella Tutti i Salvataggi</button>
+                <button id="backToLandingFromHistoryBtn" class="action-button" style="background-color: #6c757d; border-color: #5a6268;">Elenco Targhe Principale</button>
+            </div>
+        </div>
+
+        <div id="galleryPageSection" style="display: none;">
+            <h2 class="section-title" style="text-align: center;">Galleria Foto Catturate</h2>
+            <button id="backToMainFromGalleryBtn" class="action-button" style="margin-bottom: 15px; background-color: #6c757d; border-color: #5a6268;">Torna all'Elenco</button>
+            <div id="photoGridContainer">
+            </div>
+        </div>
+
+        <div id="cameraPageSection" class="camera-page-section" style="display: none;">
+            <video id="cameraStream" autoplay playsinline></video>
+            <img id="freezeFrameDisplay" src="#" alt="Foto Catturata" style="display: none;">
+            <button id="captureBtn" class="action-button"></button>
+            <button id="closeCameraBtn" class="action-button">×</button> 
+        </div>
+
+    </div> <div id="bottomNavCircles">
+        <div class="header-circles">
+            <button id="headerExitBtn" class="circle-button" title="Esci dall'applicazione"><i class="fas fa-power-off"></i></button>
+            <button id="headerPhotosBtn" class="circle-button" title="Galleria Foto App"><i class="fas fa-images"></i></button>
+            <button id="headerPeriziaBtn" class="circle-button" title="Vai all'ultima perizia/sezione"><i class="fas fa-clipboard-list"></i></button>
+            <button id="headerCameraBtn" class="circle-button" title="Fotocamera"><i class="fas fa-camera-retro"></i></button>
+        </div>
+    </div>
 <script>
   // Variabili globali
     const landingPageSection = document.getElementById('landingPageSection');
@@ -16,12 +1282,12 @@
     let lastViewBeforeCamera = 'landing'; // Default
     let lastSectionBeforeCamera = null; // Default
 
-    const bottomNavCircles = document.getElementById('bottomNavCircles'); // New global for bottom bar
+    const bottomNavCircles = document.getElementById('bottomNavCircles');
 
     const targaListContainer = document.getElementById('targaListContainer');
     const savedTargasListContainer = document.getElementById('savedTargasListContainer');
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
-    const pageHeaderContainer = document.getElementById('pageHeaderContainer'); // This is the TOP bar container
+    const pageHeaderContainer = document.getElementById('pageHeaderContainer');
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const targaDropdownContainer = document.getElementById('targaDropdownContainer');
     const targaSwitcherDropdown = document.getElementById('targaSwitcherDropdown');
@@ -63,9 +1329,8 @@
 
     const downloadZipBtn = document.getElementById('downloadZipBtn');
 
-    // >>> DICHIARAZIONE VARIABILE BLUETOOTH HANDLER <<<
-    let bluetoothShutterHandler = null;
-
+    // La dichiarazione let bluetoothShutterHandler = null; è stata rimossa.
+    // La dichiarazione della funzione sottostante è sufficiente.
 
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
     const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzN4bBhPi4d8i7fSpJQqCJ2CQYOtmes1yKeGeqVe053K4QkdKYH4PuQIughn_9YLEfCkA/exec';
@@ -75,7 +1340,7 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    const currentAppVersion = "1.6.4";
+    const currentAppVersion = "1.6.4"; // Mantieni o aggiorna la versione corrente
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtnModal = document.getElementById('closeChangelogBtnModal');
     const changelogList = document.getElementById('changelogList');
@@ -409,51 +1674,43 @@
 
 async function handleSavePeriziaAndReturn() {
         if (!targaSelezionataGlobalmente) {
-            alert("Nessuna targa attiva."); // Mantenuto in italiano
+            alert("Nessuna targa attiva.");
             return;
         }
-        const originalButtonText = saveAndReturnBtn.textContent; // Memorizza il testo iniziale del pulsante
-        saveAndReturnBtn.disabled = true; // Disabilita il pulsante durante l'elaborazione
+        const originalButtonText = saveAndReturnBtn.textContent;
+        saveAndReturnBtn.disabled = true;
 
-        // 1. Salva i progressi
         saveAndReturnBtn.textContent = 'Salvataggio Dati...';
         if (!saveProgress(targaSelezionataGlobalmente)) {
-            alert("Salvataggio dati browser fallito."); // Mantenuto in italiano
-            saveAndReturnBtn.textContent = originalButtonText; // Ripristina il testo del pulsante
-            saveAndReturnBtn.disabled = false; // Riabilita il pulsante
+            alert("Salvataggio dati browser fallito.");
+            saveAndReturnBtn.textContent = originalButtonText;
+            saveAndReturnBtn.disabled = false;
             return;
         }
 
-        // 2. Genera il riepilogo se si è nella sezione riepilogo
         if (document.getElementById('riepilogoSection').classList.contains('active')) {
             generateSummary();
         }
 
-        // 3. Scarica lo screenshot (comportamento esistente)
         saveAndReturnBtn.textContent = 'Generazione Screenshot...';
         try {
             await generateAndDownloadScreenshot();
         } catch (e) {
             console.warn("Generazione screenshot fallita, dati salvati localmente.", e);
-            // Opzionalmente, informa l'utente che lo screenshot è fallito ma la perizia è stata salvata.
-            // alert("Attenzione: la generazione dello screenshot è fallita, ma la perizia è stata salvata localmente.");
         }
 
-        // 4. Contrassegna come completata
         markTargaAsCompleted(targaSelezionataGlobalmente);
-        updateNavButtonColors(); // Aggiorna i colori dei pulsanti di navigazione
+        updateNavButtonColors();
 
-        // 5. Crea e scarica il file ZIP con le foto
         if (typeof JSZip === 'undefined') {
-            alert("Errore: Libreria JSZip non caricata. Impossibile scaricare il file ZIP delle foto."); // Mantenuto in italiano
+            alert("Errore: Libreria JSZip non caricata. Impossibile scaricare il file ZIP delle foto.");
         } else {
             saveAndReturnBtn.textContent = 'Creazione ZIP Foto...';
             try {
-                const photos = await getPhotosByTargaAndSezioneFromDB(targaSelezionataGlobalmente, null); // Ottieni tutte le foto per la targa
+                const photos = await getPhotosByTargaAndSezioneFromDB(targaSelezionataGlobalmente, null);
 
                 if (!photos || photos.length === 0) {
                     console.log(`Nessuna foto trovata per la targa ${targaSelezionataGlobalmente} da includere nel file ZIP.`);
-                    // Nessun avviso per l'assenza di foto, per mantenere il flusso regolare. L'utente potrebbe non aver scattato foto.
                 } else {
                     const zip = new JSZip();
                     photos.forEach(photoData => {
@@ -465,8 +1722,6 @@ async function handleSavePeriziaAndReturn() {
                     const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(zipBlob);
-
-                    // Usa il nome della targa per il file ZIP come richiesto, es., AA000BB.zip
                     const zipFileName = `${targaSelezionataGlobalmente.toUpperCase().replace(/[^A-Z0-9.-]/g, '_')}.zip`;
                     link.download = zipFileName;
 
@@ -474,18 +1729,14 @@ async function handleSavePeriziaAndReturn() {
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(link.href);
-                    // Potresti voler aggiungere un avviso di conferma qui se necessario:
-                    // alert(`File ZIP "${zipFileName}" per la targa ${targaSelezionataGlobalmente} scaricato.`);
                 }
             } catch (error) {
-                alert(`Errore durante la creazione del file ZIP per la targa ${targaSelezionataGlobalmente}. La perizia è stata comunque salvata.`); // Mantenuto in italiano
+                alert(`Errore durante la creazione del file ZIP per la targa ${targaSelezionataGlobalmente}. La perizia è stata comunque salvata.`);
                 console.error("Errore durante la creazione del file ZIP in handleSavePeriziaAndReturn:", error);
             }
         }
-
-        // 6. Ripristina lo stato del pulsante e naviga alla pagina iniziale
-        saveAndReturnBtn.textContent = originalButtonText; // Ripristina il testo originale del pulsante
-        saveAndReturnBtn.disabled = false; // Riabilita il pulsante
+        saveAndReturnBtn.textContent = originalButtonText;
+        saveAndReturnBtn.disabled = false;
         showView('landing');
     }
 
@@ -495,18 +1746,14 @@ async function handleSavePeriziaAndReturn() {
     function getSectionStatus(sectionElementId, targaData) { const inputs = getSectionInputs(sectionElementId); if (inputs.length === 0) return 'completed';  let allDefaultOrNA = true;  let allNonDefaultAndApplicable = true;  let hasAtLeastOneNonDefaultAndApplicable = false; inputs.forEach(input => { let isEffectivelyDefault = false; const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined; let currentValue = savedValue; if (savedValue === undefined) {  if (input.type === 'checkbox') currentValue = input.checked; else currentValue = input.value; } if (input.type === 'checkbox') { isEffectivelyDefault = !currentValue; } else if (input.tagName === 'SELECT') { isEffectivelyDefault = (currentValue === "" || (input.options.length > 0 && currentValue === input.options[0].value)); if ((input.id === 'cavo_ricarica_rapida' || input.id === 'cavo_ricarica_domestica') && currentValue === 'non_applicabile') { isEffectivelyDefault = true; } } else {  isEffectivelyDefault = (currentValue === ""); } if (!isEffectivelyDefault) { allDefaultOrNA = false; hasAtLeastOneNonDefaultAndApplicable = true; } else {  allNonDefaultAndApplicable = false; } }); if (allDefaultOrNA) return 'untouched'; if (allNonDefaultAndApplicable) return 'completed'; if (hasAtLeastOneNonDefaultAndApplicable) return 'partial';  return 'untouched';  }
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none' && galleryPageSection.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${(targaSelezionataGlobalmente || currentGalleryTargaFilter || "").toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; const activeTargaForStatus = targaSelezionataGlobalmente || currentGalleryTargaFilter; if (targetSection === 'riepilogo') { if (isTargaCompleted(activeTargaForStatus)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
-    // ----------------------------------------------------------------------------------
-    // Funzione showView MODIFICATA (ma no changes needed based on analysis for this specific problem)
-    // ----------------------------------------------------------------------------------
     function showView(viewName) {
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
-        if(cameraPageSection) cameraPageSection.style.display = 'none'; // Nascondi cameraPageSection di default
+        if(cameraPageSection) cameraPageSection.style.display = 'none';
         if(galleryPageSection) galleryPageSection.style.display = 'none';
         if(imageLightbox) imageLightbox.style.display = 'none';
 
-        // Default visibility for top header elements
         if(pageHeaderContainer) pageHeaderContainer.style.display = 'block';
         if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
         if(mainTitleGlobal) mainTitleGlobal.style.display = 'block';
@@ -516,11 +1763,9 @@ async function handleSavePeriziaAndReturn() {
         let bodyPaddingBottomValue = '0px';
 
         if (viewName !== 'camera') {
-            // Se NON siamo in modalità fotocamera, la bottomNavCircles è visibile di default
             if (bottomNavCircles) {
                 bottomNavCircles.style.display = 'flex';
             }
-
             if (pageHeaderContainer && getComputedStyle(pageHeaderContainer).display !== 'none' && pageHeaderContainer.classList.contains('fixed-header')) {
                 let hasVisibleTopContent = false;
                 const topElements = [utilityNavButtons, mainTitleGlobal, navButtonsContainer, targaDropdownContainer];
@@ -534,22 +1779,17 @@ async function handleSavePeriziaAndReturn() {
                     bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
                 }
             }
-
             if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') {
                 bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
             }
-        } else { // viewName === 'camera'
-            // In modalità fotocamera, l'header superiore è nascosto
+        } else {
             if (pageHeaderContainer) pageHeaderContainer.style.display = 'none';
-
-            // La bottomNavCircles DEVE essere visibile in modalità camera (come da richiesta)
             if (bottomNavCircles) {
-                 bottomNavCircles.style.display = 'flex'; // Assicura che sia visibile
-                 // Calcola il padding solo se effettivamente visibile
+                 bottomNavCircles.style.display = 'flex';
                  if (getComputedStyle(bottomNavCircles).display !== 'none') {
                     bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
                  } else {
-                     bodyPaddingBottomValue = '0px'; // Fallback
+                     bodyPaddingBottomValue = '0px';
                  }
             } else {
                 bodyPaddingBottomValue = '0px';
@@ -558,7 +1798,6 @@ async function handleSavePeriziaAndReturn() {
         document.body.style.paddingTop = bodyPaddingTopValue;
         document.body.style.paddingBottom = bodyPaddingBottomValue;
 
-        // Gestione specifica della vista
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
@@ -600,64 +1839,52 @@ async function handleSavePeriziaAndReturn() {
             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         } else if (viewName === 'gallery') {
             if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
-            // La visualizzazione di galleryPageSection è gestita da showGalleryPage()
-            // Questa viene chiamata da altre parti della logica (es. click su headerPhotosBtn)
             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         } else if (viewName === 'camera') {
-            // La logica principale per preparare la cameraPageSection
-            // e avviare lo stream è in showCameraPage()
-            showCameraPage(); // Chiamata per attivare la fotocamera
-        } else { // Vista sconosciuta o di default
+            showCameraPage();
+        } else {
              if (pageHeaderContainer) pageHeaderContainer.classList.remove('fixed-header');
              if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         }
-
         updateNavButtonColors();
         window.scrollTo(0, 0);
     }
 
-    // >>> DEFINIZIONE FUNZIONE BLUETOOTH HANDLER <<<
+    // >>> DEFINIZIONE DELLA FUNZIONE PER GESTIRE LO SCATTO BLUETOOTH <<<
     function bluetoothShutterHandler(event) {
-        // Stampa in console per debugging - PREMI IL TUO TASTO BLUETOOTH E GUARDA COSA APPARE QUI
-        console.log('Key pressed:', event.key, 'Code:', event.code);
-
-        // Solo se la camera è attiva e non ci sono altre modali/lightbox aperte
+        // Controlla se la modalità fotocamera è attiva e se non ci sono altre modali aperte
         if (cameraPageSection.style.display !== 'flex' ||
             (imageLightbox && imageLightbox.style.display === 'flex') ||
             (changelogModal && changelogModal.style.display === 'flex')) {
-            return;
+            return; // Non fare nulla se la fotocamera non è la vista principale o una modale è aperta
         }
 
         // Controlla se il tasto premuto è Volume Su o Volume Giù
-        if (event.key === 'AudioVolumeUp' || event.code === 'VolumeUp' || /* Tasto Volume Su */
-            event.key === 'AudioVolumeDown' || event.code === 'VolumeDown' /* Tasto Volume Giù */
-           ) {
-            event.preventDefault(); // IMPORTANTE: previene l'azione di default (cambiare il volume)
+        // event.key è più leggibile, event.code è più indipendente dal layout della tastiera
+        if (event.key === 'AudioVolumeUp' || event.code === 'VolumeUp' ||
+            event.key === 'AudioVolumeDown' || event.code === 'VolumeDown') {
+            
+            event.preventDefault(); // IMPORTANTE: previene l'azione di default del browser (es. cambiare il volume)
+            
             if (captureBtn && !captureBtn.disabled) {
-                captureBtn.click(); // Simula il click sul pulsante di scatto
+                console.log("Bluetooth shutter: Volume key pressed, triggering capture."); // Log per debug
+                captureBtn.click(); // Simula il click sul pulsante di scatto esistente
             }
         }
     }
 
-    // ----------------------------------------------------------------------------------
-    // Funzione showCameraPage MODIFICATA
-    // ----------------------------------------------------------------------------------
     async function showCameraPage() {
-        // The logic for setting lastViewBeforeCamera and lastSectionBeforeCamera
-        // has been moved to the headerCameraBtn click listener.
-        // These globals will be used directly by getFilenameSectionName() and returnFromCamera().
-
         cameraStreamElement.style.display = 'block';
         freezeFrameDisplayElement.style.display = 'none';
-        cameraPageSection.style.display = 'flex'; 
+        cameraPageSection.style.display = 'flex';
 
-        let topBarHeight = 0; 
+        let topBarHeight = 0;
         let bottomNavHeight = 0;
 
         if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') {
             bottomNavHeight = bottomNavCircles.offsetHeight;
         }
-        cameraPageSection.style.paddingTop = `${topBarHeight}px`; 
+        cameraPageSection.style.paddingTop = `${topBarHeight}px`;
         cameraPageSection.style.height = `calc(100vh - ${topBarHeight}px - ${bottomNavHeight}px)`;
 
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -680,7 +1907,7 @@ async function handleSavePeriziaAndReturn() {
                     try { await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); }
                     catch (e) { try { await videoTrack.applyConstraints({ advanced: [{ focusMode: 'auto' }] }); } catch (e2) { console.warn("Focus auto fallito:", e2); } }
                 }
-                // >>> AGGIUNTA EVENT LISTENER BLUETOOTH <<<
+                // >>> AGGIUNGI L'EVENT LISTENER PER I TASTI QUANDO LA FOTOCAMERA È ATTIVA <<<
                 document.addEventListener('keydown', bluetoothShutterHandler);
 
             } catch (err) {
@@ -689,26 +1916,23 @@ async function handleSavePeriziaAndReturn() {
                     const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
                     cameraStreamElement.srcObject = fallbackStream;
                     currentCameraStream = fallbackStream;
-                    // >>> AGGIUNTA EVENT LISTENER BLUETOOTH (ANCHE NEL FALLBACK) <<<
+                    // >>> AGGIUNGI L'EVENT LISTENER ANCHE NEL CASO DI FALLBACK <<<
                     document.addEventListener('keydown', bluetoothShutterHandler);
                 } catch (fallbackErr) {
                     console.error("Errore getUserMedia di fallback:", fallbackErr);
                     alert("Impossibile accedere alla fotocamera: " + fallbackErr.message);
-                    returnFromCamera(); 
-                    return; 
+                    returnFromCamera();
+                    return;
                 }
             }
         } else {
             alert("Browser non supporta accesso fotocamera (navigator.mediaDevices non disponibile).");
-            returnFromCamera(); 
-            return; 
+            returnFromCamera();
+            return;
         }
         window.scrollTo(0, 0);
     }
 
-    // ----------------------------------------------------------------------------------
-    // Funzione returnFromCamera MODIFICATA
-    // ----------------------------------------------------------------------------------
     function returnFromCamera() {
         if (currentCameraStream) {
             currentCameraStream.getTracks().forEach(track => track.stop());
@@ -716,38 +1940,37 @@ async function handleSavePeriziaAndReturn() {
             if (cameraStreamElement) cameraStreamElement.srcObject = null;
         }
 
-        // >>> RIMOZIONE EVENT LISTENER BLUETOOTH <<<
-        if (bluetoothShutterHandler) {
-            document.removeEventListener('keydown', bluetoothShutterHandler);
-        }
+        // >>> RIMUOVI L'EVENT LISTENER PER I TASTI QUANDO SI ESCE DALLA FOTOCAMERA <<<
+        // Non è più necessario controllare if (bluetoothShutterHandler) perché la funzione è sempre definita
+        document.removeEventListener('keydown', bluetoothShutterHandler);
+
 
         if (cameraPageSection) cameraPageSection.style.display = 'none';
-        if (cameraStreamElement) cameraStreamElement.style.display = 'block'; 
+        if (cameraStreamElement) cameraStreamElement.style.display = 'block';
         if (freezeFrameDisplayElement) freezeFrameDisplayElement.style.display = 'none';
 
         if (cameraPageSection) {
             cameraPageSection.style.paddingTop = '';
-            cameraPageSection.style.height = ''; 
+            cameraPageSection.style.height = '';
         }
 
         if (lastViewBeforeCamera === 'gallery') {
             showGalleryPage(currentGalleryTargaFilter, lastSectionBeforeCamera);
         } else if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
-            showView('checklist'); 
-            showSection(lastSectionBeforeCamera); 
+            showView('checklist');
+            showSection(lastSectionBeforeCamera);
         } else if (lastViewBeforeCamera === 'history') {
             showView('history');
-        } else { 
+        } else {
             showView('landing');
         }
     }
 
 
     function getFilenameSectionName() {
-        let sectionNameForFile = "generale"; // Default value
+        let sectionNameForFile = "generale";
         let currentSectionKey = null;
 
-        // Uses the globally set lastViewBeforeCamera and lastSectionBeforeCamera
         if (lastViewBeforeCamera === 'checklist' && lastSectionBeforeCamera) {
             currentSectionKey = lastSectionBeforeCamera;
         } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter) {
@@ -758,13 +1981,11 @@ async function handleSavePeriziaAndReturn() {
             let tempSectionKey = currentSectionKey.toLowerCase();
             if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {
                 sectionNameForFile = tempSectionKey;
-            } else if (tempSectionKey === 'danniverifiche') { // This corresponds to 'danniVerificheSection'
+            } else if (tempSectionKey === 'danniverifiche') {
                 sectionNameForFile = 'danni';
             } else if (tempSectionKey === 'riepilogo') {
                 sectionNameForFile = 'generale_riepilogo';
             }
-            // If currentSectionKey is something else, it will retain the default "generale"
-            // or "generale_riepilogo" if from 'riepilogo'.
         }
         return sectionNameForFile;
     }
@@ -811,7 +2032,7 @@ async function handleSavePeriziaAndReturn() {
             cameraStreamElement.style.display = 'none';
             captureBtn.disabled = true;
             const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');
-            const sectionNameForFile = getFilenameSectionName(); // Crucial call using updated globals
+            const sectionNameForFile = getFilenameSectionName();
             const photoNumber = getNextPhotoNumber(targaForFile, sectionNameForFile);
             if (photoNumber === null) {
                  freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#';
@@ -860,16 +2081,16 @@ async function handleSavePeriziaAndReturn() {
         currentGalleryTargaFilter = targaToFilter ? targaToFilter.toUpperCase() : null;
         currentGallerySectionFilter = sectionToFilter;
 
-        showView('gallery'); 
+        showView('gallery');
 
-        galleryPageSection.style.display = 'block'; 
+        galleryPageSection.style.display = 'block';
 
         const galleryTitleElement = galleryPageSection.querySelector('h2.section-title');
         let galleryTitleText = "Galleria Foto Catturate";
 
         if (currentGalleryTargaFilter) {
             targaSelezionataGlobalmente = currentGalleryTargaFilter;
-            if(mainTitleGlobal) mainTitleGlobal.style.display = 'none'; 
+            if(mainTitleGlobal) mainTitleGlobal.style.display = 'none';
             if(targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
             populateTargaSwitcherDropdown();
             if(targaSwitcherDropdown.value.toUpperCase() !== currentGalleryTargaFilter) {
@@ -1047,47 +2268,41 @@ function handleLightboxSwipe(endX, endY) {
         const horizontalSwipeStrength = Math.abs(deltaX);
         const verticalSwipeStrength = Math.abs(deltaY);
 
-        // Verifica se lo swipe supera la soglia minima per essere considerato un gesto
         if (horizontalSwipeStrength > swipeThreshold || verticalSwipeStrength > swipeThreshold) {
-            
-            // Determina se lo swipe è prevalentemente orizzontale o verticale
             if (horizontalSwipeStrength > verticalSwipeStrength) {
-                // Gesto prevalentemente orizzontale
-                if (deltaX > 0) { // Swipe verso destra (foto precedente)
+                if (deltaX > 0) {
                     if (currentLightboxPhotoIndex > 0) {
                         currentLightboxPhotoIndex--;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('left'); // Inizio della lista
+                        showSwipeEndIndicator('left');
                     }
-                } else { // Swipe verso sinistra (foto successiva)
+                } else {
                     if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) {
                         currentLightboxPhotoIndex++;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('right'); // Fine della lista
+                        showSwipeEndIndicator('right');
                     }
                 }
             } else {
-                // Gesto prevalentemente verticale
-                if (deltaY > 0) { // Swipe verso il basso (foto precedente)
+                if (deltaY > 0) {
                     if (currentLightboxPhotoIndex > 0) {
                         currentLightboxPhotoIndex--;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('top'); // Inizio della lista (swipe verso il basso all'inizio)
+                        showSwipeEndIndicator('top');
                     }
-                } else { // Swipe verso l'alto (foto successiva)
+                } else {
                     if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) {
                         currentLightboxPhotoIndex++;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('bottom'); // Fine della lista (swipe verso l'alto alla fine)
+                        showSwipeEndIndicator('bottom');
                     }
                 }
             }
         }
-        // Resetta le coordinate di inizio per il prossimo swipe
         lightboxTouchStartX = 0;
         lightboxTouchStartY = 0;
     }
@@ -1105,8 +2320,8 @@ function handleLightboxSwipe(endX, endY) {
             const isPageAtTop = (galleryPageSection.scrollTop || document.documentElement.scrollTop || document.body.scrollTop) === 0;
 
 
-            if (isPageAtTop && deltaY > 0 && galleryPageSection.scrollHeight <= galleryPageSection.clientHeight) { 
-                event.preventDefault(); 
+            if (isPageAtTop && deltaY > 0 && galleryPageSection.scrollHeight <= galleryPageSection.clientHeight) {
+                event.preventDefault();
                 showSwipeEndIndicator('top');
             }
         }
@@ -1279,7 +2494,7 @@ function handleLightboxSwipe(endX, endY) {
             }
             keysToRemove.forEach(k => { localStorage.removeItem(k); c++; });
             openPhotoDB().then(db => {
-                if (!db) { 
+                if (!db) {
                     alert(`Errore: DB non inizializzato. ${c} elementi LS cancellati.`);
                     return;
                 }
@@ -1626,7 +2841,7 @@ function handleLightboxSwipe(endX, endY) {
         if (Math.abs(deltaX) < swipeThreshold && Math.abs(deltaY) < swipeThreshold) { return; }
 
         let currentViewElement = null;
-        let sectionArrayForSwipe = sectionOrder; 
+        let sectionArrayForSwipe = sectionOrder;
         let currentSectionIdInSwipe = null;
         let changeFunctionForSwipe = null;
 
@@ -1635,7 +2850,7 @@ function handleLightboxSwipe(endX, endY) {
             const activeSectionElement = checklistContainer.querySelector('.category-section.active');
             if (!activeSectionElement) return;
             currentSectionIdInSwipe = activeSectionElement.id.replace('Section', '');
-            changeFunctionForSwipe = showSection; 
+            changeFunctionForSwipe = showSection;
         } else if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter) {
             currentViewElement = galleryPageSection;
             const activeNavButton = mainPageNavButtons.querySelector('button.active');
@@ -1650,14 +2865,14 @@ function handleLightboxSwipe(endX, endY) {
         const currentIndexInSwipe = sectionArrayForSwipe.indexOf(currentSectionIdInSwipe);
         if (currentIndexInSwipe === -1) return;
 
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) { 
-            if (deltaX > 0) { 
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
+            if (deltaX > 0) {
                 if (currentIndexInSwipe > 0) {
                     await changeFunctionForSwipe(sectionArrayForSwipe[currentIndexInSwipe - 1]);
                 } else {
                     showSwipeEndIndicator('left');
                 }
-            } else { 
+            } else {
                 if (currentIndexInSwipe < sectionArrayForSwipe.length - 1) {
                     await changeFunctionForSwipe(sectionArrayForSwipe[currentIndexInSwipe + 1]);
                 } else {
@@ -1667,9 +2882,7 @@ function handleLightboxSwipe(endX, endY) {
         }
     }
 
-    // >>> FUNZIONE initializeApplicationViewAndLoadData CON I DEBUG LOG <<<
     async function initializeApplicationViewAndLoadData() {
-        console.log("FN_DEBUG: Inizio initializeApplicationViewAndLoadData"); // DEBUG
         const preloader = document.getElementById('preloader');
         if (preloader) {
             preloader.style.display = 'flex'; preloader.classList.remove('hidden');
@@ -1677,26 +2890,15 @@ function handleLightboxSwipe(endX, endY) {
             const loadingText = preloader.querySelector('.loading-text');
             if (loadingText) loadingText.textContent = 'CARICAMENTO TARGHE...';
         }
-        try {
-            console.log("FN_DEBUG: Prima di openPhotoDB"); // DEBUG
-            await openPhotoDB();
-            console.log("FN_DEBUG: Dopo openPhotoDB"); // DEBUG
-        }
+        try { await openPhotoDB(); }
         catch (error) {
-            console.error("FN_DEBUG: Errore in openPhotoDB:", error); // DEBUG
             if (preloader) { const lt = preloader.querySelector('.loading-text'); if(lt) lt.textContent = 'ERRORE DB FOTO!';}
             alert("Errore inizializzazione DB foto."); return;
         }
-
-        console.log("FN_DEBUG: Prima di caricaEPopolaTarghe"); // DEBUG
         await caricaEPopolaTarghe();
-        console.log("FN_DEBUG: Dopo caricaEPopolaTarghe"); // DEBUG
-
         if (preloader) {
-            console.log("FN_DEBUG: Prima di nascondere il preloader"); // DEBUG
             preloader.classList.add('hidden');
             setTimeout(() => { if (preloader) preloader.style.display = 'none'; }, 700);
-            console.log("FN_DEBUG: Dopo aver nascosto il preloader"); // DEBUG
         }
         showView('landing');
         if (changelogModal && closeChangelogBtnModal && changelogList && changelogTitle) {
@@ -1709,7 +2911,6 @@ function handleLightboxSwipe(endX, endY) {
                 localStorage.setItem('appVersionSeen', currentAppVersion);
             };
         }
-        console.log("FN_DEBUG: Fine initializeApplicationViewAndLoadData"); // DEBUG
     }
 
 
@@ -1763,11 +2964,11 @@ function handleLightboxSwipe(endX, endY) {
             if (nuovaTargaSelezionata && nuovaTargaSelezionata.toUpperCase() !== (targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase() : null)) {
                 this.disabled = true;
                 if (galleryPageSection.style.display === 'block') {
-                    const currentSectionForNewTarga = currentGallerySectionFilter || 'riepilogo'; 
+                    const currentSectionForNewTarga = currentGallerySectionFilter || 'riepilogo';
                     targaSelezionataGlobalmente = nuovaTargaSelezionata.toUpperCase();
                     await showGalleryPage(targaSelezionataGlobalmente, currentSectionForNewTarga);
                 } else {
-                    let currentActiveSectionId = 'remarketing'; 
+                    let currentActiveSectionId = 'remarketing';
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
                     if (activeSectionElement && activeSectionElement.id) {
                         currentActiveSectionId = activeSectionElement.id.replace('Section', '');
@@ -1807,7 +3008,7 @@ function handleLightboxSwipe(endX, endY) {
                 if (cameraPageSection.style.display === 'flex') {
                     targaForGallery = (lastViewBeforeCamera === 'checklist' || lastViewBeforeCamera === 'gallery') ? targaSelezionataGlobalmente : null;
                     sectionKeyForGallery = (lastViewBeforeCamera === 'checklist' || lastViewBeforeCamera === 'gallery') ? lastSectionBeforeCamera : null;
-                    returnFromCamera(); 
+                    returnFromCamera();
                     setTimeout(async () => await showGalleryPage(targaForGallery, sectionKeyForGallery || 'riepilogo'), 50);
                 } else if (checklistContainer.style.display === 'block' && targaSelezionataGlobalmente) {
                     targaForGallery = targaSelezionataGlobalmente;
@@ -1816,7 +3017,7 @@ function handleLightboxSwipe(endX, endY) {
                     await showGalleryPage(targaForGallery, sectionKeyForGallery);
                 } else if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter){
                     await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter || 'riepilogo');
-                } else { 
+                } else {
                     await showGalleryPage(null, null);
                 }
             });
@@ -1826,7 +3027,7 @@ function handleLightboxSwipe(endX, endY) {
                 if (cameraPageSection.style.display === 'flex') {
                     returnFromCamera();
                     if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
-                         setTimeout(() => { 
+                         setTimeout(() => {
                             showView('checklist');
                             showSection(lastSectionBeforeCamera);
                         }, 50);
@@ -1844,7 +3045,7 @@ function handleLightboxSwipe(endX, endY) {
                             targaSelezionataGlobalmente = currentGalleryTargaFilter; loadProgress(targaSelezionataGlobalmente);
                         }
                         showView('checklist'); showSection(lastSectionBeforeGallery);
-                    } else if (targaSelezionataGlobalmente){ 
+                    } else if (targaSelezionataGlobalmente){
                         const lastActivePage = localStorage.getItem(LAST_ACTIVE_PERIZIA_PAGE_KEY) || 'riepilogo';
                         await handleTargaSelectionAndSync(targaSelezionataGlobalmente, lastActivePage);
                     }
@@ -1859,13 +3060,11 @@ function handleLightboxSwipe(endX, endY) {
             });
         }
 
-        // MODIFIED headerCameraBtn event listener
         if (headerCameraBtn) {
             headerCameraBtn.addEventListener('click', () => {
-                if (cameraPageSection.style.display === 'flex') { // If camera is already open
+                if (cameraPageSection.style.display === 'flex') {
                     returnFromCamera();
-                } else { // If opening camera
-                    // Determine and set lastViewBeforeCamera and lastSectionBeforeCamera HERE
+                } else {
                     if (galleryPageSection.style.display === 'block') {
                         lastViewBeforeCamera = 'gallery';
                         lastSectionBeforeCamera = currentGallerySectionFilter;
@@ -1876,11 +3075,11 @@ function handleLightboxSwipe(endX, endY) {
                     } else if (historyPageSection.style.display === 'block') {
                         lastViewBeforeCamera = 'history';
                         lastSectionBeforeCamera = null;
-                    } else { // Default if no specific section is active (e.g., on landing page)
+                    } else {
                         lastViewBeforeCamera = 'landing';
                         lastSectionBeforeCamera = null;
                     }
-                    showView('camera'); // This will call showCameraPage, which now uses the pre-set globals
+                    showView('camera');
                 }
             });
         }
@@ -1895,7 +3094,7 @@ function handleLightboxSwipe(endX, endY) {
                 await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter);
             } else if (checklistContainer.style.display === 'block' || (!targaSelezionataGlobalmente && landingPageSection.style.display === 'block')) {
                 showSection(targetId);
-            } else if (targaSelezionataGlobalmente) { 
+            } else if (targaSelezionataGlobalmente) {
                 await handleTargaSelectionAndSync(targaSelezionataGlobalmente, targetId);
             }
         }));
@@ -1916,7 +3115,7 @@ function handleLightboxSwipe(endX, endY) {
             galleryPageSection.addEventListener('touchstart', handleGalleryGridTouchStart, { passive: true });
             galleryPageSection.addEventListener('touchmove', handleGalleryGridTouchMove, { passive: false });
         }
-        initializeApplicationViewAndLoadData(); // Chiamata alla funzione di inizializzazione con i log
+        initializeApplicationViewAndLoadData();
         if (mainExitAppBtn) {
             mainExitAppBtn.addEventListener('click', () => {
                 const exitCurtain = document.getElementById('exit-curtain');
@@ -1927,7 +3126,7 @@ function handleLightboxSwipe(endX, endY) {
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none';
                     if (pageHeader) pageHeader.style.display = 'none';
                     if (bottomNav) bottomNav.style.display = 'none';
-                    if (cameraPageSection && cameraPageSection.style.display === 'flex') { 
+                    if (cameraPageSection && cameraPageSection.style.display === 'flex') {
                         if (currentCameraStream) { currentCameraStream.getTracks().forEach(track => track.stop()); currentCameraStream = null; if(cameraStreamElement) cameraStreamElement.srcObject = null; }
                         cameraPageSection.style.display = 'none';
                     }
@@ -1963,3 +3162,7 @@ function handleLightboxSwipe(endX, endY) {
         }
     });
 </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</body>
+</html>
