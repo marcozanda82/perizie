@@ -1267,6 +1267,7 @@
 
 <script>
   // Variabili globali
+    
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
@@ -1329,8 +1330,7 @@
     let currentLightboxPhotoIndex = -1;
 
     const downloadZipBtn = document.getElementById('downloadZipBtn');
-
-
+    let bluetoothShutterHandler = null;
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
     const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzN4bBhPi4d8i7fSpJQqCJ2CQYOtmes1yKeGeqVe053K4QkdKYH4PuQIughn_9YLEfCkA/exec';
 
@@ -1870,6 +1870,30 @@ async function handleSavePeriziaAndReturn() {
         } else if (viewName === 'camera') {
             // La logica principale per preparare la cameraPageSection
             // e avviare lo stream è in showCameraPage()
+
+// >>> INSERISCI QUI LA DEFINIZIONE COMPLETA DELLA FUNZIONE <<<
+function bluetoothShutterHandler(event) {
+    // Stampa in console per debugging - utile se hai ancora problemi
+    console.log('Key pressed:', event.key, 'Code:', event.code);
+
+    // Solo se la camera è attiva e non ci sono altre modali/lightbox aperte
+    if (cameraPageSection.style.display !== 'flex' ||
+        (imageLightbox && imageLightbox.style.display === 'flex') ||
+        (changelogModal && changelogModal.style.display === 'flex')) {
+        return;
+    }
+
+    // Controlla se il tasto premuto è Volume Su o Volume Giù
+    if (event.key === 'AudioVolumeUp' || event.code === 'VolumeUp' || /* Tasto Volume Su */
+        event.key === 'AudioVolumeDown' || event.code === 'VolumeDown' /* Tasto Volume Giù */
+       ) {
+        event.preventDefault(); // IMPORTANTE: previene l'azione di default (cambiare il volume)
+        if (captureBtn && !captureBtn.disabled) {
+            captureBtn.click(); // Simula il click sul pulsante di scatto
+        }
+    }
+}
+            
             showCameraPage(); // Chiamata per attivare la fotocamera
         } else { // Vista sconosciuta o di default
              if (pageHeaderContainer) pageHeaderContainer.classList.remove('fixed-header');
@@ -1934,7 +1958,7 @@ async function handleSavePeriziaAndReturn() {
                 const videoTrack = stream.getVideoTracks()[0];
                 if (videoTrack && typeof videoTrack.applyConstraints === 'function') {
                     try { await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); }
-                    catch (e) { try { await videoTrack.applyConstraints({ advanced: [{ focusMode: 'auto' }] }); } catch (e2) { console.warn("Focus auto fallito:", e2); } }
+                    catch (e) { try { await videoTrack.applyConstraints({ advanced: [{ focusMode: 'auto' }] }); } catch (e2) { console.warn("Focus auto fallito:", e2); } }                
                 }
             } catch (err) {
                 console.error("Errore getUserMedia principale:", err);
@@ -1942,6 +1966,21 @@ async function handleSavePeriziaAndReturn() {
                     const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
                     cameraStreamElement.srcObject = fallbackStream;
                     currentCameraStream = fallbackStream;
+
+            // >>> AGGIUNTA DELL'EVENT LISTENER <<<
+            document.addEventListener('keydown', bluetoothShutterHandler);
+
+        } catch (err) {
+            console.error("Errore getUserMedia principale:", err);
+            try {
+                const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+                cameraStreamElement.srcObject = fallbackStream;
+                currentCameraStream = fallbackStream;
+
+                // >>> AGGIUNTA DELL'EVENT LISTENER (ANCHE NEL FALLBACK) <<<
+                document.addEventListener('keydown', bluetoothShutterHandler);
+
+                    
                 } catch (fallbackErr) {
                     console.error("Errore getUserMedia di fallback:", fallbackErr);
                     alert("Impossibile accedere alla fotocamera: " + fallbackErr.message);
@@ -1967,6 +2006,10 @@ async function handleSavePeriziaAndReturn() {
             currentCameraStream = null;
             if (cameraStreamElement) cameraStreamElement.srcObject = null;
         }
+            // >>> RIMOZIONE DELL'EVENT LISTENER <<<
+    if (bluetoothShutterHandler) { // Buona pratica controllare se l'handler esiste
+        document.removeEventListener('keydown', bluetoothShutterHandler);
+    }
 
         // Nascondi la sezione della fotocamera e resetta gli elementi visivi
         if (cameraPageSection) cameraPageSection.style.display = 'none';
@@ -2964,19 +3007,7 @@ function handleLightboxSwipe(endX, endY) {
             utilityNavButtons.insertBefore(syncToSheetsBtn, utilityNavButtons.firstChild);
         } else { utilityNavButtons.appendChild(syncToSheetsBtn); }
         syncToSheetsBtn.addEventListener('click', syncAllLocalDataToSheets);
-        // <<< INIZIO: AGGIUNTO LISTENER KEYDOWN PER TASTO INVIO >>>
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                // Controlla se la visualizzazione della fotocamera è attiva e il pulsante di scatto non è disabilitato
-                if (cameraPageSection && cameraPageSection.style.display === 'flex' &&
-                    captureBtn && !captureBtn.disabled) {
-                    
-                    event.preventDefault(); // Previene qualsiasi azione predefinita del tasto 'Invio'
-                    capturePhoto();       // Chiama la funzione di scatto esistente
-                }
-            }
-        });
-        // <<< FINE: AGGIUNTO LISTENER KEYDOWN PER TASTO INVIO >>>
+
         document.querySelectorAll('.fill-defaults-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const sectionId = this.dataset.sectionid; const sectionTarget = sectionId.replace('Section', '');
