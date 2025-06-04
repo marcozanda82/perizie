@@ -1264,6 +1264,7 @@
             <button id="headerCameraBtn" class="circle-button" title="Fotocamera"><i class="fas fa-camera-retro"></i></button>
         </div>
     </div>
+
 <script>
   // Variabili globali
     const landingPageSection = document.getElementById('landingPageSection');
@@ -1282,12 +1283,12 @@
     let lastViewBeforeCamera = 'landing'; // Default
     let lastSectionBeforeCamera = null; // Default
 
-    const bottomNavCircles = document.getElementById('bottomNavCircles');
+    const bottomNavCircles = document.getElementById('bottomNavCircles'); // New global for bottom bar
 
     const targaListContainer = document.getElementById('targaListContainer');
     const savedTargasListContainer = document.getElementById('savedTargasListContainer');
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
-    const pageHeaderContainer = document.getElementById('pageHeaderContainer');
+    const pageHeaderContainer = document.getElementById('pageHeaderContainer'); // This is the TOP bar container
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const targaDropdownContainer = document.getElementById('targaDropdownContainer');
     const targaSwitcherDropdown = document.getElementById('targaSwitcherDropdown');
@@ -1329,8 +1330,6 @@
 
     const downloadZipBtn = document.getElementById('downloadZipBtn');
 
-    // La dichiarazione let bluetoothShutterHandler = null; è stata rimossa.
-    // La dichiarazione della funzione sottostante è sufficiente.
 
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyr8y5rUam29BeUwH9JKGz5hQknO3vWnczW3CYuzwnfqPwmxsWw20usJeMo9UH3yPyfsMBSkvKdy5n/pub?output=csv';
     const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzN4bBhPi4d8i7fSpJQqCJ2CQYOtmes1yKeGeqVe053K4QkdKYH4PuQIughn_9YLEfCkA/exec';
@@ -1340,7 +1339,7 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    const currentAppVersion = "1.6.4"; // Mantieni o aggiorna la versione corrente
+    const currentAppVersion = "1.6.4";
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtnModal = document.getElementById('closeChangelogBtnModal');
     const changelogList = document.getElementById('changelogList');
@@ -1674,43 +1673,51 @@
 
 async function handleSavePeriziaAndReturn() {
         if (!targaSelezionataGlobalmente) {
-            alert("Nessuna targa attiva.");
+            alert("Nessuna targa attiva."); // Mantenuto in italiano
             return;
         }
-        const originalButtonText = saveAndReturnBtn.textContent;
-        saveAndReturnBtn.disabled = true;
+        const originalButtonText = saveAndReturnBtn.textContent; // Memorizza il testo iniziale del pulsante
+        saveAndReturnBtn.disabled = true; // Disabilita il pulsante durante l'elaborazione
 
+        // 1. Salva i progressi
         saveAndReturnBtn.textContent = 'Salvataggio Dati...';
         if (!saveProgress(targaSelezionataGlobalmente)) {
-            alert("Salvataggio dati browser fallito.");
-            saveAndReturnBtn.textContent = originalButtonText;
-            saveAndReturnBtn.disabled = false;
+            alert("Salvataggio dati browser fallito."); // Mantenuto in italiano
+            saveAndReturnBtn.textContent = originalButtonText; // Ripristina il testo del pulsante
+            saveAndReturnBtn.disabled = false; // Riabilita il pulsante
             return;
         }
 
+        // 2. Genera il riepilogo se si è nella sezione riepilogo
         if (document.getElementById('riepilogoSection').classList.contains('active')) {
             generateSummary();
         }
 
+        // 3. Scarica lo screenshot (comportamento esistente)
         saveAndReturnBtn.textContent = 'Generazione Screenshot...';
         try {
             await generateAndDownloadScreenshot();
         } catch (e) {
             console.warn("Generazione screenshot fallita, dati salvati localmente.", e);
+            // Opzionalmente, informa l'utente che lo screenshot è fallito ma la perizia è stata salvata.
+            // alert("Attenzione: la generazione dello screenshot è fallita, ma la perizia è stata salvata localmente.");
         }
 
+        // 4. Contrassegna come completata
         markTargaAsCompleted(targaSelezionataGlobalmente);
-        updateNavButtonColors();
+        updateNavButtonColors(); // Aggiorna i colori dei pulsanti di navigazione
 
+        // 5. Crea e scarica il file ZIP con le foto
         if (typeof JSZip === 'undefined') {
-            alert("Errore: Libreria JSZip non caricata. Impossibile scaricare il file ZIP delle foto.");
+            alert("Errore: Libreria JSZip non caricata. Impossibile scaricare il file ZIP delle foto."); // Mantenuto in italiano
         } else {
             saveAndReturnBtn.textContent = 'Creazione ZIP Foto...';
             try {
-                const photos = await getPhotosByTargaAndSezioneFromDB(targaSelezionataGlobalmente, null);
+                const photos = await getPhotosByTargaAndSezioneFromDB(targaSelezionataGlobalmente, null); // Ottieni tutte le foto per la targa
 
                 if (!photos || photos.length === 0) {
                     console.log(`Nessuna foto trovata per la targa ${targaSelezionataGlobalmente} da includere nel file ZIP.`);
+                    // Nessun avviso per l'assenza di foto, per mantenere il flusso regolare. L'utente potrebbe non aver scattato foto.
                 } else {
                     const zip = new JSZip();
                     photos.forEach(photoData => {
@@ -1722,6 +1729,8 @@ async function handleSavePeriziaAndReturn() {
                     const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(zipBlob);
+
+                    // Usa il nome della targa per il file ZIP come richiesto, es., AA000BB.zip
                     const zipFileName = `${targaSelezionataGlobalmente.toUpperCase().replace(/[^A-Z0-9.-]/g, '_')}.zip`;
                     link.download = zipFileName;
 
@@ -1729,14 +1738,18 @@ async function handleSavePeriziaAndReturn() {
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(link.href);
+                    // Potresti voler aggiungere un avviso di conferma qui se necessario:
+                    // alert(`File ZIP "${zipFileName}" per la targa ${targaSelezionataGlobalmente} scaricato.`);
                 }
             } catch (error) {
-                alert(`Errore durante la creazione del file ZIP per la targa ${targaSelezionataGlobalmente}. La perizia è stata comunque salvata.`);
+                alert(`Errore durante la creazione del file ZIP per la targa ${targaSelezionataGlobalmente}. La perizia è stata comunque salvata.`); // Mantenuto in italiano
                 console.error("Errore durante la creazione del file ZIP in handleSavePeriziaAndReturn:", error);
             }
         }
-        saveAndReturnBtn.textContent = originalButtonText;
-        saveAndReturnBtn.disabled = false;
+
+        // 6. Ripristina lo stato del pulsante e naviga alla pagina iniziale
+        saveAndReturnBtn.textContent = originalButtonText; // Ripristina il testo originale del pulsante
+        saveAndReturnBtn.disabled = false; // Riabilita il pulsante
         showView('landing');
     }
 
@@ -1746,14 +1759,18 @@ async function handleSavePeriziaAndReturn() {
     function getSectionStatus(sectionElementId, targaData) { const inputs = getSectionInputs(sectionElementId); if (inputs.length === 0) return 'completed';  let allDefaultOrNA = true;  let allNonDefaultAndApplicable = true;  let hasAtLeastOneNonDefaultAndApplicable = false; inputs.forEach(input => { let isEffectivelyDefault = false; const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined; let currentValue = savedValue; if (savedValue === undefined) {  if (input.type === 'checkbox') currentValue = input.checked; else currentValue = input.value; } if (input.type === 'checkbox') { isEffectivelyDefault = !currentValue; } else if (input.tagName === 'SELECT') { isEffectivelyDefault = (currentValue === "" || (input.options.length > 0 && currentValue === input.options[0].value)); if ((input.id === 'cavo_ricarica_rapida' || input.id === 'cavo_ricarica_domestica') && currentValue === 'non_applicabile') { isEffectivelyDefault = true; } } else {  isEffectivelyDefault = (currentValue === ""); } if (!isEffectivelyDefault) { allDefaultOrNA = false; hasAtLeastOneNonDefaultAndApplicable = true; } else {  allNonDefaultAndApplicable = false; } }); if (allDefaultOrNA) return 'untouched'; if (allNonDefaultAndApplicable) return 'completed'; if (hasAtLeastOneNonDefaultAndApplicable) return 'partial';  return 'untouched';  }
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none' && galleryPageSection.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${(targaSelezionataGlobalmente || currentGalleryTargaFilter || "").toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; const activeTargaForStatus = targaSelezionataGlobalmente || currentGalleryTargaFilter; if (targetSection === 'riepilogo') { if (isTargaCompleted(activeTargaForStatus)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
 
+    // ----------------------------------------------------------------------------------
+    // Funzione showView MODIFICATA (ma no changes needed based on analysis for this specific problem)
+    // ----------------------------------------------------------------------------------
     function showView(viewName) {
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
-        if(cameraPageSection) cameraPageSection.style.display = 'none';
+        if(cameraPageSection) cameraPageSection.style.display = 'none'; // Nascondi cameraPageSection di default
         if(galleryPageSection) galleryPageSection.style.display = 'none';
         if(imageLightbox) imageLightbox.style.display = 'none';
 
+        // Default visibility for top header elements
         if(pageHeaderContainer) pageHeaderContainer.style.display = 'block';
         if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
         if(mainTitleGlobal) mainTitleGlobal.style.display = 'block';
@@ -1763,9 +1780,11 @@ async function handleSavePeriziaAndReturn() {
         let bodyPaddingBottomValue = '0px';
 
         if (viewName !== 'camera') {
+            // Se NON siamo in modalità fotocamera, la bottomNavCircles è visibile di default
             if (bottomNavCircles) {
                 bottomNavCircles.style.display = 'flex';
             }
+
             if (pageHeaderContainer && getComputedStyle(pageHeaderContainer).display !== 'none' && pageHeaderContainer.classList.contains('fixed-header')) {
                 let hasVisibleTopContent = false;
                 const topElements = [utilityNavButtons, mainTitleGlobal, navButtonsContainer, targaDropdownContainer];
@@ -1779,17 +1798,22 @@ async function handleSavePeriziaAndReturn() {
                     bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
                 }
             }
+
             if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') {
                 bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
             }
-        } else {
+        } else { // viewName === 'camera'
+            // In modalità fotocamera, l'header superiore è nascosto
             if (pageHeaderContainer) pageHeaderContainer.style.display = 'none';
+
+            // La bottomNavCircles DEVE essere visibile in modalità camera (come da richiesta)
             if (bottomNavCircles) {
-                 bottomNavCircles.style.display = 'flex';
+                 bottomNavCircles.style.display = 'flex'; // Assicura che sia visibile
+                 // Calcola il padding solo se effettivamente visibile
                  if (getComputedStyle(bottomNavCircles).display !== 'none') {
                     bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
                  } else {
-                     bodyPaddingBottomValue = '0px';
+                     bodyPaddingBottomValue = '0px'; // Fallback
                  }
             } else {
                 bodyPaddingBottomValue = '0px';
@@ -1798,6 +1822,7 @@ async function handleSavePeriziaAndReturn() {
         document.body.style.paddingTop = bodyPaddingTopValue;
         document.body.style.paddingBottom = bodyPaddingBottomValue;
 
+        // Gestione specifica della vista
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
@@ -1839,54 +1864,58 @@ async function handleSavePeriziaAndReturn() {
             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         } else if (viewName === 'gallery') {
             if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
+            // La visualizzazione di galleryPageSection è gestita da showGalleryPage()
+            // Questa viene chiamata da altre parti della logica (es. click su headerPhotosBtn)
             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         } else if (viewName === 'camera') {
-            showCameraPage();
-        } else {
+            // La logica principale per preparare la cameraPageSection
+            // e avviare lo stream è in showCameraPage()
+            showCameraPage(); // Chiamata per attivare la fotocamera
+        } else { // Vista sconosciuta o di default
              if (pageHeaderContainer) pageHeaderContainer.classList.remove('fixed-header');
              if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         }
+
         updateNavButtonColors();
         window.scrollTo(0, 0);
     }
 
-    // >>> DEFINIZIONE DELLA FUNZIONE PER GESTIRE LO SCATTO BLUETOOTH <<<
-    function bluetoothShutterHandler(event) {
-        // Controlla se la modalità fotocamera è attiva e se non ci sono altre modali aperte
-        if (cameraPageSection.style.display !== 'flex' ||
-            (imageLightbox && imageLightbox.style.display === 'flex') ||
-            (changelogModal && changelogModal.style.display === 'flex')) {
-            return; // Non fare nulla se la fotocamera non è la vista principale o una modale è aperta
-        }
-
-        // Controlla se il tasto premuto è Volume Su o Volume Giù
-        // event.key è più leggibile, event.code è più indipendente dal layout della tastiera
-        if (event.key === 'AudioVolumeUp' || event.code === 'VolumeUp' ||
-            event.key === 'AudioVolumeDown' || event.code === 'VolumeDown') {
-            
-            event.preventDefault(); // IMPORTANTE: previene l'azione di default del browser (es. cambiare il volume)
-            
-            if (captureBtn && !captureBtn.disabled) {
-                console.log("Bluetooth shutter: Volume key pressed, triggering capture."); // Log per debug
-                captureBtn.click(); // Simula il click sul pulsante di scatto esistente
-            }
-        }
-    }
-
+    // ----------------------------------------------------------------------------------
+    // Funzione showCameraPage MODIFICATA
+    // ----------------------------------------------------------------------------------
     async function showCameraPage() {
+        // The logic for setting lastViewBeforeCamera and lastSectionBeforeCamera
+        // has been moved to the headerCameraBtn click listener.
+        // These globals will be used directly by getFilenameSectionName() and returnFromCamera().
+
+        // Ensure other main sections are hidden (showView('camera') already handles this)
+        // landingPageSection.style.display = 'none';
+        // checklistContainer.style.display = 'none';
+        // historyPageSection.style.display = 'none';
+        // galleryPageSection.style.display = 'none';
+
+        // Configure camera view
         cameraStreamElement.style.display = 'block';
         freezeFrameDisplayElement.style.display = 'none';
-        cameraPageSection.style.display = 'flex';
+        cameraPageSection.style.display = 'flex'; // Make the camera container visible
 
-        let topBarHeight = 0;
+        // Bottom navigation bar (bottomNavCircles) is handled by showView('camera')
+        // Top header elements (utilityNavButtons, mainTitleGlobal, etc.) are hidden by showView('camera')
+
+        let topBarHeight = 0; // Since pageHeaderContainer is display: none
         let bottomNavHeight = 0;
 
         if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') {
             bottomNavHeight = bottomNavCircles.offsetHeight;
         }
-        cameraPageSection.style.paddingTop = `${topBarHeight}px`;
+
+        // Body padding (paddingTop and paddingBottom) is handled by showView('camera')
+
+        // Adjust cameraPageSection height to accommodate bottomNavCircles
+        cameraPageSection.style.paddingTop = `${topBarHeight}px`; // Will be '0px'
         cameraPageSection.style.height = `calc(100vh - ${topBarHeight}px - ${bottomNavHeight}px)`;
 
+        // Start camera stream
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             const constraints = {
                 video: {
@@ -1907,70 +1936,68 @@ async function handleSavePeriziaAndReturn() {
                     try { await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); }
                     catch (e) { try { await videoTrack.applyConstraints({ advanced: [{ focusMode: 'auto' }] }); } catch (e2) { console.warn("Focus auto fallito:", e2); } }
                 }
-                // >>> AGGIUNGI L'EVENT LISTENER PER I TASTI QUANDO LA FOTOCAMERA È ATTIVA <<<
-                document.addEventListener('keydown', bluetoothShutterHandler);
-
             } catch (err) {
                 console.error("Errore getUserMedia principale:", err);
                 try {
                     const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
                     cameraStreamElement.srcObject = fallbackStream;
                     currentCameraStream = fallbackStream;
-                    // >>> AGGIUNGI L'EVENT LISTENER ANCHE NEL CASO DI FALLBACK <<<
-                    document.addEventListener('keydown', bluetoothShutterHandler);
                 } catch (fallbackErr) {
                     console.error("Errore getUserMedia di fallback:", fallbackErr);
                     alert("Impossibile accedere alla fotocamera: " + fallbackErr.message);
-                    returnFromCamera();
-                    return;
+                    returnFromCamera(); 
+                    return; 
                 }
             }
         } else {
             alert("Browser non supporta accesso fotocamera (navigator.mediaDevices non disponibile).");
-            returnFromCamera();
-            return;
+            returnFromCamera(); 
+            return; 
         }
         window.scrollTo(0, 0);
     }
 
+    // ----------------------------------------------------------------------------------
+    // Funzione returnFromCamera MODIFICATA (no changes needed for this specific problem)
+    // ----------------------------------------------------------------------------------
     function returnFromCamera() {
+        // Ferma lo stream della fotocamera
         if (currentCameraStream) {
             currentCameraStream.getTracks().forEach(track => track.stop());
             currentCameraStream = null;
             if (cameraStreamElement) cameraStreamElement.srcObject = null;
         }
 
-        // >>> RIMUOVI L'EVENT LISTENER PER I TASTI QUANDO SI ESCE DALLA FOTOCAMERA <<<
-        // Non è più necessario controllare if (bluetoothShutterHandler) perché la funzione è sempre definita
-        document.removeEventListener('keydown', bluetoothShutterHandler);
-
-
+        // Nascondi la sezione della fotocamera e resetta gli elementi visivi
         if (cameraPageSection) cameraPageSection.style.display = 'none';
-        if (cameraStreamElement) cameraStreamElement.style.display = 'block';
+        if (cameraStreamElement) cameraStreamElement.style.display = 'block'; // Pronto per la prossima volta
         if (freezeFrameDisplayElement) freezeFrameDisplayElement.style.display = 'none';
 
+        // Resetta gli stili specifici della cameraPageSection che potrebbero essere stati modificati
         if (cameraPageSection) {
             cameraPageSection.style.paddingTop = '';
-            cameraPageSection.style.height = '';
+            cameraPageSection.style.height = ''; // Torna al valore CSS di default (es. 100%)
         }
 
+        // Ripristina la vista precedente (uses the globally set lastViewBeforeCamera and lastSectionBeforeCamera)
         if (lastViewBeforeCamera === 'gallery') {
             showGalleryPage(currentGalleryTargaFilter, lastSectionBeforeCamera);
         } else if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
-            showView('checklist');
-            showSection(lastSectionBeforeCamera);
+            showView('checklist'); 
+            showSection(lastSectionBeforeCamera); 
         } else if (lastViewBeforeCamera === 'history') {
             showView('history');
-        } else {
+        } else { // Default a 'landing'
             showView('landing');
         }
     }
 
 
     function getFilenameSectionName() {
-        let sectionNameForFile = "generale";
+        let sectionNameForFile = "generale"; // Default value
         let currentSectionKey = null;
 
+        // Uses the globally set lastViewBeforeCamera and lastSectionBeforeCamera
         if (lastViewBeforeCamera === 'checklist' && lastSectionBeforeCamera) {
             currentSectionKey = lastSectionBeforeCamera;
         } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter) {
@@ -1981,11 +2008,13 @@ async function handleSavePeriziaAndReturn() {
             let tempSectionKey = currentSectionKey.toLowerCase();
             if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {
                 sectionNameForFile = tempSectionKey;
-            } else if (tempSectionKey === 'danniverifiche') {
+            } else if (tempSectionKey === 'danniverifiche') { // This corresponds to 'danniVerificheSection'
                 sectionNameForFile = 'danni';
             } else if (tempSectionKey === 'riepilogo') {
                 sectionNameForFile = 'generale_riepilogo';
             }
+            // If currentSectionKey is something else, it will retain the default "generale"
+            // or "generale_riepilogo" if from 'riepilogo'.
         }
         return sectionNameForFile;
     }
@@ -2032,7 +2061,7 @@ async function handleSavePeriziaAndReturn() {
             cameraStreamElement.style.display = 'none';
             captureBtn.disabled = true;
             const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');
-            const sectionNameForFile = getFilenameSectionName();
+            const sectionNameForFile = getFilenameSectionName(); // Crucial call using updated globals
             const photoNumber = getNextPhotoNumber(targaForFile, sectionNameForFile);
             if (photoNumber === null) {
                  freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#';
@@ -2081,16 +2110,16 @@ async function handleSavePeriziaAndReturn() {
         currentGalleryTargaFilter = targaToFilter ? targaToFilter.toUpperCase() : null;
         currentGallerySectionFilter = sectionToFilter;
 
-        showView('gallery');
+        showView('gallery'); 
 
-        galleryPageSection.style.display = 'block';
+        galleryPageSection.style.display = 'block'; 
 
         const galleryTitleElement = galleryPageSection.querySelector('h2.section-title');
         let galleryTitleText = "Galleria Foto Catturate";
 
         if (currentGalleryTargaFilter) {
             targaSelezionataGlobalmente = currentGalleryTargaFilter;
-            if(mainTitleGlobal) mainTitleGlobal.style.display = 'none';
+            if(mainTitleGlobal) mainTitleGlobal.style.display = 'none'; 
             if(targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
             populateTargaSwitcherDropdown();
             if(targaSwitcherDropdown.value.toUpperCase() !== currentGalleryTargaFilter) {
@@ -2268,41 +2297,47 @@ function handleLightboxSwipe(endX, endY) {
         const horizontalSwipeStrength = Math.abs(deltaX);
         const verticalSwipeStrength = Math.abs(deltaY);
 
+        // Verifica se lo swipe supera la soglia minima per essere considerato un gesto
         if (horizontalSwipeStrength > swipeThreshold || verticalSwipeStrength > swipeThreshold) {
+            
+            // Determina se lo swipe è prevalentemente orizzontale o verticale
             if (horizontalSwipeStrength > verticalSwipeStrength) {
-                if (deltaX > 0) {
+                // Gesto prevalentemente orizzontale
+                if (deltaX > 0) { // Swipe verso destra (foto precedente)
                     if (currentLightboxPhotoIndex > 0) {
                         currentLightboxPhotoIndex--;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('left');
+                        showSwipeEndIndicator('left'); // Inizio della lista
                     }
-                } else {
+                } else { // Swipe verso sinistra (foto successiva)
                     if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) {
                         currentLightboxPhotoIndex++;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('right');
+                        showSwipeEndIndicator('right'); // Fine della lista
                     }
                 }
             } else {
-                if (deltaY > 0) {
+                // Gesto prevalentemente verticale
+                if (deltaY > 0) { // Swipe verso il basso (foto precedente)
                     if (currentLightboxPhotoIndex > 0) {
                         currentLightboxPhotoIndex--;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('top');
+                        showSwipeEndIndicator('top'); // Inizio della lista (swipe verso il basso all'inizio)
                     }
-                } else {
+                } else { // Swipe verso l'alto (foto successiva)
                     if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) {
                         currentLightboxPhotoIndex++;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('bottom');
+                        showSwipeEndIndicator('bottom'); // Fine della lista (swipe verso l'alto alla fine)
                     }
                 }
             }
         }
+        // Resetta le coordinate di inizio per il prossimo swipe
         lightboxTouchStartX = 0;
         lightboxTouchStartY = 0;
     }
@@ -2320,8 +2355,8 @@ function handleLightboxSwipe(endX, endY) {
             const isPageAtTop = (galleryPageSection.scrollTop || document.documentElement.scrollTop || document.body.scrollTop) === 0;
 
 
-            if (isPageAtTop && deltaY > 0 && galleryPageSection.scrollHeight <= galleryPageSection.clientHeight) {
-                event.preventDefault();
+            if (isPageAtTop && deltaY > 0 && galleryPageSection.scrollHeight <= galleryPageSection.clientHeight) { 
+                event.preventDefault(); 
                 showSwipeEndIndicator('top');
             }
         }
@@ -2494,7 +2529,7 @@ function handleLightboxSwipe(endX, endY) {
             }
             keysToRemove.forEach(k => { localStorage.removeItem(k); c++; });
             openPhotoDB().then(db => {
-                if (!db) {
+                if (!db) { 
                     alert(`Errore: DB non inizializzato. ${c} elementi LS cancellati.`);
                     return;
                 }
@@ -2681,6 +2716,32 @@ function handleLightboxSwipe(endX, endY) {
     function getSelectText(selectElementOrId) { const el = typeof selectElementOrId === 'string' ? document.getElementById(selectElementOrId) : selectElementOrId; if (el && el.tagName === 'SELECT' && el.value !== "") { if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) { return el.options[el.selectedIndex].text; } return el.value;  } return "N/S";  }
     function generateSummary() { summaryContent.innerHTML = ''; let targa = targaSelezionataGlobalmente || "N/D"; function createSummaryItem(label, value, isAnomaly = false) { const itemDiv = document.createElement('div'); itemDiv.classList.add('summary-item'); if (isAnomaly) itemDiv.classList.add('summary-anomaly'); itemDiv.innerHTML = `<strong>${label}:</strong> ${value}`; return itemDiv; } summaryContent.appendChild(createSummaryItem("Targa", targa.toUpperCase())); if (targaSelezionataGlobalmente) { const veicoloAttuale = listaTargheCompleta.find(v => v.targa === targaSelezionataGlobalmente); let marcaVeicolo = "N/D", modelloVeicolo = "N/D"; if (veicoloAttuale) { marcaVeicolo = veicoloAttuale.marca || "N/D"; modelloVeicolo = veicoloAttuale.modello || "N/D"; } summaryContent.appendChild(createSummaryItem("Marca", marcaVeicolo)); summaryContent.appendChild(createSummaryItem("Modello", modelloVeicolo)); summaryContent.appendChild(createSummaryItem("Posizione", loadPosizioneForTarga(targaSelezionataGlobalmente) || "N/D")); const isUrgentForSummary = loadUrgentStatusForTarga(targaSelezionataGlobalmente); summaryContent.appendChild(createSummaryItem("Urgente", isUrgentForSummary ? "Sì" : "No", isUrgentForSummary)); } else {  summaryContent.appendChild(createSummaryItem("Marca", "N/D")); summaryContent.appendChild(createSummaryItem("Modello", "N/D")); summaryContent.appendChild(createSummaryItem("Posizione", "N/D")); summaryContent.appendChild(createSummaryItem("Urgente", "N/D")); } summaryContent.innerHTML += `<h3>Remarketing:</h3>`; const tipoTrazioneValue = tipoTrazioneSelect ? tipoTrazioneSelect.value : ""; const isEV = tipoTrazioneValue === 'elettrico'; summaryContent.appendChild(createSummaryItem("Trazione Veicolo", getSelectText(tipoTrazioneSelect))); let equipaggiamento = getSelectText('tipo_equipaggiamento'), presenzaEquip = getSelectText('equipaggiamento_presenza'); let equipAnomalia = (equipaggiamento !== "N/S" && equipaggiamento !== "" && equipaggiamento !== "Seleziona..." && presenzaEquip === "Mancante"); summaryContent.appendChild(createSummaryItem("Equip. Vano Carico", equipaggiamento, equipAnomalia && presenzaEquip === "Mancante")); summaryContent.appendChild(createSummaryItem("Presenza Equip.", presenzaEquip, equipAnomalia)); let kmStato = getSelectText('stato_chilometri'); summaryContent.appendChild(createSummaryItem("Stato Chilometri", kmStato, kmStato === "Non rilevabili")); let cdcStato = getSelectText('stato_cdc'); summaryContent.appendChild(createSummaryItem("Stato CDC", cdcStato, cdcStato === "Mancante")); summaryContent.appendChild(createSummaryItem("Chiave con Telecomando", getSelectText('chiave_telecomando'), getSelectText('chiave_telecomando') === "Non Presente")); summaryContent.appendChild(createSummaryItem("Seconda Chiave", getSelectText('seconda_chiave'), getSelectText('seconda_chiave') === "Non Presente")); if (isEV) { summaryContent.innerHTML += `<h4>Dotazioni Veicolo Elettrico:</h4>`; let cavoRapidaText = getSelectText('cavo_ricarica_rapida'); let cavoDomesticaText = getSelectText('cavo_ricarica_domestica'); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Rapida", cavoRapidaText, cavoRapidaText === "Non Presente")); summaryContent.appendChild(createSummaryItem("Cavo Ricarica Domestica", cavoDomesticaText, cavoDomesticaText === "Non Presente")); } summaryContent.innerHTML += `<h3>Pneumatici:</h3>`; const pneumaticiFields = [ { id: 'pneumatico_as', label: 'Ant. Sinistro' }, { id: 'pneumatico_ad', label: 'Ant. Destro' }, { id: 'pneumatico_pd', label: 'Post. Destro' }, { id: 'pneumatico_ps', label: 'Post. Sinistro' }]; pneumaticiFields.forEach(pneu => { summaryContent.appendChild(createSummaryItem(pneu.label, getSelectText(pneu.id), getSelectText(pneu.id) === "Non conforme")); }); summaryContent.innerHTML += `<h3>Danni/Verifiche:</h3>`; summaryContent.appendChild(createSummaryItem("Motore si Accende", getSelectText('motore_accende'), getSelectText('motore_accende') === 'Non OK')); summaryContent.appendChild(createSummaryItem("Stato Batteria", getSelectText('batteria_stato'), getSelectText('batteria_stato') === 'Non OK')); const noteDanniValue = document.getElementById('note_danni_verifiche') ? document.getElementById('note_danni_verifiche').value.trim() : ""; if (noteDanniValue) { const noteDiv = document.createElement('div'); noteDiv.classList.add('summary-item', 'summary-notes'); const strongNode = document.createElement('strong'); strongNode.textContent = "Note Danni/Verifiche: "; const contentDiv = document.createElement('div'); contentDiv.style.whiteSpace = 'pre-wrap'; contentDiv.style.paddingLeft = '10px'; contentDiv.textContent = noteDanniValue; noteDiv.appendChild(strongNode); noteDiv.appendChild(contentDiv); summaryContent.appendChild(noteDiv); } }
 
+
+// Funzione per gestire la pressione dei tasti volume per scattare foto
+function handleVolumeKeyPress(event) {
+    // Controlla se la sezione della fotocamera è attiva e lo stream è presente
+    const cameraPageIsActive = cameraPageSection &&
+                               (cameraPageSection.style.display === 'flex' || cameraPageSection.style.display === 'block') &&
+                               currentCameraStream;
+
+    if (cameraPageIsActive) {
+        // Controlla se il tasto premuto è VolumeUp o VolumeDown
+        // event.key è lo standard moderno, event.keyCode è per compatibilità con browser più vecchi
+        if (event.key === 'AudioVolumeUp' || event.key === 'AudioVolumeDown' ||
+            event.keyCode === 175 /* Volume Up */ || event.keyCode === 174 /* Volume Down */) {
+
+            event.preventDefault(); // Impedisce l'azione predefinita (cambio volume)
+
+            // Scatta la foto solo se il pulsante di scatto non è già disabilitato
+            // (per prevenire scatti multipli se il tasto viene tenuto premuto a lungo)
+            if (captureBtn && !captureBtn.disabled) {
+                capturePhoto();
+            }
+        }
+    }
+}
+
+    
     async function fetchAllDataFromSheets() {
         if (!GOOGLE_SHEET_WEB_APP_URL) { return { success: false, message: "URL Web App non config.", data: [] }; }
         const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?nocache=${new Date().getTime()}`;
@@ -2841,7 +2902,7 @@ function handleLightboxSwipe(endX, endY) {
         if (Math.abs(deltaX) < swipeThreshold && Math.abs(deltaY) < swipeThreshold) { return; }
 
         let currentViewElement = null;
-        let sectionArrayForSwipe = sectionOrder;
+        let sectionArrayForSwipe = sectionOrder; 
         let currentSectionIdInSwipe = null;
         let changeFunctionForSwipe = null;
 
@@ -2850,7 +2911,7 @@ function handleLightboxSwipe(endX, endY) {
             const activeSectionElement = checklistContainer.querySelector('.category-section.active');
             if (!activeSectionElement) return;
             currentSectionIdInSwipe = activeSectionElement.id.replace('Section', '');
-            changeFunctionForSwipe = showSection;
+            changeFunctionForSwipe = showSection; 
         } else if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter) {
             currentViewElement = galleryPageSection;
             const activeNavButton = mainPageNavButtons.querySelector('button.active');
@@ -2865,14 +2926,14 @@ function handleLightboxSwipe(endX, endY) {
         const currentIndexInSwipe = sectionArrayForSwipe.indexOf(currentSectionIdInSwipe);
         if (currentIndexInSwipe === -1) return;
 
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
-            if (deltaX > 0) {
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) { 
+            if (deltaX > 0) { 
                 if (currentIndexInSwipe > 0) {
                     await changeFunctionForSwipe(sectionArrayForSwipe[currentIndexInSwipe - 1]);
                 } else {
                     showSwipeEndIndicator('left');
                 }
-            } else {
+            } else { 
                 if (currentIndexInSwipe < sectionArrayForSwipe.length - 1) {
                     await changeFunctionForSwipe(sectionArrayForSwipe[currentIndexInSwipe + 1]);
                 } else {
@@ -2912,44 +2973,6 @@ function handleLightboxSwipe(endX, endY) {
             };
         }
     }
-
-    // ... (altro codice JavaScript esistente) ...
-
-// Funzione per gestire la pressione dei tasti volume per scattare foto
-function handleVolumeKeyPress(event) {
-    // Controlla se la sezione della fotocamera è attiva e lo stream è presente
-    const cameraPageIsActive = cameraPageSection &&
-                               (cameraPageSection.style.display === 'flex' || cameraPageSection.style.display === 'block') &&
-                               currentCameraStream;
-
-    if (cameraPageIsActive) {
-        // Controlla se il tasto premuto è VolumeUp o VolumeDown
-        // event.key è lo standard moderno, event.keyCode è per compatibilità con browser più vecchi
-        if (event.key === 'AudioVolumeUp' || event.key === 'AudioVolumeDown' ||
-            event.keyCode === 175 /* Volume Up */ || event.keyCode === 174 /* Volume Down */) {
-            
-            event.preventDefault(); // Impedisce l'azione predefinita (cambio volume)
-
-            // Scatta la foto solo se il pulsante di scatto non è già disabilitato
-            // (per prevenire scatti multipli se il tasto viene tenuto premuto a lungo)
-            if (captureBtn && !captureBtn.disabled) {
-                capturePhoto();
-            }
-        }
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    // ... (tutto il tuo codice esistente all'interno di DOMContentLoaded) ...
-
-    // Aggiungi l'event listener per i tasti volume
-    document.addEventListener('keydown', handleVolumeKeyPress);
-
-    // L'ultima riga del tuo DOMContentLoaded potrebbe essere:
-    // if (mainExitAppBtn) { ... }
-});
-
-// ... (resto del codice JavaScript esistente, se presente fuori da DOMContentLoaded) ...
 
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -3002,11 +3025,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (nuovaTargaSelezionata && nuovaTargaSelezionata.toUpperCase() !== (targaSelezionataGlobalmente ? targaSelezionataGlobalmente.toUpperCase() : null)) {
                 this.disabled = true;
                 if (galleryPageSection.style.display === 'block') {
-                    const currentSectionForNewTarga = currentGallerySectionFilter || 'riepilogo';
+                    const currentSectionForNewTarga = currentGallerySectionFilter || 'riepilogo'; 
                     targaSelezionataGlobalmente = nuovaTargaSelezionata.toUpperCase();
                     await showGalleryPage(targaSelezionataGlobalmente, currentSectionForNewTarga);
                 } else {
-                    let currentActiveSectionId = 'remarketing';
+                    let currentActiveSectionId = 'remarketing'; 
                     const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
                     if (activeSectionElement && activeSectionElement.id) {
                         currentActiveSectionId = activeSectionElement.id.replace('Section', '');
@@ -3046,7 +3069,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cameraPageSection.style.display === 'flex') {
                     targaForGallery = (lastViewBeforeCamera === 'checklist' || lastViewBeforeCamera === 'gallery') ? targaSelezionataGlobalmente : null;
                     sectionKeyForGallery = (lastViewBeforeCamera === 'checklist' || lastViewBeforeCamera === 'gallery') ? lastSectionBeforeCamera : null;
-                    returnFromCamera();
+                    returnFromCamera(); 
                     setTimeout(async () => await showGalleryPage(targaForGallery, sectionKeyForGallery || 'riepilogo'), 50);
                 } else if (checklistContainer.style.display === 'block' && targaSelezionataGlobalmente) {
                     targaForGallery = targaSelezionataGlobalmente;
@@ -3055,7 +3078,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     await showGalleryPage(targaForGallery, sectionKeyForGallery);
                 } else if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter){
                     await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter || 'riepilogo');
-                } else {
+                } else { 
                     await showGalleryPage(null, null);
                 }
             });
@@ -3065,7 +3088,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cameraPageSection.style.display === 'flex') {
                     returnFromCamera();
                     if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
-                         setTimeout(() => {
+                         setTimeout(() => { 
                             showView('checklist');
                             showSection(lastSectionBeforeCamera);
                         }, 50);
@@ -3083,7 +3106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             targaSelezionataGlobalmente = currentGalleryTargaFilter; loadProgress(targaSelezionataGlobalmente);
                         }
                         showView('checklist'); showSection(lastSectionBeforeGallery);
-                    } else if (targaSelezionataGlobalmente){
+                    } else if (targaSelezionataGlobalmente){ 
                         const lastActivePage = localStorage.getItem(LAST_ACTIVE_PERIZIA_PAGE_KEY) || 'riepilogo';
                         await handleTargaSelectionAndSync(targaSelezionataGlobalmente, lastActivePage);
                     }
@@ -3098,11 +3121,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // MODIFIED headerCameraBtn event listener
         if (headerCameraBtn) {
             headerCameraBtn.addEventListener('click', () => {
-                if (cameraPageSection.style.display === 'flex') {
+                if (cameraPageSection.style.display === 'flex') { // If camera is already open
                     returnFromCamera();
-                } else {
+                } else { // If opening camera
+                    // Determine and set lastViewBeforeCamera and lastSectionBeforeCamera HERE
                     if (galleryPageSection.style.display === 'block') {
                         lastViewBeforeCamera = 'gallery';
                         lastSectionBeforeCamera = currentGallerySectionFilter;
@@ -3113,11 +3138,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else if (historyPageSection.style.display === 'block') {
                         lastViewBeforeCamera = 'history';
                         lastSectionBeforeCamera = null;
-                    } else {
+                    } else { // Default if no specific section is active (e.g., on landing page)
                         lastViewBeforeCamera = 'landing';
                         lastSectionBeforeCamera = null;
                     }
-                    showView('camera');
+                    showView('camera'); // This will call showCameraPage, which now uses the pre-set globals
                 }
             });
         }
@@ -3132,7 +3157,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await showGalleryPage(currentGalleryTargaFilter, currentGallerySectionFilter);
             } else if (checklistContainer.style.display === 'block' || (!targaSelezionataGlobalmente && landingPageSection.style.display === 'block')) {
                 showSection(targetId);
-            } else if (targaSelezionataGlobalmente) {
+            } else if (targaSelezionataGlobalmente) { 
                 await handleTargaSelectionAndSync(targaSelezionataGlobalmente, targetId);
             }
         }));
@@ -3164,7 +3189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (mainContentWrapper) mainContentWrapper.style.display = 'none';
                     if (pageHeader) pageHeader.style.display = 'none';
                     if (bottomNav) bottomNav.style.display = 'none';
-                    if (cameraPageSection && cameraPageSection.style.display === 'flex') {
+                    if (cameraPageSection && cameraPageSection.style.display === 'flex') { 
                         if (currentCameraStream) { currentCameraStream.getTracks().forEach(track => track.stop()); currentCameraStream = null; if(cameraStreamElement) cameraStreamElement.srcObject = null; }
                         cameraPageSection.style.display = 'none';
                     }
@@ -3198,9 +3223,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+        // Aggiungi l'event listener per i tasti volume
+document.addEventListener('keydown', handleVolumeKeyPress);
     });
 </script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
