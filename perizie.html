@@ -2913,6 +2913,44 @@ function handleLightboxSwipe(endX, endY) {
         }
     }
 
+    // ... (altro codice JavaScript esistente) ...
+
+// Funzione per gestire la pressione dei tasti volume per scattare foto
+function handleVolumeKeyPress(event) {
+    // Controlla se la sezione della fotocamera è attiva e lo stream è presente
+    const cameraPageIsActive = cameraPageSection &&
+                               (cameraPageSection.style.display === 'flex' || cameraPageSection.style.display === 'block') &&
+                               currentCameraStream;
+
+    if (cameraPageIsActive) {
+        // Controlla se il tasto premuto è VolumeUp o VolumeDown
+        // event.key è lo standard moderno, event.keyCode è per compatibilità con browser più vecchi
+        if (event.key === 'AudioVolumeUp' || event.key === 'AudioVolumeDown' ||
+            event.keyCode === 175 /* Volume Up */ || event.keyCode === 174 /* Volume Down */) {
+            
+            event.preventDefault(); // Impedisce l'azione predefinita (cambio volume)
+
+            // Scatta la foto solo se il pulsante di scatto non è già disabilitato
+            // (per prevenire scatti multipli se il tasto viene tenuto premuto a lungo)
+            if (captureBtn && !captureBtn.disabled) {
+                capturePhoto();
+            }
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // ... (tutto il tuo codice esistente all'interno di DOMContentLoaded) ...
+
+    // Aggiungi l'event listener per i tasti volume
+    document.addEventListener('keydown', handleVolumeKeyPress);
+
+    // L'ultima riga del tuo DOMContentLoaded potrebbe essere:
+    // if (mainExitAppBtn) { ... }
+});
+
+// ... (resto del codice JavaScript esistente, se presente fuori da DOMContentLoaded) ...
+
 
     document.addEventListener('DOMContentLoaded', () => {
         syncToSheetsBtn = document.createElement('button');
