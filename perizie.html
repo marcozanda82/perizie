@@ -2048,51 +2048,74 @@ async function handleSavePeriziaAndReturn() {
     }
 
 
-    function capturePhoto() {
+function capturePhoto() {
         if (captureBtn.disabled) return;
-        if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
-            const canvas = document.createElement('canvas');
-            canvas.width = cameraStreamElement.videoWidth;
-            canvas.height = cameraStreamElement.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
-            freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7);
-            freezeFrameDisplayElement.style.display = 'block';
-            cameraStreamElement.style.display = 'none';
-            captureBtn.disabled = true;
-            const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');
-            const sectionNameForFile = getFilenameSectionName(); // Crucial call using updated globals
-            const photoNumber = getNextPhotoNumber(targaForFile, sectionNameForFile);
-            if (photoNumber === null) {
-                 freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#';
-                 cameraStreamElement.style.display = 'block'; captureBtn.disabled = false; return;
+        
+        // Disabilita il pulsante all'inizio per evitare doppi clic
+        captureBtn.disabled = true;
+
+        try {
+            // Controlla che lo stream video sia attivo e pronto
+            if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = cameraStreamElement.videoWidth;
+                canvas.height = cameraStreamElement.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
+                
+                freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7);
+                freezeFrameDisplayElement.style.display = 'block';
+                cameraStreamElement.style.display = 'none';
+
+                const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                const sectionNameForFile = getFilenameSectionName();
+                const photoNumber = getNextPhotoNumber(targaForFile, sectionNameForFile);
+
+                if (photoNumber === null) {
+                    // Se c'è un errore nel generare il numero, esci (il finally riattiverà il pulsante)
+                    return;
+                }
+
+                const filename = `${String(photoNumber).padStart(3, '0')} ${sectionNameForFile} ${targaForFile}.jpeg`;
+                
+                canvas.toBlob(async function(blob) {
+                    if (!blob) {
+                        alert("Errore durante la conversione della foto.");
+                        return; // Il finally esterno gestirà la riattivazione
+                    }
+                    const photoObjectToSave = {
+                        name: filename, blobData: blob, timestamp: new Date().toISOString(),
+                        targa: targaForFile, sezione: sectionNameForFile
+                    };
+                    try {
+                        await savePhotoToDB(photoObjectToSave);
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob); link.download = filename;
+                        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                        URL.revokeObjectURL(link.href);
+                    } catch (error) { 
+                        alert("Errore durante il salvataggio della foto nel database.");
+                    }
+                }, 'image/jpeg', 0.7);
+
+            } else {
+                // Se lo stream non è pronto, non fare nulla, ma il finally garantirà la riattivazione
+                console.warn("Tentativo di scatto fallito: stream non pronto.");
             }
-            const formattedPhotoNumber = String(photoNumber).padStart(3, '0');
-            const filename = `${formattedPhotoNumber} ${sectionNameForFile} ${targaForFile}.jpeg`;
-            canvas.toBlob(async function(blob) {
-                if (!blob) {
-                    alert("Errore conversione foto.");
-                    freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#';
-                    cameraStreamElement.style.display = 'block'; captureBtn.disabled = false; return;
+        } finally {
+            // QUESTO BLOCCO VIENE ESEGUITO SEMPRE, ANCHE IN CASO DI ERRORI
+            // Riattiva il pulsante dopo un breve ritardo per completare le operazioni
+            setTimeout(() => {
+                if (freezeFrameDisplayElement.style.display !== 'none') {
+                    freezeFrameDisplayElement.style.display = 'none';
+                    freezeFrameDisplayElement.src = '#';
                 }
-                const photoObjectToSave = {
-                    name: filename, blobData: blob, timestamp: new Date().toISOString(),
-                    targa: targaForFile, sezione: sectionNameForFile
-                };
-                try {
-                    await savePhotoToDB(photoObjectToSave);
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob); link.download = filename;
-                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
-                    URL.revokeObjectURL(link.href);
-                } catch (error) { alert("Errore salvataggio foto DB.");
-                } finally {
-                    setTimeout(() => {
-                        freezeFrameDisplayElement.style.display = 'none'; freezeFrameDisplayElement.src = '#';
-                        cameraStreamElement.style.display = 'block'; captureBtn.disabled = false;
-                    }, 500);
+                if (cameraStreamElement.style.display !== 'block') {
+                    cameraStreamElement.style.display = 'block';
                 }
-            }, 'image/jpeg', 0.7);
+                captureBtn.disabled = false; // Riattivazione garantita
+            }, 500);
         }
     }
 
