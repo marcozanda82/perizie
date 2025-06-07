@@ -2020,29 +2020,52 @@ async function handleSavePeriziaAndReturn() {
     }
 
 
-    function getNextPhotoNumber(targa, sectionName) {
+function getNextPhotoNumber(targa, sectionName) {
         const sectionNormalized = sectionName.toLowerCase();
-        let start, end, counterKey;
+        let start, end, counterKeyBase;
 
-        if (sectionNormalized === 'remarketing') {
-            start = 1; end = 99; counterKey = `${APP_PREFIX}photoCount_${targa}_remarketing`;
-        } else if (sectionNormalized === 'pneumatici') {
-            start = 101; end = 150; counterKey = `${APP_PREFIX}photoCount_${targa}_pneumatici`;
-        } else if (sectionNormalized === 'danni' || sectionNormalized === 'danniverifiche') {
-            start = 200; end = 999; counterKey = `${APP_PREFIX}photoCount_${targa}_danni`;
-        } else {
-            const genericCounterKey = `${APP_PREFIX}photoCount_${targa}_${sectionNormalized}`;
-            let photoNumber = parseInt(localStorage.getItem(genericCounterKey) || '0') + 1;
-            localStorage.setItem(genericCounterKey, photoNumber.toString());
-            return photoNumber;
+        switch (sectionNormalized) {
+            case 'remarketing':
+                start = 1;
+                end = 99;
+                counterKeyBase = 'remarketing';
+                break;
+            
+            case 'pneumatici':
+                start = 101;
+                end = 150;
+                counterKeyBase = 'pneumatici';
+                break;
+
+            case 'danni':
+            case 'danniverifiche':
+                start = 200;
+                end = 999;
+                counterKeyBase = 'danni';
+                break;
+
+            default:
+                // Gestisce tutti gli altri casi, come 'generale'
+                const genericCounterKey = `${APP_PREFIX}photoCount_${targa}_${sectionNormalized}`;
+                let photoNumber = parseInt(localStorage.getItem(genericCounterKey) || '0') + 1;
+                localStorage.setItem(genericCounterKey, photoNumber.toString());
+                return photoNumber;
         }
 
+        // Questo codice viene eseguito solo per i casi specifici (remarketing, pneumatici, danni)
+        const counterKey = `${APP_PREFIX}photoCount_${targa}_${counterKeyBase}`;
         let currentNumber = parseInt(localStorage.getItem(counterKey) || (start - 1).toString());
         currentNumber++;
-        if (currentNumber < start) currentNumber = start;
+        
+        if (currentNumber < start) {
+            currentNumber = start;
+        }
+        
+        // La notifica del limite raggiunto era commentata, la mantengo così
         if (currentNumber > end) {
             // alert(`Attenzione: Limite foto per "${sectionName}" (${start}-${end}) raggiunto. N.${currentNumber}.`);
         }
+        
         localStorage.setItem(counterKey, currentNumber.toString());
         return currentNumber;
     }
