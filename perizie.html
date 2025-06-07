@@ -3121,22 +3121,22 @@ function handleLightboxSwipe(endX, endY) {
             });
         }
 
-if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
+        if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
         if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera);
 
-        // >>> INIZIO BLOCCO AGGIUNTO <<<
+        // >>> INIZIO BLOCCO AGGIORNATO E CORRETTO <<<
         // Aggiunge un listener per scattare la foto con il tasto Invio quando la fotocamera è attiva
         document.addEventListener('keydown', function(event) {
-            // Controlla se la pagina della fotocamera è visibile e se il tasto premuto è 'Invio'
-            if (cameraPageSection.style.display === 'flex' && event.key === 'Enter') {
-                // Previene il comportamento predefinito del tasto Invio (es. invio di un form)
+            // Controlla se la fotocamera è visibile, se il tasto è 'Invio' E SE IL PULSANTE NON È DISABILITATO
+            if (cameraPageSection.style.display === 'flex' && event.key === 'Enter' && !captureBtn.disabled) {
+                // Previene il comportamento predefinito del tasto Invio
                 event.preventDefault();
 
-                // Chiama la funzione di cattura della foto, la stessa del pulsante a schermo
+                // Chiama la funzione di cattura della foto
                 capturePhoto();
             }
         });
-        // >>> FINE BLOCCO AGGIUNTO <<<
+        // >>> FINE BLOCCO AGGIORNATO E CORRETTO <<<
 
         navButtons.forEach(b => b.addEventListener('click', async function() {
             const targetId = this.dataset.target;
