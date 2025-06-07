@@ -241,12 +241,12 @@
         .circle-button i { 
             line-height: 1; 
         }
-        #headerExitBtn i { color: #dc3545; } 
+        #headerListBtn i { color: #007bff; }  
         #headerPhotosBtn i { color: #007bff; } 
         #headerPeriziaBtn i { color: #ffc107; } 
         #headerCameraBtn i { color: #28a745; } 
 
-        #headerExitBtn:hover i,
+        #headerListBtn:hover i,
         #headerPhotosBtn:hover i,
         #headerPeriziaBtn:hover i,
         #headerCameraBtn:hover i {
@@ -1258,7 +1258,7 @@
 
     </div> <div id="bottomNavCircles">
         <div class="header-circles">
-            <button id="headerExitBtn" class="circle-button" title="Esci dall'applicazione"><i class="fas fa-power-off"></i></button>
+            <button id="headerListBtn" class="circle-button" title="Elenco Targhe"><i class="fas fa-list-ul"></i></button>
             <button id="headerPhotosBtn" class="circle-button" title="Galleria Foto App"><i class="fas fa-images"></i></button>
             <button id="headerPeriziaBtn" class="circle-button" title="Vai all'ultima perizia/sezione"><i class="fas fa-clipboard-list"></i></button>
             <button id="headerCameraBtn" class="circle-button" title="Fotocamera"><i class="fas fa-camera-retro"></i></button>
@@ -1305,7 +1305,7 @@
     const mainExitAppBtn = utilityNavButtons.querySelector('#exitAppBtn');
     let syncToSheetsBtn;
 
-    const headerExitBtn = document.getElementById('headerExitBtn');
+    const headerListBtn = document.getElementById('headerListBtn');
     const headerPhotosBtn = document.getElementById('headerPhotosBtn');
     const headerPeriziaBtn = document.getElementById('headerPeriziaBtn');
     const headerCameraBtn = document.getElementById('headerCameraBtn');
@@ -3080,7 +3080,7 @@ function handleLightboxSwipe(endX, endY) {
         if(saveAndReturnBtn) saveAndReturnBtn.addEventListener('click', handleSavePeriziaAndReturn);
         saveAndNextButtons.forEach(button=>button.addEventListener('click',handleSaveAndNext));
 
-        if (headerExitBtn) headerExitBtn.addEventListener('click', () => triggerMainExit());
+        if (headerListBtn) headerListBtn.addEventListener('click', () => showView('landing'));
         if (headerPhotosBtn) {
             headerPhotosBtn.addEventListener('click', async () => {
                 let targaForGallery = null;
