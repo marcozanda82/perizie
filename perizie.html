@@ -3171,14 +3171,19 @@ function handleLightboxSwipe(endX, endY) {
         if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera);
 
         // >>> INIZIO BLOCCO AGGIORNATO E CORRETTO <<<
-        // Aggiunge un listener per scattare la foto con il tasto Invio quando la fotocamera è attiva
+// Aggiunge un listener per scattare la foto con Invio o con i tasti Volume
         document.addEventListener('keydown', function(event) {
-            // Controlla se la fotocamera è visibile, se il tasto è 'Invio' E SE IL PULSANTE NON È DISABILITATO
-            if (cameraPageSection.style.display === 'flex' && event.key === 'Enter' && !captureBtn.disabled) {
-                // Previene il comportamento predefinito del tasto Invio
+            // Definiamo un array di tasti validi per lo scatto
+            const shutterKeys = ['Enter', 'AudioVolumeUp', 'AudioVolumeDown'];
+
+            // Controlliamo se la fotocamera è attiva, se il tasto premuto è uno dei shutterKeys e se il pulsante non è disabilitato
+            if (cameraPageSection.style.display === 'flex' && shutterKeys.includes(event.key) && !captureBtn.disabled) {
+                
+                // Preveniamo l'azione di default (cambio volume, invio form, etc.)
+                // NOTA: Questo potrebbe non riuscire a bloccare il cambio di volume su alcuni dispositivi.
                 event.preventDefault();
 
-                // Chiama la funzione di cattura della foto
+                // Chiamiamo la funzione di cattura della foto
                 capturePhoto();
             }
         });
