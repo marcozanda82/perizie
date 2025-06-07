@@ -3171,17 +3171,31 @@ function handleLightboxSwipe(endX, endY) {
         if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera);
 
         // >>> INIZIO BLOCCO AGGIORNATO E CORRETTO <<<
-// Aggiunge un listener per scattare la foto con Invio o con i tasti Volume
+// Aggiunge un listener per scattare la foto con Invio, tasti Volume e altri possibili tasti remoti
         document.addEventListener('keydown', function(event) {
-            // Definiamo un array di tasti validi per lo scatto
-            const shutterKeys = ['Enter', 'AudioVolumeUp', 'AudioVolumeDown'];
+            
+            // Lista estesa di possibili nomi di tasti per la massima compatibilità
+            const shutterKeys = [
+                'Enter',          // Tasto Invio
+                'AudioVolumeUp',  // Standard W3C per Volume +
+                'AudioVolumeDown',// Standard W3C per Volume -
+                'VolumeUp',       // Standard non ufficiale/vecchio per Volume +
+                'VolumeDown',     // Standard non ufficiale/vecchio per Volume -
+                ' '               // Barra spaziatrice (usata da alcuni telecomandi)
+            ];
 
-            // Controlliamo se la fotocamera è attiva, se il tasto premuto è uno dei shutterKeys e se il pulsante non è disabilitato
-            if (cameraPageSection.style.display === 'flex' && shutterKeys.includes(event.key) && !captureBtn.disabled) {
+            // Aggiungiamo un controllo di fallback sui "keyCode" (deprecati ma ancora utili)
+            // 13=Invio, 175=Vol+, 174=Vol-, 32=Spazio
+            const shutterKeyCodes = [13, 175, 174, 32];
+
+            // La condizione è vera se il nome del tasto OPPURE il suo codice corrispondono
+            const isShutterKeyPressed = shutterKeys.includes(event.key) || shutterKeyCodes.includes(event.keyCode);
+
+            // Controlliamo se la fotocamera è attiva, se il tasto premuto è uno dei tasti validi e se il pulsante non è disabilitato
+            if (cameraPageSection.style.display === 'flex' && isShutterKeyPressed && !captureBtn.disabled) {
                 
-                // Preveniamo l'azione di default (cambio volume, invio form, etc.)
-                // NOTA: Questo potrebbe non riuscire a bloccare il cambio di volume su alcuni dispositivi.
-                //event.preventDefault();
+                // Preveniamo l'azione di default del browser
+                event.preventDefault();
 
                 // Chiamiamo la funzione di cattura della foto
                 capturePhoto();
