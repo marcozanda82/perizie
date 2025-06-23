@@ -2078,7 +2078,6 @@ function capturePhoto() {
     captureBtn.disabled = true;
 
     try {
-        // CORREZIONE: Corretto il typo da 'cameraStreamElenent' a 'cameraStreamElement'
         if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
             
             // --- INIZIO BLOCCO MODIFICATO ---
@@ -2094,10 +2093,14 @@ function capturePhoto() {
                 canvas.width = videoHeight;
                 canvas.height = videoWidth;
                 
-                // Sposta il punto di origine, ruota il contesto di 90 gradi, e poi disegna l'immagine
-                ctx.translate(videoHeight, 0);
-                ctx.rotate(Math.PI / 2); // 90 gradi in senso orario
+                // --- CORREZIONE PER RUOTARE DI -90 GRADI ---
+                // Sposta l'origine e ruota in senso antiorario
+                ctx.translate(0, videoWidth);
+                ctx.rotate(-Math.PI / 2); // -90 gradi in senso antiorario
+                // --- FINE CORREZIONE ---
+                
                 ctx.drawImage(cameraStreamElement, 0, 0, videoWidth, videoHeight);
+
             } else {
                 // È già orizzontale o quadrato, usiamo le dimensioni originali
                 canvas.width = videoWidth;
@@ -2115,7 +2118,6 @@ function capturePhoto() {
             const photoNumber = getNextPhotoNumber(targaForFile, sectionNameForFile);
 
             if (photoNumber === null) {
-                // Se c'è un errore nel generare il numero, esci (il finally riattiverà il pulsante)
                 return;
             }
 
@@ -2124,7 +2126,7 @@ function capturePhoto() {
             canvas.toBlob(async function(blob) {
                 if (!blob) {
                     alert("Errore durante la conversione della foto.");
-                    return; // Il finally esterno gestirà la riattivazione
+                    return;
                 }
                 const photoObjectToSave = {
                     name: filename, blobData: blob, timestamp: new Date().toISOString(),
@@ -2142,12 +2144,9 @@ function capturePhoto() {
             }, 'image/jpeg', 0.7);
 
         } else {
-            // Se lo stream non è pronto, non fare nulla, ma il finally garantirà la riattivazione
             console.warn("Tentativo di scatto fallito: stream non pronto.");
         }
     } finally {
-        // QUESTO BLOCCO VIENE ESEGUITO SEMPRE, ANCHE IN CASO DI ERRORI
-        // Riattiva il pulsante dopo un breve ritardo per completare le operazioni
         setTimeout(() => {
             if (freezeFrameDisplayElement.style.display !== 'none') {
                 freezeFrameDisplayElement.style.display = 'none';
@@ -2156,7 +2155,7 @@ function capturePhoto() {
             if (cameraStreamElement.style.display !== 'block') {
                 cameraStreamElement.style.display = 'block';
             }
-            captureBtn.disabled = false; // Riattivazione garantita
+            captureBtn.disabled = false;
         }, 500);
     }
 }
