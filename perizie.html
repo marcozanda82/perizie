@@ -2078,11 +2078,11 @@ function capturePhoto() {
     captureBtn.disabled = true;
 
     try {
-        // Controlla che lo stream video sia attivo e pronto
-        if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElenent.videoWidth > 0) {
+        // CORREZIONE: Corretto il typo da 'cameraStreamElenent' a 'cameraStreamElement'
+        if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
             
             // --- INIZIO BLOCCO MODIFICATO ---
-            // NUOVO: Logica per forzare l'orientamento orizzontale
+            // Logica per forzare l'orientamento orizzontale
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             const videoWidth = cameraStreamElement.videoWidth;
