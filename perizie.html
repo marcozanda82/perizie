@@ -2071,43 +2071,34 @@ function getNextPhotoNumber(targa, sectionName) {
     }
 
 
+// VERSIONE FINALE CORRETTA E VERIFICATA
 function capturePhoto() {
     if (captureBtn.disabled) return;
     
-    // Disabilita il pulsante all'inizio per evitare doppi clic
     captureBtn.disabled = true;
 
     try {
         if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
             
-            // --- INIZIO BLOCCO MODIFICATO ---
-            // Logica per forzare l'orientamento orizzontale
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             const videoWidth = cameraStreamElement.videoWidth;
             const videoHeight = cameraStreamElement.videoHeight;
 
-            // Controlla se il video è in orientamento verticale (altezza > larghezza)
             if (videoHeight > videoWidth) {
-                // È verticale, lo ruotiamo per renderlo orizzontale
                 canvas.width = videoHeight;
                 canvas.height = videoWidth;
                 
-                // --- CORREZIONE PER RUOTARE DI -90 GRADI ---
-                // Sposta l'origine e ruota in senso antiorario
+                // Logica di rotazione antioraria (-90 gradi)
                 ctx.translate(0, videoWidth);
-                ctx.rotate(-Math.PI / 2); // -90 gradi in senso antiorario
-                // --- FINE CORREZIONE ---
+                ctx.rotate(-Math.PI / 2);
                 
                 ctx.drawImage(cameraStreamElement, 0, 0, videoWidth, videoHeight);
-
             } else {
-                // È già orizzontale o quadrato, usiamo le dimensioni originali
                 canvas.width = videoWidth;
                 canvas.height = videoHeight;
                 ctx.drawImage(cameraStreamElement, 0, 0, videoWidth, videoHeight);
             }
-            // --- FINE BLOCCO MODIFICATO ---
 
             freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7);
             freezeFrameDisplayElement.style.display = 'block';
