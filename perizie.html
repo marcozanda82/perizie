@@ -2072,75 +2072,94 @@ function getNextPhotoNumber(targa, sectionName) {
 
 
 function capturePhoto() {
-        if (captureBtn.disabled) return;
-        
-        // Disabilita il pulsante all'inizio per evitare doppi clic
-        captureBtn.disabled = true;
+    if (captureBtn.disabled) return;
+    
+    // Disabilita il pulsante all'inizio per evitare doppi clic
+    captureBtn.disabled = true;
 
-        try {
-            // Controlla che lo stream video sia attivo e pronto
-            if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElement.videoWidth > 0) {
+    try {
+        // Controlla che lo stream video sia attivo e pronto
+        if (currentCameraStream && cameraStreamElement.readyState >= cameraStreamElement.HAVE_CURRENT_DATA && cameraStreamElenent.videoWidth > 0) {
+            
+            // --- INIZIO BLOCCO MODIFICATO ---
+            // NUOVO: Logica per forzare l'orientamento orizzontale
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const videoWidth = cameraStreamElement.videoWidth;
+            const videoHeight = cameraStreamElement.videoHeight;
+
+            // Controlla se il video è in orientamento verticale (altezza > larghezza)
+            if (videoHeight > videoWidth) {
+                // È verticale, lo ruotiamo per renderlo orizzontale
+                canvas.width = videoHeight;
+                canvas.height = videoWidth;
                 
-                const canvas = document.createElement('canvas');
-                canvas.width = cameraStreamElement.videoWidth;
-                canvas.height = cameraStreamElement.videoHeight;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
-                
-                freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7);
-                freezeFrameDisplayElement.style.display = 'block';
-                cameraStreamElement.style.display = 'none';
-
-                const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');
-                const sectionNameForFile = getFilenameSectionName();
-                const photoNumber = getNextPhotoNumber(targaForFile, sectionNameForFile);
-
-                if (photoNumber === null) {
-                    // Se c'è un errore nel generare il numero, esci (il finally riattiverà il pulsante)
-                    return;
-                }
-
-                const filename = `${String(photoNumber).padStart(3, '0')} ${sectionNameForFile} ${targaForFile}.jpeg`;
-                
-                canvas.toBlob(async function(blob) {
-                    if (!blob) {
-                        alert("Errore durante la conversione della foto.");
-                        return; // Il finally esterno gestirà la riattivazione
-                    }
-                    const photoObjectToSave = {
-                        name: filename, blobData: blob, timestamp: new Date().toISOString(),
-                        targa: targaForFile, sezione: sectionNameForFile
-                    };
-                    try {
-                        await savePhotoToDB(photoObjectToSave);
-                        const link = document.createElement('a');
-                        link.href = URL.createObjectURL(blob); link.download = filename;
-                        document.body.appendChild(link); link.click(); document.body.removeChild(link);
-                        URL.revokeObjectURL(link.href);
-                    } catch (error) { 
-                        alert("Errore durante il salvataggio della foto nel database.");
-                    }
-                }, 'image/jpeg', 0.7);
-
+                // Sposta il punto di origine, ruota il contesto di 90 gradi, e poi disegna l'immagine
+                ctx.translate(videoHeight, 0);
+                ctx.rotate(Math.PI / 2); // 90 gradi in senso orario
+                ctx.drawImage(cameraStreamElement, 0, 0, videoWidth, videoHeight);
             } else {
-                // Se lo stream non è pronto, non fare nulla, ma il finally garantirà la riattivazione
-                console.warn("Tentativo di scatto fallito: stream non pronto.");
+                // È già orizzontale o quadrato, usiamo le dimensioni originali
+                canvas.width = videoWidth;
+                canvas.height = videoHeight;
+                ctx.drawImage(cameraStreamElement, 0, 0, videoWidth, videoHeight);
             }
-        } finally {
-            // QUESTO BLOCCO VIENE ESEGUITO SEMPRE, ANCHE IN CASO DI ERRORI
-            // Riattiva il pulsante dopo un breve ritardo per completare le operazioni
-            setTimeout(() => {
-                if (freezeFrameDisplayElement.style.display !== 'none') {
-                    freezeFrameDisplayElement.style.display = 'none';
-                    freezeFrameDisplayElement.src = '#';
+            // --- FINE BLOCCO MODIFICATO ---
+
+            freezeFrameDisplayElement.src = canvas.toDataURL('image/jpeg', 0.7);
+            freezeFrameDisplayElement.style.display = 'block';
+            cameraStreamElement.style.display = 'none';
+
+            const targaForFile = (targaSelezionataGlobalmente || currentGalleryTargaFilter || 'SCONOSCIUTA').toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const sectionNameForFile = getFilenameSectionName();
+            const photoNumber = getNextPhotoNumber(targaForFile, sectionNameForFile);
+
+            if (photoNumber === null) {
+                // Se c'è un errore nel generare il numero, esci (il finally riattiverà il pulsante)
+                return;
+            }
+
+            const filename = `${String(photoNumber).padStart(3, '0')} ${sectionNameForFile} ${targaForFile}.jpeg`;
+            
+            canvas.toBlob(async function(blob) {
+                if (!blob) {
+                    alert("Errore durante la conversione della foto.");
+                    return; // Il finally esterno gestirà la riattivazione
                 }
-                if (cameraStreamElement.style.display !== 'block') {
-                    cameraStreamElement.style.display = 'block';
+                const photoObjectToSave = {
+                    name: filename, blobData: blob, timestamp: new Date().toISOString(),
+                    targa: targaForFile, sezione: sectionNameForFile
+                };
+                try {
+                    await savePhotoToDB(photoObjectToSave);
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob); link.download = filename;
+                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                } catch (error) { 
+                    alert("Errore durante il salvataggio della foto nel database.");
                 }
-                captureBtn.disabled = false; // Riattivazione garantita
-            }, 500);
+            }, 'image/jpeg', 0.7);
+
+        } else {
+            // Se lo stream non è pronto, non fare nulla, ma il finally garantirà la riattivazione
+            console.warn("Tentativo di scatto fallito: stream non pronto.");
         }
+    } finally {
+        // QUESTO BLOCCO VIENE ESEGUITO SEMPRE, ANCHE IN CASO DI ERRORI
+        // Riattiva il pulsante dopo un breve ritardo per completare le operazioni
+        setTimeout(() => {
+            if (freezeFrameDisplayElement.style.display !== 'none') {
+                freezeFrameDisplayElement.style.display = 'none';
+                freezeFrameDisplayElement.src = '#';
+            }
+            if (cameraStreamElement.style.display !== 'block') {
+                cameraStreamElement.style.display = 'block';
+            }
+            captureBtn.disabled = false; // Riattivazione garantita
+        }, 500);
     }
+}
 
     async function showGalleryPage(targaToFilter = null, sectionToFilter = null) {
         if (checklistContainer.style.display === 'block') {
