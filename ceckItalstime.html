@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Checklist Perizia Vettura</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    font-family: sans-serif;
+    margin: 15px;
+    background-color: #f4f4f4;
+    color: #333;
+  }
+  .container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  h1 {
+    color: #0056b3;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  li {
+    background-color: #e9ecef;
+    margin-bottom: 10px;
+    padding: 12px 15px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  input[type="checkbox"] {
+    margin-right: 15px;
+    min-width: 20px;
+    min-height: 20px;
+    accent-color: #007bff;
+  }
+  label {
+    flex-grow: 1;
+    font-size: 1.1em;
+  }
+  .section-title {
+    font-weight: bold;
+    color: #0056b3;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Checklist Perizia Vettura - Remarketing</h1>
+
+  <div class="section-title">Foto Esterni</div>
+  <ul>
+    <li>
+      <input type="checkbox" id="foto-anteriore-destro">
+      [cite_start]<label for="foto-anteriore-destro">Foto esterni (partendo dall'anteriore destro e facendo il giro in senso antiorario) [cite: 2, 3]</label>
+    </li>
+  </ul>
+
+  <div class="section-title">Foto Interni e Documentazione</div>
+  <ul>
+    <li>
+      <input type="checkbox" id="foto-plancia">
+      [cite_start]<label for="foto-plancia">Foto plancia [cite: 4]</label>
+    </li>
+    <li>
+      <input type="checkbox" id="foto-messa-in-moto">
+      [cite_start]<label for="foto-messa-in-moto">Foto messa in moto [cite: 5]</label>
+    </li>
+    <li>
+      <input type="checkbox" id="foto-km">
+      [cite_start]<label for="foto-km">Foto KM [cite: 6]</label>
+    </li>
+    <li>
+      <input type="checkbox" id="foto-navigatore">
+      [cite_start]<label for="foto-navigatore">Foto navigatore (se presente) [cite: 7]</label>
+    </li>
+    <li>
+      <input type="checkbox" id="chiavi-libretto-carta">
+      [cite_start]<label for="chiavi-libretto-carta">Chiavi totali + eventuale busta + libretto uso e manutenzione + carta di circolazione originale (fronte e retro) [cite: 8, 9]</label>
+    </li>
+    <li>
+      <input type="checkbox" id="telaio">
+      [cite_start]<label for="telaio">Telaio [cite: 10]</label>
+    </li>
+    <li>
+      <input type="checkbox" id="vano-motore">
+      [cite_start]<label for="vano-motore">Vano motore [cite: 11]</label>
+    </li>
+    <li>
+      <input type="checkbox" id="selleria-anteriore-posteriore-vano-carico">
+      [cite_start]<label for="selleria-anteriore-posteriore-vano-carico">Selleria anteriore, posteriore, e vano carico posteriore [cite: 12]</label>
+    </li>
+    <li>
+      <input type="checkbox" id="ruotino-kit-gonfiaggio">
+      [cite_start]<label for="ruotino-kit-gonfiaggio">Presenza di ruotino di scorta/KIT gonfiaggio [cite: 13]</label>
+    </li>
+  </ul>
+
+  <div class="section-title">Cerchi e Pneumatici</div>
+  <ul>
+    <li>
+      <input type="checkbox" id="cerchi-dettaglio">
+      [cite_start]<label for="cerchi-dettaglio">Cerchi (dettaglio delle misure e marca) con eventuale indicazione dei danni a cerchi/pneumatici [cite: 14, 15]</label>
+    </li>
+    <li>
+      <input type="checkbox" id="misurazione-battistrada">
+      [cite_start]<label for="misurazione-battistrada">Misurazione del battistrada (se possibile con il misuratore) [cite: 15]</label>
+    </li>
+  </ul>
+
+  <div class="section-title">Identificazione Danni</div>
+  <ul>
+    <li>
+      <input type="checkbox" id="identificazione-danni">
+      [cite_start]<label for="identificazione-danni">Identificazione dei danni interni/esterni con l'utilizzo del ventaglio in caso di ammaccature [cite: 16]</label>
+    </li>
+  </ul>
+</div>
+
+</body>
+</html>
