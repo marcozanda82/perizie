@@ -53,6 +53,21 @@
     border-bottom: 2px solid #0056b3;
     padding-bottom: 5px;
   }
+  .circle-block {
+    margin-top: 30px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #ccc;
+  }
+  .circle {
+    width: 1cm;
+    height: 1cm;
+    background-color: #007bff;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 10px; /* Adjust margin for equidistance */
+    vertical-align: middle;
+  }
 </style>
 </head>
 <body>
@@ -64,7 +79,7 @@
   <ul>
     <li>
       <input type="checkbox" id="foto-anteriore-destro">
-      [cite_start]<label for="foto-anteriore-destro">Foto esterni (partendo dall'anteriore destro e facendo il giro in senso antiorario) [cite: 2, 3]</label>
+      <label for="foto-anteriore-destro">Foto esterni (partendo dall'anteriore destro e facendo il giro in senso antiorario)</label>
     </li>
   </ul>
 
@@ -72,39 +87,39 @@
   <ul>
     <li>
       <input type="checkbox" id="foto-plancia">
-      [cite_start]<label for="foto-plancia">Foto plancia [cite: 4]</label>
+      <label for="foto-plancia">Foto plancia</label>
     </li>
     <li>
       <input type="checkbox" id="foto-messa-in-moto">
-      [cite_start]<label for="foto-messa-in-moto">Foto messa in moto [cite: 5]</label>
+      <label for="foto-messa-in-moto">Foto messa in moto</label>
     </li>
     <li>
       <input type="checkbox" id="foto-km">
-      [cite_start]<label for="foto-km">Foto KM [cite: 6]</label>
+      <label for="foto-km">Foto KM</label>
     </li>
     <li>
       <input type="checkbox" id="foto-navigatore">
-      [cite_start]<label for="foto-navigatore">Foto navigatore (se presente) [cite: 7]</label>
+      <label for="foto-navigatore">Foto navigatore (se presente)</label>
     </li>
     <li>
       <input type="checkbox" id="chiavi-libretto-carta">
-      [cite_start]<label for="chiavi-libretto-carta">Chiavi totali + eventuale busta + libretto uso e manutenzione + carta di circolazione originale (fronte e retro) [cite: 8, 9]</label>
+      <label for="chiavi-libretto-carta">Chiavi totali + eventuale busta + libretto uso e manutenzione + carta di circolazione originale (fronte e retro)</label>
     </li>
     <li>
       <input type="checkbox" id="telaio">
-      [cite_start]<label for="telaio">Telaio [cite: 10]</label>
+      <label for="telaio">Telaio</label>
     </li>
     <li>
       <input type="checkbox" id="vano-motore">
-      [cite_start]<label for="vano-motore">Vano motore [cite: 11]</label>
+      <label for="vano-motore">Vano motore</label>
     </li>
     <li>
       <input type="checkbox" id="selleria-anteriore-posteriore-vano-carico">
-      [cite_start]<label for="selleria-anteriore-posteriore-vano-carico">Selleria anteriore, posteriore, e vano carico posteriore [cite: 12]</label>
+      <label for="selleria-anteriore-posteriore-vano-carico">Selleria anteriore, posteriore, e vano carico posteriore</label>
     </li>
     <li>
       <input type="checkbox" id="ruotino-kit-gonfiaggio">
-      [cite_start]<label for="ruotino-kit-gonfiaggio">Presenza di ruotino di scorta/KIT gonfiaggio [cite: 13]</label>
+      <label for="ruotino-kit-gonfiaggio">Presenza di ruotino di scorta/KIT gonfiaggio</label>
     </li>
   </ul>
 
@@ -112,11 +127,11 @@
   <ul>
     <li>
       <input type="checkbox" id="cerchi-dettaglio">
-      [cite_start]<label for="cerchi-dettaglio">Cerchi (dettaglio delle misure e marca) con eventuale indicazione dei danni a cerchi/pneumatici [cite: 14, 15]</label>
+      <label for="cerchi-dettaglio">Cerchi (dettaglio delle misure e marca) con eventuale indicazione dei danni a cerchi/pneumatici</label>
     </li>
     <li>
       <input type="checkbox" id="misurazione-battistrada">
-      [cite_start]<label for="misurazione-battistrada">Misurazione del battistrada (se possibile con il misuratore) [cite: 15]</label>
+      <label for="misurazione-battistrada">Misurazione del battistrada (se possibile con il misuratore)</label>
     </li>
   </ul>
 
@@ -124,9 +139,17 @@
   <ul>
     <li>
       <input type="checkbox" id="identificazione-danni">
-      [cite_start]<label for="identificazione-danni">Identificazione dei danni interni/esterni con l'utilizzo del ventaglio in caso di ammaccature [cite: 16]</label>
+      <label for="identificazione-danni">Identificazione dei danni interni/esterni con l'utilizzo del ventaglio in caso di ammaccature</label>
     </li>
   </ul>
+
+  <div class="circle-block">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+  </div>
+
 </div>
 
 </body>
