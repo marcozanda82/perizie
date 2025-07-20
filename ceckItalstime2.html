@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Checklist Perizia Vettura</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    font-family: sans-serif;
+    margin: 0; /* Rimuove il margine predefinito del body */
+    background-color: #1a1a1a; /* Sfondo nero */
+    color: #f4f4f4; /* Testo chiaro per contrasto */
+    padding-bottom: 80px; /* Spazio per il blocco fisso in fondo */
+  }
+  .header {
+    text-align: center;
+    padding: 15px 0;
+    background-color: #000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    position: relative;
+    z-index: 1001; /* Assicura che l'header sia sopra tutto */
+  }
+  .header img {
+    max-width: 150px; /* Dimensione del logo */
+    height: auto;
+  }
+  .container {
+    background-color: #2c2c2c; /* Sfondo scuro per il container */
+    padding: 20px;
+    margin: 15px; /* Margine per il container principale */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  h1 {
+    color: #4CAF50; /* Verde brillante per il titolo */
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  li {
+    background-color: #3a3a3a; /* Sfondo più scuro per gli elementi della lista */
+    margin-bottom: 10px;
+    padding: 12px 15px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  input[type="checkbox"] {
+    margin-right: 15px;
+    min-width: 24px; /* Aumenta la dimensione della checkbox */
+    min-height: 24px;
+    accent-color: #4CAF50; /* Colore verde per la checkbox selezionata */
+  }
+  label {
+    flex-grow: 1;
+    font-size: 1.1em;
+    color: #f4f4f4;
+  }
+  .section-title {
+    font-weight: bold;
+    color: #66BB6A; /* Verde leggermente più chiaro per i titoli di sezione */
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+    border-bottom: 2px solid #66BB6A;
+    padding-bottom: 5px;
+  }
+  .fixed-bottom-block {
+    position: fixed; /* Rende il blocco fisso */
+    bottom: 0; /* Lo posiziona in basso */
+    left: 0;
+    width: 100%;
+    background-color: #000; /* Sfondo nero per il blocco fisso */
+    padding: 10px 0;
+    text-align: center;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* Assicura che sia in primo piano */
+  }
+  .circle {
+    width: 1.5cm; /* Ridotto del 25% rispetto a 2cm */
+    height: 1.5cm; /* Ridotto del 25% rispetto a 2cm */
+    background-color: #FFC107; /* Giallo/Arancione per i cerchi */
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 12px; /* Margine leggermente ridotto */
+    vertical-align: middle;
+  }
+  .car-selector {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #3a3a3a;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  .car-selector label {
+    font-size: 1.1em;
+    margin-right: 10px;
+    color: #f4f4f4;
+  }
+  .car-selector select {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #444;
+    color: #f4f4f4;
+    font-size: 1em;
+    width: calc(100% - 20px); /* Regola la larghezza per mobile */
+    max-width: 300px;
+    margin-top: 5px;
+  }
+  .car-selector option.completed {
+    text-decoration: line-through;
+    color: #999;
+  }
+  .complete-button {
+    background-color: #4CAF50; /* Verde per il pulsante */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    margin-top: 15px;
+    width: calc(100% - 20px);
+    max-width: 300px;
+  }
+  .complete-button:hover:not(:disabled) {
+    background-color: #45a049;
+  }
+  .complete-button:disabled {
+    background-color: #888;
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="image_efdcbf.png" alt="Logo ITALS TIME">
+</div>
+
+<div class="container">
+  <h1>Checklist Perizia Vettura - Remarketing</h1>
+
+  <div class="car-selector">
+    <label for="vehicle-select">Seleziona Veicolo:</label>
+    <select id="vehicle-select" onchange="loadChecklist()">
+      <option value="">-- Seleziona --</option>
+      </select>
+    <button class="complete-button" id="complete-button" onclick="markVehicleAsCompleted()" disabled>Completata</button>
+  </div>
+
+  <div id="checklist-content">
+    <div class="section-title">Foto Esterni</div>
+    <ul>
+      <li>
+        <input type="checkbox" id="foto-anteriore-destro">
+        <label for="foto-anteriore-destro">Foto esterni (partendo dall'anteriore destro e facendo il giro in senso antiorario)</label>
+      </li>
+    </ul>
+
+    <div class="section-title">Foto Interni e Documentazione</div>
+    <ul>
+      <li>
+        <input type="checkbox" id="foto-plancia">
+        <label for="foto-plancia">Foto plancia</label>
+      </li>
+      <li>
+        <input type="checkbox" id="foto-messa-in-moto">
+        <label for="foto-messa-in-moto">Foto messa in moto</label>
+      </li>
+      <li>
+        <input type="checkbox" id="foto-km">
+        <label for="foto-km">Foto KM</label>
+      </li>
+      <li>
+        <input type="checkbox" id="foto-navigatore">
+        <label for="foto-navigatore">Foto navigatore (se presente)</label>
+      </li>
+      <li>
+        <input type="checkbox" id="chiavi-libretto-carta">
+        <label for="chiavi-libretto-carta">Chiavi totali + eventuale busta + libretto uso e manutenzione + carta di circolazione originale (fronte e retro)</label>
+      </li>
+      <li>
+        <input type="checkbox" id="telaio">
+        <label for="telaio">Telaio</label>
+      </li>
+      <li>
+        <input type="checkbox" id="vano-motore">
+        <label for="vano-motore">Vano motore</label>
+      </li>
+      <li>
+        <input type="checkbox" id="selleria-anteriore-posteriore-vano-carico">
+        <label for="selleria-anteriore-posteriore-vano-carico">Selleria anteriore, posteriore, e vano carico posteriore</label>
+      </li>
+      <li>
+        <input type="checkbox" id="ruotino-kit-gonfiaggio">
+        <label for="ruotino-kit-gonfiaggio">Presenza di ruotino di scorta/KIT gonfiaggio</label>
+      </li>
+    </ul>
+
+    <div class="section-title">Cerchi e Pneumatici</div>
+    <ul>
+      <li>
+        <input type="checkbox" id="cerchi-dettaglio">
+        <label for="cerchi-dettaglio">Cerchi (dettaglio delle misure e marca) con eventuale indicazione dei danni a cerchi/pneumatici</label>
+      </li>
+      <li>
+        <input type="checkbox" id="misurazione-battistrada">
+        <label for="misurazione-battistrada">Misurazione del battistrada (se possibile con il misuratore)</label>
+      </li>
+    </ul>
+
+    <div class="section-title">Identificazione Danni</div>
+    <ul>
+      <li>
+        <input type="checkbox" id="identificazione-danni">
+        <label for="identificazione-danni">Identificazione dei danni interni/esterni con l'utilizzo del ventaglio in caso di ammaccature</label>
+      </li>
+    </ul>
+  </div>
+
+</div>
+
+<div class="fixed-bottom-block">
+  <div class="circle"></div>
+  <div class="circle"></div>
+  <div class="circle"></div>
+  <div class="circle"></div>
+</div>
+
+<script>
+  // Dati dei veicoli
+  const vehicles = [
+    { targa: 'FF376JW', marca: 'ALFA ROMEO', modello: 'Giulietta 1.6 JTDm 120 CV Business' },
+    { targa: 'FG363MM', marca: 'PEUGEOT', modello: '308 BlueHDi 120 S&S SW Business' },
+    { targa: 'FR682PD', marca: 'CITROEN', modello: 'C4 SpaceTourer BlueHDi 120 S&S Feel' },
+    { targa: 'FX645ZN', marca: 'PEUGEOT', modello: '3008 BlueHDi 130 S&S EAT8 Active' },
+    { targa: 'GE010LT', marca: 'PEUGEOT', modello: '3008 BlueHDi 130 S&S EAT8 Active Business' },
+    { targa: 'FT463RP', marca: 'FIAT', modello: '500X 1.6 MultiJet 120 CV Busin' },
+    { targa: 'GD681NW', marca: 'FORD', modello: 'Kuga 1.5 EcoBlue 120 CV 2WD ST-Line' },
+    { targa: 'FZ628DV', marca: 'PEUGEOT', modello: '3008 BlueHDi 130 S&S Active' },
+    { targa: 'GE806PT', marca: 'PEUGEOT', modello: '3008 BlueHDi 130 S&S Active Business' },
+    { targa: 'FX643ZN', marca: 'PEUGEOT', modello: '3008 BlueHDi 130 S&S EAT8 Active' },
+    { targa: 'GB856CJ', marca: 'PEUGEOT', modello: '3008 BlueHDi 130 S&S Active' }
+  ];
+
+  const vehicleSelect = document.getElementById('vehicle-select');
+  const checklistContent = document.getElementById('checklist-content');
+  const completeButton = document.getElementById('complete-button');
+  let currentVehicleTarga = null;
+
+  // Funzione per salvare e caricare lo stato di completamento dei veicoli
+  function saveCompletionStatus() {
+    localStorage.setItem('completedVehicles', JSON.stringify(completedVehicles));
+  }
+
+  function loadCompletionStatus() {
+    const savedStatus = localStorage.getItem('completedVehicles');
+    return savedStatus ? JSON.parse(savedStatus) : {};
+  }
+
+  const completedVehicles = loadCompletionStatus();
+
+  // Funzione per popolare il menu a tendina
+  function populateVehicleSelect() {
+    vehicleSelect.innerHTML = '<option value="">-- Seleziona --</option>'; // Reset
+    vehicles.forEach(vehicle => {
+      const option = document.createElement('option');
+      option.value = vehicle.targa;
+      option.textContent = `${vehicle.targa} - ${vehicle.marca} ${vehicle.modello}`;
+      if (completedVehicles[vehicle.targa]) {
+        option.classList.add('completed');
+      }
+      vehicleSelect.appendChild(option);
+    });
+  }
+
+  // Funzione per salvare lo stato delle checkbox
+  function saveChecklistState() {
+    if (!currentVehicleTarga) return;
+    const checkboxes = checklistContent.querySelectorAll('input[type="checkbox"]');
+    const state = {};
+    checkboxes.forEach(checkbox => {
+      state[checkbox.id] = checkbox.checked;
+    });
+    localStorage.setItem(`checklist_${currentVehicleTarga}`, JSON.stringify(state));
+  }
+
+  // Funzione per caricare lo stato delle checkbox
+  function loadChecklistState() {
+    if (!currentVehicleTarga) return;
+    const savedState = localStorage.getItem(`checklist_${currentVehicleTarga}`);
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      const checkboxes = checklistContent.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = state[checkbox.id] || false;
+      });
+    } else {
+      // Se non ci sono stati salvati, resetta tutte le checkbox
+      resetChecklist();
+    }
+    checkAllCheckboxes(); // Controlla lo stato del bottone "Completata"
+  }
+
+  // Funzione per resettare le checkbox
+  function resetChecklist() {
+    const checkboxes = checklistContent.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = false;
+    });
+  }
+
+  // Funzione per caricare la checklist quando cambia la selezione del veicolo
+  function loadChecklist() {
+    currentVehicleTarga = vehicleSelect.value;
+    if (currentVehicleTarga) {
+      loadChecklistState();
+    } else {
+      resetChecklist();
+      completeButton.disabled = true;
+    }
+  }
+
+  // Listener per le checkbox per salvare lo stato e controllare il pulsante "Completata"
+  checklistContent.addEventListener('change', (event) => {
+    if (event.target.type === 'checkbox') {
+      saveChecklistState();
+      checkAllCheckboxes();
+    }
+  });
+
+  // Funzione per controllare se tutte le checkbox sono spuntate
+  function checkAllCheckboxes() {
+    if (!currentVehicleTarga) {
+      completeButton.disabled = true;
+      return;
+    }
+    const checkboxes = checklistContent.querySelectorAll('input[type="checkbox"]');
+    let allChecked = true;
+    if (checkboxes.length === 0) { // Se non ci sono checkbox visibili, disabilita
+        allChecked = false;
+    } else {
+        checkboxes.forEach(checkbox => {
+            if (!checkbox.checked) {
+                allChecked = false;
+            }
+        });
+    }
+    completeButton.disabled = !allChecked;
+  }
+
+  // Funzione per marcare il veicolo come completato
+  function markVehicleAsCompleted() {
+    if (currentVehicleTarga) {
+      completedVehicles[currentVehicleTarga] = true;
+      saveCompletionStatus();
+      populateVehicleSelect(); // Aggiorna il menu a tendina per mostrare la targa depennata
+      localStorage.removeItem(`checklist_${currentVehicleTarga}`); // Rimuove lo stato della checklist per quel veicolo
+      
+      // Resetta la selezione e la checklist
+      vehicleSelect.value = "";
+      currentVehicleTarga = null;
+      resetChecklist();
+      completeButton.disabled = true;
+      alert(`Veicolo con targa ${currentVehicleTarga} marcato come completato!`); // Messaggio di conferma
+    }
+  }
+
+  // Inizializzazione all'apertura della pagina
+  document.addEventListener('DOMContentLoaded', () => {
+    populateVehicleSelect();
+    checkAllCheckboxes(); // Controlla lo stato iniziale del pulsante
+  });
+
+</script>
+
+</body>
+</html>
