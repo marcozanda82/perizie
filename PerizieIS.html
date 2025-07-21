@@ -1938,8 +1938,8 @@ async function handleSavePeriziaAndReturn() {
             const constraints = {
                 video: {
                     facingMode: "environment",
-                    width: { ideal: 1920, min: 1280 },
-                    height: { ideal: 1080, min: 720 },
+                    width: { ideal: 2560, min: 1920 },
+                    height: { ideal: 1440, min: 1080 },
                     advanced: [{ focusMode: "continuous" }]
                 },
                 audio: false
@@ -2150,7 +2150,7 @@ function capturePhoto() {
                 } catch (error) { 
                     alert("Errore durante il salvataggio della foto nel database.");
                 }
-            }, 'image/jpeg', 0.7);
+            }, 'image/jpeg', 0.95);
 
         } else {
             console.warn("Tentativo di scatto fallito: stream non pronto.");
