@@ -1122,99 +1122,86 @@
                     <button class="page-action-button reset-page-btn" title="Azzera Campi Pagina" data-sectionid="remarketingSection"><i class="fas fa-undo"></i></button>
                     <button class="page-action-button fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection"><i class="fas fa-check"></i></button>
                 </div>
-<div id="remarketingSection" class="category-section">
-    <div class="page-action-buttons-container">
-        <button class="page-action-button reset-page-btn" title="Azzera Campi Pagina" data-sectionid="remarketingSection"><i class="fas fa-undo"></i></button>
-        <button class="page-action-button fill-defaults-btn" title="Compila Positivamente/Default" data-sectionid="remarketingSection"><i class="fas fa-check"></i></button>
-    </div>
-    <h2 class="section-title">1. Foto Remarketing</h2>
-    <ul>
-        <li><input type="checkbox" id="foto_angolari_ad"><label for="foto_angolari_ad">Foto 3/4 anteriore destro</label></li>
-        <li><input type="checkbox" id="foto_fiancata_sx"><label for="foto_fiancata_sx">Foto fiancata sinistra</label></li>
-        <li><input type="checkbox" id="foto_angolari_ps"><label for="foto_angolari_ps">Foto 3/4 posteriore sinistro</label></li>
-        <li><input type="checkbox" id="foto_posteriore"><label for="foto_posteriore">Foto posteriore</label></li>
-        <li><input type="checkbox" id="foto_angolari_pd"><label for="foto_angolari_pd">Foto 3/4 posteriore destro</label></li>
-        <li><input type="checkbox" id="foto_fiancata_dx"><label for="foto_fiancata_dx">Foto fiancata destra</label></li>
-        <li><input type="checkbox" id="foto_anteriore"><label for="foto_anteriore">Foto anteriore</label></li>
+<h2 class="section-title">1. Foto Remarketing</h2>
+                <ul>
+                    <li><input type="checkbox" id="foto_angolari"><label for="foto_angolari">Foto 3/4 esterni (giro antiorario)</label></li>
+                    
+                    <li><input type="checkbox" id="foto_cruscotto"><label for="foto_cruscotto">Foto plancia</label></li>
 
-        <li><input type="checkbox" id="foto_plancia"><label for="foto_plancia">Foto plancia</label></li>
+                    <li>
+                        <label for="motore_accende_remarketing">Motore si accende (controllo per foto):</label>
+                        <select id="motore_accende_remarketing">
+                            <option value="">Seleziona...</option>
+                            <option value="ok">OK (Foto scattata)</option>
+                            <option value="non_ok">Non OK</option>
+                        </select>
+                    </li>
 
-        <li><input type="checkbox" id="foto_messa_in_moto"><label for="foto_messa_in_moto">Foto messa in moto (con quadro acceso)</label></li>
+                    <li><label for="stato_chilometri">Chilometri - Stato:</label><select id="stato_chilometri"><option value="">Seleziona...</option><option value="rilevabili">Rilevabili (Foto KM)</option><option value="non_rilevabili">Non rilevabili</option></select></li>
+                    
+                    <li><input type="checkbox" id="foto_navigatore_presente"><label for="foto_navigatore_presente">Foto navigatore (se presente)</label></li>
 
-        <li><input type="checkbox" id="foto_km"><label for="foto_km">Foto KM</label></li>
+                    <li>
+                        <label for="chiave_telecomando">Chiave con telecomando:</label>
+                        <select id="chiave_telecomando">
+                            <option value="">Seleziona...</option>
+                            <option value="presente">Presente</option>
+                            <option value="non_presente">Non Presente</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label for="seconda_chiave">Seconda chiave:</label>
+                        <select id="seconda_chiave">
+                            <option value="">Seleziona...</option>
+                            <option value="presente">Presente</option>
+                            <option value="non_presente">Non Presente</option>
+                        </select>
+                    </li>
+                    <li><label for="stato_cdc">CDC - Stato (con foto fronte/retro):</label><select id="stato_cdc"><option value="">Seleziona...</option><option value="originale">Originale</option><option value="copia_conforme">Copia conforme</option><option value="mancante">Mancante</option></select></li>
+                    <li><input type="checkbox" id="foto_interni_pannelli"><label for="foto_interni_pannelli">Foto telaio (e interni/pannelli)</label></li>
+                    
+                    <li><input type="checkbox" id="foto_vano_motore"><label for="foto_vano_motore">Foto vano motore</label></li>
+                    
+                    <li><input type="checkbox" id="foto_vano_carico"><label for="foto_vano_carico">Foto selleria ant., post. e vano carico post.</label></li>
+                    <li>
+                        <label for="tipo_equipaggiamento">Equipaggiamento:</label>
+                        <select id="tipo_equipaggiamento">
+                            <option value="">Seleziona...</option>
+                            <option value="kit_gonfia_ripara">Kit</option>
+                            <option value="ruota">Ruota</option>
+                            <option value="ruotino">Ruotino</option>
+                            <option value="runflat">Runflat</option>
+                        </select>
+                    </li>
+                    <li><label for="equipaggiamento_presenza">Presenza equip.:</label><select id="equipaggiamento_presenza"><option value="">Seleziona...</option><option value="presente">Presente</option><option value="mancante">Mancante</option></select></li>
 
-        <li><input type="checkbox" id="foto_navigatore"><label for="foto_navigatore">Foto navigatore (se presente)</label></li>
-
-        <li><input type="checkbox" id="foto_chiavi_libretti_cdc"><label for="foto_chiavi_libretti_cdc">Chiavi, libretto uso/manutenzione, carta circolazione (fronte/retro)</label></li>
-
-        <li><input type="checkbox" id="foto_telaio"><label for="foto_telaio">Foto telaio</label></li>
-
-        <li><input type="checkbox" id="foto_vano_motore_new"><label for="foto_vano_motore_new">Foto vano motore</label></li>
-
-        <li><input type="checkbox" id="foto_selleria_ant"><label for="foto_selleria_ant">Foto selleria anteriore</label></li>
-        <li><input type="checkbox" id="foto_selleria_post"><label for="foto_selleria_post">Foto selleria posteriore</label></li>
-        <li><input type="checkbox" id="foto_vano_carico_post"><label for="foto_vano_carico_post">Foto vano carico posteriore</label></li>
-
-        <li>
-            <label for="tipo_equipaggiamento_new">Equipaggiamento:</label>
-            <select id="tipo_equipaggiamento_new">
-                <option value="">Seleziona...</option>
-                <option value="kit_gonfia_ripara">Kit Gonfia/Ripara</option>
-                <option value="ruota_scorta">Ruota di Scorta</option>
-                <option value="ruotino_scorta">Ruotino di Scorta</option>
-                <option value="runflat">Runflat</option>
-                <option value="mancante_non_presente">Mancante / Non Presente</option>
-            </select>
-        </li>
-        <li>
-            <label for="tipo_trazione">Trazione veicolo:</label>
-            <select id="tipo_trazione">
-                <option value="">Seleziona...</option>
-                <option value="endotermico">Endotermico</option>
-                <option value="elettrico">Elettrico</option>
-            </select>
-        </li>
-        <li><label for="stato_chilometri">Chilometri - Stato:</label><select id="stato_chilometri"><option value="">Seleziona...</option><option value="rilevabili">Rilevabili</option><option value="non_rilevabili">Non rilevabili</option></select></li>
-        <li><label for="stato_cdc">CDC - Stato:</label><select id="stato_cdc"><option value="">Seleziona...</option><option value="originale">Originale</option><option value="copia_conforme">Copia conforme</option><option value="mancante">Mancante</option></select></li>
-        <li>
-            <label for="chiave_telecomando">Chiave con telecomando:</label>
-            <select id="chiave_telecomando">
-                <option value="">Seleziona...</option>
-                <option value="presente">Presente</option>
-                <option value="non_presente">Non Presente</option>
-            </select>
-        </li>
-        <li>
-            <label for="seconda_chiave">Seconda chiave:</label>
-            <select id="seconda_chiave">
-                <option value="">Seleziona...</option>
-                <option value="presente">Presente</option>
-                <option value="non_presente">Non Presente</option>
-            </select>
-        </li>
-        <li>
-            <label for="cavo_ricarica_rapida">Cavo ricarica rapida (solo elettrico):</label>
-            <select id="cavo_ricarica_rapida" disabled>
-                <option value="">Seleziona...</option>
-                <option value="presente">Presente</option>
-                <option value="non_presente">Non Presente</option>
-                <option value="non_applicabile">Non Applicabile</option>
-            </select>
-        </li>
-        <li>
-            <label for="cavo_ricarica_domestica">Cavo ricarica domestica (solo elettrico):</label>
-            <select id="cavo_ricarica_domestica" disabled>
-                <option value="">Seleziona...</option>
-                <option value="presente">Presente</option>
-                <option value="non_presente">Non Presente</option>
-                <option value="non_applicabile">Non Applicabile</option>
-            </select>
-        </li>
-    </ul>
-                    <li><label for="pneumatico_as">Ant. sinistro:</label><select id="pneumatico_as"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
-                    <li><label for="pneumatico_ad">Ant. destro:</label><select id="pneumatico_ad"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
-                    <li><label for="pneumatico_pd">Post. destro:</label><select id="pneumatico_pd"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
-                    <li><label for="pneumatico_ps">Post. sinistro:</label><select id="pneumatico_ps"><option value="">Seleziona...</option><option value="conforme">Conforme</option><option value="non_conforme">Non conforme</option></select></li>
+                    <li>
+                        <label for="tipo_trazione">Trazione veicolo:</label>
+                        <select id="tipo_trazione">
+                            <option value="">Seleziona...</option>
+                            <option value="endotermico">Endotermico</option>
+                            <option value="elettrico">Elettrico</option>
+                        </select>
+                    </li>
+                    <li><input type="checkbox" id="foto_cofano_tetto"><label for="foto_cofano_tetto">Cofano e tetto</label></li>
+                    <li>
+                        <label for="cavo_ricarica_rapida">Cavo ricarica rapida:</label>
+                        <select id="cavo_ricarica_rapida" disabled>
+                            <option value="">Seleziona...</option>
+                            <option value="presente">Presente</option>
+                            <option value="non_presente">Non Presente</option>
+                            <option value="non_applicabile">Non Applicabile</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label for="cavo_ricarica_domestica">Cavo ricarica domestica:</label>
+                        <select id="cavo_ricarica_domestica" disabled>
+                            <option value="">Seleziona...</option>
+                            <option value="presente">Presente</option>
+                            <option value="non_presente">Non Presente</option>
+                            <option value="non_applicabile">Non Applicabile</option>
+                        </select>
+                    </li>
                 </ul>
                 <div style="text-align: right; margin-top: 20px;"><button class="action-button save-and-next-btn">Salva e Prosegui</button></div>
             </div>
