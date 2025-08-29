@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Peritale Unipol</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            color: #212529;
+            margin: 0;
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            overflow-y: auto;
+        }
+        .sidebar h2 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar ul li a:hover, .sidebar ul li a.active {
+            background-color: #007bff;
+        }
+        .content {
+            margin-left: 270px;
+            padding: 30px;
+            width: calc(100% - 270px);
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        h1 {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #343a40;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        ul, ol {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .checklist-item input[type="checkbox"] {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .checklist-item label {
+            font-size: 1rem;
+        }
+        .note {
+            background-color: #e9ecef;
+            border-left: 5px solid #007bff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .danger {
+             background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        code {
+            background-color: #e9ecef;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>Checklist Peritale</h2>
+    <ul>
+        <li><a href="#accettazione" class="nav-link active" onclick="showPage('accettazione', this)">1. Accettazione e Verifica</a></li>
+        <li><a href="#preventivo" class="nav-link" onclick="showPage('preventivo', this)">2. Modifica Preventivo</a></li>
+        <li><a href="#riserva" class="nav-link" onclick="showPage('riserva', this)">3. Autorizzazione con Riserva</a></li>
+        <li><a href="#val-ard" class="nav-link" onclick="showPage('val-ard', this)">4. Valore Commerciale ARD</a></li>
+        <li><a href="#val-rc" class="nav-link" onclick="showPage('val-rc', this)">5. Valore Commerciale RC</a></li>
+        <li><a href="#preesistenze" class="nav-link" onclick="showPage('preesistenze', this)">6. Gestione Preesistenze</a></li>
+        <li><a href="#note" class="nav-link" onclick="showPage('note', this)">7. Note Finali</a></li>
+    </ul>
+</div>
+
+<div class="content">
+
+    <div id="accettazione" class="page active">
+        <h1>1. Accettazione e Verifica Iniziale</h1>
+        <div class="card">
+            <div class="checklist-item">
+                <input type="checkbox" id="step1">
+                <label for="step1"><b>Accettazione incarico</b></label>
+            </div>
+            <hr>
+            <div class="checklist-item">
+                <input type="checkbox" id="step2">
+                <label for="step2"><b>Verifica mezzo in carrozzeria</b></label>
+            </div>
+             <hr>
+            <div class="checklist-item">
+                <input type="checkbox" id="step3">
+                <label for="step3"><b>Verifica tipo di incarico</b></label>
+            </div>
+            <div class="note">
+                <ul>
+                    <li>N° sinistro con <b>C</b> iniziale = <b>UnipolRental</b></li>
+                    <li>N° sinistro senza <b>C</b> iniziale = <b>Unipol Service</b> (RCA, Kasko, Atto Vandalico)</li>
+                </ul>
+            </div>
+             <hr>
+            <div class="checklist-item">
+                <input type="checkbox" id="step4">
+                <label for="step4"><b>Analisi documentazione e denuncia</b> (verifica coerenza per checklist)</label>
+            </div>
+             <hr>
+            <div class="checklist-item">
+                <input type="checkbox" id="step5">
+                <label for="step5"><b>Implementazione checklist</b> (solo se Unipol Service)</label>
+            </div>
+        </div>
+    </div>
+
+    <div id="preventivo" class="page">
+        <h1>2. Modifica Preventivo</h1>
+        <div class="card">
+            <h3>Punti di Attenzione</h3>
+            <ol>
+                <li>Ai <b>tempi comuni</b>.</li>
+                <li>Verifica delle <b>preesistenze</b>.</li>
+                <li><b>Coerenza</b> dei danni.</li>
+                <li>Valutare attentamente la <b>riparabilità</b> dei ricambi proposti in sostituzione.</li>
+                <li>Sui supporti proiettori rotti, verificare la presenza del <b>kit di riparazione</b>.</li>
+                <li>Verificare la <b>completezza</b> del preventivo.</li>
+            </ol>
+        </div>
+        <div class="card">
+            <h3>Procedura per Preventivazione Incompleta</h3>
+            <div class="note">
+                <p><b>ATTIVARE LA PROCEDURA</b> solo per evidenti dimenticanze.</p>
+            </div>
+            <div class="danger">
+                <p><b>NON ATTIVARE LA PROCEDURA</b> nei seguenti casi:</p>
+                <ul>
+                    <li>Danni occulti.</li>
+                    <li>Mancanza supplemento finitura.</li>
+                    <li>Mancanza scomposizione paraurti.</li>
+                    <li>Mancanza tempistiche di lavorazione (solo per le sostituzioni non indicate).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="riserva" class="page">
+        <h1>3. Autorizzazione con Riserva</h1>
+        <div class="card">
+            <h3>Requisiti per l'attivazione</h3>
+            <ul>
+                <li>Danno <b>preventivato</b>.</li>
+                <li>Danno <b>non documentato</b>.</li>
+                <li>Danno <b>presumibile</b>.</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Possibilità Operative</h3>
+            <ol>
+                <li><b>Danno non documentabile</b>: chiedere alla carrozzeria elementi che portino a ipotizzare consistenza e sussistenza del danno.</li>
+                <li><b>Danno documentabile</b>: chiedere alla carrozzeria di procedere con la documentazione.</li>
+            </ol>
+        </div>
+        <div class="card">
+            <h3>Casi tipici di attivazione</h3>
+            <ul>
+                <li>Uso di <b>dime o morsettiere</b>.</li>
+                <li>Danni non visibili.</li>
+                <li>Richiesta di <b>sfumature</b> su smalti con tonalità facilmente riproducibili (es. bianco, nero).</li>
+                <li>Sostituzione di ricambi <b>riparabili</b>.</li>
+                <li>Richiesta SR (Stacco/Riattacco) di parti che interferiscono con la riparazione.</li>
+                <li>Riparazione a caldo dei bolli da grandine (solo per garanzie Atto Vandalico/Kasko).</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="val-ard" class="page">
+        <h1>4. Valore Commerciale per Garanzie ARD</h1>
+        <div class="card">
+            <h3>Procedura di calcolo (Prodotto KM & SERVIZI)</h3>
+            <div class="checklist-item">
+                <input type="checkbox" id="ard1">
+                <label for="ard1">Individuare la <b>data dell'avvenimento</b>.</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="ard2">
+                <label for="ard2">Accertarsi che la garanzia sia <b>KM & SERVIZI</b>.</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="ard3">
+                <label for="ard3">Individuare la <b>data di scadenza</b> della polizza.</label>
+            </div>
+            <div class="note">
+                <p>La data di stipula è 12 mesi precedente alla data di scadenza.</p>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="ard4">
+                <label for="ard4">Utilizzare il codice <b>INFOCAR</b> indicato sulla scheda veicolo.</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="ard5">
+                <label for="ard5">Calcolare il valore commerciale <b>aggiornato alla data di stipula</b> (data scadenza - 12 mesi).</label>
+            </div>
+        </div>
+    </div>
+
+    <div id="val-rc" class="page">
+        <h1>5. Valore Commerciale per Garanzia RC</h1>
+        <div class="card">
+            <h3>Identificazione Prodotto</h3>
+             <div class="warning">
+                <p><b>Occhio al sinistro!</b> Il prodotto è individuabile dal numero di sinistro.</p>
+            </div>
+            <ul>
+                <li><code>5-8777-XXXX-XXXXXXX</code> &rarr; <b>BEREBEL</b></li>
+                <li><code>5-8555-XXXX-XXXXXXX</code> &rarr; <b>POSTE ITALIANE</b></li>
+            </ul>
+             <p>Per <b>Unipol NPG</b> (Nuova Prima Global) o <b>KM&SERVIZI</b>, verificare dalla pagina di check-in.</p>
+        </div>
+
+        <div class="card">
+            <h3>Procedura di calcolo</h3>
+             <div class="checklist-item">
+                <input type="checkbox" id="rc1">
+                <label for="rc1">Usare il <b>codice allestimento</b> indicato nella sezione veicolo (come per ARD).</label>
+            </div>
+             <div class="checklist-item">
+                <input type="checkbox" id="rc2">
+                <label for="rc2">Calcolare il valore <b>aggiornato alla data del sinistro</b>.</label>
+            </div>
+             <div class="checklist-item">
+                <input type="checkbox" id="rc3">
+                <label for="rc3">Applicare la <b>correzione chilometrica</b>.</label>
+            </div>
+        </div>
+    </div>
+    
+    <div id="preesistenze" class="page">
+        <h1>6. Gestione delle Preesistenze</h1>
+        <div class="card">
+            <h3>Valutazione del Danno Pregresso</h3>
+            <ul>
+                <li><b style="color: #dc3545;">TOTALE</b>: Se la preesistenza è <b>più costosa</b> del danno denunciato &rarr; <b>Si nega la lavorazione</b>.</li>
+                <li><b style="color: #ffc107;">PARZIALE</b>: Se la preesistenza è <b>meno costosa</b> del danno denunciato &rarr; Si riconoscono <b>solo le ore strettamente necessarie</b>.</li>
+                <li><b style="color: #28a745;">ININFLUENTE</b>: Se la preesistenza è di <b>gran lunga inferiore</b> al danno lamentato.</li>
+            </ul>
+             <div class="warning">
+                <p>Se il cliente rifiuta la valutazione, segnalare a <b>SPB</b>.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Preesistenza emersa in fase di riparazione</h3>
+            <ol>
+                <li>Procedere alla valutazione secondo lo schema precedente.</li>
+                <li>Segnalare la carrozzeria a <b>SPB</b>.</li>
+            </ol>
+        </div>
+
+        <div class="card">
+             <h3>Casi in cui NON si scorpora la preesistenza</h3>
+            <div class="note">
+                <p>Sinistri <b>Kasko senza franchigia e scoperto</b>.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="note" class="page">
+        <h1>7. Note Finali</h1>
+        <div class="card">
+             <h3>Contenuto Obbligatorio delle Note</h3>
+             <p>Nelle note finali della perizia, è fondamentale includere sempre i seguenti punti:</p>
+            <div class="checklist-item">
+                <input type="checkbox" id="note1">
+                <label for="note1"><b>Motivare le variazioni</b> apportate al preventivo della carrozzeria.</label>
+            </div>
+             <div class="checklist-item">
+                <input type="checkbox" id="note2">
+                <label for="note2">Chiedere adeguata <b>documentazione fotografica</b> delle fasi delle riparazioni.</label>
+            </div>
+             <div class="checklist-item">
+                <input type="checkbox" id="note3">
+                <label for="note3">Chiedere <b>integrazione delle foto</b> per i danni autorizzati con riserva.</label>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    function showPage(pageId, element) {
+        // Nasconde tutte le pagine
+        const pages = document.querySelectorAll('.page');
+        pages.forEach(page => {
+            page.style.display = 'none';
+        });
+
+        // Mostra la pagina selezionata
+        const activePage = document.getElementById(pageId);
+        if (activePage) {
+            activePage.style.display = 'block';
+        }
+        
+        // Aggiorna la classe 'active' nel menu di navigazione
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+        });
+        element.classList.add('active');
+    }
+
+    // Imposta la pagina iniziale
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('accettazione').style.display = 'block';
+    });
+</script>
+
+</body>
+</html>
