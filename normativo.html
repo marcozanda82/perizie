@@ -14,7 +14,7 @@
             display: flex;
         }
         .sidebar {
-            width: 250px;
+            width: 280px; /* Aumentato per testo più lungo */
             background-color: #343a40;
             color: white;
             padding: 20px;
@@ -45,9 +45,9 @@
             background-color: #007bff;
         }
         .content {
-            margin-left: 270px;
+            margin-left: 300px; /* Adattato alla sidebar */
             padding: 30px;
-            width: calc(100% - 270px);
+            width: calc(100% - 300px);
         }
         .page {
             display: none;
@@ -130,11 +130,12 @@
     <ul>
         <li><a href="#accettazione" class="nav-link active" onclick="showPage('accettazione', this)">1. Accettazione e Verifica</a></li>
         <li><a href="#preventivo" class="nav-link" onclick="showPage('preventivo', this)">2. Modifica Preventivo</a></li>
-        <li><a href="#riserva" class="nav-link" onclick="showPage('riserva', this)">3. Autorizzazione con Riserva</a></li>
-        <li><a href="#val-ard" class="nav-link" onclick="showPage('val-ard', this)">4. Valore Commerciale ARD</a></li>
-        <li><a href="#val-rc" class="nav-link" onclick="showPage('val-rc', this)">5. Valore Commerciale RC</a></li>
-        <li><a href="#preesistenze" class="nav-link" onclick="showPage('preesistenze', this)">6. Gestione Preesistenze</a></li>
-        <li><a href="#note" class="nav-link" onclick="showPage('note', this)">7. Note Finali</a></li>
+        <li><a href="#visualizzazione_preventivo" class="nav-link" onclick="showPage('visualizzazione_preventivo', this)">3. Visualizzazione Preventivo</a></li>
+        <li><a href="#riserva" class="nav-link" onclick="showPage('riserva', this)">4. Autorizzazione con Riserva</a></li>
+        <li><a href="#val-ard" class="nav-link" onclick="showPage('val-ard', this)">5. Valore Commerciale ARD</a></li>
+        <li><a href="#val-rc" class="nav-link" onclick="showPage('val-rc', this)">6. Valore Commerciale RC</a></li>
+        <li><a href="#preesistenze" class="nav-link" onclick="showPage('preesistenze', this)">7. Gestione Preesistenze</a></li>
+        <li><a href="#note" class="nav-link" onclick="showPage('note', this)">8. Note Finali</a></li>
     </ul>
 </div>
 
@@ -206,8 +207,28 @@
         </div>
     </div>
 
+    <div id="visualizzazione_preventivo" class="page">
+        <h1>3. Visualizzazione Preventivo Iniziale</h1>
+        <div class="card">
+            <h3>Procedura per visualizzare il preventivo originale</h3>
+            <p>Per consultare la versione originale del preventivo caricato dalla carrozzeria, seguire questi passaggi:</p>
+            <div class="checklist-item">
+                <input type="checkbox" id="vis1">
+                <label for="vis1">Andare su <b>"Versioni"</b> (in alto a sinistra nella schermata del preventivo).</label>
+            </div>
+            <hr>
+            <div class="checklist-item">
+                <input type="checkbox" id="vis2">
+                <label for="vis2">Selezionare <b>"Preventivo autorizzato"</b>.</label>
+            </div>
+             <div class="note">
+                <p>La versione etichettata come <b>"Preventivo non autorizzato"</b> corrisponde all'ultima versione salvata o modificata.</p>
+            </div>
+        </div>
+    </div>
+
     <div id="riserva" class="page">
-        <h1>3. Autorizzazione con Riserva</h1>
+        <h1>4. Autorizzazione con Riserva</h1>
         <div class="card">
             <h3>Requisiti per l'attivazione</h3>
             <ul>
@@ -237,7 +258,7 @@
     </div>
 
     <div id="val-ard" class="page">
-        <h1>4. Valore Commerciale per Garanzie ARD</h1>
+        <h1>5. Valore Commerciale per Garanzie ARD</h1>
         <div class="card">
             <h3>Procedura di calcolo (Prodotto KM & SERVIZI)</h3>
             <div class="checklist-item">
@@ -267,7 +288,7 @@
     </div>
 
     <div id="val-rc" class="page">
-        <h1>5. Valore Commerciale per Garanzia RC</h1>
+        <h1>6. Valore Commerciale per Garanzia RC</h1>
         <div class="card">
             <h3>Identificazione Prodotto</h3>
              <div class="warning">
@@ -298,7 +319,7 @@
     </div>
     
     <div id="preesistenze" class="page">
-        <h1>6. Gestione delle Preesistenze</h1>
+        <h1>7. Gestione delle Preesistenze</h1>
         <div class="card">
             <h3>Valutazione del Danno Pregresso</h3>
             <ul>
@@ -328,7 +349,7 @@
     </div>
 
     <div id="note" class="page">
-        <h1>7. Note Finali</h1>
+        <h1>8. Note Finali</h1>
         <div class="card">
              <h3>Contenuto Obbligatorio delle Note</h3>
              <p>Nelle note finali della perizia, è fondamentale includere sempre i seguenti punti:</p>
