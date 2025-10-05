@@ -2112,7 +2112,7 @@ function capturePhoto() {
                 return;
             }
 
-            const filename = `${String(photoNumber).padStart(3, '0')} ${sectionNameForFile} ${targaForFile}.jpeg`;
+            const filename = `${String(photoNumber).padStart(3, '0')} ${sectionNameForFile} ${targaForFile}.jpg`;
             
             canvas.toBlob(async function(blob) {
                 if (!blob) {
@@ -3311,3 +3311,4 @@ function handleLightboxSwipe(endX, endY) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
