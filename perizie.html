@@ -1477,6 +1477,7 @@ async function startPlateScan() {
                 if (foundVehicle) {
                     await stopPlateScan();
                     returnFromCamera();
+                    stopPlateScan();
                     alert(`Veicolo ${cleanedText} trovato! Caricamento perizia...`);
                     await handleTargaSelectionAndSync(cleanedText);
                 } else {
@@ -3446,6 +3447,7 @@ function handleLightboxSwipe(endX, endY) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
 
 
 
