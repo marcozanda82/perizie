@@ -1255,6 +1255,11 @@
         </div>
 
         <div id="cameraPageSection" class="camera-page-section" style="display: none;">
+
+    <div id="ocrOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 2018;">
+        <div id="ocrTargetBox" style="width: 80%; max-width: 400px; height: 100px; border: 3px dashed #ffc107; background-color: rgba(0,0,0,0.2); border-radius: 10px;"></div>
+        <p id="ocrStatusText" style="color: white; background-color: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 5px; margin-top: 20px; font-size: 1.1em;">Inquadra la targa...</p>
+    </div>
             
             <video id="cameraStream" autoplay playsinline></video>
             <img id="freezeFrameDisplay" src="#" alt="Foto Catturata" style="display: none;">
@@ -2097,6 +2102,7 @@ async function handleSavePeriziaAndReturn() {
     // Funzione returnFromCamera MODIFICATA (no changes needed for this specific problem)
     // ----------------------------------------------------------------------------------
     function returnFromCamera() {
+        stopPlateScan();
         // Ferma lo stream della fotocamera
         if (currentCameraStream) {
             currentCameraStream.getTracks().forEach(track => track.stop());
@@ -3304,30 +3310,20 @@ function handleLightboxSwipe(endX, endY) {
         }
 
         // MODIFIED headerCameraBtn event listener
-        if (headerCameraBtn) {
-            headerCameraBtn.addEventListener('click', () => {
-                if (cameraPageSection.style.display === 'flex') { // If camera is already open
-                    returnFromCamera();
-                } else { // If opening camera
-                    // Determine and set lastViewBeforeCamera and lastSectionBeforeCamera HERE
-                    if (galleryPageSection.style.display === 'block') {
-                        lastViewBeforeCamera = 'gallery';
-                        lastSectionBeforeCamera = currentGallerySectionFilter;
-                    } else if (checklistContainer.style.display === 'block') {
-                        lastViewBeforeCamera = 'checklist';
-                        const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
-                        lastSectionBeforeCamera = activeSectionElement ? activeSectionElement.id.replace('Section', '') : null;
-                    } else if (historyPageSection.style.display === 'block') {
-                        lastViewBeforeCamera = 'history';
-                        lastSectionBeforeCamera = null;
-                    } else { // Default if no specific section is active (e.g., on landing page)
-                        lastViewBeforeCamera = 'landing';
-                        lastSectionBeforeCamera = null;
-                    }
-                    showView('camera'); // This will call showCameraPage, which now uses the pre-set globals
-                }
-            });
+// CERCA e SOSTITUISCI il vecchio blocco "if (headerCameraBtn)" con QUESTO:
+if (headerCameraBtn) {
+    headerCameraBtn.addEventListener('click', () => {
+        if (cameraPageSection.style.display === 'flex') {
+            returnFromCamera(); // Se la fotocamera è già aperta, la chiude
+        } else {
+            openCamera('capture'); // Altrimenti la apre in modalità FOTO
         }
+    });
+}
+        // AGGIUNGI QUESTO BLOCCO di codice:
+if (scanPlateBtn) {
+    scanPlateBtn.addEventListener('click', () => openCamera('scan'));
+}
 
         if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
         if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera);
@@ -3447,6 +3443,7 @@ function handleLightboxSwipe(endX, endY) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
 
 
 
