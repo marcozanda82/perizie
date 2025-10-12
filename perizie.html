@@ -449,6 +449,52 @@
     function showView(viewName) { landingPageSection.style.display = 'none'; checklistContainer.style.display = 'none'; historyPageSection.style.display = 'none'; if(cameraPageSection) cameraPageSection.style.display = 'none'; if(galleryPageSection) galleryPageSection.style.display = 'none'; if(imageLightbox) imageLightbox.style.display = 'none'; if(targaScanPageSection) targaScanPageSection.style.display = 'none'; if(pageHeaderContainer) pageHeaderContainer.style.display = 'block'; if(utilityNavButtons) utilityNavButtons.style.display = 'flex'; if(mainTitleGlobal) mainTitleGlobal.style.display = 'block'; if(navButtonsContainer) navButtonsContainer.style.display = 'flex'; let bodyPaddingTopValue = '0px', bodyPaddingBottomValue = '0px'; if (viewName !== 'camera' && viewName !== 'targaScan') { if (bottomNavCircles) bottomNavCircles.style.display = 'flex'; if (pageHeaderContainer && getComputedStyle(pageHeaderContainer).display !== 'none' && pageHeaderContainer.classList.contains('fixed-header')) { let hasVisibleTopContent = false; [utilityNavButtons, mainTitleGlobal, navButtonsContainer, targaDropdownContainer].forEach(el => { if (el && getComputedStyle(el).display !== 'none') hasVisibleTopContent = true; }); if(hasVisibleTopContent) bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`; } if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') { bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`; } } else { if (pageHeaderContainer) pageHeaderContainer.style.display = 'none'; if (viewName === 'camera') { if (bottomNavCircles) bottomNavCircles.style.display = 'flex'; if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`; } else { if (bottomNavCircles) bottomNavCircles.style.display = 'none'; } } document.body.style.paddingTop = bodyPaddingTopValue; document.body.style.paddingBottom = bodyPaddingBottomValue; if (viewName === 'landing') { landingPageSection.style.display = 'block'; if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header'); if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli"; if (navButtonsContainer) navButtonsContainer.style.display = 'none'; if (targaDropdownContainer) targaDropdownContainer.style.display = 'none'; if (listaTargheCompleta.length > 0 && (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) && typeof popolaTargheFiltrate === 'function') { popolaTargheFiltrate(); } if (downloadZipBtn) downloadZipBtn.style.display = 'none'; } else if (viewName === 'checklist') { if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header'); if (!targaSelezionataGlobalmente) { showView('landing'); return; } if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente.toUpperCase()}`)) { showView('landing'); alert(`Perizia per ${targaSelezionataGlobalmente} cancellata.`); return; } checklistContainer.style.display = 'block'; if (mainTitleGlobal) mainTitleGlobal.style.display = 'none'; if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex'; populateTargaSwitcherDropdown(); updateTargaDetailsDisplay(targaSelezionataGlobalmente); if (tipoTrazioneSelect) handleTrazioneChange(); const activeSectionElement = document.querySelector('#checklistContainer .category-section.active'); if (downloadZipBtn && activeSectionElement && activeSectionElement.id === 'riepilogoSection' && targaSelezionataGlobalmente) { downloadZipBtn.href = `https://192.168.1.154:8080/${targaSelezionataGlobalmente.toUpperCase()}.zip`; downloadZipBtn.style.display = 'inline-flex'; } else if (downloadZipBtn) { downloadZipBtn.style.display = 'none'; } } else if (viewName === 'history') { if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header'); historyPageSection.style.display = 'block'; if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Cronistoria Salvataggi"; if (navButtonsContainer) navButtonsContainer.style.display = 'none'; if (targaDropdownContainer) targaDropdownContainer.style.display = 'none'; populateSavedTargasList(); if (downloadZipBtn) downloadZipBtn.style.display = 'none'; } else if (viewName === 'gallery') { if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header'); if (downloadZipBtn) downloadZipBtn.style.display = 'none'; } else if (viewName === 'camera') { showCameraPage(); } else if (viewName === 'targaScan') { targaScanPageSection.style.display = 'flex'; } else { if (pageHeaderContainer) pageHeaderContainer.classList.remove('fixed-header'); if (downloadZipBtn) downloadZipBtn.style.display = 'none'; } updateNavButtonColors(); window.scrollTo(0, 0); }
     // (Il resto delle funzioni non OCR è qui... omesso per brevità)
 
+async function initializeApplicationViewAndLoadData() {
+    const preloader = document.getElementById('preloader');
+    if (preloader) {
+        preloader.style.display = 'flex'; preloader.classList.remove('hidden');
+        preloader.style.opacity = '1'; preloader.style.visibility = 'visible';
+        const loadingText = preloader.querySelector('.loading-text');
+        if (loadingText) loadingText.textContent = 'CARICAMENTO DATI...';
+    }
+    try { 
+        await openPhotoDB(); 
+    } catch (error) {
+        if (preloader) { 
+            const lt = preloader.querySelector('.loading-text'); 
+            if(lt) lt.textContent = 'ERRORE DB FOTO!';
+        }
+        alert("Errore inizializzazione DB foto."); 
+        return;
+    }
+    await caricaEPopolaTarghe();
+    if (preloader) {
+        preloader.classList.add('hidden');
+        setTimeout(() => { if (preloader) preloader.style.display = 'none'; }, 700);
+    }
+    showView('landing');
+    if (changelogModal && closeChangelogBtnModal && changelogList && changelogTitle) {
+        const lastVersionSeen = localStorage.getItem('appVersionSeen');
+        changelogTitle.textContent = `WebApp Perizie - Novità v${currentAppVersion}`;
+        changelogList.innerHTML = latestChangesText;
+        if (lastVersionSeen !== currentAppVersion) {
+            changelogModal.style.display = 'flex';
+        }
+        closeChangelogBtnModal.onclick = () => {
+            changelogModal.style.display = 'none';
+            localStorage.setItem('appVersionSeen', currentAppVersion);
+        };
+         // Aggiunto per chiudere il modale cliccando fuori
+        changelogModal.onclick = (event) => {
+            if(event.target === changelogModal) {
+                changelogModal.style.display = 'none';
+                localStorage.setItem('appVersionSeen', currentAppVersion);
+            }
+        };
+    }
+}
+
+    
     document.addEventListener('DOMContentLoaded', () => {
         if (targaScanBtn) targaScanBtn.addEventListener('click', startTargaScan);
         if (closeTargaScanBtn) closeTargaScanBtn.addEventListener('click', stopTargaScan);
@@ -481,5 +527,6 @@
     
 </body>
 </html>
+
 
 
