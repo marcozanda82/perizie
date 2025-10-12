@@ -1256,28 +1256,21 @@
 
         <div id="cameraPageSection" class="camera-page-section" style="display: none;">
 
-<div id="ocrOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 2018;">
-    <div id="ocrTargetBox" style="width: 80%; max-width: 400px; height: 100px; border: 3px dashed #ffc107; background-color: rgba(0,0,0,0.2); border-radius: 10px;"></div>
-    <p id="ocrStatusText" style="color: white; background-color: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 5px; margin-top: 20px; font-size: 1.1em;">Inquadra la targa e scatta</p>
-    <button id="retryScanBtn" class="action-button" style="background-color: #ffc107; border-color: #e0a800; color: #212529; margin-top: 15px; display: none;">
-        <i class="fas fa-redo"></i> Riprova
-    </button>
-</div>
-            
-            <video id="cameraStream" autoplay playsinline></video>
-            <img id="freezeFrameDisplay" src="#" alt="Foto Catturata" style="display: none;">
-            <button id="captureBtn" class="action-button"></button>
-            <button id="closeCameraBtn" class="action-button">×</button> 
-        </div>
+<div id="ocrOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; z-index: 2018; background-color: rgba(0,0,0,0.5);">
 
-    </div> <div id="bottomNavCircles">
-        <div class="header-circles">
-               <button id="headerShutdownBtn" class="circle-button" title="Spegni Tablet"><i class="fas fa-power-off"></i></button>
-            <button id="headerPhotosBtn" class="circle-button" title="Galleria Foto App"><i class="fas fa-images"></i></button>
-            <button id="headerPeriziaBtn" class="circle-button" title="Vai all'ultima perizia/sezione"><i class="fas fa-clipboard-list"></i></button>
-            <button id="headerCameraBtn" class="circle-button" title="Fotocamera"><i class="fas fa-camera-retro"></i></button>
+    <img id="ocrFrozenImage" src="#" alt="Targa Bloccata" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 1;">
+
+    <div id="ocrTargetBox" style="width: 80%; max-width: 400px; height: 100px; border: 3px dashed #ffc107; background-color: rgba(0,0,0,0.2); border-radius: 10px; margin: auto; z-index: 2;"></div>
+
+    <div id="ocrControls" style="position: absolute; bottom: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.8); padding: 15px; box-sizing: border-box; text-align: center; z-index: 2;">
+        <p id="ocrStatusText" style="color: white; font-size: 1.1em; margin-top: 0; margin-bottom: 15px;">Inquadra la targa nel riquadro</p>
+        <div style="display: flex; justify-content: center; gap: 10px;">
+            <button id="ocrFreezeBtn" class="action-button" style="background-color: #007bff;"><i class="fas fa-pause"></i> Blocca Targa</button>
+            <button id="ocrScanBtn" class="action-button" style="background-color: #28a745; display: none;"><i class="fas fa-search"></i> Acquisisci</button>
+            <button id="ocrExitBtn" class="action-button" style="background-color: #dc3545;"><i class="fas fa-times"></i> Esci</button>
         </div>
     </div>
+</div>
 
 <script>
   // Variabili globali
@@ -3446,6 +3439,7 @@ if (scanPlateBtn) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
 
 
 
