@@ -471,6 +471,135 @@
                 }
             }
         }
+        // ===================================================================================
+// INIZIO BLOCCO DI CODICE MANCANTE DA INSERIRE
+// ===================================================================================
+
+async function fetchAllDataFromSheets() {
+    if (!GOOGLE_SHEET_WEB_APP_URL) { return { success: false, message: "URL Web App non config.", data: [] }; }
+    const fetchUrl = `${GOOGLE_SHEET_WEB_APP_URL}?nocache=${new Date().getTime()}`;
+    try {
+        const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' });
+        if (!response.ok) { return { success: false, message: `Errore Sheets (${response.status}) recupero globale.`, data: [] }; }
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            const result = await response.json();
+            if (Array.isArray(result)) { return { success: true, data: result, message: "Dati recuperati." }; }
+            else if (result && result.status === "success" && Array.isArray(result.data)) { return { success: true, data: result.data, message: result.message || "Dati recuperati."}; }
+            else if (result && result.status === "notfound") { return { success: true, data: [], message: result.message || "Nessuna perizia."}; }
+            else { return { success: false, message: "Formato risposta globale non valido.", data: [] }; }
+        } else { return { success: false, message: "Errore formato risposta globale Sheets (non JSON).", data: [] }; }
+    } catch (error) { return { success: false, message: "Errore rete recupero globale: " + error.message, data: [] }; }
+}
+
+async function syncAllLocalDataToSheets() {
+    const originalSyncButtonText = syncToSheetsBtn.textContent;
+    syncToSheetsBtn.disabled = true;
+    let updatedFromSheetsCount = 0, localUpdatesFailedCount = 0;
+    let sheetsDeletionsSuccessCount = 0, sheetsDeletionsFailedCount = 0;
+    let localToSheetsSuccessCount = 0, localToSheetsErrorCount = 0;
+    let errorMessages = [];
+    syncToSheetsBtn.textContent = "Sinc (0/4 DelSheets)...";
+    let deletionRequests = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith(`${APP_PREFIX}deleted_`)) deletionRequests.push(key.substring(`${APP_PREFIX}deleted_`.length));
+    }
+    if (deletionRequests.length > 0) {
+        for (const targa of deletionRequests) {
+            const deleteUrl = `${GOOGLE_SHEET_WEB_APP_URL}?action=deletePerizia&targa=${encodeURIComponent(targa)}`;
+            try {
+                const response = await fetch(deleteUrl, { method: 'POST', mode: 'cors', body: JSON.stringify({targa: targa})});
+                const result = await response.json();
+                if (response.ok && result.status === "success") {
+                    localStorage.removeItem(`${APP_PREFIX}deleted_${targa}`); sheetsDeletionsSuccessCount++;
+                } else {
+                    sheetsDeletionsFailedCount++; errorMessages.push(`Targa ${targa} (Del Sheets): ${result.message || 'Errore'}`);
+                }
+            } catch (error) {
+                sheetsDeletionsFailedCount++; errorMessages.push(`Targa ${targa} (Del Sheets Network): ${error.message}`);
+            }
+        }
+    }
+    syncToSheetsBtn.textContent = "Sinc (1/4 RecSheets)...";
+    const sheetsResponse = await fetchAllDataFromSheets();
+    if (!sheetsResponse.success) alert(`Errore recupero dati Sheets:\n${sheetsResponse.message}\nSinc incompleta.`);
+    const allSheetsData = sheetsResponse.data || [];
+    syncToSheetsBtn.textContent = "Sinc (2/4 AggLoc)...";
+    if (allSheetsData.length > 0) {
+        for (const sheetPerizia of allSheetsData) {
+            if (!sheetPerizia || !sheetPerizia.targa || !sheetPerizia.timestamp || !sheetPerizia.datiPerizia || !sheetPerizia.datiPerizia.timestamp) continue;
+            const targa = sheetPerizia.targa.toUpperCase();
+            if (localStorage.getItem(`${APP_PREFIX}deleted_${targa}`)) continue;
+            const localDataKey = `${APP_PREFIX}data_${targa}`;
+            const localDataJSON = localStorage.getItem(localDataKey);
+            let localDatiPeriziaTimestamp = null;
+            if (localDataJSON) { try { const localDatiPeriziaObject = JSON.parse(localDataJSON); localDatiPeriziaTimestamp = localDatiPeriziaObject.timestamp ? new Date(localDatiPeriziaObject.timestamp) : null; } catch (e) {} }
+            const sheetsRecordTimestamp = new Date(sheetPerizia.timestamp);
+            if (!localDatiPeriziaTimestamp || sheetsRecordTimestamp > localDatiPeriziaTimestamp) {
+                try {
+                    localStorage.setItem(localDataKey, JSON.stringify(sheetPerizia.datiPerizia));
+                    if (sheetPerizia.hasOwnProperty('posizione')) savePosizioneForTarga(targa, sheetPerizia.posizione);
+                    if (sheetPerizia.hasOwnProperty('urgente')) saveUrgentStatusForTarga(targa, sheetPerizia.urgente);
+                    if (sheetPerizia.hasOwnProperty('completata')) {
+                        if (sheetPerizia.completata) markTargaAsCompleted(targa); else unmarkTargaAsCompleted(targa);
+                    }
+                    updatedFromSheetsCount++;
+                } catch (e) { localUpdatesFailedCount++; }
+            }
+        }
+    }
+    syncToSheetsBtn.textContent = "Sinc (3/4 InvioSheets)...";
+    let perizieLocaliKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith(`${APP_PREFIX}data_`)) {
+             const targaFromKey = key.substring(`${APP_PREFIX}data_`.length);
+             if (!localStorage.getItem(`${APP_PREFIX}deleted_${targaFromKey}`)) perizieLocaliKeys.push(key);
+        }
+    }
+    if (perizieLocaliKeys.length === 0 && updatedFromSheetsCount === 0 && localUpdatesFailedCount === 0 && deletionRequests.length === 0) {
+        alert("Nessuna operazione di sincronizzazione da eseguire.");
+        syncToSheetsBtn.textContent = originalSyncButtonText; syncToSheetsBtn.disabled = false; return;
+    }
+    for (const key of perizieLocaliKeys) {
+        const targa = key.substring(`${APP_PREFIX}data_`.length);
+        let datiPeriziaSalvatiLocalmente;
+        try { datiPeriziaSalvatiLocalmente = JSON.parse(localStorage.getItem(key)); }
+        catch (e) { localToSheetsErrorCount++; errorMessages.push(`Targa ${targa} (Invio): Errore lettura dati locali.`); continue; }
+        if (!datiPeriziaSalvatiLocalmente || !datiPeriziaSalvatiLocalmente.timestamp) {
+            localToSheetsErrorCount++; errorMessages.push(`Targa ${targa} (Invio): Dati locali incompleti.`); continue;
+        }
+        const periziaDaInviare = {
+            targa: targa, posizione: loadPosizioneForTarga(targa) || "", urgente: loadUrgentStatusForTarga(targa) || false,
+            completata: isTargaCompleted(targa), datiPerizia: datiPeriziaSalvatiLocalmente, timestamp: datiPeriziaSalvatiLocalmente.timestamp
+        };
+        const result = await inviaPeriziaSingolaASheets(periziaDaInviare);
+        if (result.success) {
+            localToSheetsSuccessCount++;
+            if (result.data && result.data.timestamp && new Date(result.data.timestamp) > new Date(datiPeriziaSalvatiLocalmente.timestamp)) {
+                datiPeriziaSalvatiLocalmente.timestamp = result.data.timestamp;
+                try { localStorage.setItem(key, JSON.stringify(datiPeriziaSalvatiLocalmente)); } catch (e) {}
+            }
+        } else { localToSheetsErrorCount++; errorMessages.push(`Targa ${targa} (Invio): ${result.message || 'Errore'}`); }
+    }
+    syncToSheetsBtn.textContent = "Sinc (4/4 Fine)";
+    let finalMessage = `Sincronizzazione completata.\n\nCANCELLAZIONI (Locale -> Sheets):\n- ${sheetsDeletionsSuccessCount} cancellate da Sheets.\n`;
+    if (sheetsDeletionsFailedCount > 0) finalMessage += `- ${sheetsDeletionsFailedCount} errori cancellazione Sheets.\n`;
+    finalMessage += `\nAGGIORNAMENTI (Sheets -> Locale):\n- ${updatedFromSheetsCount} locali aggiornate/create da Sheets.\n`;
+    if (localUpdatesFailedCount > 0) finalMessage += `- Errori aggiornamento locale: ${localUpdatesFailedCount}.\n`;
+    finalMessage += `\nINVIO DATI (Locale -> Sheets):\n- ${localToSheetsSuccessCount} inviate/aggiornate con successo su Sheets.\n`;
+    if (localToSheetsErrorCount > 0) finalMessage += `- ${localToSheetsErrorCount} errori durante invio.\n`;
+    if (errorMessages.length > 0) finalMessage += "\n\nDETTAGLIO ERRORI:\n" + errorMessages.join("\n");
+    alert(finalMessage);
+    syncToSheetsBtn.textContent = originalSyncButtonText; syncToSheetsBtn.disabled = false;
+    if (typeof popolaTargheFiltrate === 'function' && landingPageSection.style.display === 'block') popolaTargheFiltrate();
+    if (typeof populateSavedTargasList === 'function' && historyPageSection.style.display === 'block') populateSavedTargasList();
+}
+
+// ===================================================================================
+// FINE BLOCCO DI CODICE MANCANTE
+// ===================================================================================
     }
     
     // --- TUTTO IL RESTO DEL CODICE ---
@@ -562,3 +691,4 @@
 </script>
 </body>
 </html>
+
