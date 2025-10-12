@@ -662,7 +662,62 @@ async function exitPlateScan(targaDaCaricare = null) {
     function setupSheetFilterDropdown() { /* ... */ }
     function handleSheetFilterChange() { /* ... */ }
     function popolaTargheFiltrate() { /* ... */ }
-    async function caricaEPopolaTarghe() { /* ... */ }
+    // NUOVA VERSIONE CON TIMEOUT
+async function caricaEPopolaTarghe() {
+    if (targheLoadingStatus) targheLoadingStatus.textContent = "Download elenco targhe...";
+
+    // Imposta un controller per annullare il download dopo 10 secondi
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondi
+
+    try {
+        const response = await fetch(GOOGLE_SHEET_CSV_URL + `&nocache=${new Date().getTime()}`, {
+            signal: controller.signal // Collega il controller al fetch
+        });
+
+        // Una volta ricevuta la risposta, cancella il timer
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            throw new Error(`Errore server HTTP ${response.status}.`);
+        }
+
+        const csv = await response.text();
+        const lines = csv.split(/\r\n|\n|\r/).filter(l => l.trim() !== '');
+        if (lines.length === 0) {
+            throw new Error("Il file CSV da Google Sheets è vuoto.");
+        }
+
+        listaTargheCompleta = lines.map(l => {
+            const p = l.split(',');
+            return {
+                targa: (p[0] || '').trim().replace(/^"|"$/g, '').toUpperCase(),
+                marca: (p[1] || '').trim().replace(/^"|"$/g, ''),
+                modello: (p[2] || '').trim().replace(/^"|"$/g, ''),
+                piazzale: (p[3] || '').trim().replace(/^"|"$/g, '')
+            };
+        }).filter(i => i.targa && i.targa.length > 3);
+
+        if (listaTargheCompleta.length === 0) {
+             if (targheLoadingStatus) targheLoadingStatus.textContent = "Nessuna targa valida trovata nel file.";
+        } else {
+            setupSheetFilterDropdown();
+            popolaTargheFiltrate();
+        }
+
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            console.error("Timeout: impossibile scaricare l'elenco targhe in 10 secondi.");
+            if (targheLoadingStatus) targheLoadingStatus.textContent = "Timeout: impossibile scaricare l'elenco targhe. Controlla la connessione.";
+        } else {
+            console.error("Errore durante il caricamento delle targhe:", error);
+            if (targheLoadingStatus) targheLoadingStatus.textContent = `Errore di rete: ${error.message}`;
+        }
+        listaTargheCompleta = [];
+        if (sheetFilterDropdown) sheetFilterDropdown.innerHTML = '<option value="all">Nessun elenco caricato</option>';
+        if (targaListContainer) targaListContainer.innerHTML = '';
+    }
+}
     function initSequentialAnimation() { /* ... */ }
     function showSection(targetId) { /* ... */ }
     function getSelectText(selectElementOrId) { /* ... */ }
@@ -826,3 +881,4 @@ async function exitPlateScan(targaDaCaricare = null) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
