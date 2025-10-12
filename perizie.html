@@ -1703,7 +1703,7 @@ async function scanFrameForTarga() {
             
             // Cattura un nuovo frame per ogni tentativo (dal flusso video che è ancora attivo ma nascosto)
             context.drawImage(targaScanStreamElement, 0, 0, targaScanCanvas.width, targaScanCanvas.height);
-            preprocessCanvas(targaScanCanvas); // Pre-elabora ogni frame
+            //preprocessCanvas(targaScanCanvas); // Pre-elabora ogni frame
 
             const { data: { text } } = await ocrWorker.recognize(targaScanCanvas);
             const cleanedText = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
@@ -3614,6 +3614,7 @@ function handleLightboxSwipe(endX, endY) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
 
 
 
