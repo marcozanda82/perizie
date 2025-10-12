@@ -751,12 +751,18 @@
 
         /* START: Stili per la pagina Targa Scan OCR */
         #targaScanPageSection {
-            z-index: 4000; /* Assicura che sia sopra tutto il resto */
+            z-index: 4000;
         }
-        #targaScanStream {
+        #targaScanStream, #targaScanFreezeFrame {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Usa cover per riempire lo schermo */
+            object-fit: cover;
+        }
+        #targaScanFreezeFrame {
+            z-index: 4005;
         }
         #targaFocusBox {
             position: absolute;
@@ -770,10 +776,11 @@
             border: 3px solid rgba(255, 255, 0, 0.8);
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.7), 0 0 0 100vw rgba(0,0,0,0.5);
             border-radius: 8px;
+            z-index: 4010;
         }
         #ocrResultDisplay {
             position: absolute;
-            bottom: 20px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
             background-color: rgba(0,0,0,0.7);
@@ -783,13 +790,33 @@
             font-size: 1.2em;
             text-align: center;
             min-width: 250px;
-            z-index: 4010;
+            z-index: 4020;
         }
         #ocrResultDisplay.success { background-color: rgba(40, 167, 69, 0.8); }
         #ocrResultDisplay.error { background-color: rgba(220, 53, 69, 0.8); }
 
+        #targaScanControls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4020;
+            display: flex;
+            gap: 20px;
+        }
+
+        #analyzeTargaBtn, #retryTargaScanBtn {
+            padding: 15px 25px;
+            font-size: 1.2em;
+            gap: 10px;
+        }
+        #retryTargaScanBtn {
+            background-color: #17a2b8;
+            border-color: #117a8b;
+        }
+        
         #closeTargaScanBtn {
-             position: absolute;
+            position: absolute;
             top: 20px; 
             right: 20px;
             z-index: 4020; 
@@ -1158,11 +1185,13 @@
                     <option value="all">Tutti gli Elenchi</option>
                 </select>
             </div>
+            
             <div style="text-align: center; margin-bottom: 15px;">
                 <button id="targaScanBtn" class="action-button" style="background-color: #ffc107; border-color: #e0a800; color: #212529;">
                     <i class="fas fa-camera"></i> Targa Scan
                 </button>
             </div>
+            
             <div id="targheLoadingStatus">Caricamento targhe in corso...</div>
             <div class="table-scroll-wrapper">
                 <div class="targa-list-table-content">
@@ -1320,14 +1349,22 @@
             <button id="closeCameraBtn" class="action-button">×</button> 
         </div>
 
+        
         <div id="targaScanPageSection" class="camera-page-section" style="display: none;">
             <video id="targaScanStream" autoplay playsinline></video>
+            <img id="targaScanFreezeFrame" src="#" alt="Fermo immagine targa" style="display: none;">
             <canvas id="targaScanCanvas" style="display: none;"></canvas>
             <div id="targaFocusBox"></div>
             <div id="ocrResultDisplay">Inquadra la targa...</div>
+            <div id="targaScanControls">
+                <button id="analyzeTargaBtn" class="action-button"><i class="fas fa-search"></i> Analizza</button>
+                <button id="retryTargaScanBtn" class="action-button" style="display: none;"><i class="fas fa-sync-alt"></i> Riprova</button>
+            </div>
             <button id="closeTargaScanBtn" class="action-button">×</button>
         </div>
-        </div> 
+        
+
+    </div> 
     <div id="bottomNavCircles">
         <div class="header-circles">
                <button id="headerShutdownBtn" class="circle-button" title="Spegni Tablet"><i class="fas fa-power-off"></i></button>
@@ -1355,18 +1392,20 @@
     let lastViewBeforeCamera = 'landing';
     let lastSectionBeforeCamera = null;
 
-    // --- NUOVE VARIABILI GLOBALI PER OCR ---
+    // --- VARIABILI GLOBALI PER OCR ---
     const targaScanBtn = document.getElementById('targaScanBtn');
     const targaScanPageSection = document.getElementById('targaScanPageSection');
     const targaScanStreamElement = document.getElementById('targaScanStream');
+    const targaScanFreezeFrame = document.getElementById('targaScanFreezeFrame');
     const targaScanCanvas = document.getElementById('targaScanCanvas');
     const ocrResultDisplay = document.getElementById('ocrResultDisplay');
+    const analyzeTargaBtn = document.getElementById('analyzeTargaBtn');
+    const retryTargaScanBtn = document.getElementById('retryTargaScanBtn');
     const closeTargaScanBtn = document.getElementById('closeTargaScanBtn');
     let currentTargaScanStream = null;
     let isScanningOCR = false;
     let ocrWorker = null;
-    let scanInterval = null;
-    // --- FINE NUOVE VARIABILI ---
+    // --- FINE VARIABILI OCR ---
 
     const bottomNavCircles = document.getElementById('bottomNavCircles');
 
@@ -1424,29 +1463,22 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    const currentAppVersion = "1.7.0"; // Versione incrementata
+    const currentAppVersion = "1.8.0"; // Versione incrementata
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtnModal = document.getElementById('closeChangelogBtnModal');
     const changelogList = document.getElementById('changelogList');
     const changelogTitle = document.getElementById('changelogTitle');
 
     const latestChangesText = `
-        <li><strong>Nuova Funzionalità: Targa Scan (OCR):</strong>
+        <li><strong>Modalità Scansione Targa (OCR) Migliorata:</strong>
             <ul>
-                <li>Aggiunto pulsante "Targa Scan" (<i class="fas fa-camera"></i>) nell'elenco veicoli.</li>
-                <li>Attiva una vista fotocamera a schermo intero con un riquadro per inquadrare la targa.</li>
-                <li>Il sistema legge la targa in tempo reale e cerca una corrispondenza nell'elenco caricato.</li>
-                <li>Se viene trovata una corrispondenza, la perizia per quel veicolo si apre automaticamente.</li>
-                <li>Un messaggio di feedback informa sullo stato della scansione (ricerca, trovata, non trovata).</li>
-                <li>Aggiunto un pulsante per uscire manualmente dalla modalità di scansione.</li>
+                <li>L'analisi della targa non è più continua.</li>
+                <li>Aggiunto il pulsante <strong>"Analizza"</strong>: inquadra la targa e premi il pulsante per catturare un fermo immagine.</li>
+                <li>L'analisi OCR viene eseguita <strong>solo sull'immagine bloccata</strong>, offrendo maggiore controllo.</li>
+                <li>Dopo l'analisi, appare un pulsante <strong>"Riprova"</strong> per tornare al video live e catturare una nuova immagine se la prima non ha avuto successo.</li>
             </ul>
         </li>
-        <li><strong>Miglioramenti Stabilità e Interfaccia:</strong>
-             <ul>
-                <li>Migliorata la gestione delle risorse della fotocamera.</li>
-                <li>Ottimizzazioni minori all'interfaccia utente.</li>
-            </ul>
-        </li>
+        <li><strong>Nuova Versione App:</strong> v1.8.0</li>
     `;
 
 
@@ -1471,7 +1503,7 @@
     const PHOTO_STORE_NAME = 'capturedPhotosStore';
     let dbPromise = null;
 
-    // --- NUOVA FUNZIONE PER OCR ---
+    // --- LOGICA OCR AGGIORNATA ---
     async function initializeOcrWorker() {
         ocrResultDisplay.textContent = 'Inizializzazione OCR...';
         ocrResultDisplay.classList.remove('success', 'error');
@@ -1486,7 +1518,7 @@
             await ocrWorker.setParameters({
                 tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
             });
-            ocrResultDisplay.textContent = 'Inquadra la targa...';
+            ocrResultDisplay.textContent = 'Inquadra e Analizza';
             return true;
         } catch (error) {
             console.error("Errore inizializzazione Tesseract:", error);
@@ -1504,6 +1536,12 @@
         
         isScanningOCR = true;
         showView('targaScan');
+        
+        retryTargaScanBtn.style.display = 'none';
+        analyzeTargaBtn.style.display = 'inline-flex';
+        closeTargaScanBtn.style.display = 'inline-flex';
+        targaScanFreezeFrame.style.display = 'none';
+        targaScanStreamElement.style.display = 'block';
 
         if (!ocrWorker) {
             const success = await initializeOcrWorker();
@@ -1512,7 +1550,7 @@
                 return;
             }
         } else {
-            ocrResultDisplay.textContent = 'Inquadra la targa...';
+            ocrResultDisplay.textContent = 'Inquadra e Analizza';
             ocrResultDisplay.classList.remove('success', 'error');
         }
 
@@ -1520,9 +1558,6 @@
         try {
             currentTargaScanStream = await navigator.mediaDevices.getUserMedia(constraints);
             targaScanStreamElement.srcObject = currentTargaScanStream;
-            targaScanStreamElement.addEventListener('loadedmetadata', () => {
-                scanInterval = setInterval(scanFrameForTarga, 1000); // Scansiona ogni secondo
-            });
         } catch (err) {
             console.error("Errore accesso fotocamera per OCR:", err);
             alert("Impossibile accedere alla fotocamera.");
@@ -1532,10 +1567,6 @@
     
     function stopTargaScan() {
         isScanningOCR = false;
-        if (scanInterval) {
-            clearInterval(scanInterval);
-            scanInterval = null;
-        }
         if (currentTargaScanStream) {
             currentTargaScanStream.getTracks().forEach(track => track.stop());
             currentTargaScanStream = null;
@@ -1545,43 +1576,83 @@
              ocrWorker = null;
         }
         targaScanStreamElement.srcObject = null;
+        targaScanFreezeFrame.src = '#';
         showView('landing');
     }
 
     async function scanFrameForTarga() {
-        if (!isScanningOCR || !ocrWorker || !targaScanStreamElement.srcObject || targaScanStreamElement.paused || targaScanStreamElement.ended) return;
-
+        if (!isScanningOCR || !ocrWorker || !targaScanStreamElement.srcObject) return;
+        
+        analyzeTargaBtn.disabled = true;
+        retryTargaScanBtn.style.display = 'none';
+        
+        // 1. Cattura e mostra il fermo immagine
         const context = targaScanCanvas.getContext('2d');
         targaScanCanvas.width = targaScanStreamElement.videoWidth;
         targaScanCanvas.height = targaScanStreamElement.videoHeight;
         context.drawImage(targaScanStreamElement, 0, 0, targaScanCanvas.width, targaScanCanvas.height);
+        
+        targaScanFreezeFrame.src = targaScanCanvas.toDataURL('image/jpeg');
+        targaScanFreezeFrame.style.display = 'block';
+        targaScanStreamElement.style.display = 'none';
+        analyzeTargaBtn.style.display = 'none';
+        closeTargaScanBtn.style.display = 'none';
 
+        // 2. Esegui l'analisi
         try {
-            const { data: { text } } = await ocrWorker.recognize(targaScanCanvas.toDataURL('image/jpeg'));
+            const { data: { text } } = await ocrWorker.recognize(targaScanCanvas);
             const cleanedText = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
 
-            if (cleanedText.length >= 5) { // Una soglia minima per considerare il testo
-                ocrResultDisplay.textContent = `Letto: ${cleanedText}`;
+            if (cleanedText.length >= 5) {
                 const foundTarga = listaTargheCompleta.find(item => item.targa === cleanedText);
                 
                 if (foundTarga) {
-                    ocrResultDisplay.textContent = `Trovata: ${foundTarga.targa}! Apro...`;
+                    ocrResultDisplay.textContent = `Trovata: ${foundTarga.targa}!`;
+                    ocrResultDisplay.classList.remove('error');
                     ocrResultDisplay.classList.add('success');
-                    isScanningOCR = false; // Ferma ulteriori scansioni
+                    isScanningOCR = false;
                     setTimeout(() => {
                         stopTargaScan();
                         handleTargaSelectionAndSync(foundTarga.targa);
-                    }, 1000);
+                    }, 1200);
                 } else {
+                    ocrResultDisplay.textContent = `"${cleanedText}" non in elenco.`;
+                    ocrResultDisplay.classList.remove('success');
                     ocrResultDisplay.classList.add('error');
-                    ocrResultDisplay.textContent = `${cleanedText} non in elenco`;
+                    retryTargaScanBtn.style.display = 'inline-flex';
+                    closeTargaScanBtn.style.display = 'inline-flex';
                 }
+            } else {
+                 ocrResultDisplay.textContent = 'Nessuna targa leggibile.';
+                 ocrResultDisplay.classList.remove('success');
+                 ocrResultDisplay.classList.add('error');
+                 retryTargaScanBtn.style.display = 'inline-flex';
+                 closeTargaScanBtn.style.display = 'inline-flex';
             }
         } catch (error) {
             console.error('Errore durante il riconoscimento OCR:', error);
+            ocrResultDisplay.textContent = 'Errore analisi.';
+            ocrResultDisplay.classList.add('error');
+            retryTargaScanBtn.style.display = 'inline-flex';
+            closeTargaScanBtn.style.display = 'inline-flex';
+        } finally {
+            analyzeTargaBtn.disabled = false;
         }
     }
-    // --- FINE NUOVE FUNZIONI ---
+
+    function retryOcrScan() {
+        targaScanFreezeFrame.style.display = 'none';
+        targaScanFreezeFrame.src = '#';
+        targaScanStreamElement.style.display = 'block';
+        
+        retryTargaScanBtn.style.display = 'none';
+        analyzeTargaBtn.style.display = 'inline-flex';
+        closeTargaScanBtn.style.display = 'inline-flex';
+        
+        ocrResultDisplay.textContent = 'Inquadra e Analizza';
+        ocrResultDisplay.classList.remove('success', 'error');
+    }
+    // --- FINE LOGICA OCR ---
 
     function openPhotoDB() {
         if (dbPromise) return dbPromise;
@@ -1953,7 +2024,7 @@ async function handleSavePeriziaAndReturn() {
         if(cameraPageSection) cameraPageSection.style.display = 'none';
         if(galleryPageSection) galleryPageSection.style.display = 'none';
         if(imageLightbox) imageLightbox.style.display = 'none';
-        if(targaScanPageSection) targaScanPageSection.style.display = 'none'; // Nascondi pagina OCR
+        if(targaScanPageSection) targaScanPageSection.style.display = 'none';
 
         if(pageHeaderContainer) pageHeaderContainer.style.display = 'block';
         if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
@@ -1981,7 +2052,7 @@ async function handleSavePeriziaAndReturn() {
             if (viewName === 'camera') {
                 if (bottomNavCircles) bottomNavCircles.style.display = 'flex';
                 if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
-            } else { // Per targaScan, nascondi anche la barra inferiore
+            } else {
                  if (bottomNavCircles) bottomNavCircles.style.display = 'none';
                  bodyPaddingBottomValue = '0px';
             }
@@ -2031,7 +2102,7 @@ async function handleSavePeriziaAndReturn() {
             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         } else if (viewName === 'camera') {
             showCameraPage();
-        } else if (viewName === 'targaScan') { // Gestione vista OCR
+        } else if (viewName === 'targaScan') {
             targaScanPageSection.style.display = 'flex';
         } else {
              if (pageHeaderContainer) pageHeaderContainer.classList.remove('fixed-header');
@@ -3124,8 +3195,10 @@ function handleLightboxSwipe(endX, endY) {
 
 
     document.addEventListener('DOMContentLoaded', () => {
-        // --- NUOVI EVENT LISTENER OCR ---
+        // --- EVENT LISTENER OCR ---
         if (targaScanBtn) targaScanBtn.addEventListener('click', startTargaScan);
+        if (analyzeTargaBtn) analyzeTargaBtn.addEventListener('click', scanFrameForTarga);
+        if (retryTargaScanBtn) retryTargaScanBtn.addEventListener('click', retryOcrScan);
         if (closeTargaScanBtn) closeTargaScanBtn.addEventListener('click', stopTargaScan);
         // --- FINE ---
 
