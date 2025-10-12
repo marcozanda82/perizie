@@ -1580,81 +1580,172 @@
         showView('landing');
     }
 
+/**
+ * Calcola la distanza di Levenshtein tra due stringhe (quanti cambi servono per uguagliarle).
+ * Una distanza di 1 significa che c'è un solo carattere diverso.
+ * @param {string} s1 La prima stringa.
+ * @param {string} s2 La seconda stringa.
+ * @returns {number} La distanza tra le due stringhe.
+ */
+function levenshtein(s1, s2) {
+    if (!s1 || !s2) return (s1 || s2).length;
+    var s1_len = s1.length, s2_len = s2.length;
+    if (s1_len === s2_len && s1 === s2) return 0;
+
+    var T = [], i, j;
+    for (i = 0; i <= s1_len; i++) {
+        T[i] = [i];
+    }
+    for (j = 0; j <= s2_len; j++) {
+        T[0][j] = j;
+    }
+    for (i = 1; i <= s1_len; i++) {
+        for (j = 1; j <= s2_len; j++) {
+            T[i][j] = Math.min(
+                T[i - 1][j] + 1,
+                T[i][j - 1] + 1,
+                T[i - 1][j - 1] + (s1[i - 1] !== s2[j - 1])
+            );
+        }
+    }
+    return T[s1_len][s2_len];
+}
+
+/**
+ * Pre-elabora l'immagine sul canvas per migliorare la qualità per l'OCR.
+ * Applica ritaglio, scala di grigi e aumento del contrasto.
+ * @param {HTMLCanvasElement} canvas Il canvas con l'immagine da elaborare.
+ * @returns {void}
+ */
+function preprocessCanvas(canvas) {
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    // 1. Ritaglia l'immagine per analizzare solo l'area del focus box
+    const focusBox = document.getElementById('targaFocusBox').getBoundingClientRect();
+    const videoRect = targaScanStreamElement.getBoundingClientRect();
+
+    // Calcola le coordinate del ritaglio in proporzione alla dimensione reale del video
+    const scaleX = canvas.width / videoRect.width;
+    const scaleY = canvas.height / videoRect.height;
+
+    const cropX = (focusBox.left - videoRect.left) * scaleX;
+    const cropY = (focusBox.top - videoRect.top) * scaleY;
+    const cropWidth = focusBox.width * scaleX;
+    const cropHeight = focusBox.height * scaleY;
+
+    const croppedImageData = ctx.getImageData(cropX, cropY, cropWidth, cropHeight);
+
+    // Sovrascrivi il canvas con l'immagine ritagliata
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+    ctx.putImageData(croppedImageData, 0, 0);
+
+    // 2. Applica filtri di scala di grigi e contrasto
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    const contrast = 1.8; // Valore di contrasto (sopra 1 aumenta, sotto 1 diminuisce)
+    const factor = (259 * (contrast * 255 + 255)) / (255 * (259 - contrast * 255));
+
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        // Converti in scala di grigi (formula di luminosità)
+        const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+
+        // Applica contrasto
+        let contrastedGray = factor * (gray - 128) + 128;
+        contrastedGray = Math.max(0, Math.min(255, contrastedGray));
+
+        data[i] = contrastedGray;
+        data[i + 1] = contrastedGray;
+        data[i + 2] = contrastedGray;
+    }
+    ctx.putImageData(imageData, 0, 0);
+}
+    
 async function scanFrameForTarga() {
-        if (!isScanningOCR || !ocrWorker || !targaScanStreamElement.srcObject) return;
-        
-        analyzeTargaBtn.disabled = true;
-        retryTargaScanBtn.style.display = 'none';
-        
-        // 1. Cattura e mostra il fermo immagine (invariato)
-        const context = targaScanCanvas.getContext('2d');
-        targaScanCanvas.width = targaScanStreamElement.videoWidth;
-        targaScanCanvas.height = targaScanStreamElement.videoHeight;
-        context.drawImage(targaScanStreamElement, 0, 0, targaScanCanvas.width, targaScanCanvas.height);
-        
-        targaScanFreezeFrame.src = targaScanCanvas.toDataURL('image/jpeg');
-        targaScanFreezeFrame.style.display = 'block';
-        targaScanStreamElement.style.display = 'none';
-        analyzeTargaBtn.style.display = 'none';
-        closeTargaScanBtn.style.display = 'none';
+    if (!isScanningOCR || !ocrWorker || !targaScanStreamElement.srcObject) return;
 
-        // 2. Esegui l'analisi (invariato)
-        try {
-            const { data: { text } } = await ocrWorker.recognize(targaScanCanvas);
-            const cleanedText = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+    analyzeTargaBtn.disabled = true;
+    retryTargaScanBtn.style.display = 'none';
 
-            // --- NUOVA LOGICA CON ESPRESSIONE REGOLARE ---
-            
-            // 3. Definisci il pattern della targa (2 lettere, 3 numeri, 2 lettere)
-            const targaRegex = /[A-Z]{2}\d{3}[A-Z]{2}/g;
-            
-            // 4. Estrai tutte le corrispondenze dal testo pulito
-            const potentialMatches = cleanedText.match(targaRegex);
+    const context = targaScanCanvas.getContext('2d', { willReadFrequently: true });
+    targaScanCanvas.width = targaScanStreamElement.videoWidth;
+    targaScanCanvas.height = targaScanStreamElement.videoHeight;
+    context.drawImage(targaScanStreamElement, 0, 0, targaScanCanvas.width, targaScanCanvas.height);
 
-            let targaTrovata = false;
+    // **FASE 1: Pre-elaborazione dell'immagine per migliorare l'OCR**
+    preprocessCanvas(targaScanCanvas);
 
-            // 5. Controlla se abbiamo trovato almeno un potenziale match
-            if (potentialMatches && potentialMatches.length > 0) {
-                // Itera su ogni match (nel caso l'OCR legga più pattern validi)
-                for (const match of potentialMatches) {
-                    const foundTarga = listaTargheCompleta.find(item => item.targa === match);
-                    
-                    if (foundTarga) {
-                        targaTrovata = true;
-                        ocrResultDisplay.textContent = `Trovata: ${foundTarga.targa}!`;
-                        ocrResultDisplay.classList.remove('error');
-                        ocrResultDisplay.classList.add('success');
-                        isScanningOCR = false;
-                        setTimeout(() => {
-                            stopTargaScan();
-                            handleTargaSelectionAndSync(foundTarga.targa);
-                        }, 1200);
-                        break; // Esci dal ciclo appena trovi la prima targa valida
-                    }
+    targaScanFreezeFrame.src = targaScanCanvas.toDataURL('image/jpeg');
+    targaScanFreezeFrame.style.display = 'block';
+    targaScanStreamElement.style.display = 'none';
+    analyzeTargaBtn.style.display = 'none';
+    closeTargaScanBtn.style.display = 'none';
+
+    try {
+        const { data: { text } } = await ocrWorker.recognize(targaScanCanvas);
+        const cleanedText = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+
+        const targaRegex = /[A-Z]{2}\d{3}[A-Z]{2}/g;
+        const potentialMatches = cleanedText.match(targaRegex);
+
+        let bestMatch = null;
+        let minDistance = 2; // Accettiamo solo distanze di 0 o 1
+
+        if (potentialMatches && potentialMatches.length > 0) {
+            const ocrResult = potentialMatches[0]; // Consideriamo il primo match valido
+
+            for (const targaInLista of listaTargheCompleta) {
+                const distance = levenshtein(ocrResult, targaInLista.targa);
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    bestMatch = {
+                        targaCorretta: targaInLista.targa,
+                        targaLetta: ocrResult
+                    };
                 }
-            }
-            
-            // Se il ciclo è finito senza trovare corrispondenze nell'elenco
-            if (!targaTrovata) {
-                const displayMatch = potentialMatches ? `"${potentialMatches[0]}"` : 'Nessuna targa';
-                ocrResultDisplay.textContent = `${displayMatch} non in elenco.`;
-                ocrResultDisplay.classList.remove('success');
-                ocrResultDisplay.classList.add('error');
-                retryTargaScanBtn.style.display = 'inline-flex';
-                closeTargaScanBtn.style.display = 'inline-flex';
-            }
-            // --- FINE NUOVA LOGICA ---
 
-        } catch (error) {
-            console.error('Errore durante il riconoscimento OCR:', error);
-            ocrResultDisplay.textContent = 'Errore analisi.';
+                if (minDistance === 0) break; // Trovata corrispondenza perfetta, inutile continuare
+            }
+        }
+
+        if (bestMatch) {
+            let message = `Trovata: ${bestMatch.targaCorretta}`;
+            if (minDistance === 1) {
+                message += ` (letta come ${bestMatch.targaLetta})`;
+            }
+
+            ocrResultDisplay.textContent = message;
+            ocrResultDisplay.classList.remove('error');
+            ocrResultDisplay.classList.add('success');
+            isScanningOCR = false;
+
+            setTimeout(() => {
+                stopTargaScan();
+                handleTargaSelectionAndSync(bestMatch.targaCorretta);
+            }, 1500); // Aumento leggermente il tempo per dare modo di leggere il feedback
+        } else {
+            ocrResultDisplay.textContent = 'Nessuna targa trovata in elenco. Riprova.';
+            ocrResultDisplay.classList.remove('success');
             ocrResultDisplay.classList.add('error');
             retryTargaScanBtn.style.display = 'inline-flex';
             closeTargaScanBtn.style.display = 'inline-flex';
-        } finally {
-            analyzeTargaBtn.disabled = false;
         }
+
+    } catch (error) {
+        console.error('Errore durante il riconoscimento OCR:', error);
+        ocrResultDisplay.textContent = 'Errore analisi.';
+        ocrResultDisplay.classList.add('error');
+        retryTargaScanBtn.style.display = 'inline-flex';
+        closeTargaScanBtn.style.display = 'inline-flex';
+    } finally {
+        analyzeTargaBtn.disabled = false;
     }
+}
 
     function retryOcrScan() {
         targaScanFreezeFrame.style.display = 'none';
@@ -3492,4 +3583,5 @@ function handleLightboxSwipe(endX, endY) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
 
