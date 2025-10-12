@@ -1580,13 +1580,13 @@
         showView('landing');
     }
 
-    async function scanFrameForTarga() {
+async function scanFrameForTarga() {
         if (!isScanningOCR || !ocrWorker || !targaScanStreamElement.srcObject) return;
         
         analyzeTargaBtn.disabled = true;
         retryTargaScanBtn.style.display = 'none';
         
-        // 1. Cattura e mostra il fermo immagine
+        // 1. Cattura e mostra il fermo immagine (invariato)
         const context = targaScanCanvas.getContext('2d');
         targaScanCanvas.width = targaScanStreamElement.videoWidth;
         targaScanCanvas.height = targaScanStreamElement.videoHeight;
@@ -1598,37 +1598,53 @@
         analyzeTargaBtn.style.display = 'none';
         closeTargaScanBtn.style.display = 'none';
 
-        // 2. Esegui l'analisi
+        // 2. Esegui l'analisi (invariato)
         try {
             const { data: { text } } = await ocrWorker.recognize(targaScanCanvas);
             const cleanedText = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
 
-            if (cleanedText.length >= 5) {
-                const foundTarga = listaTargheCompleta.find(item => item.targa === cleanedText);
-                
-                if (foundTarga) {
-                    ocrResultDisplay.textContent = `Trovata: ${foundTarga.targa}!`;
-                    ocrResultDisplay.classList.remove('error');
-                    ocrResultDisplay.classList.add('success');
-                    isScanningOCR = false;
-                    setTimeout(() => {
-                        stopTargaScan();
-                        handleTargaSelectionAndSync(foundTarga.targa);
-                    }, 1200);
-                } else {
-                    ocrResultDisplay.textContent = `"${cleanedText}" non in elenco.`;
-                    ocrResultDisplay.classList.remove('success');
-                    ocrResultDisplay.classList.add('error');
-                    retryTargaScanBtn.style.display = 'inline-flex';
-                    closeTargaScanBtn.style.display = 'inline-flex';
+            // --- NUOVA LOGICA CON ESPRESSIONE REGOLARE ---
+            
+            // 3. Definisci il pattern della targa (2 lettere, 3 numeri, 2 lettere)
+            const targaRegex = /[A-Z]{2}\d{3}[A-Z]{2}/g;
+            
+            // 4. Estrai tutte le corrispondenze dal testo pulito
+            const potentialMatches = cleanedText.match(targaRegex);
+
+            let targaTrovata = false;
+
+            // 5. Controlla se abbiamo trovato almeno un potenziale match
+            if (potentialMatches && potentialMatches.length > 0) {
+                // Itera su ogni match (nel caso l'OCR legga più pattern validi)
+                for (const match of potentialMatches) {
+                    const foundTarga = listaTargheCompleta.find(item => item.targa === match);
+                    
+                    if (foundTarga) {
+                        targaTrovata = true;
+                        ocrResultDisplay.textContent = `Trovata: ${foundTarga.targa}!`;
+                        ocrResultDisplay.classList.remove('error');
+                        ocrResultDisplay.classList.add('success');
+                        isScanningOCR = false;
+                        setTimeout(() => {
+                            stopTargaScan();
+                            handleTargaSelectionAndSync(foundTarga.targa);
+                        }, 1200);
+                        break; // Esci dal ciclo appena trovi la prima targa valida
+                    }
                 }
-            } else {
-                 ocrResultDisplay.textContent = 'Nessuna targa leggibile.';
-                 ocrResultDisplay.classList.remove('success');
-                 ocrResultDisplay.classList.add('error');
-                 retryTargaScanBtn.style.display = 'inline-flex';
-                 closeTargaScanBtn.style.display = 'inline-flex';
             }
+            
+            // Se il ciclo è finito senza trovare corrispondenze nell'elenco
+            if (!targaTrovata) {
+                const displayMatch = potentialMatches ? `"${potentialMatches[0]}"` : 'Nessuna targa';
+                ocrResultDisplay.textContent = `${displayMatch} non in elenco.`;
+                ocrResultDisplay.classList.remove('success');
+                ocrResultDisplay.classList.add('error');
+                retryTargaScanBtn.style.display = 'inline-flex';
+                closeTargaScanBtn.style.display = 'inline-flex';
+            }
+            // --- FINE NUOVA LOGICA ---
+
         } catch (error) {
             console.error('Errore durante il riconoscimento OCR:', error);
             ocrResultDisplay.textContent = 'Errore analisi.';
@@ -3476,3 +3492,4 @@ function handleLightboxSwipe(endX, endY) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
