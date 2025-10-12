@@ -6,6 +6,7 @@
     <title>Perizia Veicolo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <style>
         /* Preloader & Exit Curtain Styles */
         #preloader {
@@ -685,25 +686,25 @@
             box-sizing: border-box;
         }
 
-#captureBtn {
-    position: absolute;
-    bottom: 90px; /* Ulteriormente modificato */
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2020;
-    width: 70px;
-    height: 70px;
-    background-color: #fff;
-    border: 4px solid #fff;
-    border-radius: 50%;
-    box-shadow: 0 0 0 4px #333;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
+        #captureBtn {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2020;
+            width: 70px;
+            height: 70px;
+            background-color: #fff;
+            border: 4px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px #333;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
 
         #captureBtn::before { 
             content: '';
@@ -747,6 +748,64 @@
             border-color: #fff;
         }
         /* END: Stili per la pagina Fotocamera */
+
+        /* START: Stili per la pagina Targa Scan OCR */
+        #targaScanPageSection {
+            z-index: 4000; /* Assicura che sia sopra tutto il resto */
+        }
+        #targaScanStream {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Usa cover per riempire lo schermo */
+        }
+        #targaFocusBox {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            max-width: 400px;
+            height: 20vw;
+            max-height: 100px;
+            border: 3px solid rgba(255, 255, 0, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.7), 0 0 0 100vw rgba(0,0,0,0.5);
+            border-radius: 8px;
+        }
+        #ocrResultDisplay {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1.2em;
+            text-align: center;
+            min-width: 250px;
+            z-index: 4010;
+        }
+        #ocrResultDisplay.success { background-color: rgba(40, 167, 69, 0.8); }
+        #ocrResultDisplay.error { background-color: rgba(220, 53, 69, 0.8); }
+
+        #closeTargaScanBtn {
+             position: absolute;
+            top: 20px; 
+            right: 20px;
+            z-index: 4020; 
+            width: 45px;
+            height: 45px;
+            background-color: rgba(40, 40, 40, 0.8);
+            color: #ff4d4d;
+            border: 1px solid #ff4d4d;
+            border-radius: 4px;
+            font-size: 1.8em;
+            line-height: 43px; 
+            text-align: center;
+            padding: 0;
+            cursor: pointer;
+        }
+        /* END: Stili per la pagina Targa Scan OCR */
 
         /* START: Stili per Changelog Modal */
         .modal-overlay {
@@ -1099,6 +1158,11 @@
                     <option value="all">Tutti gli Elenchi</option>
                 </select>
             </div>
+            <div style="text-align: center; margin-bottom: 15px;">
+                <button id="targaScanBtn" class="action-button" style="background-color: #ffc107; border-color: #e0a800; color: #212529;">
+                    <i class="fas fa-camera"></i> Targa Scan
+                </button>
+            </div>
             <div id="targheLoadingStatus">Caricamento targhe in corso...</div>
             <div class="table-scroll-wrapper">
                 <div class="targa-list-table-content">
@@ -1256,7 +1320,15 @@
             <button id="closeCameraBtn" class="action-button">×</button> 
         </div>
 
-    </div> <div id="bottomNavCircles">
+        <div id="targaScanPageSection" class="camera-page-section" style="display: none;">
+            <video id="targaScanStream" autoplay playsinline></video>
+            <canvas id="targaScanCanvas" style="display: none;"></canvas>
+            <div id="targaFocusBox"></div>
+            <div id="ocrResultDisplay">Inquadra la targa...</div>
+            <button id="closeTargaScanBtn" class="action-button">×</button>
+        </div>
+        </div> 
+    <div id="bottomNavCircles">
         <div class="header-circles">
                <button id="headerShutdownBtn" class="circle-button" title="Spegni Tablet"><i class="fas fa-power-off"></i></button>
             <button id="headerPhotosBtn" class="circle-button" title="Galleria Foto App"><i class="fas fa-images"></i></button>
@@ -1266,7 +1338,7 @@
     </div>
 
 <script>
-  // Variabili globali
+    // Variabili globali
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
@@ -1280,15 +1352,28 @@
     const captureBtn = document.getElementById('captureBtn');
     const closeCameraBtn = document.getElementById('closeCameraBtn');
     let currentCameraStream = null;
-    let lastViewBeforeCamera = 'landing'; // Default
-    let lastSectionBeforeCamera = null; // Default
+    let lastViewBeforeCamera = 'landing';
+    let lastSectionBeforeCamera = null;
 
-    const bottomNavCircles = document.getElementById('bottomNavCircles'); // New global for bottom bar
+    // --- NUOVE VARIABILI GLOBALI PER OCR ---
+    const targaScanBtn = document.getElementById('targaScanBtn');
+    const targaScanPageSection = document.getElementById('targaScanPageSection');
+    const targaScanStreamElement = document.getElementById('targaScanStream');
+    const targaScanCanvas = document.getElementById('targaScanCanvas');
+    const ocrResultDisplay = document.getElementById('ocrResultDisplay');
+    const closeTargaScanBtn = document.getElementById('closeTargaScanBtn');
+    let currentTargaScanStream = null;
+    let isScanningOCR = false;
+    let ocrWorker = null;
+    let scanInterval = null;
+    // --- FINE NUOVE VARIABILI ---
+
+    const bottomNavCircles = document.getElementById('bottomNavCircles');
 
     const targaListContainer = document.getElementById('targaListContainer');
     const savedTargasListContainer = document.getElementById('savedTargasListContainer');
     const targheLoadingStatus = document.getElementById('targheLoadingStatus');
-    const pageHeaderContainer = document.getElementById('pageHeaderContainer'); // This is the TOP bar container
+    const pageHeaderContainer = document.getElementById('pageHeaderContainer');
     const mainTitleGlobal = pageHeaderContainer.querySelector('#mainTitleGlobal');
     const targaDropdownContainer = document.getElementById('targaDropdownContainer');
     const targaSwitcherDropdown = document.getElementById('targaSwitcherDropdown');
@@ -1339,27 +1424,29 @@
     const APP_PREFIX = 'periziaApp_';
     const LAST_ACTIVE_PERIZIA_PAGE_KEY = `${APP_PREFIX}lastActivePeriziaPage`;
 
-    const currentAppVersion = "1.6.4";
+    const currentAppVersion = "1.7.0"; // Versione incrementata
     const changelogModal = document.getElementById('changelogModal');
     const closeChangelogBtnModal = document.getElementById('closeChangelogBtnModal');
     const changelogList = document.getElementById('changelogList');
     const changelogTitle = document.getElementById('changelogTitle');
 
     const latestChangesText = `
-        <li><strong>Nuovi Pulsanti Azione Pagina:</strong>
+        <li><strong>Nuova Funzionalità: Targa Scan (OCR):</strong>
             <ul>
-                <li>Aggiunto pulsante "Azzera Campi" (<i class="fas fa-undo"></i>) per le sezioni Remarketing, Pneumatici e Danni/Verifiche.</li>
-                <li>I pulsanti "Azzera" e "Compila Default" sono ora affiancati in alto a destra di ogni sezione operativa.</li>
+                <li>Aggiunto pulsante "Targa Scan" (<i class="fas fa-camera"></i>) nell'elenco veicoli.</li>
+                <li>Attiva una vista fotocamera a schermo intero con un riquadro per inquadrare la targa.</li>
+                <li>Il sistema legge la targa in tempo reale e cerca una corrispondenza nell'elenco caricato.</li>
+                <li>Se viene trovata una corrispondenza, la perizia per quel veicolo si apre automaticamente.</li>
+                <li>Un messaggio di feedback informa sullo stato della scansione (ricerca, trovata, non trovata).</li>
+                <li>Aggiunto un pulsante per uscire manualmente dalla modalità di scansione.</li>
             </ul>
         </li>
-        <li><strong>Download Perizia ZIP:</strong>
-            <ul>
-                <li>Aggiunto pulsante "Download ZIP" (<i class="fas fa-file-archive"></i>) nella sezione Riepilogo, a destra del titolo.</li>
-                <li>Il link punta a <code>https://192.168.1.154:8080/TARGA.zip</code>, sostituendo TARGA con la targa attiva.</li>
-                <li>Il pulsante è visibile solo quando una targa è selezionata e si è nella sezione Riepilogo.</li>
+        <li><strong>Miglioramenti Stabilità e Interfaccia:</strong>
+             <ul>
+                <li>Migliorata la gestione delle risorse della fotocamera.</li>
+                <li>Ottimizzazioni minori all'interfaccia utente.</li>
             </ul>
         </li>
-        <li>Miglioramenti Interfaccia Fotocamera e Navigazione Foto (come da v1.6.3).</li>
     `;
 
 
@@ -1383,6 +1470,118 @@
     const IDB_VERSION = 1;
     const PHOTO_STORE_NAME = 'capturedPhotosStore';
     let dbPromise = null;
+
+    // --- NUOVA FUNZIONE PER OCR ---
+    async function initializeOcrWorker() {
+        ocrResultDisplay.textContent = 'Inizializzazione OCR...';
+        ocrResultDisplay.classList.remove('success', 'error');
+        try {
+            ocrWorker = await Tesseract.createWorker('ita', 1, {
+                logger: m => {
+                    if (m.status === 'recognizing text') {
+                        ocrResultDisplay.textContent = `Analisi... (${(m.progress * 100).toFixed(0)}%)`;
+                    }
+                },
+            });
+            await ocrWorker.setParameters({
+                tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            });
+            ocrResultDisplay.textContent = 'Inquadra la targa...';
+            return true;
+        } catch (error) {
+            console.error("Errore inizializzazione Tesseract:", error);
+            ocrResultDisplay.textContent = 'Errore OCR!';
+            ocrResultDisplay.classList.add('error');
+            return false;
+        }
+    }
+
+    async function startTargaScan() {
+        if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+            alert("Il tuo browser non supporta l'accesso alla fotocamera.");
+            return;
+        }
+        
+        isScanningOCR = true;
+        showView('targaScan');
+
+        if (!ocrWorker) {
+            const success = await initializeOcrWorker();
+            if (!success) {
+                stopTargaScan();
+                return;
+            }
+        } else {
+            ocrResultDisplay.textContent = 'Inquadra la targa...';
+            ocrResultDisplay.classList.remove('success', 'error');
+        }
+
+        const constraints = { video: { facingMode: 'environment' } };
+        try {
+            currentTargaScanStream = await navigator.mediaDevices.getUserMedia(constraints);
+            targaScanStreamElement.srcObject = currentTargaScanStream;
+            targaScanStreamElement.addEventListener('loadedmetadata', () => {
+                scanInterval = setInterval(scanFrameForTarga, 1000); // Scansiona ogni secondo
+            });
+        } catch (err) {
+            console.error("Errore accesso fotocamera per OCR:", err);
+            alert("Impossibile accedere alla fotocamera.");
+            stopTargaScan();
+        }
+    }
+    
+    function stopTargaScan() {
+        isScanningOCR = false;
+        if (scanInterval) {
+            clearInterval(scanInterval);
+            scanInterval = null;
+        }
+        if (currentTargaScanStream) {
+            currentTargaScanStream.getTracks().forEach(track => track.stop());
+            currentTargaScanStream = null;
+        }
+        if (ocrWorker) {
+             ocrWorker.terminate();
+             ocrWorker = null;
+        }
+        targaScanStreamElement.srcObject = null;
+        showView('landing');
+    }
+
+    async function scanFrameForTarga() {
+        if (!isScanningOCR || !ocrWorker || !targaScanStreamElement.srcObject || targaScanStreamElement.paused || targaScanStreamElement.ended) return;
+
+        const context = targaScanCanvas.getContext('2d');
+        targaScanCanvas.width = targaScanStreamElement.videoWidth;
+        targaScanCanvas.height = targaScanStreamElement.videoHeight;
+        context.drawImage(targaScanStreamElement, 0, 0, targaScanCanvas.width, targaScanCanvas.height);
+
+        try {
+            const { data: { text } } = await ocrWorker.recognize(targaScanCanvas.toDataURL('image/jpeg'));
+            const cleanedText = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+
+            if (cleanedText.length >= 5) { // Una soglia minima per considerare il testo
+                ocrResultDisplay.textContent = `Letto: ${cleanedText}`;
+                const foundTarga = listaTargheCompleta.find(item => item.targa === cleanedText);
+                
+                if (foundTarga) {
+                    ocrResultDisplay.textContent = `Trovata: ${foundTarga.targa}! Apro...`;
+                    ocrResultDisplay.classList.add('success');
+                    isScanningOCR = false; // Ferma ulteriori scansioni
+                    setTimeout(() => {
+                        stopTargaScan();
+                        handleTargaSelectionAndSync(foundTarga.targa);
+                    }, 1000);
+                } else {
+                    ocrResultDisplay.classList.add('error');
+                    ocrResultDisplay.textContent = `${cleanedText} non in elenco`;
+                }
+            }
+        } catch (error) {
+            console.error('Errore durante il riconoscimento OCR:', error);
+        }
+    }
+    // --- FINE NUOVE FUNZIONI ---
 
     function openPhotoDB() {
         if (dbPromise) return dbPromise;
@@ -1673,51 +1872,43 @@
 
 async function handleSavePeriziaAndReturn() {
         if (!targaSelezionataGlobalmente) {
-            alert("Nessuna targa attiva."); // Mantenuto in italiano
+            alert("Nessuna targa attiva.");
             return;
         }
-        const originalButtonText = saveAndReturnBtn.textContent; // Memorizza il testo iniziale del pulsante
-        saveAndReturnBtn.disabled = true; // Disabilita il pulsante durante l'elaborazione
+        const originalButtonText = saveAndReturnBtn.textContent;
+        saveAndReturnBtn.disabled = true;
 
-        // 1. Salva i progressi
         saveAndReturnBtn.textContent = 'Salvataggio Dati...';
         if (!saveProgress(targaSelezionataGlobalmente)) {
-            alert("Salvataggio dati browser fallito."); // Mantenuto in italiano
-            saveAndReturnBtn.textContent = originalButtonText; // Ripristina il testo del pulsante
-            saveAndReturnBtn.disabled = false; // Riabilita il pulsante
+            alert("Salvataggio dati browser fallito.");
+            saveAndReturnBtn.textContent = originalButtonText;
+            saveAndReturnBtn.disabled = false;
             return;
         }
 
-        // 2. Genera il riepilogo se si è nella sezione riepilogo
         if (document.getElementById('riepilogoSection').classList.contains('active')) {
             generateSummary();
         }
 
-        // 3. Scarica lo screenshot (comportamento esistente)
         saveAndReturnBtn.textContent = 'Generazione Screenshot...';
         try {
             await generateAndDownloadScreenshot();
         } catch (e) {
             console.warn("Generazione screenshot fallita, dati salvati localmente.", e);
-            // Opzionalmente, informa l'utente che lo screenshot è fallito ma la perizia è stata salvata.
-            // alert("Attenzione: la generazione dello screenshot è fallita, ma la perizia è stata salvata localmente.");
         }
 
-        // 4. Contrassegna come completata
         markTargaAsCompleted(targaSelezionataGlobalmente);
-        updateNavButtonColors(); // Aggiorna i colori dei pulsanti di navigazione
+        updateNavButtonColors();
 
-        // 5. Crea e scarica il file ZIP con le foto
         if (typeof JSZip === 'undefined') {
-            alert("Errore: Libreria JSZip non caricata. Impossibile scaricare il file ZIP delle foto."); // Mantenuto in italiano
+            alert("Errore: Libreria JSZip non caricata. Impossibile scaricare il file ZIP delle foto.");
         } else {
             saveAndReturnBtn.textContent = 'Creazione ZIP Foto...';
             try {
-                const photos = await getPhotosByTargaAndSezioneFromDB(targaSelezionataGlobalmente, null); // Ottieni tutte le foto per la targa
+                const photos = await getPhotosByTargaAndSezioneFromDB(targaSelezionataGlobalmente, null);
 
                 if (!photos || photos.length === 0) {
                     console.log(`Nessuna foto trovata per la targa ${targaSelezionataGlobalmente} da includere nel file ZIP.`);
-                    // Nessun avviso per l'assenza di foto, per mantenere il flusso regolare. L'utente potrebbe non aver scattato foto.
                 } else {
                     const zip = new JSZip();
                     photos.forEach(photoData => {
@@ -1729,8 +1920,7 @@ async function handleSavePeriziaAndReturn() {
                     const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(zipBlob);
-
-                    // Usa il nome della targa per il file ZIP come richiesto, es., AA000BB.zip
+                    
                     const zipFileName = `${targaSelezionataGlobalmente.toUpperCase().replace(/[^A-Z0-9.-]/g, '_')}.zip`;
                     link.download = zipFileName;
 
@@ -1738,18 +1928,15 @@ async function handleSavePeriziaAndReturn() {
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(link.href);
-                    // Potresti voler aggiungere un avviso di conferma qui se necessario:
-                    // alert(`File ZIP "${zipFileName}" per la targa ${targaSelezionataGlobalmente} scaricato.`);
                 }
             } catch (error) {
-                alert(`Errore durante la creazione del file ZIP per la targa ${targaSelezionataGlobalmente}. La perizia è stata comunque salvata.`); // Mantenuto in italiano
+                alert(`Errore durante la creazione del file ZIP per la targa ${targaSelezionataGlobalmente}. La perizia è stata comunque salvata.`);
                 console.error("Errore durante la creazione del file ZIP in handleSavePeriziaAndReturn:", error);
             }
         }
 
-        // 6. Ripristina lo stato del pulsante e naviga alla pagina iniziale
-        saveAndReturnBtn.textContent = originalButtonText; // Ripristina il testo originale del pulsante
-        saveAndReturnBtn.disabled = false; // Riabilita il pulsante
+        saveAndReturnBtn.textContent = originalButtonText;
+        saveAndReturnBtn.disabled = false;
         showView('landing');
     }
 
@@ -1758,19 +1945,16 @@ async function handleSavePeriziaAndReturn() {
     function getSectionInputs(sectionElementId) { const sectionDiv = document.getElementById(sectionElementId); if (!sectionDiv) return []; return Array.from(sectionDiv.querySelectorAll('input[type="checkbox"]:not(:disabled), select:not(:disabled)')); }
     function getSectionStatus(sectionElementId, targaData) { const inputs = getSectionInputs(sectionElementId); if (inputs.length === 0) return 'completed';  let allDefaultOrNA = true;  let allNonDefaultAndApplicable = true;  let hasAtLeastOneNonDefaultAndApplicable = false; inputs.forEach(input => { let isEffectivelyDefault = false; const savedValue = targaData && targaData.hasOwnProperty(input.id) ? targaData[input.id] : undefined; let currentValue = savedValue; if (savedValue === undefined) {  if (input.type === 'checkbox') currentValue = input.checked; else currentValue = input.value; } if (input.type === 'checkbox') { isEffectivelyDefault = !currentValue; } else if (input.tagName === 'SELECT') { isEffectivelyDefault = (currentValue === "" || (input.options.length > 0 && currentValue === input.options[0].value)); if ((input.id === 'cavo_ricarica_rapida' || input.id === 'cavo_ricarica_domestica') && currentValue === 'non_applicabile') { isEffectivelyDefault = true; } } else {  isEffectivelyDefault = (currentValue === ""); } if (!isEffectivelyDefault) { allDefaultOrNA = false; hasAtLeastOneNonDefaultAndApplicable = true; } else {  allNonDefaultAndApplicable = false; } }); if (allDefaultOrNA) return 'untouched'; if (allNonDefaultAndApplicable) return 'completed'; if (hasAtLeastOneNonDefaultAndApplicable) return 'partial';  return 'untouched';  }
     function updateNavButtonColors() { if (!targaSelezionataGlobalmente && checklistContainer.style.display === 'none' && galleryPageSection.style.display === 'none') { navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched', 'active'); btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; }); return; } const targaDataJSON = localStorage.getItem(`${APP_PREFIX}data_${(targaSelezionataGlobalmente || currentGalleryTargaFilter || "").toUpperCase()}`); const targaData = targaDataJSON ? JSON.parse(targaDataJSON) : null; navButtons.forEach(btn => { btn.classList.remove('nav-btn-completed', 'nav-btn-partial', 'nav-btn-untouched'); if (!btn.classList.contains('active')) { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; } if (btn.classList.contains('active')) { return; } const targetSection = btn.dataset.target; let status = 'untouched'; const activeTargaForStatus = targaSelezionataGlobalmente || currentGalleryTargaFilter; if (targetSection === 'riepilogo') { if (isTargaCompleted(activeTargaForStatus)) { status = 'completed'; } else { let hasAnyDataForSummary = false; if (targaData && Object.keys(targaData).length > 0 && Object.keys(targaData).some(k => k !== 'timestamp')) { hasAnyDataForSummary = true; } else { ['remarketingSection', 'pneumaticiSection', 'danniVerificheSection'].forEach(secId => { if (getSectionStatus(secId, targaData) !== 'untouched') { hasAnyDataForSummary = true; } }); } status = hasAnyDataForSummary ? 'partial' : 'untouched'; } } else if (targetSection) { status = getSectionStatus(targetSection + 'Section', targaData); } if (status === 'completed') btn.classList.add('nav-btn-completed'); else if (status === 'partial') btn.classList.add('nav-btn-partial'); else btn.classList.add('nav-btn-untouched'); }); }
-
-    // ----------------------------------------------------------------------------------
-    // Funzione showView MODIFICATA (ma no changes needed based on analysis for this specific problem)
-    // ----------------------------------------------------------------------------------
+    
     function showView(viewName) {
         landingPageSection.style.display = 'none';
         checklistContainer.style.display = 'none';
         historyPageSection.style.display = 'none';
-        if(cameraPageSection) cameraPageSection.style.display = 'none'; // Nascondi cameraPageSection di default
+        if(cameraPageSection) cameraPageSection.style.display = 'none';
         if(galleryPageSection) galleryPageSection.style.display = 'none';
         if(imageLightbox) imageLightbox.style.display = 'none';
+        if(targaScanPageSection) targaScanPageSection.style.display = 'none'; // Nascondi pagina OCR
 
-        // Default visibility for top header elements
         if(pageHeaderContainer) pageHeaderContainer.style.display = 'block';
         if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
         if(mainTitleGlobal) mainTitleGlobal.style.display = 'block';
@@ -1779,59 +1963,39 @@ async function handleSavePeriziaAndReturn() {
         let bodyPaddingTopValue = '0px';
         let bodyPaddingBottomValue = '0px';
 
-        if (viewName !== 'camera') {
-            // Se NON siamo in modalità fotocamera, la bottomNavCircles è visibile di default
-            if (bottomNavCircles) {
-                bottomNavCircles.style.display = 'flex';
-            }
+        if (viewName !== 'camera' && viewName !== 'targaScan') {
+            if (bottomNavCircles) bottomNavCircles.style.display = 'flex';
 
             if (pageHeaderContainer && getComputedStyle(pageHeaderContainer).display !== 'none' && pageHeaderContainer.classList.contains('fixed-header')) {
                 let hasVisibleTopContent = false;
                 const topElements = [utilityNavButtons, mainTitleGlobal, navButtonsContainer, targaDropdownContainer];
-                for(let el of topElements) {
-                    if (el && getComputedStyle(el).display !== 'none') {
-                        hasVisibleTopContent = true;
-                        break;
-                    }
-                }
-                if(hasVisibleTopContent) {
-                    bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
-                }
+                for(let el of topElements) { if (el && getComputedStyle(el).display !== 'none') { hasVisibleTopContent = true; break; } }
+                if(hasVisibleTopContent) bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
             }
 
             if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') {
                 bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
             }
-        } else { // viewName === 'camera'
-            // In modalità fotocamera, l'header superiore è nascosto
+        } else { 
             if (pageHeaderContainer) pageHeaderContainer.style.display = 'none';
-
-            // La bottomNavCircles DEVE essere visibile in modalità camera (come da richiesta)
-            if (bottomNavCircles) {
-                 bottomNavCircles.style.display = 'flex'; // Assicura che sia visibile
-                 // Calcola il padding solo se effettivamente visibile
-                 if (getComputedStyle(bottomNavCircles).display !== 'none') {
-                    bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
-                 } else {
-                     bodyPaddingBottomValue = '0px'; // Fallback
-                 }
-            } else {
-                bodyPaddingBottomValue = '0px';
+            if (viewName === 'camera') {
+                if (bottomNavCircles) bottomNavCircles.style.display = 'flex';
+                if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
+            } else { // Per targaScan, nascondi anche la barra inferiore
+                 if (bottomNavCircles) bottomNavCircles.style.display = 'none';
+                 bodyPaddingBottomValue = '0px';
             }
         }
         document.body.style.paddingTop = bodyPaddingTopValue;
         document.body.style.paddingBottom = bodyPaddingBottomValue;
 
-        // Gestione specifica della vista
         if (viewName === 'landing') {
             landingPageSection.style.display = 'block';
             if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
             if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
             if (navButtonsContainer) navButtonsContainer.style.display = 'none';
             if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-            if (listaTargheCompleta.length > 0 &&
-                (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
-                typeof popolaTargheFiltrate === 'function') {
+            if (listaTargheCompleta.length > 0 && (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) && typeof popolaTargheFiltrate === 'function') {
                 popolaTargheFiltrate();
             }
             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
@@ -1863,15 +2027,13 @@ async function handleSavePeriziaAndReturn() {
             populateSavedTargasList();
             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         } else if (viewName === 'gallery') {
-            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
-            // La visualizzazione di galleryPageSection è gestita da showGalleryPage()
-            // Questa viene chiamata da altre parti della logica (es. click su headerPhotosBtn)
+             if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         } else if (viewName === 'camera') {
-            // La logica principale per preparare la cameraPageSection
-            // e avviare lo stream è in showCameraPage()
-            showCameraPage(); // Chiamata per attivare la fotocamera
-        } else { // Vista sconosciuta o di default
+            showCameraPage();
+        } else if (viewName === 'targaScan') { // Gestione vista OCR
+            targaScanPageSection.style.display = 'flex';
+        } else {
              if (pageHeaderContainer) pageHeaderContainer.classList.remove('fixed-header');
              if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         }
@@ -1879,43 +2041,22 @@ async function handleSavePeriziaAndReturn() {
         updateNavButtonColors();
         window.scrollTo(0, 0);
     }
-
-    // ----------------------------------------------------------------------------------
-    // Funzione showCameraPage MODIFICATA
-    // ----------------------------------------------------------------------------------
+    
     async function showCameraPage() {
-        // The logic for setting lastViewBeforeCamera and lastSectionBeforeCamera
-        // has been moved to the headerCameraBtn click listener.
-        // These globals will be used directly by getFilenameSectionName() and returnFromCamera().
-
-        // Ensure other main sections are hidden (showView('camera') already handles this)
-        // landingPageSection.style.display = 'none';
-        // checklistContainer.style.display = 'none';
-        // historyPageSection.style.display = 'none';
-        // galleryPageSection.style.display = 'none';
-
-        // Configure camera view
         cameraStreamElement.style.display = 'block';
         freezeFrameDisplayElement.style.display = 'none';
-        cameraPageSection.style.display = 'flex'; // Make the camera container visible
+        cameraPageSection.style.display = 'flex';
 
-        // Bottom navigation bar (bottomNavCircles) is handled by showView('camera')
-        // Top header elements (utilityNavButtons, mainTitleGlobal, etc.) are hidden by showView('camera')
-
-        let topBarHeight = 0; // Since pageHeaderContainer is display: none
+        let topBarHeight = 0;
         let bottomNavHeight = 0;
 
         if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') {
             bottomNavHeight = bottomNavCircles.offsetHeight;
         }
-
-        // Body padding (paddingTop and paddingBottom) is handled by showView('camera')
-
-        // Adjust cameraPageSection height to accommodate bottomNavCircles
-        cameraPageSection.style.paddingTop = `${topBarHeight}px`; // Will be '0px'
+        
+        cameraPageSection.style.paddingTop = `${topBarHeight}px`;
         cameraPageSection.style.height = `calc(100vh - ${topBarHeight}px - ${bottomNavHeight}px)`;
-
-        // Start camera stream
+        
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             const constraints = {
                 video: {
@@ -1956,30 +2097,23 @@ async function handleSavePeriziaAndReturn() {
         }
         window.scrollTo(0, 0);
     }
-
-    // ----------------------------------------------------------------------------------
-    // Funzione returnFromCamera MODIFICATA (no changes needed for this specific problem)
-    // ----------------------------------------------------------------------------------
+    
     function returnFromCamera() {
-        // Ferma lo stream della fotocamera
         if (currentCameraStream) {
             currentCameraStream.getTracks().forEach(track => track.stop());
             currentCameraStream = null;
             if (cameraStreamElement) cameraStreamElement.srcObject = null;
         }
 
-        // Nascondi la sezione della fotocamera e resetta gli elementi visivi
         if (cameraPageSection) cameraPageSection.style.display = 'none';
-        if (cameraStreamElement) cameraStreamElement.style.display = 'block'; // Pronto per la prossima volta
+        if (cameraStreamElement) cameraStreamElement.style.display = 'block';
         if (freezeFrameDisplayElement) freezeFrameDisplayElement.style.display = 'none';
 
-        // Resetta gli stili specifici della cameraPageSection che potrebbero essere stati modificati
         if (cameraPageSection) {
             cameraPageSection.style.paddingTop = '';
-            cameraPageSection.style.height = ''; // Torna al valore CSS di default (es. 100%)
+            cameraPageSection.style.height = '';
         }
 
-        // Ripristina la vista precedente (uses the globally set lastViewBeforeCamera and lastSectionBeforeCamera)
         if (lastViewBeforeCamera === 'gallery') {
             showGalleryPage(currentGalleryTargaFilter, lastSectionBeforeCamera);
         } else if (lastViewBeforeCamera === 'checklist' && targaSelezionataGlobalmente && lastSectionBeforeCamera) {
@@ -1987,17 +2121,16 @@ async function handleSavePeriziaAndReturn() {
             showSection(lastSectionBeforeCamera); 
         } else if (lastViewBeforeCamera === 'history') {
             showView('history');
-        } else { // Default a 'landing'
+        } else {
             showView('landing');
         }
     }
 
 
     function getFilenameSectionName() {
-        let sectionNameForFile = "generale"; // Default value
+        let sectionNameForFile = "generale";
         let currentSectionKey = null;
 
-        // Uses the globally set lastViewBeforeCamera and lastSectionBeforeCamera
         if (lastViewBeforeCamera === 'checklist' && lastSectionBeforeCamera) {
             currentSectionKey = lastSectionBeforeCamera;
         } else if (lastViewBeforeCamera === 'gallery' && currentGallerySectionFilter) {
@@ -2008,13 +2141,11 @@ async function handleSavePeriziaAndReturn() {
             let tempSectionKey = currentSectionKey.toLowerCase();
             if (['remarketing', 'pneumatici'].includes(tempSectionKey)) {
                 sectionNameForFile = tempSectionKey;
-            } else if (tempSectionKey === 'danniverifiche') { // This corresponds to 'danniVerificheSection'
+            } else if (tempSectionKey === 'danniverifiche') {
                 sectionNameForFile = 'danni';
             } else if (tempSectionKey === 'riepilogo') {
                 sectionNameForFile = 'generale_riepilogo';
             }
-            // If currentSectionKey is something else, it will retain the default "generale"
-            // or "generale_riepilogo" if from 'riepilogo'.
         }
         return sectionNameForFile;
     }
@@ -2045,14 +2176,12 @@ function getNextPhotoNumber(targa, sectionName) {
                 break;
 
             default:
-                // Gestisce tutti gli altri casi, come 'generale'
                 const genericCounterKey = `${APP_PREFIX}photoCount_${targa}_${sectionNormalized}`;
                 let photoNumber = parseInt(localStorage.getItem(genericCounterKey) || '0') + 1;
                 localStorage.setItem(genericCounterKey, photoNumber.toString());
                 return photoNumber;
         }
-
-        // Questo codice viene eseguito solo per i casi specifici (remarketing, pneumatici, danni)
+        
         const counterKey = `${APP_PREFIX}photoCount_${targa}_${counterKeyBase}`;
         let currentNumber = parseInt(localStorage.getItem(counterKey) || (start - 1).toString());
         currentNumber++;
@@ -2061,17 +2190,13 @@ function getNextPhotoNumber(targa, sectionName) {
             currentNumber = start;
         }
         
-        // La notifica del limite raggiunto era commentata, la mantengo così
         if (currentNumber > end) {
-            // alert(`Attenzione: Limite foto per "${sectionName}" (${start}-${end}) raggiunto. N.${currentNumber}.`);
         }
         
         localStorage.setItem(counterKey, currentNumber.toString());
         return currentNumber;
     }
 
-
-// VERSIONE FINALE CORRETTA E VERIFICATA
 function capturePhoto() {
     if (captureBtn.disabled) return;
     
@@ -2089,7 +2214,6 @@ function capturePhoto() {
                 canvas.width = videoHeight;
                 canvas.height = videoWidth;
                 
-                // Logica di rotazione antioraria (-90 gradi)
                 ctx.translate(0, videoWidth);
                 ctx.rotate(-Math.PI / 2);
                 
@@ -2351,48 +2475,43 @@ function handleLightboxSwipe(endX, endY) {
 
         const horizontalSwipeStrength = Math.abs(deltaX);
         const verticalSwipeStrength = Math.abs(deltaY);
-
-        // Verifica se lo swipe supera la soglia minima per essere considerato un gesto
+        
         if (horizontalSwipeStrength > swipeThreshold || verticalSwipeStrength > swipeThreshold) {
             
-            // Determina se lo swipe è prevalentemente orizzontale o verticale
             if (horizontalSwipeStrength > verticalSwipeStrength) {
-                // Gesto prevalentemente orizzontale
-                if (deltaX > 0) { // Swipe verso destra (foto precedente)
+                if (deltaX > 0) {
                     if (currentLightboxPhotoIndex > 0) {
                         currentLightboxPhotoIndex--;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('left'); // Inizio della lista
+                        showSwipeEndIndicator('left');
                     }
-                } else { // Swipe verso sinistra (foto successiva)
+                } else {
                     if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) {
                         currentLightboxPhotoIndex++;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('right'); // Fine della lista
+                        showSwipeEndIndicator('right');
                     }
                 }
             } else {
-                // Gesto prevalentemente verticale
-                if (deltaY > 0) { // Swipe verso il basso (foto precedente)
+                if (deltaY > 0) {
                     if (currentLightboxPhotoIndex > 0) {
                         currentLightboxPhotoIndex--;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('top'); // Inizio della lista (swipe verso il basso all'inizio)
+                        showSwipeEndIndicator('top');
                     }
-                } else { // Swipe verso l'alto (foto successiva)
+                } else {
                     if (currentLightboxPhotoIndex < currentLightboxPhotoList.length - 1) {
                         currentLightboxPhotoIndex++;
                         openImageLightbox(currentLightboxPhotoList[currentLightboxPhotoIndex]);
                     } else {
-                        showSwipeEndIndicator('bottom'); // Fine della lista (swipe verso l'alto alla fine)
+                        showSwipeEndIndicator('bottom');
                     }
                 }
             }
         }
-        // Resetta le coordinate di inizio per il prossimo swipe
         lightboxTouchStartX = 0;
         lightboxTouchStartY = 0;
     }
@@ -3005,6 +3124,11 @@ function handleLightboxSwipe(endX, endY) {
 
 
     document.addEventListener('DOMContentLoaded', () => {
+        // --- NUOVI EVENT LISTENER OCR ---
+        if (targaScanBtn) targaScanBtn.addEventListener('click', startTargaScan);
+        if (closeTargaScanBtn) closeTargaScanBtn.addEventListener('click', stopTargaScan);
+        // --- FINE ---
+
         syncToSheetsBtn = document.createElement('button');
         syncToSheetsBtn.id = 'syncToSheetsBtn'; syncToSheetsBtn.classList.add('action-button');
         syncToSheetsBtn.textContent = 'Sincronizza';
@@ -3091,19 +3215,14 @@ function handleLightboxSwipe(endX, endY) {
 
         if (headerShutdownBtn) {
     headerShutdownBtn.addEventListener('click', (event) => {
-        // URL del trigger di MacroDroid
         const triggerUrl = 'https://trigger.macrodroid.com/5759064d-6af9-4af0-aef0-2548335e41fd/disattivaperizie';
 
-        // Forniamo un feedback visivo immediato all'utente
         const button = event.currentTarget;
-        button.style.backgroundColor = '#8b0000'; // Rosso scuro al clic
-        setTimeout(() => { button.style.backgroundColor = ''; }, 250); // Rimuove il colore dopo 250ms
+        button.style.backgroundColor = '#8b0000';
+        setTimeout(() => { button.style.backgroundColor = ''; }, 250);
 
-        // Eseguiamo la richiesta in background senza aprire una nuova pagina
         fetch(triggerUrl, { mode: 'no-cors' }).catch(error => {
             console.error('Errore durante l\'invio del trigger a MacroDroid:', error);
-            // Puoi aggiungere un alert qui se vuoi notificare l'utente in caso di errore
-            // alert('Impossibile contattare il trigger di spegnimento.');
         });
     });
 }
@@ -3166,14 +3285,12 @@ function handleLightboxSwipe(endX, endY) {
                 } else { showView('landing'); }
             });
         }
-
-        // MODIFIED headerCameraBtn event listener
+        
         if (headerCameraBtn) {
             headerCameraBtn.addEventListener('click', () => {
-                if (cameraPageSection.style.display === 'flex') { // If camera is already open
+                if (cameraPageSection.style.display === 'flex') {
                     returnFromCamera();
-                } else { // If opening camera
-                    // Determine and set lastViewBeforeCamera and lastSectionBeforeCamera HERE
+                } else {
                     if (galleryPageSection.style.display === 'block') {
                         lastViewBeforeCamera = 'gallery';
                         lastSectionBeforeCamera = currentGallerySectionFilter;
@@ -3184,55 +3301,30 @@ function handleLightboxSwipe(endX, endY) {
                     } else if (historyPageSection.style.display === 'block') {
                         lastViewBeforeCamera = 'history';
                         lastSectionBeforeCamera = null;
-                    } else { // Default if no specific section is active (e.g., on landing page)
+                    } else {
                         lastViewBeforeCamera = 'landing';
                         lastSectionBeforeCamera = null;
                     }
-                    showView('camera'); // This will call showCameraPage, which now uses the pre-set globals
+                    showView('camera');
                 }
             });
         }
 
         if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
         if (closeCameraBtn) closeCameraBtn.addEventListener('click', returnFromCamera);
-
-        // >>> INIZIO BLOCCO AGGIORNATO E CORRETTO <<<
-// Aggiunge un listener per scattare la foto con Invio, tasti Volume e altri possibili tasti remoti
+        
         document.addEventListener('keydown', function(event) {
             
-            // Lista estesa di possibili nomi di tasti per la massima compatibilità
-            const shutterKeys = [
-                'Enter',          // Tasto Invio
-                'AudioVolumeUp',  // Standard W3C per Volume +
-                'AudioVolumeDown',// Standard W3C per Volume -
-                'AudioVolume_Up',  // Standard W3C per Volume +
-                'AudioVolume_Down',// Standard W3C per Volume -
-                'VolumeUp',       // Standard non ufficiale/vecchio per Volume +
-                'VolumeDown',     // Standard non ufficiale/vecchio per Volume -
-                'Volume_Up',       // Standard non ufficiale/vecchio per Volume +
-                'Volume_Down',     // Standard non ufficiale/vecchio per Volume -
-                ' '               // Barra spaziatrice (usata da alcuni telecomandi)
-            ];
-
-            // Aggiungiamo un controllo di fallback sui "keyCode" (deprecati ma ancora utili)
-            // 13=Invio, 175=Vol+, 174=Vol-, 32=Spazio
+            const shutterKeys = [ 'Enter', 'AudioVolumeUp', 'AudioVolumeDown', 'AudioVolume_Up', 'AudioVolume_Down', 'VolumeUp', 'VolumeDown', 'Volume_Up', 'Volume_Down', ' ' ];
             const shutterKeyCodes = [13, 175, 174, 32];
-
-            // La condizione è vera se il nome del tasto OPPURE il suo codice corrispondono
             const isShutterKeyPressed = shutterKeys.includes(event.key) || shutterKeyCodes.includes(event.keyCode);
 
-            // Controlliamo se la fotocamera è attiva, se il tasto premuto è uno dei tasti validi e se il pulsante non è disabilitato
             if (cameraPageSection.style.display === 'flex' && isShutterKeyPressed && !captureBtn.disabled) {
-                
-                // Preveniamo l'azione di default del browser
                 event.preventDefault();
-
-                // Chiamiamo la funzione di cattura della foto
                 capturePhoto();
             }
         });
-        // >>> FINE BLOCCO AGGIORNATO E CORRETTO <<<
-
+        
         navButtons.forEach(b => b.addEventListener('click', async function() {
             const targetId = this.dataset.target;
             if (galleryPageSection.style.display === 'block' && currentGalleryTargaFilter) {
@@ -3311,5 +3403,3 @@ function handleLightboxSwipe(endX, endY) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
-
-
