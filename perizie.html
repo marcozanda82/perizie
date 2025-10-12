@@ -1520,12 +1520,14 @@
             });
             ocrResultDisplay.textContent = 'Inquadra e Analizza';
             return true;
-        } catch (error) {
-            console.error("Errore inizializzazione Tesseract:", error);
-            ocrResultDisplay.textContent = 'Errore OCR!';
-            ocrResultDisplay.classList.add('error');
-            return false;
-        }
+} catch (error) {
+    alert('Dettaglio errore: ' + error.message); // <-- RIGA AGGIUNTA
+    console.error('Errore durante il riconoscimento OCR:', error);
+    ocrResultDisplay.textContent = 'Errore analisi. Riprova.';
+    ocrResultDisplay.classList.add('error');
+    retryTargaScanBtn.style.display = 'inline-flex';
+    closeTargaScanBtn.style.display = 'inline-flex';
+}
     }
 
 async function startTargaScan() {
@@ -3612,6 +3614,7 @@ function handleLightboxSwipe(endX, endY) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
 
 
 
