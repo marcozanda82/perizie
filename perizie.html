@@ -1857,123 +1857,88 @@ async function handleSavePeriziaAndReturn() {
     // ----------------------------------------------------------------------------------
     // Funzione showView MODIFICATA (ma no changes needed based on analysis for this specific problem)
     // ----------------------------------------------------------------------------------
+
     function showView(viewName) {
-        landingPageSection.style.display = 'none';
-        checklistContainer.style.display = 'none';
-        historyPageSection.style.display = 'none';
-        if(cameraPageSection) cameraPageSection.style.display = 'none'; // Nascondi cameraPageSection di default
-        if(galleryPageSection) galleryPageSection.style.display = 'none';
-        if(imageLightbox) imageLightbox.style.display = 'none';
+    // Nascondi tutte le sezioni principali
+    landingPageSection.style.display = 'none';
+    checklistContainer.style.display = 'none';
+    historyPageSection.style.display = 'none';
+    if(cameraPageSection) cameraPageSection.style.display = 'none';
+    if(galleryPageSection) galleryPageSection.style.display = 'none';
+    if(imageLightbox) imageLightbox.style.display = 'none';
+    if(targaScanPageSection) targaScanPageSection.style.display = 'none';
 
-        // Default visibility for top header elements
-        if(pageHeaderContainer) pageHeaderContainer.style.display = 'block';
-        if(utilityNavButtons) utilityNavButtons.style.display = 'flex';
-        if(mainTitleGlobal) mainTitleGlobal.style.display = 'block';
-        if(navButtonsContainer) navButtonsContainer.style.display = 'flex';
+    // Gestione della visibilità degli header in base alla vista
+    const isFullScreenView = (viewName === 'camera' || viewName === 'targaScan');
 
-        let bodyPaddingTopValue = '0px';
-        let bodyPaddingBottomValue = '0px';
-
-        if (viewName !== 'camera') {
-            // Se NON siamo in modalità fotocamera, la bottomNavCircles è visibile di default
-            if (bottomNavCircles) {
-                bottomNavCircles.style.display = 'flex';
-            }
-
-            if (pageHeaderContainer && getComputedStyle(pageHeaderContainer).display !== 'none' && pageHeaderContainer.classList.contains('fixed-header')) {
-                let hasVisibleTopContent = false;
-                const topElements = [utilityNavButtons, mainTitleGlobal, navButtonsContainer, targaDropdownContainer];
-                for(let el of topElements) {
-                    if (el && getComputedStyle(el).display !== 'none') {
-                        hasVisibleTopContent = true;
-                        break;
-                    }
-                }
-                if(hasVisibleTopContent) {
-                    bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
-                }
-            }
-
-            if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') {
-                bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
-            }
-        } else { // viewName === 'camera'
-            // In modalità fotocamera, l'header superiore è nascosto
-            if (pageHeaderContainer) pageHeaderContainer.style.display = 'none';
-
-            // La bottomNavCircles DEVE essere visibile in modalità camera (come da richiesta)
-            if (bottomNavCircles) {
-                 bottomNavCircles.style.display = 'flex'; // Assicura che sia visibile
-                 // Calcola il padding solo se effettivamente visibile
-                 if (getComputedStyle(bottomNavCircles).display !== 'none') {
-                    bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
-                 } else {
-                     bodyPaddingBottomValue = '0px'; // Fallback
-                 }
-            } else {
-                bodyPaddingBottomValue = '0px';
-            }
-        }
-        document.body.style.paddingTop = bodyPaddingTopValue;
-        document.body.style.paddingBottom = bodyPaddingBottomValue;
-
-        // Gestione specifica della vista
-        if (viewName === 'landing') {
-            landingPageSection.style.display = 'block';
-            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
-            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
-            if (navButtonsContainer) navButtonsContainer.style.display = 'none';
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-            if (listaTargheCompleta.length > 0 &&
-                (!document.getElementById('preloader') || document.getElementById('preloader').classList.contains('hidden')) &&
-                typeof popolaTargheFiltrate === 'function') {
-                popolaTargheFiltrate();
-            }
-            if (downloadZipBtn) downloadZipBtn.style.display = 'none';
-        } else if (viewName === 'checklist') {
-            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
-            if (!targaSelezionataGlobalmente) { showView('landing'); return; }
-            if (localStorage.getItem(`${APP_PREFIX}deleted_${targaSelezionataGlobalmente.toUpperCase()}`)) {
-                showView('landing');
-                alert(`Perizia per ${targaSelezionataGlobalmente} cancellata.`); return;
-            }
-            checklistContainer.style.display = 'block';
-            if (mainTitleGlobal) mainTitleGlobal.style.display = 'none';
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
-            populateTargaSwitcherDropdown(); updateTargaDetailsDisplay(targaSelezionataGlobalmente);
-            if (tipoTrazioneSelect) handleTrazioneChange();
-            const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
-            if (downloadZipBtn && activeSectionElement && activeSectionElement.id === 'riepilogoSection' && targaSelezionataGlobalmente) {
-                downloadZipBtn.href = `https://192.168.1.154:8080/${targaSelezionataGlobalmente.toUpperCase()}.zip`;
-                downloadZipBtn.style.display = 'inline-flex';
-            } else if (downloadZipBtn) {
-                downloadZipBtn.style.display = 'none';
-            }
-        } else if (viewName === 'history') {
-            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
-            historyPageSection.style.display = 'block';
-            if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
-            if (navButtonsContainer) navButtonsContainer.style.display = 'none';
-            if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
-            populateSavedTargasList();
-            if (downloadZipBtn) downloadZipBtn.style.display = 'none';
-        } else if (viewName === 'gallery') {
-            if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
-            // La visualizzazione di galleryPageSection è gestita da showGalleryPage()
-            // Questa viene chiamata da altre parti della logica (es. click su headerPhotosBtn)
-            if (downloadZipBtn) downloadZipBtn.style.display = 'none';
-        } else if (viewName === 'camera') {
-            // La logica principale per preparare la cameraPageSection
-            // e avviare lo stream è in showCameraPage()
-            showCameraPage(); // Chiamata per attivare la fotocamera
-        } else { // Vista sconosciuta o di default
-             if (pageHeaderContainer) pageHeaderContainer.classList.remove('fixed-header');
-             if (downloadZipBtn) downloadZipBtn.style.display = 'none';
-        }
-
-        updateNavButtonColors();
-        window.scrollTo(0, 0);
+    if (isFullScreenView) {
+        // Viste a schermo intero: nascondi tutto tranne la vista stessa
+        if (pageHeaderContainer) pageHeaderContainer.style.display = 'none';
+        if (bottomNavCircles) bottomNavCircles.style.display = viewName === 'camera' ? 'flex' : 'none'; // Mostra solo per la fotocamera normale
+    } else {
+        // Viste normali: mostra gli header
+        if (pageHeaderContainer) pageHeaderContainer.style.display = 'block';
+        if (bottomNavCircles) bottomNavCircles.style.display = 'flex';
     }
+
+    // Imposta il padding del body (margini interni)
+    let bodyPaddingTopValue = '0px';
+    let bodyPaddingBottomValue = '0px';
+    if (pageHeaderContainer && getComputedStyle(pageHeaderContainer).display !== 'none') {
+        bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
+    }
+    if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') {
+        bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
+    }
+    document.body.style.paddingTop = bodyPaddingTopValue;
+    document.body.style.paddingBottom = bodyPaddingBottomValue;
+
+    // Mostra la sezione corretta
+    if (viewName === 'landing') {
+        landingPageSection.style.display = 'block';
+        if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
+        if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
+        if (navButtonsContainer) navButtonsContainer.style.display = 'none';
+        if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
+        if (downloadZipBtn) downloadZipBtn.style.display = 'none';
+        if (listaTargheCompleta.length > 0 && typeof popolaTargheFiltrate === 'function') {
+            popolaTargheFiltrate();
+        }
+    } else if (viewName === 'checklist') {
+        if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
+        if (!targaSelezionataGlobalmente) { showView('landing'); return; }
+        checklistContainer.style.display = 'block';
+        if (mainTitleGlobal) mainTitleGlobal.style.display = 'none';
+        if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
+        populateTargaSwitcherDropdown();
+        updateTargaDetailsDisplay(targaSelezionataGlobalmente);
+        const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
+        if (downloadZipBtn && activeSectionElement && activeSectionElement.id === 'riepilogoSection') {
+             downloadZipBtn.style.display = 'inline-flex';
+        } else if (downloadZipBtn) {
+            downloadZipBtn.style.display = 'none';
+        }
+    } else if (viewName === 'history') {
+        if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
+        historyPageSection.style.display = 'block';
+        if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Cronistoria Salvataggi";
+        if (navButtonsContainer) navButtonsContainer.style.display = 'none';
+        if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
+        if (downloadZipBtn) downloadZipBtn.style.display = 'none';
+        populateSavedTargasList();
+    } else if (viewName === 'gallery') {
+        if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
+        if (downloadZipBtn) downloadZipBtn.style.display = 'none';
+        // La visualizzazione effettiva della sezione è in showGalleryPage()
+    } else if (viewName === 'camera') {
+        showCameraPage(); // Questa funzione si occuperà di mostrare cameraPageSection
+    } else if (viewName === 'targaScan') {
+        targaScanPageSection.style.display = 'flex'; // Mostra la sezione OCR
+    }
+
+    updateNavButtonColors();
+    window.scrollTo(0, 0);
+}
 
     // ----------------------------------------------------------------------------------
     // Funzione showCameraPage MODIFICATA
@@ -3418,6 +3383,7 @@ if (closeTargaScanBtn) closeTargaScanBtn.addEventListener('click', stopTargaScan
 
 </body>
 </html>
+
 
 
 
