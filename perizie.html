@@ -1672,70 +1672,93 @@ function preprocessCanvas(canvas) {
 }
     
 async function scanFrameForTarga() {
-    if (!isScanningOCR || !ocrWorker || !targaScanStreamElement.srcObject) return;
+    // Se il processo è già in corso, non fare nulla
+    if (analyzeTargaBtn.disabled) return;
 
     analyzeTargaBtn.disabled = true;
     retryTargaScanBtn.style.display = 'none';
+    closeTargaScanBtn.style.display = 'none'; // Nascondiamo anche il tasto chiudi durante l'analisi
 
-    const context = targaScanCanvas.getContext('2d', { willReadFrequently: true });
-    targaScanCanvas.width = targaScanStreamElement.videoWidth;
-    targaScanCanvas.height = targaScanStreamElement.videoHeight;
-    context.drawImage(targaScanStreamElement, 0, 0, targaScanCanvas.width, targaScanCanvas.height);
-
-    // **FASE 1: Pre-elaborazione dell'immagine per migliorare l'OCR**
-    preprocessCanvas(targaScanCanvas);
-
-    targaScanFreezeFrame.src = targaScanCanvas.toDataURL('image/jpeg');
-    targaScanFreezeFrame.style.display = 'block';
-    targaScanStreamElement.style.display = 'none';
-    analyzeTargaBtn.style.display = 'none';
-    closeTargaScanBtn.style.display = 'none';
+    // --- IMPOSTAZIONI DI ANALISI ---
+    const NUMERO_DI_TENTATIVI = 3; // Analizzeremo 3 frame per maggiore affidabilità
+    const TOLLERANZA_ERRORI = 1;   // Accettiamo targhe con 1 carattere di differenza (puoi provare a mettere 2 se ancora non funziona, ma con cautela)
 
     try {
-        const { data: { text } } = await ocrWorker.recognize(targaScanCanvas);
-        const cleanedText = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+        let candidates = []; // Array per raccogliere tutti i risultati validi dai vari tentativi
 
-        const targaRegex = /[A-Z]{2}\d{3}[A-Z]{2}/g;
-        const potentialMatches = cleanedText.match(targaRegex);
+        // Mostra il primo fermo immagine per feedback visivo immediato
+        const context = targaScanCanvas.getContext('2d', { willReadFrequently: true });
+        targaScanCanvas.width = targaScanStreamElement.videoWidth;
+        targaScanCanvas.height = targaScanStreamElement.videoHeight;
+        context.drawImage(targaScanStreamElement, 0, 0, targaScanCanvas.width, targaScanCanvas.height);
+        targaScanFreezeFrame.src = targaScanCanvas.toDataURL('image/jpeg');
+        targaScanFreezeFrame.style.display = 'block';
+        targaScanStreamElement.style.display = 'none'; // Nascondiamo il video live
+        
+        // --- INIZIO CICLO DI ANALISI A RAFFICA ---
+        for (let i = 0; i < NUMERO_DI_TENTATIVI; i++) {
+            ocrResultDisplay.textContent = `Analisi tentativo ${i + 1} di ${NUMERO_DI_TENTATIVI}...`;
+            
+            // Cattura un nuovo frame per ogni tentativo (dal flusso video che è ancora attivo ma nascosto)
+            context.drawImage(targaScanStreamElement, 0, 0, targaScanCanvas.width, targaScanCanvas.height);
+            preprocessCanvas(targaScanCanvas); // Pre-elabora ogni frame
 
-        let bestMatch = null;
-        let minDistance = 2; // Accettiamo solo distanze di 0 o 1
+            const { data: { text } } = await ocrWorker.recognize(targaScanCanvas);
+            const cleanedText = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+            
+            const targaRegex = /[A-Z]{2}\d{3}[A-Z]{2}/g;
+            const potentialMatches = cleanedText.match(targaRegex);
 
-        if (potentialMatches && potentialMatches.length > 0) {
-            const ocrResult = potentialMatches[0]; // Consideriamo il primo match valido
+            if (potentialMatches && potentialMatches.length > 0) {
+                const ocrResult = potentialMatches[0];
 
-            for (const targaInLista of listaTargheCompleta) {
-                const distance = levenshtein(ocrResult, targaInLista.targa);
-
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    bestMatch = {
-                        targaCorretta: targaInLista.targa,
-                        targaLetta: ocrResult
-                    };
+                for (const targaInLista of listaTargheCompleta) {
+                    const distance = levenshtein(ocrResult, targaInLista.targa);
+                    
+                    if (distance <= TOLLERANZA_ERRORI) {
+                        // Trovato un candidato valido, lo aggiungiamo alla lista con la sua distanza
+                        candidates.push({ targa: targaInLista.targa, distance: distance });
+                        
+                        // OTTIMIZZAZIONE: Se troviamo una corrispondenza perfetta, è inutile continuare
+                        if (distance === 0) {
+                            i = NUMERO_DI_TENTATIVI; // Forza l'uscita dal ciclo for
+                            break; // Esci dal ciclo interno
+                        }
+                    }
                 }
-
-                if (minDistance === 0) break; // Trovata corrispondenza perfetta, inutile continuare
             }
         }
+        // --- FINE CICLO DI ANALISI ---
 
-        if (bestMatch) {
-            let message = `Trovata: ${bestMatch.targaCorretta}`;
-            if (minDistance === 1) {
-                message += ` (letta come ${bestMatch.targaLetta})`;
+        // --- LOGICA DI "VOTAZIONE" DEL RISULTATO MIGLIORE ---
+        if (candidates.length > 0) {
+            // Se abbiamo una corrispondenza perfetta, vince su tutto
+            let perfectMatch = candidates.find(c => c.distance === 0);
+            if (perfectMatch) {
+                bestMatch = perfectMatch.targa;
+            } else {
+                // Altrimenti, contiamo le occorrenze di ogni targa candidata
+                const counts = candidates.reduce((acc, curr) => {
+                    acc[curr.targa] = (acc[curr.targa] || 0) + 1;
+                    return acc;
+                }, {});
+                // Troviamo la targa che è apparsa più volte
+                bestMatch = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
             }
 
-            ocrResultDisplay.textContent = message;
+            ocrResultDisplay.textContent = `Trovata: ${bestMatch}!`;
             ocrResultDisplay.classList.remove('error');
             ocrResultDisplay.classList.add('success');
             isScanningOCR = false;
-
+            
             setTimeout(() => {
                 stopTargaScan();
-                handleTargaSelectionAndSync(bestMatch.targaCorretta);
-            }, 1500); // Aumento leggermente il tempo per dare modo di leggere il feedback
+                handleTargaSelectionAndSync(bestMatch);
+            }, 1200);
+
         } else {
-            ocrResultDisplay.textContent = 'Nessuna targa trovata in elenco. Riprova.';
+            // Se dopo tutti i tentativi non abbiamo trovato nulla
+            ocrResultDisplay.textContent = 'Nessuna targa trovata. Riprova.';
             ocrResultDisplay.classList.remove('success');
             ocrResultDisplay.classList.add('error');
             retryTargaScanBtn.style.display = 'inline-flex';
@@ -1744,7 +1767,7 @@ async function scanFrameForTarga() {
 
     } catch (error) {
         console.error('Errore durante il riconoscimento OCR:', error);
-        ocrResultDisplay.textContent = 'Errore analisi.';
+        ocrResultDisplay.textContent = 'Errore analisi. Riprova.';
         ocrResultDisplay.classList.add('error');
         retryTargaScanBtn.style.display = 'inline-flex';
         closeTargaScanBtn.style.display = 'inline-flex';
@@ -3589,6 +3612,7 @@ function handleLightboxSwipe(endX, endY) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
 
 
 
