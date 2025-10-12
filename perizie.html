@@ -1575,20 +1575,16 @@ async function startTargaScan() {
     }
 }
     
-    function stopTargaScan() {
-        isScanningOCR = false;
-        if (currentTargaScanStream) {
-            currentTargaScanStream.getTracks().forEach(track => track.stop());
-            currentTargaScanStream = null;
-        }
-        if (ocrWorker) {
-             ocrWorker.terminate();
-             ocrWorker = null;
-        }
-        targaScanStreamElement.srcObject = null;
-        targaScanFreezeFrame.src = '#';
-        showView('landing');
+function stopTargaScan() {
+    isScanningOCR = false;
+    if (currentTargaScanStream) {
+        currentTargaScanStream.getTracks().forEach(track => track.stop());
+        currentTargaScanStream = null;
     }
+    targaScanStreamElement.srcObject = null;
+    targaScanFreezeFrame.src = '#';
+    showView('landing');
+}
 
 /**
  * Calcola la distanza di Levenshtein tra due stringhe (quanti cambi servono per uguagliarle).
@@ -3593,6 +3589,7 @@ function handleLightboxSwipe(endX, endY) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
 
 
 
