@@ -1027,6 +1027,75 @@
     .riepilogo-header .section-title { width: 100%; text-align: center; } 
     #downloadZipBtn { width: 100%; justify-content: center;} 
 }
+        /* START: Stili per la pagina Targa Scan OCR */
+#targaScanPageSection {
+    z-index: 4000;
+}
+#targaScanStream {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+#targaFocusBox {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vw;
+    max-width: 400px;
+    height: 20vw;
+    max-height: 100px;
+    border: 3px solid rgba(255, 255, 0, 0.8);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7), 0 0 0 100vw rgba(0,0,0,0.5);
+    border-radius: 8px;
+    z-index: 4010;
+}
+#ocrResultDisplay {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1.2em;
+    text-align: center;
+    min-width: 250px;
+    z-index: 4020;
+}
+#ocrResultDisplay.success { background-color: rgba(40, 167, 69, 0.8); }
+#ocrResultDisplay.error { background-color: rgba(220, 53, 69, 0.8); }
+#targaScanControls {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4020;
+    display: flex;
+    gap: 20px;
+}
+#closeTargaScanBtn {
+    position: absolute;
+    top: 20px; 
+    right: 20px;
+    z-index: 4020; 
+    width: 45px;
+    height: 45px;
+    background-color: rgba(40, 40, 40, 0.8);
+    color: #ff4d4d;
+    border: 1px solid #ff4d4d;
+    border-radius: 4px;
+    font-size: 1.8em;
+    line-height: 43px; 
+    text-align: center;
+    padding: 0;
+    cursor: pointer;
+}
+/* END: Stili per la pagina Targa Scan OCR */
     </style>
 </head>
 <body>
@@ -1255,6 +1324,15 @@
             <button id="captureBtn" class="action-button"></button>
             <button id="closeCameraBtn" class="action-button">×</button> 
         </div>
+        <div id="targaScanPageSection" class="camera-page-section" style="display: none;">
+    <video id="targaScanStream" autoplay playsinline></video>
+    <canvas id="targaScanCanvas" style="display: none;"></canvas>
+    <div id="targaFocusBox"></div>
+    <div id="ocrResultDisplay">Inquadra la targa...</div>
+    <div id="targaScanControls">
+        </div>
+    <button id="closeTargaScanBtn" class="action-button">×</button>
+</div>
 
     </div> <div id="bottomNavCircles">
         <div class="header-circles">
@@ -1265,8 +1343,19 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
   // Variabili globali
+    const targaScanBtn = document.getElementById('targaScanBtn');
+const targaScanPageSection = document.getElementById('targaScanPageSection');
+const targaScanStreamElement = document.getElementById('targaScanStream');
+const targaScanCanvas = document.getElementById('targaScanCanvas');
+const ocrResultDisplay = document.getElementById('ocrResultDisplay');
+const closeTargaScanBtn = document.getElementById('closeTargaScanBtn');
+let currentTargaScanStream = null;
+let isScanningOCR = false;
+let isOcrBusy = false;
+let ocrWorker = null;
     const landingPageSection = document.getElementById('landingPageSection');
     const checklistContainer = document.getElementById('checklistContainer');
     const historyPageSection = document.getElementById('historyPageSection');
@@ -2150,6 +2239,14 @@ function capturePhoto() {
         }, 500);
     }
 }
+    // --- FUNZIONI OCR ---
+function levenshtein(s1, s2) { if (!s1 || !s2) return (s1 || s2).length; var s1_len = s1.length, s2_len = s2.length; if (s1_len === s2_len && s1 === s2) return 0; var T = [], i, j; for (i = 0; i <= s1_len; i++) { T[i] = [i]; } for (j = 0; j <= s2_len; j++) { T[0][j] = j; } for (i = 1; i <= s1_len; i++) { for (j = 1; j <= s2_len; j++) { T[i][j] = Math.min(T[i - 1][j] + 1, T[i][j - 1] + 1, T[i - 1][j - 1] + (s1[i - 1] !== s2[j - 1])); } } return T[s1_len][s2_len]; }
+function preprocessCanvas(canvas) { const ctx = canvas.getContext('2d', { willReadFrequently: true }); const focusBox = document.getElementById('targaFocusBox').getBoundingClientRect(); const videoRect = targaScanStreamElement.getBoundingClientRect(); const scaleX = canvas.width / videoRect.width; const scaleY = canvas.height / videoRect.height; const cropX = (focusBox.left - videoRect.left) * scaleX; const cropY = (focusBox.top - videoRect.top) * scaleY; const cropWidth = focusBox.width * scaleX; const cropHeight = focusBox.height * scaleY; const croppedImageData = ctx.getImageData(cropX, cropY, cropWidth, cropHeight); canvas.width = cropWidth; canvas.height = cropHeight; ctx.putImageData(croppedImageData, 0, 0); const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height); const data = imageData.data; const contrast = 2.0; const factor = (259 * (contrast * 255 + 255)) / (255 * (259 - contrast * 255)); for (let i = 0; i < data.length; i += 4) { const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]; let contrastedGray = Math.max(0, Math.min(255, factor * (gray - 128) + 128)); data[i] = data[i + 1] = data[i + 2] = contrastedGray; } ctx.putImageData(imageData, 0, 0); }
+function findBestMatchInOcrBlob(ocrBlob, plateList, maxDistance) { let bestMatch = { plate: null, distance: Infinity }; const plateLength = 7; for (const plate of plateList) { for (let i = 0; i <= ocrBlob.length - plateLength; i++) { const substring = ocrBlob.substring(i, i + plateLength); const distance = levenshtein(substring, plate.targa); if (distance < bestMatch.distance) { bestMatch.distance = distance; bestMatch.plate = plate.targa; } if (distance === 0) break; } if (bestMatch.distance === 0) break; } return bestMatch.distance <= maxDistance ? bestMatch : null; }
+async function initializeOcrWorker() { if (ocrWorker) return ocrWorker; ocrResultDisplay.textContent = 'Inizializzazione OCR (attendi)...'; try { const worker = await Tesseract.createWorker('ita'); await worker.setParameters({ tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ' }); ocrWorker = worker; return ocrWorker; } catch (error) { console.error("Errore critico inizializzazione Tesseract:", error); ocrResultDisplay.textContent = 'Errore OCR!'; return null; } }
+async function runOcrScanLoop() { if (!isScanningOCR) return; if (isOcrBusy) { requestAnimationFrame(runOcrScanLoop); return; } isOcrBusy = true; const context = targaScanCanvas.getContext('2d', { willReadFrequently: true }); if(targaScanStreamElement.videoWidth === 0) { isOcrBusy = false; requestAnimationFrame(runOcrScanLoop); return; } targaScanCanvas.width = targaScanStreamElement.videoWidth; targaScanCanvas.height = targaScanStreamElement.videoHeight; context.drawImage(targaScanStreamElement, 0, 0, targaScanCanvas.width, targaScanCanvas.height); preprocessCanvas(targaScanCanvas); try { const { data: { text } } = await ocrWorker.recognize(targaScanCanvas); const cleanedText = text.replace(/[^A-Z0-9]/gi, '').toUpperCase(); ocrResultDisplay.textContent = cleanedText || "Inquadra..."; ocrResultDisplay.classList.remove('success', 'error'); if (cleanedText.length >= 7) { const bestMatch = findBestMatchInOcrBlob(cleanedText, listaTargheCompleta, 1); if (bestMatch) { isScanningOCR = false; ocrResultDisplay.textContent = `Trovata: ${bestMatch.plate}!`; ocrResultDisplay.classList.add('success'); setTimeout(() => { stopTargaScan(false); handleTargaSelectionAndSync(bestMatch.plate); }, 1000); return; } } } catch (e) { console.error("Errore nel ciclo di riconoscimento", e); } isOcrBusy = false; requestAnimationFrame(runOcrScanLoop); }
+async function startTargaScan() { if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { alert("Il tuo browser non supporta l'accesso alla fotocamera."); return; } isScanningOCR = true; isOcrBusy = false; showView('targaScan'); const worker = await initializeOcrWorker(); if (!worker) { stopTargaScan(); return; } ocrResultDisplay.textContent = 'Inquadra...'; ocrResultDisplay.classList.remove('success', 'error'); const constraints = { video: { facingMode: 'environment' } }; try { currentTargaScanStream = await navigator.mediaDevices.getUserMedia(constraints); targaScanStreamElement.srcObject = currentTargaScanStream; try { await targaScanStreamElement.play(); } catch (playError) { console.error("Errore avvio video:", playError); alert("Il browser ha bloccato la riproduzione video. Controlla i permessi del sito e ricarica la pagina."); stopTargaScan(); return; } runOcrScanLoop(); } catch (err) { console.error("Errore durante l'avvio dello stream OCR:", err); alert("Impossibile avviare la fotocamera. Controlla i permessi."); stopTargaScan(); } }
+function stopTargaScan(navigateToLanding = true) { isScanningOCR = false; if (currentTargaScanStream) { currentTargaScanStream.getTracks().forEach(track => track.stop()); currentTargaScanStream = null; } targaScanStreamElement.srcObject = null; if (navigateToLanding) { showView('landing'); } }
 
     async function showGalleryPage(targaToFilter = null, sectionToFilter = null) {
         if (checklistContainer.style.display === 'block') {
@@ -3005,6 +3102,10 @@ function handleLightboxSwipe(endX, endY) {
 
 
     document.addEventListener('DOMContentLoaded', () => {
+
+if (targaScanBtn) targaScanBtn.addEventListener('click', startTargaScan);
+if (closeTargaScanBtn) closeTargaScanBtn.addEventListener('click', stopTargaScan);
+        
         syncToSheetsBtn = document.createElement('button');
         syncToSheetsBtn.id = 'syncToSheetsBtn'; syncToSheetsBtn.classList.add('action-button');
         syncToSheetsBtn.textContent = 'Sincronizza';
@@ -3308,8 +3409,9 @@ function handleLightboxSwipe(endX, endY) {
         }
     });
 </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 </body>
 </html>
+
 
 
