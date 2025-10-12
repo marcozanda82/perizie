@@ -1391,136 +1391,119 @@
     const PHOTO_STORE_NAME = 'capturedPhotosStore';
     let dbPromise = null;
 
-  // ========= INIZIO NUOVO BLOCCO CODICE OCR TARGA (CORRETTO) ===========
+// ========= INIZIO BLOCCO OCR A 3 PULSANTI ===========
 
-// --- Variabili globali per la scansione OCR ---
-let isScanningForPlate = false;
-let ocrScanInterval = null;
-const scanPlateBtn = document.getElementById('scanPlateBtn');
+// --- Variabili globali per la nuova modalità OCR ---
 const ocrOverlay = document.getElementById('ocrOverlay');
 const ocrStatusText = document.getElementById('ocrStatusText');
-let ocrScheduler = null; // Aggiunta per gestire lo scheduler
+const ocrFreezeBtn = document.getElementById('ocrFreezeBtn');
+const ocrScanBtn = document.getElementById('ocrScanBtn');
+const ocrExitBtn = document.getElementById('ocrExitBtn');
+const ocrFrozenImage = document.getElementById('ocrFrozenImage');
+let frozenCanvas = null; // Per conservare l'immagine bloccata
 
-// --- Funzione centralizzata per aprire la fotocamera ---
-function openCamera(mode = 'capture') { // mode può essere 'capture' o 'scan'
-    // Imposta lo stato della vista prima di aprire la fotocamera
-    // (Questa logica è già presente nel tuo listener di headerCameraBtn, la centralizziamo qui)
-    if (galleryPageSection.style.display === 'block') {
-        lastViewBeforeCamera = 'gallery';
-        lastSectionBeforeCamera = currentGallerySectionFilter;
-    } else if (checklistContainer.style.display === 'block') {
-        lastViewBeforeCamera = 'checklist';
-        const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
-        lastSectionBeforeCamera = activeSectionElement ? activeSectionElement.id.replace('Section', '') : null;
-    } else {
-        lastViewBeforeCamera = 'landing';
-        lastSectionBeforeCamera = null;
-    }
+// --- Funzioni per la nuova modalità OCR ---
 
-    // Mostra la vista della fotocamera
-    showView('camera'); // La tua funzione showCameraPage() verrà chiamata da qui
-
-    if (mode === 'scan') {
-        // Avvia la modalità scansione
-        startPlateScan();
-    } else {
-        // Assicurati che sia in modalità foto normale
-        ocrOverlay.style.display = 'none';
-        captureBtn.style.display = 'flex';
-    }
-}
-
-
-// --- Funzione per avviare la scansione della targa ---
-async function startPlateScan() {
-    if (isScanningForPlate) return;
+// 1. Funzione chiamata dal pulsante "Scansiona Targa"
+function startPlateScan() {
+    showView('camera'); // Apre la vista fotocamera
     isScanningForPlate = true;
 
-    // Imposta l'interfaccia per la scansione
-    ocrOverlay.style.display = 'flex';
+    // Nasconde i controlli della fotocamera standard
     captureBtn.style.display = 'none';
-    ocrStatusText.textContent = 'Avvio motore OCR...';
+    closeCameraBtn.style.display = 'none';
+
+    // Mostra l'interfaccia di scansione e imposta lo stato iniziale
+    ocrOverlay.style.display = 'flex';
+    ocrFrozenImage.style.display = 'none';
+    cameraStreamElement.style.display = 'block'; // Assicurati che il video sia visibile
+
+    ocrStatusText.textContent = 'Inquadra la targa nel riquadro';
+    ocrFreezeBtn.style.display = 'inline-block';
+    ocrScanBtn.style.display = 'none';
+    ocrExitBtn.style.display = 'inline-block';
+}
+
+// 2. Funzione per bloccare l'immagine
+function freezePlateImage() {
+    frozenCanvas = document.createElement('canvas');
+    const context = frozenCanvas.getContext('2d');
+    frozenCanvas.width = cameraStreamElement.videoWidth;
+    frozenCanvas.height = cameraStreamElement.videoHeight;
+    context.drawImage(cameraStreamElement, 0, 0, frozenCanvas.width, frozenCanvas.height);
+
+    // Mostra l'immagine bloccata e nascondi il video
+    ocrFrozenImage.src = frozenCanvas.toDataURL('image/jpeg');
+    ocrFrozenImage.style.display = 'block';
+    cameraStreamElement.style.display = 'none';
+
+    // Aggiorna l'interfaccia: nascondi "Blocca", mostra "Acquisisci"
+    ocrStatusText.textContent = 'Immagine bloccata. Premi "Acquisisci".';
+    ocrFreezeBtn.style.display = 'none';
+    ocrScanBtn.style.display = 'inline-block';
+}
+
+// 3. Funzione per analizzare l'immagine bloccata
+async function acquirePlateFromImage() {
+    if (!frozenCanvas) return;
+
+    ocrStatusText.textContent = 'Analisi in corso...';
+    ocrScanBtn.style.display = 'none'; // Nascondi i pulsanti durante l'analisi
+    ocrExitBtn.style.display = 'none';
 
     try {
-        // Inizializza Tesseract
-        ocrScheduler = Tesseract.createScheduler();
         const worker = await Tesseract.createWorker('eng');
         await worker.setParameters({
             tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
         });
-        ocrScheduler.addWorker(worker);
+        const { data: { text } } = await worker.recognize(frozenCanvas);
+        await worker.terminate();
 
-        ocrStatusText.textContent = 'Inquadra la targa...';
+        const cleanedText = text.replace(/[^A-Z0-9]/g, '');
+        const plateRegex = /^[A-Z]{2}\d{3}[A-Z]{2}$/;
 
-        // Avvia l'intervallo per analizzare i fotogrammi
-        ocrScanInterval = setInterval(async () => {
-            if (!isScanningForPlate || cameraStreamElement.paused || cameraStreamElement.ended || !cameraStreamElement.srcObject) {
-                return; // Non fare nulla se non siamo pronti
-            }
-
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = cameraStreamElement.videoWidth;
-            canvas.height = cameraStreamElement.videoHeight;
-            context.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
-
-            // Esegui il riconoscimento
-            ocrStatusText.textContent = 'Analisi in corso...';
-            const { data: { text } } = await ocrScheduler.addJob('recognize', canvas);
-            
-            const cleanedText = text.replace(/[^A-Z0-9]/g, '');
-            const plateRegex = /^[A-Z]{2}\d{3}[A-Z]{2}$/;
-
-            if (plateRegex.test(cleanedText)) {
-                ocrStatusText.textContent = `Targa trovata: ${cleanedText}`;
-                const foundVehicle = listaTargheCompleta.find(v => v.targa.toUpperCase() === cleanedText.toUpperCase());
-                
-                if (foundVehicle) {
-                    await stopPlateScan();
-                    returnFromCamera();
-                    stopPlateScan();
-                    alert(`Veicolo ${cleanedText} trovato! Caricamento perizia...`);
-                    await handleTargaSelectionAndSync(cleanedText);
-                } else {
-                    ocrStatusText.textContent = `${cleanedText} non in elenco. Riprovo...`;
-                }
+        if (plateRegex.test(cleanedText)) {
+            const foundVehicle = listaTargheCompleta.find(v => v.targa.toUpperCase() === cleanedText.toUpperCase());
+            if (foundVehicle) {
+                alert(`Targa trovata: ${cleanedText}! Caricamento perizia...`);
+                exitPlateScan(cleanedText); // Passa la targa per il caricamento
             } else {
-                 ocrStatusText.textContent = 'Inquadra la targa...';
+                alert(`Targa "${cleanedText}" letta correttamente, ma non presente in elenco. Riprova.`);
+                startPlateScan(); // Torna allo stato iniziale per un nuovo tentativo
             }
-        }, 2000); // Aumentato a 2 secondi per maggiore stabilità
-
+        } else {
+            alert('Nessuna targa valida trovata. Riprova inquadrando meglio.');
+            startPlateScan(); // Torna allo stato iniziale
+        }
     } catch (error) {
-        console.error("Errore avvio Tesseract OCR:", error);
-        ocrStatusText.textContent = 'Errore avvio OCR!';
-        alert("Impossibile avviare il motore OCR. Controlla la connessione internet e ricarica la pagina.");
-        // Ferma tutto e torna indietro in caso di errore
-        await stopPlateScan();
-        returnFromCamera();
+        console.error("Errore OCR:", error);
+        alert("Errore durante l'analisi dell'immagine.");
+        startPlateScan(); // Torna allo stato iniziale
     }
 }
 
-// --- Funzione per fermare la scansione ---
-async function stopPlateScan() {
-    if (!isScanningForPlate) return;
+// 4. Funzione per uscire dalla modalità scansione
+async function exitPlateScan(targaDaCaricare = null) {
     isScanningForPlate = false;
-    
-    if (ocrScanInterval) {
-        clearInterval(ocrScanInterval);
-        ocrScanInterval = null;
-    }
-    if (ocrScheduler) {
-        await ocrScheduler.terminate(); // Termina i worker di Tesseract
-        ocrScheduler = null;
-    }
-
-    // Ripristina l'interfaccia
     ocrOverlay.style.display = 'none';
+
+    // Riattiva i controlli standard della fotocamera
     captureBtn.style.display = 'flex';
-    console.log("Scansione OCR terminata.");
+    closeCameraBtn.style.display = 'flex';
+
+    // Chiudi la vista fotocamera
+    returnFromCamera();
+
+    if (targaDaCaricare) {
+        // Se abbiamo trovato una targa, carichiamola
+        await handleTargaSelectionAndSync(targaDaCaricare);
+    } else {
+        // Altrimenti, torna semplicemente alla lista targhe
+        showView('landing');
+    }
 }
 
-// ========= FINE NUOVO BLOCCO CODICE OCR TARGA (CORRETTO) ===========
-
+// ========= FINE BLOCCO OCR A 3 PULSANTI ===========
     function openPhotoDB() {
         if (dbPromise) return dbPromise;
 
@@ -3439,6 +3422,7 @@ if (scanPlateBtn) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
 
 
 
