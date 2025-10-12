@@ -728,7 +728,44 @@ async function caricaEPopolaTarghe() {
     function handleTouchStart(event) { /* ... */ }
     function handleTouchEnd(event) { /* ... */ }
     async function handleSwipeGesture() { /* ... */ }
-    async function initializeApplicationViewAndLoadData() { /* ... */ }
+    // NUOVA VERSIONE CON GESTIONE SICURA DEL PRELOADER
+async function initializeApplicationViewAndLoadData() {
+    const preloader = document.getElementById('preloader');
+    const loadingText = preloader ? preloader.querySelector('.loading-text') : null;
+
+    if (preloader) {
+        preloader.style.display = 'flex';
+        preloader.classList.remove('hidden');
+    }
+    if(loadingText) loadingText.textContent = 'AVVIO IN CORSO...';
+
+    try {
+        if(loadingText) loadingText.textContent = 'Inizializzazione DB foto...';
+        await openPhotoDB();
+
+        if(loadingText) loadingText.textContent = 'CARICAMENTO TARGHE...';
+        await caricaEPopolaTarghe();
+
+        showView('landing');
+
+        if (changelogModal && closeChangelogBtnModal) {
+            const lastVersionSeen = localStorage.getItem('appVersionSeen');
+            // ... (la tua logica per il changelog rimane qui)
+        }
+    } catch (error) {
+        // Gestisce eventuali errori imprevisti durante l'avvio
+        console.error("Errore critico durante l'inizializzazione:", error);
+        if(loadingText) loadingText.textContent = 'ERRORE DI AVVIO!';
+        alert("Si è verificato un errore critico durante l'avvio dell'applicazione.");
+    } finally {
+        // Questo blocco viene eseguito SEMPRE, sia in caso di successo che di errore.
+        // Garantisce che il preloader venga nascosto.
+        if (preloader) {
+            preloader.classList.add('hidden');
+            setTimeout(() => { if (preloader) preloader.style.display = 'none'; }, 700);
+        }
+    }
+}
 
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -881,4 +918,5 @@ async function caricaEPopolaTarghe() {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
 
