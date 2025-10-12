@@ -1600,35 +1600,52 @@
         requestAnimationFrame(runOcrScanLoop); // Richiama il prossimo ciclo
     }
 
-    async function startTargaScan() {
-        if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
-            alert("Il tuo browser non supporta l'accesso alla fotocamera.");
-            return;
-        }
-        
-        isScanningOCR = true;
-        isOcrBusy = false;
-        showView('targaScan');
-        
-        const worker = await initializeOcrWorker();
-        if (!worker) {
-            stopTargaScan();
-            return;
-        }
-        
-        const constraints = { video: { facingMode: 'environment' } };
-        try {
-            currentTargaScanStream = await navigator.mediaDevices.getUserMedia(constraints);
-            targaScanStreamElement.srcObject = currentTargaScanStream;
-            await targaScanStreamElement.play();
-            runOcrScanLoop(); // Avvia il ciclo di analisi continua
-        } catch (err) {
-            console.error("Errore durante l'avvio dello stream OCR:", err);
-            alert("Impossibile avviare la fotocamera. Controlla i permessi.");
-            stopTargaScan();
-        }
+async function startTargaScan() {
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+        alert("Il tuo browser non supporta l'accesso alla fotocamera.");
+        return;
     }
 
+    isScanningOCR = true;
+    isOcrBusy = false;
+    showView('targaScan');
+
+    const worker = await initializeOcrWorker();
+    if (!worker) {
+        stopTargaScan();
+        return;
+    }
+
+    ocrResultDisplay.textContent = 'Inquadra...';
+    ocrResultDisplay.classList.remove('success', 'error');
+
+    const constraints = { video: { facingMode: 'environment' } };
+
+    try {
+        currentTargaScanStream = await navigator.mediaDevices.getUserMedia(constraints);
+        targaScanStreamElement.srcObject = currentTargaScanStream;
+
+        // =================================================================
+        // *** ECCO IL BLOCCO DI CODICE FONDAMENTALE CHE AVEVO DIMENTICATO ***
+        // Questo forza l'avvio del video e gestisce eventuali errori.
+        // =================================================================
+        try {
+            await targaScanStreamElement.play();
+        } catch (playError) {
+            console.error("Errore avvio video:", playError);
+            alert("Il browser ha bloccato la riproduzione video. Controlla i permessi del sito e ricarica la pagina.");
+            stopTargaScan();
+            return; // Interrompe l'esecuzione se il video non parte
+        }
+
+        runOcrScanLoop(); // Avvia il ciclo di analisi continua
+
+    } catch (err) {
+        console.error("Errore durante l'avvio dello stream OCR:", err);
+        alert("Impossibile avviare la fotocamera. Controlla i permessi.");
+        stopTargaScan();
+    }
+}
     function stopTargaScan() {
         isScanningOCR = false; // Questo fermerà il loop di runOcrScanLoop
         if (currentTargaScanStream) {
@@ -1977,6 +1994,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
 
 
 
