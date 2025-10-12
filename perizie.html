@@ -1528,42 +1528,52 @@
         }
     }
 
-    async function startTargaScan() {
-        if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
-            alert("Il tuo browser non supporta l'accesso alla fotocamera.");
+async function startTargaScan() {
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+        alert("Il tuo browser non supporta l'accesso alla fotocamera.");
+        return;
+    }
+
+    isScanningOCR = true;
+    showView('targaScan');
+
+    retryTargaScanBtn.style.display = 'none';
+    analyzeTargaBtn.style.display = 'inline-flex';
+    closeTargaScanBtn.style.display = 'inline-flex';
+    targaScanFreezeFrame.style.display = 'none';
+    targaScanStreamElement.style.display = 'block';
+
+    if (!ocrWorker) {
+        const success = await initializeOcrWorker();
+        if (!success) {
+            stopTargaScan();
             return;
         }
-        
-        isScanningOCR = true;
-        showView('targaScan');
-        
-        retryTargaScanBtn.style.display = 'none';
-        analyzeTargaBtn.style.display = 'inline-flex';
-        closeTargaScanBtn.style.display = 'inline-flex';
-        targaScanFreezeFrame.style.display = 'none';
-        targaScanStreamElement.style.display = 'block';
-
-        if (!ocrWorker) {
-            const success = await initializeOcrWorker();
-            if (!success) {
-                stopTargaScan();
-                return;
-            }
-        } else {
-            ocrResultDisplay.textContent = 'Inquadra e Analizza';
-            ocrResultDisplay.classList.remove('success', 'error');
-        }
-
-        const constraints = { video: { facingMode: 'environment' } };
-        try {
-            currentTargaScanStream = await navigator.mediaDevices.getUserMedia(constraints);
-            targaScanStreamElement.srcObject = currentTargaScanStream;
-        } catch (err) {
-            console.error("Errore accesso fotocamera per OCR:", err);
-            alert("Impossibile accedere alla fotocamera.");
-            stopTargaScan();
-        }
+    } else {
+        ocrResultDisplay.textContent = 'Inquadra e Analizza';
+        ocrResultDisplay.classList.remove('success', 'error');
     }
+
+    const constraints = { video: { facingMode: 'environment' } };
+    try {
+        currentTargaScanStream = await navigator.mediaDevices.getUserMedia(constraints);
+        targaScanStreamElement.srcObject = currentTargaScanStream;
+
+        // *** CORREZIONE: Aggiunto questo blocco per garantire l'avvio del video ***
+        targaScanStreamElement.addEventListener('loadedmetadata', () => {
+            targaScanStreamElement.play().catch(error => {
+                console.error("Errore durante l'avvio manuale del video:", error);
+                alert("Non è stato possibile avviare lo streaming video.");
+            });
+        });
+        // *** FINE DELLA CORREZIONE ***
+
+    } catch (err) {
+        console.error("Errore accesso fotocamera per OCR:", err);
+        alert("Impossibile accedere alla fotocamera.");
+        stopTargaScan();
+    }
+}
     
     function stopTargaScan() {
         isScanningOCR = false;
@@ -3583,5 +3593,6 @@ function handleLightboxSwipe(endX, endY) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
+
 
 
