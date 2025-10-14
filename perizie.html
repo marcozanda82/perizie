@@ -1878,14 +1878,14 @@ function showView(viewName) {
     if (isFullScreenView) {
         // Viste a schermo intero: nascondi tutto tranne la vista stessa
         if (pageHeaderContainer) pageHeaderContainer.style.display = 'none';
-        if (bottomNavCircles) bottomNavCircles.style.display = viewName === 'camera' ? 'flex' : 'none'; // Mostra solo per la fotocamera normale
+        if (bottomNavCircles) bottomNavCircles.style.display = viewName === 'camera' ? 'flex' : 'none';
     } else {
         // Viste normali: mostra gli header
         if (pageHeaderContainer) pageHeaderContainer.style.display = 'block';
         if (bottomNavCircles) bottomNavCircles.style.display = 'flex';
     }
 
-    // Mostra la sezione corretta
+    // Mostra la sezione corretta e configura gli elementi dell'header
     if (viewName === 'landing') {
         landingPageSection.style.display = 'block';
         if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
@@ -1901,7 +1901,10 @@ function showView(viewName) {
         if (!targaSelezionataGlobalmente) { showView('landing'); return; }
         checklistContainer.style.display = 'block';
         if (mainTitleGlobal) mainTitleGlobal.style.display = 'none';
+        
+        // Questo è il punto chiave: mostriamo il dropdown PRIMA di calcolare l'altezza
         if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
+        
         populateTargaSwitcherDropdown();
         updateTargaDetailsDisplay(targaSelezionataGlobalmente);
         const activeSectionElement = document.querySelector('#checklistContainer .category-section.active');
@@ -1921,15 +1924,15 @@ function showView(viewName) {
     } else if (viewName === 'gallery') {
         if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
         if (downloadZipBtn) downloadZipBtn.style.display = 'none';
-        // La visualizzazione effettiva della sezione è in showGalleryPage()
+        // La visualizzazione effettiva della sezione è gestita da showGalleryPage()
     } else if (viewName === 'camera') {
-        showCameraPage(); // Questa funzione si occuperà di mostrare cameraPageSection
+        showCameraPage();
     } else if (viewName === 'targaScan') {
-        targaScanPageSection.style.display = 'flex'; // Mostra la sezione OCR
+        targaScanPageSection.style.display = 'flex';
     }
 
-    // Calcola e applica il padding DOPO aver modificato la visibilità di tutti gli elementi
-    // per garantire che l'altezza degli header sia quella finale e corretta.
+    // Calcola e applica il padding DOPO aver modificato la visibilità di tutti gli elementi.
+    // Questo garantisce che pageHeaderContainer.offsetHeight abbia il valore corretto e finale.
     let bodyPaddingTopValue = '0px';
     let bodyPaddingBottomValue = '0px';
     if (pageHeaderContainer && getComputedStyle(pageHeaderContainer).display !== 'none') {
@@ -3430,6 +3433,7 @@ if (closeTargaScanBtn) closeTargaScanBtn.addEventListener('click', stopTargaScan
 
 </body>
 </html>
+
 
 
 
