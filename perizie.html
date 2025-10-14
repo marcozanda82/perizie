@@ -1881,18 +1881,6 @@ async function handleSavePeriziaAndReturn() {
         if (bottomNavCircles) bottomNavCircles.style.display = 'flex';
     }
 
-    // Imposta il padding del body (margini interni)
-    let bodyPaddingTopValue = '0px';
-    let bodyPaddingBottomValue = '0px';
-    if (pageHeaderContainer && getComputedStyle(pageHeaderContainer).display !== 'none') {
-        bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
-    }
-    if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') {
-        bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
-    }
-    document.body.style.paddingTop = bodyPaddingTopValue;
-    document.body.style.paddingBottom = bodyPaddingBottomValue;
-
     // Mostra la sezione corretta
     if (viewName === 'landing') {
         landingPageSection.style.display = 'block';
@@ -1938,6 +1926,24 @@ async function handleSavePeriziaAndReturn() {
 
     updateNavButtonColors();
     window.scrollTo(0, 0);
+
+        // Calcola e applica il padding DOPO aver modificato la visibilità di tutti gli elementi
+    // per garantire che l'altezza degli header sia quella finale e corretta.
+    let bodyPaddingTopValue = '0px';
+    let bodyPaddingBottomValue = '0px';
+    if (pageHeaderContainer && getComputedStyle(pageHeaderContainer).display !== 'none') {
+        bodyPaddingTopValue = `${pageHeaderContainer.offsetHeight + 10}px`;
+    }
+    if (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none') {
+        bodyPaddingBottomValue = `${bottomNavCircles.offsetHeight + 10}px`;
+    }
+    document.body.style.paddingTop = bodyPaddingTopValue;
+    document.body.style.paddingBottom = bodyPaddingBottomValue;
+
+    updateNavButtonColors();
+    window.scrollTo(0, 0);
+} // <-- Questa è la parentesi graffa di chiusura della funzione
+        
 }
 
     // ----------------------------------------------------------------------------------
@@ -3425,6 +3431,7 @@ if (closeTargaScanBtn) closeTargaScanBtn.addEventListener('click', stopTargaScan
 
 </body>
 </html>
+
 
 
 
