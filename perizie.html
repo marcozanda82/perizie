@@ -1858,7 +1858,7 @@ async function handleSavePeriziaAndReturn() {
     // Funzione showView MODIFICATA (ma no changes needed based on analysis for this specific problem)
     // ----------------------------------------------------------------------------------
 
-    function showView(viewName) {
+function showView(viewName) {
     // Nascondi tutte le sezioni principali
     landingPageSection.style.display = 'none';
     checklistContainer.style.display = 'none';
@@ -1924,10 +1924,7 @@ async function handleSavePeriziaAndReturn() {
         targaScanPageSection.style.display = 'flex'; // Mostra la sezione OCR
     }
 
-    updateNavButtonColors();
-    window.scrollTo(0, 0);
-
-        // Calcola e applica il padding DOPO aver modificato la visibilità di tutti gli elementi
+    // Calcola e applica il padding DOPO aver modificato la visibilità di tutti gli elementi
     // per garantire che l'altezza degli header sia quella finale e corretta.
     let bodyPaddingTopValue = '0px';
     let bodyPaddingBottomValue = '0px';
@@ -1942,7 +1939,7 @@ async function handleSavePeriziaAndReturn() {
 
     updateNavButtonColors();
     window.scrollTo(0, 0);
-} // <-- Questa è la parentesi graffa di chiusura della funzione
+}
         
 }
 
@@ -3431,6 +3428,7 @@ if (closeTargaScanBtn) closeTargaScanBtn.addEventListener('click', stopTargaScan
 
 </body>
 </html>
+
 
 
 
