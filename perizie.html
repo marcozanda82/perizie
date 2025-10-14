@@ -1890,7 +1890,7 @@ function showView(viewName) {
         landingPageSection.style.display = 'block';
         if (pageHeaderContainer) pageHeaderContainer.classList.add('fixed-header');
         if (mainTitleGlobal) mainTitleGlobal.innerHTML = "Elenco Veicoli";
-        if (navButtonsContainer) navButtonsContainer.style.display = 'none';
+        if (navButtonsContainer) navButtonsContainer.style.display = 'none'; // Nascosto qui
         if (targaDropdownContainer) targaDropdownContainer.style.display = 'none';
         if (downloadZipBtn) downloadZipBtn.style.display = 'none';
         if (listaTargheCompleta.length > 0 && typeof popolaTargheFiltrate === 'function') {
@@ -1902,7 +1902,9 @@ function showView(viewName) {
         checklistContainer.style.display = 'block';
         if (mainTitleGlobal) mainTitleGlobal.style.display = 'none';
         
-        // Questo è il punto chiave: mostriamo il dropdown PRIMA di calcolare l'altezza
+        // --- ECCO LA RIGA MANCANTE ---
+        if (navButtonsContainer) navButtonsContainer.style.display = 'flex'; // Reso nuovamente visibile
+        
         if (targaDropdownContainer) targaDropdownContainer.style.display = 'flex';
         
         populateTargaSwitcherDropdown();
@@ -1932,7 +1934,6 @@ function showView(viewName) {
     }
 
     // Calcola e applica il padding DOPO aver modificato la visibilità di tutti gli elementi.
-    // Questo garantisce che pageHeaderContainer.offsetHeight abbia il valore corretto e finale.
     let bodyPaddingTopValue = '0px';
     let bodyPaddingBottomValue = '0px';
     if (pageHeaderContainer && getComputedStyle(pageHeaderContainer).display !== 'none') {
@@ -3433,6 +3434,7 @@ if (closeTargaScanBtn) closeTargaScanBtn.addEventListener('click', stopTargaScan
 
 </body>
 </html>
+
 
 
 
