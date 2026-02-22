@@ -2,487 +2,460 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker Perizie Auto</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Tracker Fatturazione</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        :root {
-            --bg: #1e1e1e;
-            --card: #2a2a2a;
-            --text: #f0f0f0;
-            --text-muted: #b0b0b0;
-            --accent: #4a9eff;
-            --accent-hover: #6bb0ff;
-            --border: #3a3a3a;
-            --input-bg: #252525;
-            --danger: #e57373;
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.75); z-index: 99999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            opacity: 1; visibility: visible;
         }
-        * { box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 16px;
-            min-height: 100vh;
+        #preloader.hidden { opacity: 0; visibility: hidden; transition: opacity 0.7s ease-out, visibility 0.7s ease-out; }
+        .loader-bar-container { display: flex; gap: 10px; margin-bottom: 25px; }
+        .loader-bar { width: 15px; height: 70px; background-color: #007bff; border-radius: 3px; animation: barPulse 1.2s infinite ease-in-out; }
+        .loader-bar:nth-child(2) { animation-delay: 0.2s; }
+        .loader-bar:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes barPulse { 0%, 100% { transform: scaleY(0.3); opacity: 0.6; } 50% { transform: scaleY(1); opacity: 1; } }
+        #preloader .loading-text { color: #00aeff; font-size: 1.6em; text-align: center; }
+
+        body { font-family: sans-serif; line-height: 1.6; margin: 0; background-color: #1e1e1e; color: #f0f0f0; padding-bottom: 70px; }
+        .content-wrapper { padding: 20px; }
+        h1, h2 { text-align: center; color: #ffffff; }
+        #pageHeaderContainer { background-color: #1e1e1e; z-index: 1000; width: 100%; }
+        #pageHeaderContainer.fixed-header { position: fixed; top: 0; left: 0; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 2030; }
+        .header-export-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+        .header-export-row label { color: #ccc; }
+        .header-export-row input[type="month"] { padding: 8px; background-color: #333; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; }
+        .action-button { padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: 1px solid #0056b3; border-radius: 4px; font-size: 0.9em; }
+        .action-button:hover { background-color: #0056b3; border-color: #004085; }
+        .action-button.secondary { background-color: #6c757d; border-color: #5a6268; }
+        .action-button.success { background-color: #28a745; border-color: #1e7e34; }
+
+        #landingPageSection, #saveRecordSection, .camera-page-section {
+            padding: 20px; border: 1px solid #444; border-radius: 8px; margin-top: 20px; background-color: #2a2a2a;
+            max-width: 850px; margin-left: auto; margin-right: auto;
         }
-        h1 {
-            text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 24px;
-            font-weight: 600;
+        #saveRecordSection { display: none; }
+        .camera-page-section { display: none; position: fixed; inset: 0; z-index: 4000; background: #000; }
+        .camera-page-section .camera-page-inner { position: absolute; inset: 0; }
+
+        .table-scroll-wrapper { overflow-x: auto; width: 100%; margin-bottom: 10px; border: 1px solid #444; border-radius: 4px; }
+        .tracking-table { width: 100%; min-width: 320px; border-collapse: collapse; }
+        .tracking-table th, .tracking-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #444; }
+        .tracking-table th { background-color: #3a3a3a; color: #ddd; font-weight: bold; }
+        .tracking-table tbody tr:hover { background-color: #333; }
+        #trackingListContainer { max-height: 350px; overflow-y: auto; }
+        #trackingListContainer:empty::after { content: 'Nessuna registrazione. Usa "Aggiungi" o "Scansiona Targa".'; display: block; padding: 20px; color: #888; text-align: center; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; color: #e0e0e0; }
+        .form-group input[type="text"], .form-group select { width: 100%; padding: 10px; background-color: #333; color: #f0f0f0; border: 1px solid #555; border-radius: 4px; box-sizing: border-box; }
+        #saveRecordSection .actions { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+        #saveRecordSection .actions .action-button { flex: 1; min-width: 120px; }
+
+        /* Targa Scan OCR (stessi stili dell'app perizie) */
+        #targaScanPageSection { z-index: 4000; }
+        #targaScanStream { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        #targaFocusBox {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80vw; max-width: 400px; height: 20vw; max-height: 100px;
+            border: 3px solid rgba(255, 255, 0, 0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.7), 0 0 0 100vw rgba(0,0,0,0.5);
+            border-radius: 8px; z-index: 4010;
         }
-        .card {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border);
+        #ocrResultDisplay {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.7); color: #fff; padding: 10px 20px; border-radius: 5px;
+            font-size: 1.2em; text-align: center; min-width: 250px; z-index: 4020;
         }
-        .card h2 {
-            margin: 0 0 16px 0;
-            font-size: 1.15rem;
-            color: var(--text);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 8px;
+        #ocrResultDisplay.success { background-color: rgba(40, 167, 69, 0.8); }
+        #ocrResultDisplay.error { background-color: rgba(220, 53, 69, 0.8); }
+        #closeTargaScanBtn {
+            position: absolute; top: 20px; right: 20px; z-index: 4020;
+            width: 45px; height: 45px; background-color: rgba(40, 40, 40, 0.8); color: #ff4d4d;
+            border: 1px solid #ff4d4d; border-radius: 4px; font-size: 1.8em; line-height: 43px; text-align: center; padding: 0; cursor: pointer;
         }
-        /* Section A: Video + OCR */
-        .video-wrap {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto 16px;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            aspect-ratio: 4/3;
+        #targaScanCanvas { display: none; }
+
+        #bottomNavCircles {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            display: flex; justify-content: space-around; align-items: center; padding: 10px 0;
+            box-sizing: border-box; background-color: #2a2a2a; border-top: 1px solid #444; z-index: 2025;
         }
-        .video-wrap video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
+        .circle-button {
+            width: 75px; height: 75px; background-color: #383838; color: #e0e0e0; border: 1px solid #555;
+            border-radius: 6px; flex-shrink: 0; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; font-size: 2em; transition: background-color 0.3s ease, transform 0.2s ease;
         }
-        /* Focus box: inquadra la targa al centro del video */
-        .video-wrap .focus-box {
-            position: absolute;
-            left: 15%;
-            top: 37%;
-            width: 70%;
-            height: 26%;
-            border: 3px solid #f0c000;
-            border-radius: 4px;
-            pointer-events: none;
-            box-sizing: border-box;
-            z-index: 2;
-        }
-        .video-wrap .placeholder {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--card);
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            text-align: center;
-            padding: 20px;
-        }
-        .video-wrap .placeholder.hidden { display: none; }
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-primary {
-            background: var(--accent);
-            color: #fff;
-        }
-        .btn-primary:hover { background: var(--accent-hover); }
-        .btn-secondary {
-            background: var(--border);
-            color: var(--text);
-        }
-        .btn-secondary:hover { background: #4a4a4a; }
-        .btn-block { width: 100%; }
-        .form-group {
-            margin-bottom: 16px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-        input[type="text"],
-        input[type="month"],
-        select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--input-bg);
-            color: var(--text);
-            font-size: 1rem;
-        }
-        input[type="text"]:focus,
-        input[type="month"]:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        .ocr-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-        .save-row {
-            margin-top: 20px;
-        }
-        .save-row .btn { min-height: 48px; }
-        /* Section B: Export */
-        .export-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: flex-end;
-        }
-        .export-row .form-group { margin-bottom: 0; flex: 1; min-width: 180px; }
-        .export-row .btn { flex-shrink: 0; }
-        @media (max-width: 480px) {
-            .export-row .form-group { min-width: 100%; }
-        }
-        .status {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
+        .circle-button:hover { background-color: #4a4a4a; transform: translateY(-2px); }
+        .circle-button i { line-height: 1; }
     </style>
 </head>
 <body>
-    <h1>Tracker Perizie Auto</h1>
-
-    <!-- SEZIONE A: Registrazione Targa -->
-    <section class="card" id="section-a">
-        <h2>Registrazione Targa</h2>
-
-        <div class="video-wrap">
-            <div class="placeholder" id="video-placeholder">Avvia la fotocamera per scansionare la targa.</div>
-            <video id="video" playsinline muted autoplay style="display: none;"></video>
-            <div class="focus-box" id="focus-box" aria-hidden="true"></div>
+    <div id="preloader">
+        <div class="loader-bar-container">
+            <div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+            <div class="loader-bar"></div>
         </div>
+        <div class="loading-text">AVVIO IN CORSO...</div>
+    </div>
 
-        <div class="ocr-actions">
-            <button type="button" class="btn btn-primary" id="btn-start-cam">Avvia fotocamera</button>
-            <button type="button" class="btn btn-secondary" id="btn-stop-cam" style="display: none;">Ferma fotocamera</button>
+    <div id="pageHeaderContainer" class="fixed-header">
+        <h1 id="mainTitleGlobal">Tracker Fatturazione</h1>
+        <div class="header-export-row">
+            <label for="inputMonth">Mese:</label>
+            <input type="month" id="inputMonth">
+            <button type="button" id="btnExportCsv" class="action-button">Esporta CSV</button>
         </div>
+    </div>
 
-        <p class="status" id="ocr-status"></p>
-
-        <div class="form-group" id="form-targa" style="display: none;">
-            <label for="input-targa">Targa (verifica e correggi se necessario)</label>
-            <input type="text" id="input-targa" placeholder="Es. AB123CD" maxlength="10" autocomplete="off">
-        </div>
-
-        <div class="form-group">
-            <label for="select-committente">Committente</label>
-            <select id="select-committente">
-                <option value="Privato">Privato</option>
-                <option value="Concessionaria Rossi">Concessionaria Rossi</option>
-                <option value="Assicurazione Y">Assicurazione Y</option>
-            </select>
-        </div>
-
-        <div class="save-row">
-            <button type="button" class="btn btn-primary btn-block" id="btn-save">Salva Registrazione</button>
-        </div>
-    </section>
-
-    <!-- SEZIONE B: Esportazione Dati -->
-    <section class="card" id="section-b">
-        <h2>Esportazione Dati</h2>
-        <div class="export-row">
-            <div class="form-group">
-                <label for="input-month">Mese e anno</label>
-                <input type="month" id="input-month">
+    <div class="content-wrapper" id="mainContentWrapper">
+        <div id="landingPageSection" style="display: block;">
+            <h2 style="margin-top: 10px;">Elenco Targhe Registrate</h2>
+            <div class="table-scroll-wrapper">
+                <table class="tracking-table">
+                    <thead>
+                        <tr><th>Data</th><th>Ora</th><th>Targa</th><th>Committente</th></tr>
+                    </thead>
+                    <tbody id="trackingListContainer"></tbody>
+                </table>
             </div>
-            <button type="button" class="btn btn-primary" id="btn-export-csv">Scarica CSV</button>
+            <div style="margin-top: 15px; text-align: center;">
+                <button type="button" id="btnAggiungi" class="action-button success"><i class="fas fa-plus"></i> Aggiungi</button>
+            </div>
         </div>
-    </section>
+
+        <div id="saveRecordSection">
+            <h2 style="margin-top: 10px;">Salva Registrazione</h2>
+            <div class="form-group">
+                <label for="inputTarga">Targa</label>
+                <input type="text" id="inputTarga" placeholder="Es. AB123CD" maxlength="10" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="selectCommittente">Committente</label>
+                <select id="selectCommittente">
+                    <option value="Privato">Privato</option>
+                    <option value="Concessionaria Rossi">Concessionaria Rossi</option>
+                    <option value="Assicurazione Y">Assicurazione Y</option>
+                </select>
+            </div>
+            <div class="actions">
+                <button type="button" id="btnSalva" class="action-button success">Salva</button>
+                <button type="button" id="btnAnnullaSave" class="action-button secondary">Annulla</button>
+            </div>
+        </div>
+
+        <div id="targaScanPageSection" class="camera-page-section">
+            <div class="camera-page-inner">
+                <video id="targaScanStream" autoplay playsinline></video>
+                <canvas id="targaScanCanvas"></canvas>
+                <div id="targaFocusBox"></div>
+                <div id="ocrResultDisplay">Inquadra la targa...</div>
+                <button type="button" id="closeTargaScanBtn" class="action-button">×</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bottomNavCircles">
+        <button type="button" id="navElenco" class="circle-button" title="Elenco"><i class="fas fa-list"></i></button>
+        <button type="button" id="navScansiona" class="circle-button" title="Scansiona Targa"><i class="fas fa-camera"></i></button>
+    </div>
 
     <script>
-        (function () {
-            'use strict';
+    (function () {
+        'use strict';
 
-            const STORAGE_KEY = 'vehicleAppraisals';
-            /** Regex targa italiana: 2 lettere + 3 cifre + 2 lettere (es. AB123CD) */
-            const PLATE_REGEX = /[A-Z]{2}[0-9]{3}[A-Z]{2}/;
-            /** Proporzioni focus box (centrato): stesse % usate in CSS .focus-box */
-            const FOCUS_WIDTH = 0.70;
-            const FOCUS_HEIGHT = 0.26;
-            const FOCUS_LEFT = (1 - FOCUS_WIDTH) / 2;
-            const FOCUS_TOP = (1 - FOCUS_HEIGHT) / 2;
-            /** Riduzione orizzontale 15% per lato per escludere bande blu EU */
-            const EU_MARGIN = 0.15;
-            /** Fattore contrasto pre-elaborazione */
-            const CONTRAST_FACTOR = 2.0;
+        const STORAGE_KEY = 'tracking_fatturazione';
+        const landingPageSection = document.getElementById('landingPageSection');
+        const saveRecordSection = document.getElementById('saveRecordSection');
+        const trackingListContainer = document.getElementById('trackingListContainer');
+        const inputTarga = document.getElementById('inputTarga');
+        const selectCommittente = document.getElementById('selectCommittente');
+        const inputMonth = document.getElementById('inputMonth');
+        const targaScanPageSection = document.getElementById('targaScanPageSection');
+        const targaScanStreamElement = document.getElementById('targaScanStream');
+        const targaScanCanvas = document.getElementById('targaScanCanvas');
+        const ocrResultDisplay = document.getElementById('ocrResultDisplay');
+        const closeTargaScanBtn = document.getElementById('closeTargaScanBtn');
+        const pageHeaderContainer = document.getElementById('pageHeaderContainer');
+        const bottomNavCircles = document.getElementById('bottomNavCircles');
 
-            const videoEl = document.getElementById('video');
-            const videoPlaceholder = document.getElementById('video-placeholder');
-            const formTarga = document.getElementById('form-targa');
-            const inputTarga = document.getElementById('input-targa');
-            const selectCommittente = document.getElementById('select-committente');
-            const ocrStatus = document.getElementById('ocr-status');
-            let stream = null;
-            let ocrRunning = false;
-            let ocrTimeoutId = null;
+        let currentTargaScanStream = null;
+        let isScanningOCR = false;
+        let isOcrBusy = false;
+        let ocrWorker = null;
 
-            // ---------- Persistenza ----------
-            function getRecords() {
-                try {
-                    const raw = localStorage.getItem(STORAGE_KEY);
-                    return raw ? JSON.parse(raw) : [];
-                } catch (e) {
-                    return [];
+        function getRecords() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveRecord(targa, committente) {
+            const records = getRecords();
+            records.push({
+                targa: String(targa).trim().toUpperCase(),
+                committente: String(committente).trim(),
+                data_ora: new Date().toISOString()
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        }
+
+        function pad(n) { return n < 10 ? '0' + n : String(n); }
+        function formatDate(iso) {
+            const d = new Date(iso);
+            return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+        }
+        function formatTime(iso) {
+            const d = new Date(iso);
+            return pad(d.getHours()) + ':' + pad(d.getMinutes());
+        }
+
+        function renderLandingTable() {
+            const records = getRecords();
+            trackingListContainer.innerHTML = '';
+            records.slice().reverse().forEach(function (r) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td>' + formatDate(r.data_ora) + '</td><td>' + formatTime(r.data_ora) + '</td><td>' + (r.targa || '') + '</td><td>' + (r.committente || '') + '</td>';
+                trackingListContainer.appendChild(tr);
+            });
+        }
+
+        function showView(viewName) {
+            landingPageSection.style.display = 'none';
+            saveRecordSection.style.display = 'none';
+            targaScanPageSection.style.display = 'none';
+
+            if (viewName === 'targaScan') {
+                pageHeaderContainer.style.display = 'none';
+                bottomNavCircles.style.display = 'none';
+                targaScanPageSection.style.display = 'flex';
+            } else {
+                pageHeaderContainer.style.display = 'block';
+                bottomNavCircles.style.display = 'flex';
+                if (viewName === 'landing') {
+                    landingPageSection.style.display = 'block';
+                    renderLandingTable();
+                } else if (viewName === 'saveRecord') {
+                    saveRecordSection.style.display = 'block';
                 }
             }
+            document.body.style.paddingTop = pageHeaderContainer.offsetHeight + 10 + 'px';
+            document.body.style.paddingBottom = (bottomNavCircles && getComputedStyle(bottomNavCircles).display !== 'none' ? bottomNavCircles.offsetHeight + 10 : 70) + 'px';
+            window.scrollTo(0, 0);
+        }
 
-            function saveRecord(targa, committente) {
-                const records = getRecords();
-                const now = new Date();
-                records.push({
-                    targa: String(targa).trim().toUpperCase(),
-                    committente: String(committente).trim(),
-                    data_ora: now.toISOString()
-                });
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        /** Copia esatta da perizie.html: ritaglio focus box, margine 15% bande EU, grayscale e contrasto 2.0 */
+        function preprocessCanvas(canvas) {
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            const focusBox = document.getElementById('targaFocusBox').getBoundingClientRect();
+            const videoRect = targaScanStreamElement.getBoundingClientRect();
+            const scaleX = canvas.width / videoRect.width;
+            const scaleY = canvas.height / videoRect.height;
+
+            let cropX = (focusBox.left - videoRect.left) * scaleX;
+            let cropY = (focusBox.top - videoRect.top) * scaleY;
+            let cropWidth = focusBox.width * scaleX;
+            let cropHeight = focusBox.height * scaleY;
+
+            const horizontalMargin = cropWidth * 0.15;
+            cropX += horizontalMargin;
+            cropWidth -= horizontalMargin * 2;
+
+            const croppedImageData = ctx.getImageData(cropX, cropY, cropWidth, cropHeight);
+            canvas.width = cropWidth;
+            canvas.height = cropHeight;
+            ctx.putImageData(croppedImageData, 0, 0);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const contrast = 2.0;
+            const factor = (259 * (contrast * 255 + 255)) / (255 * (259 - contrast * 255));
+            for (let i = 0; i < data.length; i += 4) {
+                const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+                let contrastedGray = Math.max(0, Math.min(255, factor * (gray - 128) + 128));
+                data[i] = data[i + 1] = data[i + 2] = contrastedGray;
             }
+            ctx.putImageData(imageData, 0, 0);
+        }
 
-            function clearFormAndPrepareNewScan() {
-                inputTarga.value = '';
-                selectCommittente.selectedIndex = 0;
-                formTarga.style.display = 'none';
-                ocrStatus.textContent = '';
-                // Opzionale: riavviare la camera per una nuova scansione
-                if (!stream) {
-                    ocrStatus.textContent = 'Avvia la fotocamera per una nuova scansione.';
-                }
+        async function initializeOcrWorker() {
+            if (ocrWorker) return ocrWorker;
+            ocrResultDisplay.textContent = 'Inizializzazione OCR (attendi)...';
+            try {
+                const worker = await Tesseract.createWorker('ita');
+                await worker.setParameters({ tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ' });
+                ocrWorker = worker;
+                return ocrWorker;
+            } catch (error) {
+                console.error('Errore inizializzazione Tesseract:', error);
+                ocrResultDisplay.textContent = 'Errore OCR!';
+                return null;
             }
+        }
 
-            // ---------- Camera ----------
-            function stopCamera() {
-                if (ocrTimeoutId) {
-                    clearTimeout(ocrTimeoutId);
-                    ocrTimeoutId = null;
-                }
-                ocrRunning = false;
-                if (stream) {
-                    stream.getTracks().forEach(t => t.stop());
-                    stream = null;
-                }
-                videoEl.srcObject = null;
-                videoEl.style.display = 'none';
-                videoPlaceholder.classList.remove('hidden');
-                videoPlaceholder.textContent = 'Avvia la fotocamera per scansionare la targa.';
-                document.getElementById('btn-start-cam').style.display = '';
-                document.getElementById('btn-stop-cam').style.display = 'none';
+        async function runOcrScanLoop() {
+            if (!isScanningOCR) return;
+            if (isOcrBusy) {
+                requestAnimationFrame(runOcrScanLoop);
+                return;
             }
-
-            function startCamera() {
-                videoPlaceholder.textContent = 'Avvio fotocamera…';
-                const constraints = {
-                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-                    audio: false
-                };
-                navigator.mediaDevices.getUserMedia(constraints)
-                    .then(function (mediaStream) {
-                        stream = mediaStream;
-                        videoEl.srcObject = stream;
-                        videoEl.style.display = 'block';
-                        videoPlaceholder.classList.add('hidden');
-                        document.getElementById('btn-start-cam').style.display = 'none';
-                        document.getElementById('btn-stop-cam').style.display = '';
-                        ocrStatus.textContent = 'Scansione in corso…';
-                        runOcrLoop();
-                    })
-                    .catch(function (err) {
-                        videoPlaceholder.classList.remove('hidden');
-                        videoPlaceholder.textContent = 'Impossibile accedere alla fotocamera.';
-                        alert('Accesso alla fotocamera negato o non disponibile. Verifica i permessi del browser.\n\n' + (err.message || ''));
-                    });
+            isOcrBusy = true;
+            const context = targaScanCanvas.getContext('2d', { willReadFrequently: true });
+            if (targaScanStreamElement.videoWidth === 0) {
+                isOcrBusy = false;
+                requestAnimationFrame(runOcrScanLoop);
+                return;
             }
-
-            /**
-             * Preelabora il frame: ritaglio alla Focus Box, margine 15% per bande EU,
-             * scala grigi e contrasto 2.0. Restituisce un canvas pronto per Tesseract.
-             */
-            function preprocessCanvas(sourceVideo) {
-                const vw = sourceVideo.videoWidth;
-                const vh = sourceVideo.videoHeight;
-                if (!vw || !vh) return null;
-
-                // Coordinate Focus Box (stesse proporzioni del CSS)
-                const cropX = Math.round(FOCUS_LEFT * vw);
-                const cropY = Math.round(FOCUS_TOP * vh);
-                const cropWidth = Math.round(FOCUS_WIDTH * vw);
-                const cropHeight = Math.round(FOCUS_HEIGHT * vh);
-
-                // Riduzione orizzontale 15% sinistra/destra per escludere bande blu EU
-                const innerX = cropX + Math.round(cropWidth * EU_MARGIN);
-                const innerWidth = Math.round(cropWidth * (1 - 2 * EU_MARGIN));
-
-                const fullCanvas = document.createElement('canvas');
-                fullCanvas.width = vw;
-                fullCanvas.height = vh;
-                const fullCtx = fullCanvas.getContext('2d');
-                fullCtx.drawImage(sourceVideo, 0, 0);
-
-                const cropCanvas = document.createElement('canvas');
-                cropCanvas.width = innerWidth;
-                cropCanvas.height = cropHeight;
-                const cropCtx = cropCanvas.getContext('2d');
-                cropCtx.drawImage(fullCanvas, innerX, cropY, innerWidth, cropHeight, 0, 0, innerWidth, cropHeight);
-
-                const ctx = cropCanvas.getContext('2d');
-                const imageData = ctx.getImageData(0, 0, innerWidth, cropHeight);
-                const data = imageData.data;
-
-                for (let i = 0; i < data.length; i += 4) {
-                    const r = data[i];
-                    const g = data[i + 1];
-                    const b = data[i + 2];
-                    const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
-                    const contrasted = Math.round((gray - 128) * CONTRAST_FACTOR + 128);
-                    const clamped = Math.max(0, Math.min(255, contrasted));
-                    data[i] = data[i + 1] = data[i + 2] = clamped;
-                }
-                ctx.putImageData(imageData, 0, 0);
-                return cropCanvas;
-            }
-
-            /** Valida con regex targa italiana; restituisce la stringa matched o null. */
-            function validateItalianPlate(text) {
-                if (!text || typeof text !== 'string') return null;
+            targaScanCanvas.width = targaScanStreamElement.videoWidth;
+            targaScanCanvas.height = targaScanStreamElement.videoHeight;
+            context.drawImage(targaScanStreamElement, 0, 0, targaScanCanvas.width, targaScanCanvas.height);
+            preprocessCanvas(targaScanCanvas);
+            try {
+                const { data: { text } } = await ocrWorker.recognize(targaScanCanvas);
                 const cleanedText = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
-                const match = cleanedText.match(PLATE_REGEX);
-                return match ? match[0] : null;
+                ocrResultDisplay.textContent = cleanedText || 'Inquadra...';
+                ocrResultDisplay.classList.remove('success', 'error');
+                if (cleanedText.length >= 7) {
+                    isScanningOCR = false;
+                    ocrResultDisplay.textContent = 'Targa rilevata!';
+                    ocrResultDisplay.classList.add('success');
+                    stopTargaScan(false);
+                    inputTarga.value = cleanedText.substring(0, 10);
+                    selectCommittente.selectedIndex = 0;
+                    showView('saveRecord');
+                    inputTarga.focus();
+                    isOcrBusy = false;
+                    return;
+                }
+            } catch (e) {
+                console.error('Errore riconoscimento OCR', e);
             }
+            isOcrBusy = false;
+            requestAnimationFrame(runOcrScanLoop);
+        }
 
-            function runOcrLoop() {
-                if (!stream || !videoEl.videoWidth) {
-                    ocrTimeoutId = setTimeout(runOcrLoop, 500);
-                    return;
-                }
-                if (!ocrRunning) return;
-
-                const processedCanvas = preprocessCanvas(videoEl);
-                if (!processedCanvas) {
-                    ocrTimeoutId = setTimeout(runOcrLoop, 500);
-                    return;
-                }
-
-                Tesseract.recognize(processedCanvas, 'ita', {
-                    logger: function (m) {
-                        if (m.status === 'recognizing text') ocrStatus.textContent = 'Scansione…';
-                    }
-                }).then(function (result) {
-                    const text = (result.data && result.data.text) ? result.data.text : '';
-                    const plate = validateItalianPlate(text);
-                    if (plate) {
-                        ocrRunning = false;
-                        stopCamera();
-                        inputTarga.value = plate;
-                        formTarga.style.display = 'block';
-                        ocrStatus.textContent = 'Targa rilevata: verifica e correggi se necessario, poi scegli il committente e clicca "Salva Registrazione".';
-                        inputTarga.focus();
-                        return;
-                    }
-                    if (ocrRunning) ocrTimeoutId = setTimeout(runOcrLoop, 2000);
-                }).catch(function (err) {
-                    console.error('OCR error', err);
-                    if (ocrRunning) ocrTimeoutId = setTimeout(runOcrLoop, 2000);
-                });
+        function stopTargaScan(navigateToLanding) {
+            isScanningOCR = false;
+            if (currentTargaScanStream) {
+                currentTargaScanStream.getTracks().forEach(function (track) { track.stop(); });
+                currentTargaScanStream = null;
             }
-
-            // Loop OCR: cattura frame, riconoscimento con Tesseract; estrazione targa con whitelist A-Z0-9
-            document.getElementById('btn-start-cam').addEventListener('click', function () {
-                ocrRunning = true;
-                startCamera();
-            });
-            document.getElementById('btn-stop-cam').addEventListener('click', stopCamera);
-
-            // Riavvia loop OCR quando il video è pronto
-            videoEl.addEventListener('loadeddata', function () {
-                if (stream && ocrRunning && !inputTarga.value) runOcrLoop();
-            });
-
-            // Salva registrazione solo al click esplicito
-            document.getElementById('btn-save').addEventListener('click', function () {
-                const targa = inputTarga.value.trim().toUpperCase();
-                if (!targa) {
-                    alert('Inserisci o scansiona una targa prima di salvare.');
-                    return;
-                }
-                const committente = selectCommittente.value.trim();
-                saveRecord(targa, committente);
-                alert('Registrazione salvata: ' + targa + ' – ' + committente);
-                clearFormAndPrepareNewScan();
-            });
-
-            // ---------- Esportazione CSV ----------
-            function pad(n) { return n < 10 ? '0' + n : String(n); }
-            function formatDate(iso) {
-                const d = new Date(iso);
-                return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+            targaScanStreamElement.srcObject = null;
+            if (navigateToLanding) {
+                showView('landing');
             }
-            function formatTime(iso) {
-                const d = new Date(iso);
-                return pad(d.getHours()) + ':' + pad(d.getMinutes());
+        }
+
+        async function startTargaScan() {
+            if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+                alert("Il tuo browser non supporta l'accesso alla fotocamera.");
+                return;
             }
+            isScanningOCR = true;
+            isOcrBusy = false;
+            showView('targaScan');
+            var worker = await initializeOcrWorker();
+            if (!worker) {
+                stopTargaScan(true);
+                return;
+            }
+            ocrResultDisplay.textContent = 'Inquadra...';
+            ocrResultDisplay.classList.remove('success', 'error');
+            var constraints = { video: { facingMode: 'environment' } };
+            try {
+                currentTargaScanStream = await navigator.mediaDevices.getUserMedia(constraints);
+                targaScanStreamElement.srcObject = currentTargaScanStream;
+                await targaScanStreamElement.play();
+                runOcrScanLoop();
+            } catch (err) {
+                console.error('Errore avvio stream OCR:', err);
+                alert('Impossibile avviare la fotocamera. Controlla i permessi.');
+                stopTargaScan(true);
+            }
+        }
 
-            document.getElementById('btn-export-csv').addEventListener('click', function () {
-                const monthInput = document.getElementById('input-month').value;
-                if (!monthInput) {
-                    alert('Seleziona un mese e un anno.');
-                    return;
-                }
-                const [year, month] = monthInput.split('-').map(Number);
-                const records = getRecords();
-                const filtered = records.filter(function (r) {
-                    const d = new Date(r.data_ora);
-                    return d.getFullYear() === year && (d.getMonth() + 1) === month;
-                });
-                if (filtered.length === 0) {
-                    alert('Nessun dato presente per il mese selezionato.');
-                    return;
-                }
-                const header = 'Data;Ora;Targa;Committente';
-                const rows = filtered.map(function (r) {
-                    return formatDate(r.data_ora) + ';' + formatTime(r.data_ora) + ';' + (r.targa || '') + ';' + (r.committente || '');
-                });
-                const csv = [header].concat(rows).join('\r\n');
-                const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'perizie_' + year + '_' + pad(month) + '.csv';
-                a.click();
-                URL.revokeObjectURL(url);
+        closeTargaScanBtn.addEventListener('click', function () { stopTargaScan(true); });
+
+        document.getElementById('btnSalva').addEventListener('click', function () {
+            var targa = inputTarga.value.trim().toUpperCase();
+            if (!targa) {
+                alert('Inserisci una targa.');
+                return;
+            }
+            var committente = selectCommittente.value.trim();
+            saveRecord(targa, committente);
+            alert('Registrazione salvata: ' + targa + ' – ' + committente);
+            inputTarga.value = '';
+            selectCommittente.selectedIndex = 0;
+            showView('landing');
+        });
+
+        document.getElementById('btnAnnullaSave').addEventListener('click', function () {
+            inputTarga.value = '';
+            selectCommittente.selectedIndex = 0;
+            showView('landing');
+        });
+
+        document.getElementById('btnAggiungi').addEventListener('click', function () {
+            inputTarga.value = '';
+            selectCommittente.selectedIndex = 0;
+            showView('saveRecord');
+            inputTarga.focus();
+        });
+
+        document.getElementById('btnExportCsv').addEventListener('click', function () {
+            var monthVal = inputMonth.value;
+            if (!monthVal) {
+                alert('Seleziona un mese e un anno.');
+                return;
+            }
+            var parts = monthVal.split('-').map(Number);
+            var year = parts[0];
+            var month = parts[1];
+            var records = getRecords();
+            var filtered = records.filter(function (r) {
+                var d = new Date(r.data_ora);
+                return d.getFullYear() === year && (d.getMonth() + 1) === month;
             });
+            if (filtered.length === 0) {
+                alert('Nessun dato presente per il mese selezionato.');
+                return;
+            }
+            var header = 'Data;Ora;Targa;Committente';
+            var rows = filtered.map(function (r) {
+                return formatDate(r.data_ora) + ';' + formatTime(r.data_ora) + ';' + (r.targa || '') + ';' + (r.committente || '');
+            });
+            var csv = [header].concat(rows).join('\r\n');
+            var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'tracker_fatturazione_' + year + '_' + pad(month) + '.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
 
-            // Inizializza input mese con mese corrente
-            var now = new Date();
-            document.getElementById('input-month').value = now.getFullYear() + '-' + pad(now.getMonth() + 1);
-        })();
+        document.getElementById('navElenco').addEventListener('click', function () { showView('landing'); });
+        document.getElementById('navScansiona').addEventListener('click', startTargaScan);
+
+        var now = new Date();
+        inputMonth.value = now.getFullYear() + '-' + pad(now.getMonth() + 1);
+
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                document.getElementById('preloader').classList.add('hidden');
+                renderLandingTable();
+            }, 500);
+        });
+    })();
     </script>
 </body>
 </html>
