@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracker Perizie Auto</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <style>
+        :root {
+            --bg: #1e1e1e;
+            --card: #2a2a2a;
+            --text: #f0f0f0;
+            --text-muted: #b0b0b0;
+            --accent: #4a9eff;
+            --accent-hover: #6bb0ff;
+            --border: #3a3a3a;
+            --input-bg: #252525;
+            --danger: #e57373;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 16px;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+        .card h2 {
+            margin: 0 0 16px 0;
+            font-size: 1.15rem;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+        /* Section A: Video + OCR */
+        .video-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 16px;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+        }
+        .video-wrap video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .video-wrap .placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 20px;
+        }
+        .video-wrap .placeholder.hidden { display: none; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+        .btn-secondary:hover { background: #4a4a4a; }
+        .btn-block { width: 100%; }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        input[type="text"],
+        input[type="month"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 1rem;
+        }
+        input[type="text"]:focus,
+        input[type="month"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .ocr-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .save-row {
+            margin-top: 20px;
+        }
+        .save-row .btn { min-height: 48px; }
+        /* Section B: Export */
+        .export-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        .export-row .form-group { margin-bottom: 0; flex: 1; min-width: 180px; }
+        .export-row .btn { flex-shrink: 0; }
+        @media (max-width: 480px) {
+            .export-row .form-group { min-width: 100%; }
+        }
+        .status {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tracker Perizie Auto</h1>
+
+    <!-- SEZIONE A: Registrazione Targa -->
+    <section class="card" id="section-a">
+        <h2>Registrazione Targa</h2>
+
+        <div class="video-wrap">
+            <div class="placeholder" id="video-placeholder">Avvia la fotocamera per scansionare la targa.</div>
+            <video id="video" playsinline muted autoplay style="display: none;"></video>
+        </div>
+
+        <div class="ocr-actions">
+            <button type="button" class="btn btn-primary" id="btn-start-cam">Avvia fotocamera</button>
+            <button type="button" class="btn btn-secondary" id="btn-stop-cam" style="display: none;">Ferma fotocamera</button>
+        </div>
+
+        <p class="status" id="ocr-status"></p>
+
+        <div class="form-group" id="form-targa" style="display: none;">
+            <label for="input-targa">Targa (verifica e correggi se necessario)</label>
+            <input type="text" id="input-targa" placeholder="Es. AB123CD" maxlength="10" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+            <label for="select-committente">Committente</label>
+            <select id="select-committente">
+                <option value="Privato">Privato</option>
+                <option value="Concessionaria Rossi">Concessionaria Rossi</option>
+                <option value="Assicurazione Y">Assicurazione Y</option>
+            </select>
+        </div>
+
+        <div class="save-row">
+            <button type="button" class="btn btn-primary btn-block" id="btn-save">Salva Registrazione</button>
+        </div>
+    </section>
+
+    <!-- SEZIONE B: Esportazione Dati -->
+    <section class="card" id="section-b">
+        <h2>Esportazione Dati</h2>
+        <div class="export-row">
+            <div class="form-group">
+                <label for="input-month">Mese e anno</label>
+                <input type="month" id="input-month">
+            </div>
+            <button type="button" class="btn btn-primary" id="btn-export-csv">Scarica CSV</button>
+        </div>
+    </section>
+
+    <script>
+        (function () {
+            'use strict';
+
+            const STORAGE_KEY = 'vehicleAppraisals';
+            // Whitelist OCR: solo lettere maiuscole e numeri (applicata in extractPlateFromText)
+            const OCR_WHITELIST = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const MIN_PLATE_CHARS = 7;
+
+            const videoEl = document.getElementById('video');
+            const videoPlaceholder = document.getElementById('video-placeholder');
+            const formTarga = document.getElementById('form-targa');
+            const inputTarga = document.getElementById('input-targa');
+            const selectCommittente = document.getElementById('select-committente');
+            const ocrStatus = document.getElementById('ocr-status');
+            let stream = null;
+            let ocrRunning = false;
+            let ocrTimeoutId = null;
+
+            // ---------- Persistenza ----------
+            function getRecords() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    return raw ? JSON.parse(raw) : [];
+                } catch (e) {
+                    return [];
+                }
+            }
+
+            function saveRecord(targa, committente) {
+                const records = getRecords();
+                const now = new Date();
+                records.push({
+                    targa: String(targa).trim().toUpperCase(),
+                    committente: String(committente).trim(),
+                    data_ora: now.toISOString()
+                });
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+            }
+
+            function clearFormAndPrepareNewScan() {
+                inputTarga.value = '';
+                selectCommittente.selectedIndex = 0;
+                formTarga.style.display = 'none';
+                ocrStatus.textContent = '';
+                // Opzionale: riavviare la camera per una nuova scansione
+                if (!stream) {
+                    ocrStatus.textContent = 'Avvia la fotocamera per una nuova scansione.';
+                }
+            }
+
+            // ---------- Camera ----------
+            function stopCamera() {
+                if (ocrTimeoutId) {
+                    clearTimeout(ocrTimeoutId);
+                    ocrTimeoutId = null;
+                }
+                ocrRunning = false;
+                if (stream) {
+                    stream.getTracks().forEach(t => t.stop());
+                    stream = null;
+                }
+                videoEl.srcObject = null;
+                videoEl.style.display = 'none';
+                videoPlaceholder.classList.remove('hidden');
+                videoPlaceholder.textContent = 'Avvia la fotocamera per scansionare la targa.';
+                document.getElementById('btn-start-cam').style.display = '';
+                document.getElementById('btn-stop-cam').style.display = 'none';
+            }
+
+            function startCamera() {
+                videoPlaceholder.textContent = 'Avvio fotocamera…';
+                const constraints = {
+                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+                    audio: false
+                };
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(function (mediaStream) {
+                        stream = mediaStream;
+                        videoEl.srcObject = stream;
+                        videoEl.style.display = 'block';
+                        videoPlaceholder.classList.add('hidden');
+                        document.getElementById('btn-start-cam').style.display = 'none';
+                        document.getElementById('btn-stop-cam').style.display = '';
+                        ocrStatus.textContent = 'Scansione in corso…';
+                        runOcrLoop();
+                    })
+                    .catch(function (err) {
+                        videoPlaceholder.classList.remove('hidden');
+                        videoPlaceholder.textContent = 'Impossibile accedere alla fotocamera.';
+                        alert('Accesso alla fotocamera negato o non disponibile. Verifica i permessi del browser.\n\n' + (err.message || ''));
+                    });
+            }
+
+            // Estrae una stringa "targa-like" (solo caratteri whitelist, almeno MIN_PLATE_CHARS)
+            function extractPlateFromText(text) {
+                if (!text || !text.length) return null;
+                const allowed = new Set(OCR_WHITELIST);
+                let run = '';
+                let best = '';
+                for (let i = 0; i < text.length; i++) {
+                    const c = text[i].toUpperCase();
+                    if (allowed.has(c)) {
+                        run += c;
+                        if (run.length >= MIN_PLATE_CHARS && run.length > best.length) best = run;
+                    } else {
+                        run = '';
+                    }
+                }
+                if (run.length >= MIN_PLATE_CHARS && run.length > best.length) best = run;
+                return best.length >= MIN_PLATE_CHARS ? best : null;
+            }
+
+            function runOcrLoop() {
+                if (!stream || !videoEl.videoWidth) {
+                    ocrTimeoutId = setTimeout(runOcrLoop, 500);
+                    return;
+                }
+                if (!ocrRunning) return;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = videoEl.videoWidth;
+                canvas.height = videoEl.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(videoEl, 0, 0);
+                const imageData = canvas.toDataURL('image/png');
+
+                Tesseract.recognize(imageData, 'ita', {
+                    logger: function (m) {
+                        if (m.status === 'recognizing text') ocrStatus.textContent = 'Scansione…';
+                    }
+                }).then(function (result) {
+                    const text = (result.data && result.data.text) ? result.data.text : '';
+                    const plate = extractPlateFromText(text);
+                    if (plate) {
+                        ocrRunning = false;
+                        stopCamera();
+                        inputTarga.value = plate;
+                        formTarga.style.display = 'block';
+                        ocrStatus.textContent = 'Targa rilevata: verifica e correggi se necessario, poi scegli il committente e clicca "Salva Registrazione".';
+                        inputTarga.focus();
+                        return;
+                    }
+                    if (ocrRunning) ocrTimeoutId = setTimeout(runOcrLoop, 2000);
+                }).catch(function (err) {
+                    console.error('OCR error', err);
+                    if (ocrRunning) ocrTimeoutId = setTimeout(runOcrLoop, 2000);
+                });
+            }
+
+            // Loop OCR: cattura frame, riconoscimento con Tesseract; estrazione targa con whitelist A-Z0-9
+            document.getElementById('btn-start-cam').addEventListener('click', function () {
+                ocrRunning = true;
+                startCamera();
+            });
+            document.getElementById('btn-stop-cam').addEventListener('click', stopCamera);
+
+            // Riavvia loop OCR quando il video è pronto
+            videoEl.addEventListener('loadeddata', function () {
+                if (stream && ocrRunning && !inputTarga.value) runOcrLoop();
+            });
+
+            // Salva registrazione solo al click esplicito
+            document.getElementById('btn-save').addEventListener('click', function () {
+                const targa = inputTarga.value.trim().toUpperCase();
+                if (!targa) {
+                    alert('Inserisci o scansiona una targa prima di salvare.');
+                    return;
+                }
+                const committente = selectCommittente.value.trim();
+                saveRecord(targa, committente);
+                alert('Registrazione salvata: ' + targa + ' – ' + committente);
+                clearFormAndPrepareNewScan();
+            });
+
+            // ---------- Esportazione CSV ----------
+            function pad(n) { return n < 10 ? '0' + n : String(n); }
+            function formatDate(iso) {
+                const d = new Date(iso);
+                return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+            }
+            function formatTime(iso) {
+                const d = new Date(iso);
+                return pad(d.getHours()) + ':' + pad(d.getMinutes());
+            }
+
+            document.getElementById('btn-export-csv').addEventListener('click', function () {
+                const monthInput = document.getElementById('input-month').value;
+                if (!monthInput) {
+                    alert('Seleziona un mese e un anno.');
+                    return;
+                }
+                const [year, month] = monthInput.split('-').map(Number);
+                const records = getRecords();
+                const filtered = records.filter(function (r) {
+                    const d = new Date(r.data_ora);
+                    return d.getFullYear() === year && (d.getMonth() + 1) === month;
+                });
+                if (filtered.length === 0) {
+                    alert('Nessun dato presente per il mese selezionato.');
+                    return;
+                }
+                const header = 'Data;Ora;Targa;Committente';
+                const rows = filtered.map(function (r) {
+                    return formatDate(r.data_ora) + ';' + formatTime(r.data_ora) + ';' + (r.targa || '') + ';' + (r.committente || '');
+                });
+                const csv = [header].concat(rows).join('\r\n');
+                const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'perizie_' + year + '_' + pad(month) + '.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+
+            // Inizializza input mese con mese corrente
+            var now = new Date();
+            document.getElementById('input-month').value = now.getFullYear() + '-' + pad(now.getMonth() + 1);
+        })();
+    </script>
+</body>
+</html>
