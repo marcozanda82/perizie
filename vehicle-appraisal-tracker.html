@@ -63,6 +63,19 @@
             object-fit: cover;
             display: block;
         }
+        /* Focus box: inquadra la targa al centro del video */
+        .video-wrap .focus-box {
+            position: absolute;
+            left: 15%;
+            top: 37%;
+            width: 70%;
+            height: 26%;
+            border: 3px solid #f0c000;
+            border-radius: 4px;
+            pointer-events: none;
+            box-sizing: border-box;
+            z-index: 2;
+        }
         .video-wrap .placeholder {
             position: absolute;
             inset: 0;
@@ -165,6 +178,7 @@
         <div class="video-wrap">
             <div class="placeholder" id="video-placeholder">Avvia la fotocamera per scansionare la targa.</div>
             <video id="video" playsinline muted autoplay style="display: none;"></video>
+            <div class="focus-box" id="focus-box" aria-hidden="true"></div>
         </div>
 
         <div class="ocr-actions">
@@ -210,9 +224,17 @@
             'use strict';
 
             const STORAGE_KEY = 'vehicleAppraisals';
-            // Whitelist OCR: solo lettere maiuscole e numeri (applicata in extractPlateFromText)
-            const OCR_WHITELIST = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            const MIN_PLATE_CHARS = 7;
+            /** Regex targa italiana: 2 lettere + 3 cifre + 2 lettere (es. AB123CD) */
+            const PLATE_REGEX = /[A-Z]{2}[0-9]{3}[A-Z]{2}/;
+            /** Proporzioni focus box (centrato): stesse % usate in CSS .focus-box */
+            const FOCUS_WIDTH = 0.70;
+            const FOCUS_HEIGHT = 0.26;
+            const FOCUS_LEFT = (1 - FOCUS_WIDTH) / 2;
+            const FOCUS_TOP = (1 - FOCUS_HEIGHT) / 2;
+            /** Riduzione orizzontale 15% per lato per escludere bande blu EU */
+            const EU_MARGIN = 0.15;
+            /** Fattore contrasto pre-elaborazione */
+            const CONTRAST_FACTOR = 2.0;
 
             const videoEl = document.getElementById('video');
             const videoPlaceholder = document.getElementById('video-placeholder');
@@ -299,23 +321,60 @@
                     });
             }
 
-            // Estrae una stringa "targa-like" (solo caratteri whitelist, almeno MIN_PLATE_CHARS)
-            function extractPlateFromText(text) {
-                if (!text || !text.length) return null;
-                const allowed = new Set(OCR_WHITELIST);
-                let run = '';
-                let best = '';
-                for (let i = 0; i < text.length; i++) {
-                    const c = text[i].toUpperCase();
-                    if (allowed.has(c)) {
-                        run += c;
-                        if (run.length >= MIN_PLATE_CHARS && run.length > best.length) best = run;
-                    } else {
-                        run = '';
-                    }
+            /**
+             * Preelabora il frame: ritaglio alla Focus Box, margine 15% per bande EU,
+             * scala grigi e contrasto 2.0. Restituisce un canvas pronto per Tesseract.
+             */
+            function preprocessCanvas(sourceVideo) {
+                const vw = sourceVideo.videoWidth;
+                const vh = sourceVideo.videoHeight;
+                if (!vw || !vh) return null;
+
+                // Coordinate Focus Box (stesse proporzioni del CSS)
+                const cropX = Math.round(FOCUS_LEFT * vw);
+                const cropY = Math.round(FOCUS_TOP * vh);
+                const cropWidth = Math.round(FOCUS_WIDTH * vw);
+                const cropHeight = Math.round(FOCUS_HEIGHT * vh);
+
+                // Riduzione orizzontale 15% sinistra/destra per escludere bande blu EU
+                const innerX = cropX + Math.round(cropWidth * EU_MARGIN);
+                const innerWidth = Math.round(cropWidth * (1 - 2 * EU_MARGIN));
+
+                const fullCanvas = document.createElement('canvas');
+                fullCanvas.width = vw;
+                fullCanvas.height = vh;
+                const fullCtx = fullCanvas.getContext('2d');
+                fullCtx.drawImage(sourceVideo, 0, 0);
+
+                const cropCanvas = document.createElement('canvas');
+                cropCanvas.width = innerWidth;
+                cropCanvas.height = cropHeight;
+                const cropCtx = cropCanvas.getContext('2d');
+                cropCtx.drawImage(fullCanvas, innerX, cropY, innerWidth, cropHeight, 0, 0, innerWidth, cropHeight);
+
+                const ctx = cropCanvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, innerWidth, cropHeight);
+                const data = imageData.data;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+                    const contrasted = Math.round((gray - 128) * CONTRAST_FACTOR + 128);
+                    const clamped = Math.max(0, Math.min(255, contrasted));
+                    data[i] = data[i + 1] = data[i + 2] = clamped;
                 }
-                if (run.length >= MIN_PLATE_CHARS && run.length > best.length) best = run;
-                return best.length >= MIN_PLATE_CHARS ? best : null;
+                ctx.putImageData(imageData, 0, 0);
+                return cropCanvas;
+            }
+
+            /** Valida con regex targa italiana; restituisce la stringa matched o null. */
+            function validateItalianPlate(text) {
+                if (!text || typeof text !== 'string') return null;
+                const cleanedText = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+                const match = cleanedText.match(PLATE_REGEX);
+                return match ? match[0] : null;
             }
 
             function runOcrLoop() {
@@ -325,20 +384,19 @@
                 }
                 if (!ocrRunning) return;
 
-                const canvas = document.createElement('canvas');
-                canvas.width = videoEl.videoWidth;
-                canvas.height = videoEl.videoHeight;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(videoEl, 0, 0);
-                const imageData = canvas.toDataURL('image/png');
+                const processedCanvas = preprocessCanvas(videoEl);
+                if (!processedCanvas) {
+                    ocrTimeoutId = setTimeout(runOcrLoop, 500);
+                    return;
+                }
 
-                Tesseract.recognize(imageData, 'ita', {
+                Tesseract.recognize(processedCanvas, 'ita', {
                     logger: function (m) {
                         if (m.status === 'recognizing text') ocrStatus.textContent = 'Scansione…';
                     }
                 }).then(function (result) {
                     const text = (result.data && result.data.text) ? result.data.text : '';
-                    const plate = extractPlateFromText(text);
+                    const plate = validateItalianPlate(text);
                     if (plate) {
                         ocrRunning = false;
                         stopCamera();
