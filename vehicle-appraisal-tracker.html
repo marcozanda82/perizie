@@ -170,6 +170,7 @@
         'use strict';
 
         const STORAGE_KEY = 'tracking_fatturazione';
+        const MAX_SAMPLES = 20;
         const landingPageSection = document.getElementById('landingPageSection');
         const saveRecordSection = document.getElementById('saveRecordSection');
         const trackingListContainer = document.getElementById('trackingListContainer');
@@ -188,6 +189,8 @@
         let isScanningOCR = false;
         let isOcrBusy = false;
         let ocrWorker = null;
+        let sampleCount = 0;
+        let charFrequencies = [{}, {}, {}, {}, {}, {}, {}];
 
         function getRecords() {
             try {
@@ -320,25 +323,42 @@
             preprocessCanvas(targaScanCanvas);
             try {
                 const { data: { text } } = await ocrWorker.recognize(targaScanCanvas);
-                // Clean the recognized text completely (remove spaces, dashes, etc.)
                 const cleanedText = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
                 ocrResultDisplay.textContent = cleanedText || 'Inquadra...';
                 ocrResultDisplay.classList.remove('success', 'error');
-                // Strict Regex: exactly 2 letters, 3 numbers, 2 letters (Italian plate)
-                const plateRegex = /([A-Z]{2}[0-9]{3}[A-Z]{2})/;
-                const match = cleanedText.match(plateRegex);
+                const match = cleanedText.match(/([A-Z]{2}[0-9]{3}[A-Z]{2})/);
                 if (match) {
-                    const validPlate = match[1];
-                    isScanningOCR = false;
-                    ocrResultDisplay.textContent = 'Targa rilevata!';
-                    ocrResultDisplay.classList.add('success');
-                    stopTargaScan(false);
-                    inputTarga.value = validPlate;
-                    selectCommittente.selectedIndex = 0;
-                    showView('saveRecord');
-                    inputTarga.focus();
-                    isOcrBusy = false;
-                    return;
+                    const plateStr = match[1];
+                    sampleCount++;
+                    ocrResultDisplay.textContent = 'Acquisizione in corso... ' + sampleCount + '/' + MAX_SAMPLES;
+                    for (let i = 0; i < 7; i++) {
+                        const c = plateStr[i];
+                        if (!charFrequencies[i][c]) charFrequencies[i][c] = 0;
+                        charFrequencies[i][c]++;
+                    }
+                    if (sampleCount >= MAX_SAMPLES) {
+                        isScanningOCR = false;
+                        ocrResultDisplay.textContent = 'Targa rilevata!';
+                        ocrResultDisplay.classList.add('success');
+                        stopTargaScan(false);
+                        let finalPlate = '';
+                        for (let i = 0; i < 7; i++) {
+                            var maxCount = 0, maxChar = '';
+                            for (var k in charFrequencies[i]) {
+                                if (charFrequencies[i][k] > maxCount) {
+                                    maxCount = charFrequencies[i][k];
+                                    maxChar = k;
+                                }
+                            }
+                            finalPlate += maxChar;
+                        }
+                        inputTarga.value = finalPlate;
+                        selectCommittente.selectedIndex = 0;
+                        showView('saveRecord');
+                        inputTarga.focus();
+                        isOcrBusy = false;
+                        return;
+                    }
                 }
             } catch (e) {
                 console.error('Errore riconoscimento OCR', e);
@@ -366,6 +386,8 @@
             }
             isScanningOCR = true;
             isOcrBusy = false;
+            sampleCount = 0;
+            charFrequencies = [{}, {}, {}, {}, {}, {}, {}];
             showView('targaScan');
             var worker = await initializeOcrWorker();
             if (!worker) {
